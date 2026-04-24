@@ -1308,9 +1308,869 @@
     },
   });
 
+  const fr = buildTranslations({
+    static: {
+      intro_badge: 'Analyse du Code de Succès · 4 minutes',
+      intro_h1_line1: 'Quel type de succès',
+      intro_h1_line2: 'se cache vraiment en toi?',
+      intro_body:
+        '6 questions honnêtes. Un portrait surprenamment clair de comment tu fonctionnes vraiment et quelles opportunités correspondent à ta personnalité.',
+      intro_type_1: 'Feu',
+      intro_type_2: 'Vent',
+      intro_type_3: 'Eau',
+      intro_type_4: 'Pierre',
+      intro_cta: 'Découvre mon code →',
+      intro_disclaimer: 'Pas de discours de vente. Pas d\'e-mail requise.',
+      intro_legal_link: 'Mentions légales & confidentialité',
+
+      analyzing_badge: 'Analyse',
+      analyzing_h2: 'Ton profil est créé...',
+      analyzing_step_1: 'Les schémas de personnalité sont analysés...',
+      analyzing_step_2: 'Les forces et moteurs sont identifiés...',
+      analyzing_step_3: 'La compatibilité business est calculée...',
+      analyzing_step_4: 'Ton profil personnel est créé...',
+      analyzing_step_5: 'Presque fini...',
+
+      quiz_phase: 'Phase',
+      quiz_question_label: 'Question',
+      quiz_btn_next: 'Continuer →',
+      quiz_btn_submit: 'Démarrer l\'analyse →',
+
+      result_badge: 'Ton code de succès',
+      result_element_label: 'Élément',
+      result_strengths_heading: 'Tes forces principales',
+      result_shadow_heading: 'Ton point aveugle',
+      result_cta_btn: 'Oui, j\'en veux plus →',
+      result_restart_btn: 'Recommencer le quiz',
+
+      barrier_vehicle: 'un système fonctionnant',
+      barrier_community: 'l\'environnement adéquat',
+      barrier_confidence: 'un premier pas sûr',
+      barrier_opportunity: 'l\'opportunité idéale',
+
+      asp_tag_freedom: 'Liberté',
+      asp_tag_impact: 'Impact',
+      asp_tag_security: 'Sécurité',
+      asp_tag_growth: 'Croissance',
+
+      aspconf_badge: 'Ton focus',
+      aspconf_freedom_label: 'La liberté est ton moteur',
+      aspconf_freedom_desc:
+        'Tu veux décider toi-même quand, comment et avec qui tu travailles. C\'est pourquoi tu as besoin d\'un modèle qui ne crée pas nouvelles dépendances.',
+      aspconf_impact_label: 'L\'impact est ton moteur',
+      aspconf_impact_desc:
+        'Ce n\'est pas seulement l\'argent pour toi. Tu veux sentir que ce que tu fais bouge vraiment quelque chose dans les autres.',
+      aspconf_security_label: 'La sécurité est ton moteur',
+      aspconf_security_desc:
+        'Tu ne cherches pas des sensations inutiles. Tu veux une vraie opportunité, mais avec une base claire et stable.',
+      aspconf_growth_label: 'La croissance est ton moteur',
+      aspconf_growth_desc:
+        'Tu ne veux pas rester sur place. Tu cherches un environnement où tu peux croître et développer des compétences réelles.',
+      aspconf_btn: 'Continuer →',
+      aspconf_footnote: 'Tes réponses rendent le résultat beaucoup plus personnel.',
+
+      optin_badge: 'Presque fini',
+      optin_h2_line1: 'Où pouvons-nous t\'envoyer tes',
+      optin_h2_line2: 'vidéos?',
+      optin_body:
+        'Trois courtes vidéos, spécifiquement pour ton type. Pas de spam. Pas de pression. Juste des vraies infos.',
+      optin_label_firstname: 'Prénom',
+      optin_placeholder_firstname: 'Ton prénom',
+      optin_label_email: 'Adresse e-mail',
+      optin_placeholder_email: 'ton@email.com',
+      optin_btn_submit: 'Débloquer les vidéos →',
+      optin_btn_loading: 'Envoi en cours...',
+      optin_btn_validating: 'Vérification e-mail...',
+      optin_email_error_format: 'Merci d\'entrer une adresse e-mail valide.',
+      optin_email_error_invalid:
+        'Cette adresse e-mail ne semble pas valide. Vérifies-la rapidement.',
+      optin_privacy: 'Tes données seront traitées de manière confidentielle et ne seront pas partagées.',
+
+      video_1_title: 'Partie 1: Introduction',
+      video_1_sub: 'Dans les prochaines minutes, découvre ce que c\'est vraiment.',
+      video_2_title: 'Partie 2: Comment ça marche',
+      video_2_sub:
+        'L\'explication complète de comment le modèle est structuré et ce qui le rend différent des autres.',
+      video_3_title: 'Partie 3: Vraies expériences',
+      video_3_sub: 'Des gens comme toi, ce qu\'ils ont vécu et ce qui a changé dans leurs vies.',
+      video_counter: 'Vidéo',
+      video_next_label: 'Suivant',
+      video_btn_next: 'Continuer à l\'étape',
+      video_btn_prev: '← Revoir la vidéo',
+      video_btn_final: 'Continuer à l\'étape 4 →',
+      video_btn_locked: 'Continuer à l\'étape suivante',
+      video_hint_locked: 'Le bouton continuer se débloque après 75% de la vidéo.',
+      video_hint_unlocked: 'Tu peux maintenant continuer.',
+      video_hint_recovery:
+        'Si la détection vidéo se bloque, tu peux recharger la vidéo ou continuer manuellement en dernier recours.',
+      video_error_title: 'La vidéo n\'a pas pu être détectée correctement en raison d\'un problème technique.',
+      video_error_body:
+        'Normalement le bouton continuer se débloque automatiquement à 75%. Si ce n\'est pas le cas, recharge la vidéo ou utilise le fallback manuel.',
+      video_error_detail: 'Détail technique',
+      video_error_reload: 'Recharger la vidéo',
+      video_error_unlock: 'Continuer manuellement',
+
+      final_badge: 'Tu as regardé toutes les trois vidéos',
+      final_h2: 'Est-ce que c\'est pour toi?',
+      final_body:
+        'Si tu veux simplement explorer sans engagement si ça pourrait vraiment te convenir, écris simplement. Pas de pitch, pas de pression. Juste une vraie conversation.',
+      final_profile_label: 'Ton profil',
+      final_btn_whatsapp: 'Oui, j\'en veux plus',
+      final_btn_later: 'Je te contacterai quand je suis prêt',
+      final_footnote: 'Tu seras connecté directement via WhatsApp. Pas d\'attente, pas de formulaire.',
+      final_contact_prompt: 'Des questions? Écris à',
+      quicklink_whatsapp_prefix: 'Salut ',
+      quicklink_whatsapp_suffix: ', j\'ai une question.',
+      final_whatsapp_prefill:
+        'Salut! Je viens de faire le quiz Code de Succès et j\'aimerais en savoir plus sur cette opportunité.',
+      final_closed_h2: 'Tout va bien. Pas de pression.',
+      final_closed_body: 'Si tu deviens curieux plus tard, tu sais où nous trouver.',
+      final_closed_restart: 'Refaire le quiz',
+      result_barrier_intro: 'Tu l\'as dit toi-même: ce qui te manque c\'est – "',
+      result_barrier_outro: '". C\'est exactement pour ça qu\'on a quelque chose.',
+
+      legal_modal_title: 'Mentions légales & confidentialité',
+      webhook_title: 'FR - Quiz Code de Succès',
+    },
+    questions: [
+      {
+        phase: 'Personnalité',
+        text: 'Qu\'est-ce qui te fait vraiment sortir du lit le matin?',
+        sub: 'Sois honnête. Pas ce que tu devrais dire, mais ce qui est vraiment vrai pour toi.',
+        options: [
+          {
+            key: 'r',
+            label: 'Buts et progrès',
+            desc: 'J\'ai un objectif devant moi et je veux voir que j\'avance.',
+          },
+          {
+            key: 'y',
+            label: 'Gens et rencontres',
+            desc: 'J\'attends avec impatience les gens que je rencontrerai ou parlerai aujourd\'hui.',
+          },
+          {
+            key: 'g',
+            label: 'Structure et calme',
+            desc: 'Je sais ce qui m\'attend et ça me donne la paix et l\'énergie.',
+          },
+          {
+            key: 'b',
+            label: 'Profondeur et défi',
+            desc: 'J\'ai une tâche qui me challenge vraiment et m\'intéresse.',
+          },
+        ],
+      },
+      {
+        phase: 'Personnalité',
+        text: 'Dans un groupe, tu es généralement...',
+        sub: 'Pense aux vraies situations. En équipe, en famille ou avec tes amis.',
+        options: [
+          {
+            key: 'r',
+            label: 'Celui qui donne la direction',
+            desc: 'Celui qui a la vue d\'ensemble et indique la direction.',
+          },
+          {
+            key: 'y',
+            label: 'Celui qui crée l\'énergie',
+            desc: 'Celui qui crée une bonne atmosphère et entraîne les autres.',
+          },
+          {
+            key: 'g',
+            label: 'Le centre calme',
+            desc: 'Celui qui écoute et s\'assure que tout le monde se sent bien.',
+          },
+          {
+            key: 'b',
+            label: 'L\'observateur silencieux',
+            desc: 'Celui qui analyse en arrière-plan avant de parler.',
+          },
+        ],
+      },
+      {
+        phase: 'Personnalité',
+        text: 'Qu\'est-ce qui vraiment t\'agace?',
+        sub: 'Ton plus grand déclencheur de frustration révèle ce qui compte vraiment pour toi au fond.',
+        options: [
+          {
+            key: 'r',
+            label: 'Blocages et hésitants',
+            desc: 'Quand les choses n\'avancent pas parce que quelqu\'un ne peut ou ne veut décider.',
+          },
+          {
+            key: 'y',
+            label: 'Mauvaise énergie',
+            desc: 'Quand l\'ambiance tombe et que l\'énergie négative empoisonne tout.',
+          },
+          {
+            key: 'b',
+            label: 'Erreurs évitables',
+            desc: 'Quand des erreurs arrivent qui auraient simplement ne pas dû arriver.',
+          },
+          {
+            key: 'g',
+            label: 'Processus sans sens',
+            desc: 'Quand on me dit de faire quelque chose qui n\'a aucun sens pour moi.',
+          },
+        ],
+      },
+      {
+        phase: 'Vie et buts',
+        text: 'Qu\'est-ce qui est le plus important pour toi dans ton travail?',
+        sub: 'Si tu ne peux avoir qu\'une seule chose, ce qui ne doit absolument pas manquer?',
+        options: [
+          {
+            key: 'freedom',
+            label: 'Liberté',
+            desc: 'Décider toi-même quand, comment et où tu travailles sans avoir besoin d\'autorisation.',
+          },
+          {
+            key: 'impact',
+            label: 'Impact',
+            desc: 'Sentir que ton travail bouge vraiment quelque chose dans les autres personnes.',
+          },
+          {
+            key: 'security',
+            label: 'Sécurité',
+            desc: 'Un revenu stable et fiable sur lequel tu peux compter chaque mois.',
+          },
+          {
+            key: 'growth',
+            label: 'Croissance',
+            desc: 'Devenir un peu meilleur chaque jour et construire de nouvelles compétences.',
+          },
+        ],
+      },
+      {
+        phase: 'Vie et buts',
+        text: 'À quoi ressemble ta vie idéale dans 3 ans?',
+        sub: 'Ferme les yeux un instant. Qu\'est-ce que tu vois vraiment?',
+        options: [
+          {
+            key: 'freedom',
+            label: 'Financièrement libre',
+            desc: 'Je décide de mon temps et de mon revenu. Pas de patron, pas de limites.',
+          },
+          {
+            key: 'impact',
+            label: 'Sens et expériences',
+            desc: 'J\'aide les gens, vis le monde et fais quelque chose qui a vraiment du sens.',
+          },
+          {
+            key: 'security',
+            label: 'Calme et famille',
+            desc: 'Pas de soucis d\'argent, du temps pour les gens importants et une vie stable.',
+          },
+          {
+            key: 'growth',
+            label: 'Expertise et système',
+            desc: 'Je suis reconnu dans mon domaine et j\'ai un système qui marche sans moi.',
+          },
+        ],
+      },
+      {
+        phase: 'Vie et buts',
+        text: 'Qu\'est-ce qui VRAIMENT t\'empêche de vivre déjà cette vie aujourd\'hui?',
+        sub: 'La vérité ici t\'aidera plus que la réponse apparemment juste.',
+        options: [
+          {
+            key: 'vehicle',
+            label: 'Système manquant',
+            desc: 'J\'ai la volonté, mais pas encore un système qui marche pour m\'y amener.',
+          },
+          {
+            key: 'community',
+            label: 'Environnement manquant',
+            desc: 'Il me manque des gens autour de moi qui me poussent et me soutiennent chaque jour.',
+          },
+          {
+            key: 'confidence',
+            label: 'Sécurité manquante',
+            desc: 'J\'ai de l\'incertitude et j\'ai besoin d\'un premier pas clair et à faible risque.',
+          },
+          {
+            key: 'opportunity',
+            label: 'Opportunité manquante',
+            desc: 'Je n\'ai pas encore trouvé une opportunité qui me convient vraiment et à ma vie.',
+          },
+        ],
+      },
+    ],
+    profiles: {
+      r: {
+        code: 'Type A',
+        name: 'Le faiseur',
+        animal: 'Feu',
+        tagline: 'Tu es né pour mener, pas pour suivre.',
+        shadow:
+          'Parfois ton énergie peut sembler impatiente aux autres, mais c\'est juste une impulsion qui cherche une issue.',
+        strengths: [
+          'Prise de décision rapide et claire',
+          'Passage cohérent de l\'idée à l\'exécution',
+          'Leadership naturel',
+          'Autonomie et indépendance',
+        ],
+        fit: {
+          freedom:
+            'Tu n\'as pas besoin de 9h-17h. Tu as besoin d\'un système qui se met à l\'échelle aussi vite que tu penses.',
+          impact:
+            'Si tu veux un impact, tu as besoin d\'un modèle où ton énergie bouge vraiment les gens.',
+          security:
+            'Même si tu vas vite, tu veux une base solide. Un bon système te donne exactement ça.',
+          growth:
+            'Tu te développes le plus où tu peux assumer la responsabilité, mener et voir les résultats.',
+        },
+        cta: {
+          freedom:
+            'Tu sais déjà ce que tu veux. La seule question est: as-tu le bon véhicule pour ça?',
+          impact:
+            'Ton énergie peut tirer les autres. Ce qui compte c\'est que tu la mettes dans le bon environnement.',
+          security:
+            'Tu ne dois pas t\'amoindrir pour te sentir sûr. Tu as juste besoin du bon modèle.',
+          growth:
+            'Tu n\'as pas besoin de motivation externe. Tu as besoin d\'un terrain de jeu assez grand pour toi.',
+        },
+      },
+      y: {
+        code: 'Type B',
+        name: 'Le connecteur',
+        animal: 'Vent',
+        tagline: 'Ton énergie est contagieuse et c\'est ton avantage déloyale.',
+        shadow:
+          'Parfois tu sautes d\'une idée à l\'autre, mais ce n\'est pas un défaut. Tu as juste besoin du bon cadre.',
+        strengths: [
+          'Enthousiasme contagieux',
+          'Construire la confiance très vite',
+          'Connecter et énergiser les gens',
+          'Présence positive et magnétique',
+        ],
+        fit: {
+          freedom:
+            'Tu n\'es pas construit pour les structures rigides. Tu prospères où les gens et l\'énergie peuvent croître avec toi.',
+          impact:
+            'Si tu veux un impact, tu es le plus fort où les relations comptent plus que les processus froids.',
+          security:
+            'Pour toi, la sécurité n\'est pas juste l\'argent, mais aussi un environnement qui te soutient.',
+          growth:
+            'Tu croît le plus quand tu rencontres de nouvelles gens, de nouveaux espaces et de nouvelles possibilités.',
+        },
+        cta: {
+          freedom:
+            'Tu n\'as pas besoin de vendre. Tu as juste besoin d\'être toi. Un business basé sur de vraies connexions est ta maison naturelle.',
+          impact:
+            'Les équipes les plus fortes ne sont pas construites par une stratégie parfaite, mais par des gens comme toi.',
+          security:
+            'Quand l\'environnement est juste, tu attires naturellement les gens et les opportunités.',
+          growth:
+            'Ton vrai potentiel s\'épanouit quand l\'enthousiasme rencontre la structure.',
+        },
+      },
+      g: {
+        code: 'Type C',
+        name: 'L\'ancre',
+        animal: 'Eau',
+        tagline:
+          'Tu es le point fixe sur lequel les autres peuvent compter et c\'est plus rare que tu penses.',
+        shadow:
+          'Tu as tendance à mettre tes propres besoins en second, mais ton bien-être est la base de tout.',
+        strengths: [
+          'Profondément fiable',
+          'Confiance qui dure',
+          'Calme dans les situations difficiles',
+          'Équilibré et sans conflit',
+        ],
+        fit: {
+          freedom:
+            'Tu n\'as pas besoin des projecteurs. Tu as besoin de stabilité plus une vraie liberté sans amener du chaos dans ta vie.',
+          impact:
+            'Tu ne changes pas les gens par le volume, mais par la constance, la confiance et une vraie présence.',
+          security:
+            'Un modèle stable et durable compte plus pour toi que le hype. C\'est là que ta force brille.',
+          growth:
+            'Tu ne croît pas sous la pression, mais par la clarté, la confiance et un environnement stable.',
+        },
+        cta: {
+          freedom:
+            'Tu n\'as pas besoin d\'un spectacle. Tu as besoin d\'un modèle qui correspond à ta vie et te donne de la respiration.',
+          impact:
+            'Les équipes qui durent vraiment sont formées et maintenues ensemble par des gens comme toi.',
+          security:
+            'Ta force est de construire une confiance qui tient aussi demain.',
+          growth:
+            'Avec le bon environnement, tu développes une profondeur que peu de gens atteignent jamais.',
+        },
+      },
+      b: {
+        code: 'Type D',
+        name: 'L\'architecte',
+        animal: 'Pierre',
+        tagline: 'Tu vois des schémas que les autres manquent complètement.',
+        shadow:
+          'Parfois tu analyses trop longtemps, mais la précision est ton superpouvoir, pas ta faiblesse.',
+        strengths: [
+          'Décisions fondées et bien pesées',
+          'Pensée systémique et vision à long terme',
+          'Optimisation cohérente et précise',
+          'Drive intrinsèque et indépendance',
+        ],
+        fit: {
+          freedom:
+            'Tu n\'as pas besoin du chaos ou de promesses creuses. Tu as besoin d\'un système que tu peux comprendre et améliorer au fil du temps.',
+          impact:
+            'Ton impact commence où les autres ne voient que la surface et tu apportes vraie structure.',
+          security:
+            'Pour toi, la sécurité vient de la clarté, la logique et un modèle qui marche vraiment.',
+          growth:
+            'Tu croît le plus quand tu peux comprendre, affiner et maîtriser un système.',
+        },
+        cta: {
+          freedom:
+            'Tu n\'as pas besoin de frénésie. Tu as besoin d\'un véhicule avec substance qui peut tenir à ta façon de penser.',
+          impact:
+            'Les meilleures structures dans un business sont créées et raffinées par des gens comme toi.',
+          security:
+            'Une fois que tu comprends quelque chose, tu peux l\'agrandir avec calme et précision.',
+          growth:
+            'Ta force est de transformer des possibilités en vrais systèmes.',
+        },
+      },
+    },
+  });
+
+  const ru = buildTranslations({
+    static: {
+      intro_badge: 'Анализ кода успеха · 4 минуты',
+      intro_h1_line1: 'Какой тип успеха',
+      intro_h1_line2: 'действительно скрыт в тебе?',
+      intro_body:
+        '6 честных вопросов. Удивительно четкая картина того, как ты действительно работаешь и какие возможности подходят твоей личности.',
+      intro_type_1: 'Огонь',
+      intro_type_2: 'Ветер',
+      intro_type_3: 'Вода',
+      intro_type_4: 'Камень',
+      intro_cta: 'Открой мой код →',
+      intro_disclaimer: 'Нет торгового разговора. Не требуется e-mail.',
+      intro_legal_link: 'Правовая информация и конфиденциальность',
+
+      analyzing_badge: 'Анализ',
+      analyzing_h2: 'Твой профиль создается...',
+      analyzing_step_1: 'Анализируются паттерны личности...',
+      analyzing_step_2: 'Выявляются сильные стороны и мотивы...',
+      analyzing_step_3: 'Рассчитывается совместимость бизнеса...',
+      analyzing_step_4: 'Создается твой личный профиль...',
+      analyzing_step_5: 'Почти готово...',
+
+      quiz_phase: 'Этап',
+      quiz_question_label: 'Вопрос',
+      quiz_btn_next: 'Продолжить →',
+      quiz_btn_submit: 'Начать анализ →',
+
+      result_badge: 'Твой код успеха',
+      result_element_label: 'Элемент',
+      result_strengths_heading: 'Твои главные сильные стороны',
+      result_shadow_heading: 'Твоя слепая зона',
+      result_cta_btn: 'Да, я хочу больше узнать →',
+      result_restart_btn: 'Начать тест заново',
+
+      barrier_vehicle: 'работающая система',
+      barrier_community: 'правильная среда',
+      barrier_confidence: 'безопасный первый шаг',
+      barrier_opportunity: 'правильная возможность',
+
+      asp_tag_freedom: 'Свобода',
+      asp_tag_impact: 'Влияние',
+      asp_tag_security: 'Безопасность',
+      asp_tag_growth: 'Рост',
+
+      aspconf_badge: 'Твой фокус',
+      aspconf_freedom_label: 'Свобода – твой главный мотив',
+      aspconf_freedom_desc:
+        'Ты хочешь сам решать, когда, как и с кем работать. Поэтому тебе нужна модель, которая не создает новых зависимостей.',
+      aspconf_impact_label: 'Влияние – твой главный мотив',
+      aspconf_impact_desc:
+        'Для тебя это не только деньги. Ты хочешь чувствовать, что то, что ты делаешь, действительно движет что-то в других.',
+      aspconf_security_label: 'Безопасность – твой главный мотив',
+      aspconf_security_desc:
+        'Ты не ищешь ненужных приключений. Ты хочешь реальную возможность, но с четкой стабильной базой.',
+      aspconf_growth_label: 'Рост – твой главный мотив',
+      aspconf_growth_desc:
+        'Ты не хочешь стоять на месте. Ты ищешь среду, где сможешь расти и развивать реальные навыки.',
+      aspconf_btn: 'Продолжить →',
+      aspconf_footnote: 'Твои ответы делают результат намного более личным.',
+
+      optin_badge: 'Почти готово',
+      optin_h2_line1: 'Куда нам отправить твои',
+      optin_h2_line2: 'видео?',
+      optin_body:
+        'Три коротких видео, специально для твоего типа. Нет спама. Нет давления. Только честная информация.',
+      optin_label_firstname: 'Имя',
+      optin_placeholder_firstname: 'Твое имя',
+      optin_label_email: 'Email адрес',
+      optin_placeholder_email: 'твой@email.com',
+      optin_btn_submit: 'Разблокировать видео →',
+      optin_btn_loading: 'Отправка...',
+      optin_btn_validating: 'Проверка email...',
+      optin_email_error_format: 'Пожалуйста, введи валидный email адрес.',
+      optin_email_error_invalid:
+        'Этот email адрес похоже недействителен. Проверь его быстро.',
+      optin_privacy: 'Твои данные будут обработаны конфиденциально и не будут переданы третьим лицам.',
+
+      video_1_title: 'Часть 1: Введение',
+      video_1_sub: 'В следующих минутах выясни, в чем это действительно.',
+      video_2_title: 'Часть 2: Как это работает',
+      video_2_sub:
+        'Полное объяснение того, как построена модель и что ее отличает от других.',
+      video_3_title: 'Часть 3: Реальные опыты',
+      video_3_sub: 'Люди как ты, что они испытали и что изменилось в их жизни.',
+      video_counter: 'Видео',
+      video_next_label: 'Далее',
+      video_btn_next: 'Перейти к шагу',
+      video_btn_prev: '← Посмотреть видео еще раз',
+      video_btn_final: 'Перейти к шагу 4 →',
+      video_btn_locked: 'Перейти к следующему шагу',
+      video_hint_locked: 'Кнопка продолжить разблокируется после 75% видео.',
+      video_hint_unlocked: 'Теперь ты можешь продолжить.',
+      video_hint_recovery:
+        'Если обнаружение видео зависает, ты можешь перезагрузить видео или в крайнем случае продолжить вручную.',
+      video_error_title: 'Видео не удалось правильно обнаружить из-за технической проблемы.',
+      video_error_body:
+        'Обычно кнопка продолжить автоматически разблокируется на 75%. Если это не происходит, перезагрузи видео или используй ручной fallback.',
+      video_error_detail: 'Технические детали',
+      video_error_reload: 'Перезагрузить видео',
+      video_error_unlock: 'Продолжить вручную',
+
+      final_badge: 'Ты посмотрел все три видео',
+      final_h2: 'Подходит ли это тебе?',
+      final_body:
+        'Если ты просто хочешь изучить без обязательств, подойдет ли это тебе, просто напиши. Нет pitch, нет давления. Только честный разговор.',
+      final_profile_label: 'Твой профиль',
+      final_btn_whatsapp: 'Да, я хочу больше узнать',
+      final_btn_later: 'Я напишу когда буду готов',
+      final_footnote: 'Ты будешь подключен прямо через WhatsApp. Без ожидания, без формы.',
+      final_contact_prompt: 'Вопросы? Напиши',
+      quicklink_whatsapp_prefix: 'Привет ',
+      quicklink_whatsapp_suffix: ', у меня есть вопрос.',
+      final_whatsapp_prefill:
+        'Привет! Я только что прошел тест код успеха и хотел бы узнать больше об этой возможности.',
+      final_closed_h2: 'Все хорошо. Нет давления.',
+      final_closed_body: 'Если позже станет интересно, ты знаешь где нас найти.',
+      final_closed_restart: 'Повторить тест',
+      result_barrier_intro: 'Ты сам сказал: тебе не хватает – "',
+      result_barrier_outro: '". Вот для этого у нас есть что-то.',
+
+      legal_modal_title: 'Правовая информация и конфиденциальность',
+      webhook_title: 'RU - Тест Код Успеха',
+    },
+    questions: [
+      {
+        phase: 'Личность',
+        text: 'Что действительно вытаскивает тебя из постели по утрам?',
+        sub: 'Будь честен. Не то, что ты должен сказать, а то, что действительно верно для тебя.',
+        options: [
+          {
+            key: 'r',
+            label: 'Цели и прогресс',
+            desc: 'У меня есть цель перед собой и я хочу видеть, что продвигаюсь вперед.',
+          },
+          {
+            key: 'y',
+            label: 'Люди и встречи',
+            desc: 'Я жду с нетерпением людей, которых встречу или с которыми поговорю сегодня.',
+          },
+          {
+            key: 'g',
+            label: 'Структура и спокойствие',
+            desc: 'Я знаю, что меня ждет, и это дает мне спокойствие и энергию.',
+          },
+          {
+            key: 'b',
+            label: 'Глубина и вызов',
+            desc: 'У меня есть задача, которая действительно меня вызывает и интересует.',
+          },
+        ],
+      },
+      {
+        phase: 'Личность',
+        text: 'В группе ты обычно...',
+        sub: 'Подумай о реальных ситуациях. В команде, в семье или в кругу друзей.',
+        options: [
+          {
+            key: 'r',
+            label: 'Тот кто задает направление',
+            desc: 'Тот, кто видит общую картину и указывает направление.',
+          },
+          {
+            key: 'y',
+            label: 'Тот кто создает энергию',
+            desc: 'Тот, кто создает хорошую атмосферу и заражает других.',
+          },
+          {
+            key: 'g',
+            label: 'Центр спокойствия',
+            desc: 'Тот, кто слушает и следит, чтобы все чувствовали себя комфортно.',
+          },
+          {
+            key: 'b',
+            label: 'Молчаливый наблюдатель',
+            desc: 'Тот, кто анализирует в фоне, прежде чем что-то сказать.',
+          },
+        ],
+      },
+      {
+        phase: 'Личность',
+        text: 'Что действительно выводит тебя из себя?',
+        sub: 'Твой самый большой триггер разочарования показывает, что действительно важно для тебя глубоко.',
+        options: [
+          {
+            key: 'r',
+            label: 'Блокировки и нерешительные',
+            desc: 'Когда дела не продвигаются, потому что кто-то не может или не хочет решить.',
+          },
+          {
+            key: 'y',
+            label: 'Плохая энергия',
+            desc: 'Когда атмосфера падает и отрицательная энергия все отравляет.',
+          },
+          {
+            key: 'b',
+            label: 'Избежимые ошибки',
+            desc: 'Когда происходят ошибки, которые просто не должны были происходить.',
+          },
+          {
+            key: 'g',
+            label: 'Бессмысленные процессы',
+            desc: 'Когда мне говорят делать что-то, что для меня не имеет смысла.',
+          },
+        ],
+      },
+      {
+        phase: 'Жизнь и цели',
+        text: 'Что для тебя самое важное в работе?',
+        sub: 'Если ты можешь иметь только одно, что абсолютно не должно недоставать?',
+        options: [
+          {
+            key: 'freedom',
+            label: 'Свобода',
+            desc: 'Сам решаю когда, как и где работаю, без необходимости спрашивать разрешение.',
+          },
+          {
+            key: 'impact',
+            label: 'Влияние',
+            desc: 'Чувствовать, что мая работа действительно движет что-то в других людях.',
+          },
+          {
+            key: 'security',
+            label: 'Безопасность',
+            desc: 'Стабильный и надежный доход, на который я могу рассчитывать каждый месяц.',
+          },
+          {
+            key: 'growth',
+            label: 'Рост',
+            desc: 'Становиться немного лучше каждый день и развивать новые навыки.',
+          },
+        ],
+      },
+      {
+        phase: 'Жизнь и цели',
+        text: 'Как выглядит твоя идеальная жизнь через 3 года?',
+        sub: 'Закрой глаза на момент. Что ты действительно видишь?',
+        options: [
+          {
+            key: 'freedom',
+            label: 'Финансово свободен',
+            desc: 'Я решаю о моем времени и доходе. Нет босса, нет ограничений.',
+          },
+          {
+            key: 'impact',
+            label: 'Смысл и опыты',
+            desc: 'Я помогаю людям, переживаю мир и делаю что-то, что имеет реальное значение.',
+          },
+          {
+            key: 'security',
+            label: 'Спокойствие и семья',
+            desc: 'Нет финансовых забот, время для важных людей и стабильная жизнь.',
+          },
+          {
+            key: 'growth',
+            label: 'Экспертность и система',
+            desc: 'Я признан в своей области и имею систему, которая работает без меня.',
+          },
+        ],
+      },
+      {
+        phase: 'Жизнь и цели',
+        text: 'Что ДЕЙСТВИТЕЛЬНО мешает тебе жить этой жизнью уже сегодня?',
+        sub: 'Честь здесь поможет тебе больше, чем кажущийся правильный ответ.',
+        options: [
+          {
+            key: 'vehicle',
+            label: 'Отсутствует система',
+            desc: 'У меня есть воля, но пока нет работающей системы, которая меня туда доведет.',
+          },
+          {
+            key: 'community',
+            label: 'Отсутствует среда',
+            desc: 'Мне не хватает людей вокруг меня, которые каждый день толкают и поддерживают меня.',
+          },
+          {
+            key: 'confidence',
+            label: 'Отсутствует безопасность',
+            desc: 'Я неуверен и мне нужен четкий, низкорисковый первый шаг.',
+          },
+          {
+            key: 'opportunity',
+            label: 'Отсутствует возможность',
+            desc: 'Я еще не нашел возможность, которая действительно подходит мне и моей жизни.',
+          },
+        ],
+      },
+    ],
+    profiles: {
+      r: {
+        code: 'Тип A',
+        name: 'Деятель',
+        animal: 'Огонь',
+        tagline: 'Ты рожден, чтобы вести, а не следовать.',
+        shadow:
+          'Иногда твоя энергия может казаться нетерпеливой другим, но это просто стремление, ищущее выхода.',
+        strengths: [
+          'Быстрое и четкое принятие решений',
+          'Последовательный путь от идеи к исполнению',
+          'Естественное лидерство',
+          'Самомотивация и независимость',
+        ],
+        fit: {
+          freedom:
+            'Тебе не нужен 9-to-5. Тебе нужна система, которая масштабируется так же быстро, как ты думаешь.',
+          impact:
+            'Если ты хочешь влияние, тебе нужна модель, где твоя энергия действительно движет людей.',
+          security:
+            'Даже если ты действуешь быстро, ты хочешь сильную базу. Хорошая система дает тебе ровно это.',
+          growth:
+            'Ты растешь больше всего там, где можешь взять ответственность, вести и видеть результаты.',
+        },
+        cta: {
+          freedom:
+            'Ты уже знаешь, что хочешь. Единственный вопрос: есть ли у тебя правильный инструмент?',
+          impact:
+            'Твоя энергия может тянуть других. Важно только, чтобы ты ее применял в правой среде.',
+          security:
+            'Ты не должен умалять себя, чтобы чувствовать себя защищенным. Тебе просто нужна правильная модель.',
+          growth:
+            'Тебе не нужна внешняя мотивация. Тебе нужно игровое поле, достаточно большое для тебя.',
+        },
+      },
+      y: {
+        code: 'Тип B',
+        name: 'Соединитель',
+        animal: 'Ветер',
+        tagline: 'Твоя энергия заразна и это твое неправомерное преимущество.',
+        shadow:
+          'Иногда ты прыгаешь с одной идеи на другую, но это не недостаток. Тебе просто нужна правильная рамка.',
+        strengths: [
+          'Заразительный энтузиазм',
+          'Строишь доверие очень быстро',
+          'Соединяешь и энергизируешь людей',
+          'Позитивное и магнитное присутствие',
+        ],
+        fit: {
+          freedom:
+            'Ты не создан для жестких структур. Ты процветаешь там, где люди и энергия могут расти с тобой.',
+          impact:
+            'Если ты хочешь влияние, ты сильнейший где отношения важнее холодных процессов.',
+          security:
+            'Для тебя безопасность это не только деньги, но и среда, которая поддерживает.',
+          growth:
+            'Ты растешь больше всего когда встречаешь новых людей, новые места и новые возможности.',
+        },
+        cta: {
+          freedom:
+            'Тебе не нужно продавать. Тебе нужно быть собой. Бизнес основанный на реальных связях это твой естественный дом.',
+          impact:
+            'Самые сильные команды строятся не идеальной стратегией, а людьми как ты.',
+          security:
+            'Когда среда правильная, ты естественно привлекаешь людей и возможности.',
+          growth:
+            'Твой реальный потенциал раскрывается когда энтузиазм встречает структуру.',
+        },
+      },
+      g: {
+        code: 'Тип C',
+        name: 'Якорь',
+        animal: 'Вода',
+        tagline:
+          'Ты стабильная точка, на которую могут опираться другие, и это реже, чем ты думаешь.',
+        shadow:
+          'Ты склонен ставить свои собственные потребности на второе место, но твое благополучие это основа всего.',
+        strengths: [
+          'Глубокая надежность',
+          'Доверие, которое длится',
+          'Спокойствие в сложных ситуациях',
+          'Сбалансированность и без конфликтов',
+        ],
+        fit: {
+          freedom:
+            'Тебе не нужен центр внимания. Тебе нужна стабильность плюс реальная свобода без хаоса в твоей жизни.',
+          impact:
+            'Ты не меняешь людей через громкость, а через постоянство, доверие и реальное присутствие.',
+          security:
+            'Стабильная и устойчивая модель для тебя важнее, чем хайп. Там твоя сила сияет.',
+          growth:
+            'Ты растешь не под давлением, а через ясность, доверие и стабильную среду.',
+        },
+        cta: {
+          freedom:
+            'Тебе не нужно шоу. Тебе нужна модель, которая соответствует твоей жизни и дает тебе место дышать.',
+          impact:
+            'Команды, которые действительно держатся, формируются и укрепляются людьми как ты.',
+          security:
+            'Твоя сила в том, чтобы строить доверие, которое держит даже завтра.',
+          growth:
+            'С правильной средой ты развиваешь глубину, которую немногие когда-либо достигают.',
+        },
+      },
+      b: {
+        code: 'Тип D',
+        name: 'Архитектор',
+        animal: 'Камень',
+        tagline: 'Ты видишь паттерны, которые другие полностью пропускают.',
+        shadow:
+          'Иногда ты анализируешь слишком долго, но точность это твоя суперсила, не слабость.',
+        strengths: [
+          'Взвешенные и обдуманные решения',
+          'Системное мышление с предвидением',
+          'Последовательная оптимизация и точность',
+          'Внутренняя мотивация и независимость',
+        ],
+        fit: {
+          freedom:
+            'Тебе не нужен хаос или пустые обещания. Тебе нужна система, которую ты можешь понять и улучшать со временем.',
+          impact:
+            'Твое влияние начинается где другие видят только поверхность и ты вносишь реальную структуру.',
+          security:
+            'Для тебя безопасность растет из ясности, логики и модели, которая действительно работает.',
+          growth:
+            'Ты растешь больше всего когда можешь понять, улучшить и овладеть системой.',
+        },
+        cta: {
+          freedom:
+            'Тебе не нужна спешка. Тебе нужен инструмент с веществом, который может выдержать твой способ мышления.',
+          impact:
+            'Лучшие структуры в бизнесе создаются и совершенствуются людьми как ты.',
+          security:
+            'Когда ты что-то понимаешь, ты можешь масштабировать это со спокойствием и точностью.',
+          growth:
+            'Твоя сила в том, чтобы превратить возможности в реальные системы.',
+        },
+      },
+    },
+  });
+
   window.TRANSLATIONS = {
     de: de,
     it: it,
+    fr: fr,
+    ru: ru,
     en: en,
   };
 })();

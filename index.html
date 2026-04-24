@@ -9,9 +9,53 @@
     <script src="https://assets.mediadelivery.net/playerjs/player-0.1.0.min.js"></script>
     <script src="/video-config.js"></script>
     <script src="/translations.js"></script>
+    <style>
+      .language-switcher {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 50;
+        display: flex;
+        gap: 8px;
+        background: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        font-size: 14px;
+      }
+      .language-switcher a {
+        cursor: pointer;
+        text-decoration: none;
+        color: #666;
+        font-weight: 400;
+        transition: color 0.2s;
+      }
+      .language-switcher a:hover {
+        color: #333;
+      }
+      .language-switcher a.active {
+        font-weight: 700;
+        color: #333;
+      }
+      .language-switcher span {
+        color: #ccc;
+      }
+    </style>
 </head>
 <body style="margin: 0; padding: 0;">
     <div id="root"></div>
+
+    <div class="language-switcher" id="languageSwitcher">
+      <a href="javascript:void(0)" onclick="setLang('de')" id="langDE" class="active">DE</a>
+      <span>—</span>
+      <a href="javascript:void(0)" onclick="setLang('it')" id="langIT">IT</a>
+      <span>—</span>
+      <a href="javascript:void(0)" onclick="setLang('fr')" id="langFR">FR</a>
+      <span>—</span>
+      <a href="javascript:void(0)" onclick="setLang('ru')" id="langRU">RU</a>
+      <span>—</span>
+      <a href="javascript:void(0)" onclick="setLang('en')" id="langEN">EN</a>
+    </div>
 
     <div id="legalModal"
         style="position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 1; transition: opacity 300ms; overflow-y: auto; visibility: visible;"
@@ -44,6 +88,42 @@
     </style>
 
     <script>
+      // ── i18n Sprachenverwaltung ────────────────────────────────────
+      var currentLang = (function() {
+        var stored = localStorage.getItem('preferredLang');
+        if (stored && ['de','it','fr','ru','en'].includes(stored)) return stored;
+        var browser = (navigator.language || 'de').split('-')[0].toLowerCase();
+        return ['it','fr','ru','en'].includes(browser) ? browser : 'de';
+      })();
+
+      function setLang(lang) {
+        if (['de','it','fr','ru','en'].includes(lang)) {
+          localStorage.setItem('preferredLang', lang);
+          window.location.reload();
+        }
+      }
+
+      function updateLanguageSwitcher() {
+        var langDE = document.getElementById('langDE');
+        var langIT = document.getElementById('langIT');
+        var langFR = document.getElementById('langFR');
+        var langRU = document.getElementById('langRU');
+        var langEN = document.getElementById('langEN');
+
+        [langDE, langIT, langFR, langRU, langEN].forEach(function(el) {
+          if (el) el.classList.remove('active');
+        });
+
+        if (currentLang === 'de' && langDE) langDE.classList.add('active');
+        if (currentLang === 'it' && langIT) langIT.classList.add('active');
+        if (currentLang === 'fr' && langFR) langFR.classList.add('active');
+        if (currentLang === 'ru' && langRU) langRU.classList.add('active');
+        if (currentLang === 'en' && langEN) langEN.classList.add('active');
+      }
+
+      updateLanguageSwitcher();
+      document.addEventListener('DOMContentLoaded', updateLanguageSwitcher);
+
         function loadAppModule() {
             if (!window.TRANSLATIONS || Object.keys(window.TRANSLATIONS).length === 0) {
                 setTimeout(loadAppModule, 50);
