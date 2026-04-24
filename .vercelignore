@@ -1,0 +1,14 @@
+.git
+.gitignore
+README.md
+.env.local
+node_modules
+.env.example
+dist
+business-quiz-artifact.jsx
+.playwright-cli
+AGENTS.md
+code_details
+supabase-schema.sql
+assets/*.bak*
+*.bak

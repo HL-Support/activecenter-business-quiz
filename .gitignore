@@ -1,0 +1,11 @@
+node_modules
+.env.local
+.env
+.vercel
+.DS_Store
+dist
+.playwright-cli
+*.bak
+*.bak-*
+
+.vercel

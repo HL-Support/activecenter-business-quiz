@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erfolgscode Quiz | Activecenter</title>
+    <meta name="description" content="Entdecke deinen Erfolgscode in 4 Minuten. Welcher Erfolgstyp steckt wirklich in dir?">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://ik.imagekit.io/b40kqkuhj/icons/favicon-32x32.png">
+    <script src="https://assets.mediadelivery.net/playerjs/player-0.1.0.min.js"></script>
+    <script src="/video-config.js"></script>
+    <script src="/translations.js"></script>
+</head>
+<body style="margin: 0; padding: 0;">
+    <div id="root"></div>
+
+    <div id="legalModal"
+        style="position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 1; transition: opacity 300ms; overflow-y: auto; visibility: visible;"
+        class="hidden">
+        <div id="legalModalContent"
+            style="background: white; border-radius: 16px; box-shadow: 0 20px 25px rgba(0,0,0,0.15); width: 100%; max-width: 1024px; height: 80vh; display: flex; flex-direction: column; transform: scale(1); transition: transform 300ms;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #f3f4f6;">
+                <h3 id="legalModalTitle" style="font-size: 18px; font-weight: 600; color: #111827; margin: 0;">Impressum & Datenschutz</h3>
+                <button onclick="closeLegalModal()"
+                    style="padding: 8px; background: none; border: none; cursor: pointer; border-radius: 6px; color: #9ca3af; transition: all 0.2s;">
+                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div style="flex-grow: 1; position: relative; overflow: hidden; border-radius: 0 0 16px 16px;">
+                <iframe src="https://impressum.hl-support.biz/privacy.html"
+                    style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', system-ui, sans-serif; }
+        p { margin: 0; }
+        #legalModal.hidden { display: none !important; }
+        #legalModal.opacity-0 { opacity: 0 !important; }
+        #legalModalContent.scale-95 { transform: scale(0.95) !important; }
+    </style>
+
+    <script>
+        function loadAppModule() {
+            if (!window.TRANSLATIONS || Object.keys(window.TRANSLATIONS).length === 0) {
+                setTimeout(loadAppModule, 50);
+                return;
+            }
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = '/assets/app.js';
+            document.body.appendChild(script);
+        }
+        loadAppModule();
+    </script>
+</body>
+</html>
