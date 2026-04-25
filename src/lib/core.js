@@ -2,12 +2,20 @@ const MAUTIC_BASE_URL = 'https://mautic.deinedomain.com';
 const TRACKING_SESSION_KEY = 'acTrackingSession';
 const TRACKING_COOKIE = 'acTrackingHash';
 const TRACKING_SESSION_TTL_MS = 60 * 60 * 1000;
+const VISITOR_KEY = 'acVisitorId';
+const VISITOR_COOKIE = 'acVisitorId';
+const VISITOR_TTL_MS = 180 * 24 * 60 * 60 * 1000;
+const INTERNAL_KEY = 'acInternalTraffic';
+const INTERNAL_COOKIE = 'acInternalTraffic';
+const INTERNAL_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const TRACKING_SCHEMA_VERSION = 'ac_tracking_v1';
 const LEGACY_QUIZ_HASH_KEY = 'acQuizHash';
 const LEGACY_QUIZ_HASH_PREFIX = 'acQuizHash:';
 const LEAD_RUN_PREFIX = 'acLeadRun:';
 const DEFAULT_COACH = {
   slug: 'default',
   member_id: '',
+  organisation_name: 'Activecenter',
   phone: '',
   first_name: 'Markus',
   full_name: 'Markus',
@@ -62,25 +70,25 @@ export const storage = {
 
 export function getPreferredLang() {
   const preferred = storage.getItem('preferredLang');
-  if (preferred && ['de', 'it', 'en'].includes(preferred)) {
+  if (preferred && ['de', 'it', 'fr', 'ru', 'en'].includes(preferred)) {
     return preferred;
   }
 
   const browserLang = String((navigator.language || 'de').split('-')[0] || 'de').toLowerCase();
-  return ['it', 'en'].includes(browserLang) ? browserLang : 'de';
+  return ['it', 'fr', 'ru', 'en'].includes(browserLang) ? browserLang : 'de';
 }
 
 export function t(key) {
   const lang = getPreferredLang();
-  return (
+  const raw =
     (window.TRANSLATIONS &&
       ((window.TRANSLATIONS[lang] || {})[key] || (window.TRANSLATIONS.de || {})[key])) ||
-    key
-  );
+    key;
+  return applyBrandName(raw);
 }
 
 export function setPreferredLang(lang) {
-  if (!['de', 'it', 'en'].includes(lang)) {
+  if (!['de', 'it', 'fr', 'ru', 'en'].includes(lang)) {
     return;
   }
 
@@ -153,6 +161,118 @@ function writeSessionCookie(hash) {
   }
 }
 
+function writeCookie(name, value, maxAgeSeconds) {
+  if (!name || value === undefined || value === null || value === '') return;
+  try {
+    document.cookie = [
+      `${name}=${encodeURIComponent(String(value))}`,
+      `Max-Age=${maxAgeSeconds}`,
+      'Path=/',
+      'SameSite=Lax',
+      'Secure',
+    ].join('; ');
+  } catch (error) {
+    console.warn('Cookie set failed:', error);
+  }
+}
+
+function clearCookie(name) {
+  if (!name) return;
+  try {
+    document.cookie = [`${name}=`, 'Max-Age=0', 'Path=/', 'SameSite=Lax', 'Secure'].join('; ');
+  } catch (error) {
+    console.warn('Cookie clear failed:', error);
+  }
+}
+
+function parseBooleanFlag(value) {
+  const normalized = String(value || '')
+    .trim()
+    .toLowerCase();
+  if (!normalized) return null;
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return null;
+}
+
+function generateVisitorId() {
+  return generateId('av', 32);
+}
+
+export function getTrackingVisitorId() {
+  const storedVisitorId = String(storage.getItem(VISITOR_KEY) || '').trim();
+  if (storedVisitorId.indexOf('av_') === 0) {
+    writeCookie(VISITOR_COOKIE, storedVisitorId, Math.floor(VISITOR_TTL_MS / 1000));
+    return storedVisitorId;
+  }
+
+  const cookieVisitorId = (() => {
+    try {
+      const source = document.cookie || '';
+      const prefix = `${VISITOR_COOKIE}=`;
+      return source
+        .split(';')
+        .map((part) => part.trim())
+        .find((part) => part.indexOf(prefix) === 0)
+        ?.slice(prefix.length);
+    } catch {
+      return '';
+    }
+  })();
+
+  if (cookieVisitorId && String(cookieVisitorId).indexOf('av_') === 0) {
+    storage.setItem(VISITOR_KEY, String(cookieVisitorId));
+    writeCookie(VISITOR_COOKIE, cookieVisitorId, Math.floor(VISITOR_TTL_MS / 1000));
+    return String(cookieVisitorId);
+  }
+
+  const visitorId = generateVisitorId();
+  storage.setItem(VISITOR_KEY, visitorId);
+  writeCookie(VISITOR_COOKIE, visitorId, Math.floor(VISITOR_TTL_MS / 1000));
+  return visitorId;
+}
+
+export function isInternalTraffic() {
+  const params = new URLSearchParams(window.location.search || '');
+  const explicitFlag =
+    parseBooleanFlag(params.get('internal')) ??
+    parseBooleanFlag(params.get('internal_traffic')) ??
+    parseBooleanFlag(params.get('qa')) ??
+    parseBooleanFlag(params.get('test'));
+
+  if (explicitFlag !== null) {
+    storage.setItem(INTERNAL_KEY, explicitFlag ? '1' : '0');
+    if (explicitFlag) {
+      writeCookie(INTERNAL_COOKIE, '1', Math.floor(INTERNAL_TTL_MS / 1000));
+    } else {
+      clearCookie(INTERNAL_COOKIE);
+    }
+    return explicitFlag;
+  }
+
+  const host = String(window.location.hostname || '').toLowerCase();
+  if (
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host === '0.0.0.0' ||
+    host.endsWith('.vercel.app')
+  ) {
+    storage.setItem(INTERNAL_KEY, '1');
+    writeCookie(INTERNAL_COOKIE, '1', Math.floor(INTERNAL_TTL_MS / 1000));
+    return true;
+  }
+
+  const storedFlag = parseBooleanFlag(storage.getItem(INTERNAL_KEY));
+  if (storedFlag !== null) {
+    if (storedFlag) {
+      writeCookie(INTERNAL_COOKIE, '1', Math.floor(INTERNAL_TTL_MS / 1000));
+    }
+    return storedFlag;
+  }
+
+  return false;
+}
+
 function getLeadRunKey(slug = getCurrentSlug()) {
   return `${LEAD_RUN_PREFIX}${String(slug || 'default').toLowerCase()}`;
 }
@@ -185,6 +305,7 @@ export function getTrackingSessionHash(slug = getCurrentSlug(), memberId = '') {
   }
 
   const hash = generateId('ac', 32);
+  getTrackingVisitorId();
   storage.setItem(
     TRACKING_SESSION_KEY,
     JSON.stringify({
@@ -201,12 +322,14 @@ export function getTrackingSessionHash(slug = getCurrentSlug(), memberId = '') {
 function createLeadRun(slug = getCurrentSlug(), memberId = '') {
   const normalizedSlug = String(slug || 'default').toLowerCase();
   const sessionHash = getTrackingSessionHash(normalizedSlug, memberId);
+  const visitorId = getTrackingVisitorId();
   const leadRun = {
     lead_hash: generateId('qz', 24),
     token: generateId('tf', 28).replace(/_/g, ''),
     event_id: generateId('evt', 24).replace(/_/g, '').toUpperCase(),
     session_hash: sessionHash,
     tracking_hash: sessionHash,
+    visitor_id: visitorId,
     slug: normalizedSlug,
     member_id: String(memberId || ''),
     state: 'active',
@@ -227,6 +350,7 @@ export function getActiveLeadRun(slug = getCurrentSlug(), memberId = '') {
       ...existing,
       session_hash: sessionHash,
       tracking_hash: existing.tracking_hash || sessionHash,
+      visitor_id: existing.visitor_id || getTrackingVisitorId(),
       member_id: String(memberId || existing.member_id || ''),
       updatedAt: isoNow(),
     };
@@ -271,6 +395,18 @@ export function getCoachFromStorage() {
   }
 }
 
+export function getBrandName(coach = null) {
+  const activeCoach = coach || getCoachFromStorage();
+  const orgName = String(activeCoach?.organisation_name || '').trim();
+  return orgName || 'Activecenter';
+}
+
+export function applyBrandName(text, coach = null) {
+  return String(text === null || text === undefined ? '' : text)
+    .replace(/ActiveCenter/g, getBrandName(coach))
+    .replace(/Activecenter/g, getBrandName(coach));
+}
+
 function getCurrentCountry() {
   return (
     String((navigator.language || 'de').split('-')[1] || 'DE')
@@ -305,6 +441,7 @@ function normalizeCoach(rawCoach, slug) {
   return {
     slug,
     member_id: rawCoach.herbalife_id || '',
+    organisation_name: rawCoach.organisation_name || 'Activecenter',
     full_name: rawCoach.full_name || 'Coach',
     first_name: rawCoach.first_name || 'Coach',
     phone: rawCoach.phone || '',
@@ -322,26 +459,26 @@ export async function initializeQuizEnvironment() {
   storage.removeItem(LEGACY_QUIZ_HASH_KEY);
   storage.removeItem(`${LEGACY_QUIZ_HASH_PREFIX}${slug}`);
 
-  let coach = { ...DEFAULT_COACH };
-
-  if (slug !== 'default') {
-    try {
-      const coachResponse = await lookupCoach(slug);
-
-      if (!coachResponse.herbalife_id || String(coachResponse.herbalife_id).trim() === '') {
-        window.location.href = 'https://www.global-sce.com/';
-        return null;
-      }
-
-      coach = normalizeCoach(coachResponse, slug);
-    } catch {
-      window.location.href = 'https://www.global-sce.com/';
-      return null;
-    }
+  if (slug === 'default') {
+    return { coach: null, reason: 'missing_handle', slug };
   }
+
+  let coachResponse;
+  try {
+    coachResponse = await lookupCoach(slug);
+  } catch {
+    return { coach: null, reason: 'coach_lookup_failed', slug };
+  }
+
+  if (!coachResponse.herbalife_id || String(coachResponse.herbalife_id).trim() === '') {
+    return { coach: null, reason: 'coach_not_found', slug };
+  }
+
+  const coach = normalizeCoach(coachResponse, slug);
 
   storage.setItem('acCoach', JSON.stringify(coach));
   storage.setItem('acBeraterSlug', coach.slug || slug);
+  document.title = applyBrandName(document.title, coach);
   getTrackingSessionHash(coach.slug || slug, coach.member_id || '');
   getActiveLeadRun(coach.slug || slug, coach.member_id || '');
 
@@ -352,7 +489,7 @@ export async function initializeQuizEnvironment() {
     lang: getPreferredLang(),
   });
 
-  return coach;
+  return { coach, reason: null, slug };
 }
 
 export function getVideoConfig() {
@@ -613,10 +750,16 @@ export function trackQuizAnalytics(eventName, payload = {}) {
     return;
   }
 
+  const isResume = storage.getItem('acSessionIsResume') === 'true';
+
   const body = {
     hash,
     session_hash: hash,
     lead_hash: getActiveLeadRun(slug, coach.member_id || '').lead_hash,
+    visitor_id: getTrackingVisitorId(),
+    is_internal_traffic: isInternalTraffic(),
+    is_resume: isResume,
+    schema_version: TRACKING_SCHEMA_VERSION,
     event_name: eventName,
     event_at: isoNow(),
     source_app: 'business_leads_quiz',
@@ -752,6 +895,7 @@ export async function forwardQuizSubmission(
   );
   const hash = leadRun.lead_hash;
   const sessionHash = leadRun.session_hash || getTrackingSessionHash(slug, coach.member_id || '');
+  const visitorId = leadRun.visitor_id || getTrackingVisitorId();
 
   if (!hash) {
     return null;
@@ -788,6 +932,8 @@ export async function forwardQuizSubmission(
             lead_hash: hash,
             session_hash: sessionHash,
             tracking_hash: sessionHash,
+            visitor_id: visitorId,
+            schema_version: TRACKING_SCHEMA_VERSION,
             main_aspiration: mainAspiration,
             main_aspiration_label: mainAspirationLabel,
             lang,
@@ -811,6 +957,7 @@ export async function forwardQuizSubmission(
           lang,
           leadHash: hash,
           sessionHash,
+          visitorId,
           token: leadRun.token,
           mainAspiration,
           mainAspirationLabel,

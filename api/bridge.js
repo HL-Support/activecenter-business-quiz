@@ -20,6 +20,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xlpiisbozpgmemxhtivj.s
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const JWT_SECRET = process.env.JWT_SECRET;
 const RESUME_KEY_SECRET = process.env.RESUME_KEY_SECRET || JWT_SECRET;
+const TRACKING_SCHEMA_VERSION = 'ac_tracking_v1';
 
 const TYPEFORM_TARGET = 'https://contacts.hl-support.biz/webhook/typeform';
 const ALLOWED_ADAPTER_KEYS = new Set(['business_leads_quiz_v1']);
@@ -77,12 +78,26 @@ function sessionHashOf(payload) {
   return safeString(payload.session_hash || payload.tracking_hash || payload.hash, 96);
 }
 
-function longResumeUrl(token) {
-  return `https://quiz.activecenter.info?resume=${encodeURIComponent(String(token || ''))}`;
+function normalizeResumeSlug(slug) {
+  const normalized = String(slug || '')
+    .trim()
+    .toLowerCase();
+  return /^[a-z0-9_-]+$/.test(normalized) && normalized !== 'default' ? normalized : '';
 }
 
-function shortResumeUrl(key) {
-  return `https://quiz.activecenter.info?r=${encodeURIComponent(String(key || ''))}`;
+function resumeBaseUrl(slug) {
+  const normalizedSlug = normalizeResumeSlug(slug);
+  return normalizedSlug
+    ? `https://quiz.activecenter.info/${normalizedSlug}`
+    : 'https://quiz.activecenter.info';
+}
+
+function longResumeUrl(token, slug) {
+  return `${resumeBaseUrl(slug)}?resume=${encodeURIComponent(String(token || ''))}`;
+}
+
+function shortResumeUrl(key, slug) {
+  return `${resumeBaseUrl(slug)}?r=${encodeURIComponent(String(key || ''))}`;
 }
 
 function toBase62(value) {
@@ -298,6 +313,10 @@ async function writeTrackingEvent(payload) {
   };
 
   try {
+    const trackingPayload = {
+      ...payload,
+      schema_version: safeString(payload.schema_version, 40) || TRACKING_SCHEMA_VERSION,
+    };
     await insertIgnoringDuplicates(
       'tracking_sessions',
       'session_hash',
@@ -308,12 +327,16 @@ async function writeTrackingEvent(payload) {
       })
     );
 
+    // Determine if this is a resume session (first event with is_resume=true)
+    const isResume = payload.is_resume === true || payload.is_resume === 'true';
+
     await patchByEquals(
       'tracking_sessions',
       'session_hash',
       identity.sessionHash,
       compactObject({
         ...base,
+        is_resume: isResume ? true : undefined,
         last_event_at: eventAt,
         current_event: eventName,
         device_type: safeTrackingString(payload, 'device_type', 30),
@@ -355,7 +378,7 @@ async function writeTrackingEvent(payload) {
           video_id: safeString(payload.video_id, 120),
           progress_percent: safeInteger(payload.progress_percent),
           unique_watched_percent: safeInteger(payload.unique_watched_percent),
-          properties: payload,
+          properties: trackingPayload,
         })
       ),
     });
@@ -1041,6 +1064,50 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ success: true, hash: payload.hash });
   }
 
+  if (action === 'write_analytics_batch') {
+    if (!payload || !Array.isArray(payload.events) || payload.events.length === 0) {
+      return res.status(400).json({ error: 'Missing or empty events array' });
+    }
+
+    // Process events in parallel but with controlled concurrency
+    const maxConcurrent = 5;
+    const events = payload.events;
+    let processed = 0;
+    let failed = 0;
+
+    for (let i = 0; i < events.length; i += maxConcurrent) {
+      const batch = events.slice(i, i + maxConcurrent);
+      const results = await Promise.allSettled(
+        batch.map((event) =>
+          writeToSupabaseAsync({
+            ...event,
+            hash: event.session_hash || event.hash || '',
+            session_hash: event.session_hash || event.hash || '',
+            herbalife_id: event.member_id || event.herbalife_id || '',
+            berater_slug: event.berater_slug || event.slug || '',
+            event_at: event.event_at || nowIso(),
+          })
+        )
+      );
+
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          processed++;
+        } else {
+          failed++;
+          console.warn('Batch event processing failed:', result.reason?.message);
+        }
+      });
+    }
+
+    return res.status(200).json({
+      success: failed === 0,
+      processed,
+      failed,
+      total: events.length,
+    });
+  }
+
   if (action === 'forward_typeform_adapter') {
     if (!ALLOWED_ADAPTER_KEYS.has(adapterKey)) {
       return res.status(400).json({ error: 'Unknown adapter_key' });
@@ -1121,8 +1188,9 @@ module.exports = async function handler(req, res) {
       { algorithm: 'HS256' }
     );
 
+    const resumeSlug = safeString(payload.slug || payload.berater_slug || payload.coach_slug, 80);
     const shortKey = resumeSession?.id ? createResumeKey(resumeSession.id) : null;
-    const shortUrl = shortKey ? shortResumeUrl(shortKey) : null;
+    const shortUrl = shortKey ? shortResumeUrl(shortKey, resumeSlug) : null;
 
     return res.status(200).json({
       success: true,
@@ -1130,7 +1198,7 @@ module.exports = async function handler(req, res) {
       lastVideoStep,
       shortKey,
       shortUrl,
-      resumeUrl: shortUrl || longResumeUrl(token),
+      resumeUrl: shortUrl || longResumeUrl(token, resumeSlug),
     });
   }
 
@@ -1208,6 +1276,107 @@ module.exports = async function handler(req, res) {
       context: safeString(resumeRecord.funnel || 'quiz', 32) || 'quiz',
       lastVideoStep,
     });
+  }
+
+  if (action === 'get_funnel_metrics') {
+    const slug = payload?.berater_slug || payload?.slug;
+    if (!slug) {
+      return res.status(400).json({ error: 'Missing berater_slug' });
+    }
+
+    try {
+      const slugEncoded = encodeURIComponent(String(slug).toLowerCase());
+      const response = await supabaseRequest(
+        `v_funnel_analysis?berater_slug=eq.${slugEncoded}&select=*`
+      );
+      const rows = await response?.json?.();
+      const metrics = Array.isArray(rows) ? rows[0] : null;
+
+      if (!metrics) {
+        return res.status(200).json({
+          success: true,
+          data: {
+            berater_slug: slug,
+            step_1_starts: 0,
+            step_2_questions: 0,
+            step_form_submits: 0,
+            completions: 0,
+            completion_rate_pct: 0,
+          },
+        });
+      }
+
+      return res.status(200).json({ success: true, data: metrics });
+    } catch (error) {
+      console.error('get_funnel_metrics error:', error.message);
+      return res.status(500).json({ error: 'Failed to fetch funnel metrics' });
+    }
+  }
+
+  if (action === 'get_resume_metrics') {
+    const slug = payload?.berater_slug || payload?.slug;
+    if (!slug) {
+      return res.status(400).json({ error: 'Missing berater_slug' });
+    }
+
+    try {
+      const slugEncoded = encodeURIComponent(String(slug).toLowerCase());
+      const response = await supabaseRequest(
+        `v_resume_metrics?berater_slug=eq.${slugEncoded}&select=*`
+      );
+      const rows = await response?.json?.();
+      const metrics = Array.isArray(rows) ? rows[0] : null;
+
+      if (!metrics) {
+        return res.status(200).json({
+          success: true,
+          data: {
+            berater_slug: slug,
+            total_resume_sessions: 0,
+            resume_completions: 0,
+            resume_completion_rate_pct: 0,
+          },
+        });
+      }
+
+      return res.status(200).json({ success: true, data: metrics });
+    } catch (error) {
+      console.error('get_resume_metrics error:', error.message);
+      return res.status(500).json({ error: 'Failed to fetch resume metrics' });
+    }
+  }
+
+  if (action === 'get_completion_metrics') {
+    const slug = payload?.berater_slug || payload?.slug;
+    if (!slug) {
+      return res.status(400).json({ error: 'Missing berater_slug' });
+    }
+
+    try {
+      const slugEncoded = encodeURIComponent(String(slug).toLowerCase());
+      const response = await supabaseRequest(
+        `v_completion_metrics?berater_slug=eq.${slugEncoded}&select=*`
+      );
+      const rows = await response?.json?.();
+      const metrics = Array.isArray(rows) ? rows[0] : null;
+
+      if (!metrics) {
+        return res.status(200).json({
+          success: true,
+          data: {
+            berater_slug: slug,
+            total_starts: 0,
+            total_completions: 0,
+            completion_rate_pct: 0,
+          },
+        });
+      }
+
+      return res.status(200).json({ success: true, data: metrics });
+    } catch (error) {
+      console.error('get_completion_metrics error:', error.message);
+      return res.status(500).json({ error: 'Failed to fetch completion metrics' });
+    }
   }
 
   return res.status(400).json({ error: 'Unknown action' });
