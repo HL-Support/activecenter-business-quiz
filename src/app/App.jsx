@@ -1,4 +1,4 @@
-/* eslint-disable prefer-const, no-undef, no-empty */
+/* eslint-disable prefer-const */
 import React from 'react';
 import {
   getPreferredLang,
@@ -126,7 +126,7 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
       progressBuckets[bucket] = !0;
       track('video_progress', buildProgressPayload(method, bucket));
     }
-    if (percent >= 75) unlock('unique_watch_75');
+    if (percent >= 95) unlock('unique_watch_95');
   }
 
   function unlock(reason) {
@@ -135,7 +135,7 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
     readyTimeout && clearTimeout(readyTimeout);
     progressTimeout && clearTimeout(progressTimeout);
     durationTimeout && clearTimeout(durationTimeout);
-    track('video_unlocked', buildProgressPayload(reason, 75));
+    track('video_unlocked', buildProgressPayload(reason, 95));
     setStatus('unlocked');
     onUnlocked && onUnlocked(reason);
   }
@@ -225,7 +225,7 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
       markWatched(lastSecond, duration || lastSecond);
       track('video_completed', buildProgressPayload('playerjs_ended', 100));
       emitProgress('playerjs_ended', !0);
-      if (uniqueWatchedPercent() >= 75) unlock('ended');
+      if (uniqueWatchedPercent() >= 95) unlock('ended');
     });
 
     progressTimeout = setTimeout(function () {
@@ -301,7 +301,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
             window.acTrack('quiz_form_submit', { pageKey: 'quiz' }),
             new Promise((V) => setTimeout(V, 500)),
           ]));
-      } catch (error) {
+      } catch (_error) {
         // intentionally empty - tracking error is non-critical
       }
       (y(!1), o());
@@ -459,7 +459,7 @@ function VideoStep({
   visible: r,
   onNext: l,
   onPrev: o,
-  onVideoReached75: i,
+  onVideoReached95: i,
 }) {
   const u = n[t];
   if (!u) return null;
@@ -774,7 +774,7 @@ function FinalStep({ profile: e, visible: t, onRestart: n }) {
     o = e?.accentColor || '#C9A84C',
     i = React.useMemo(() => getCoachFromStorage() || {}, []),
     u = i?.phone || '',
-    s = i?.first_name || 'Markus',
+    _s = i?.first_name || 'Markus',
     d = encodeURIComponent(a('final_whatsapp_prefill')),
     g = u ? `https://wa.me/${u.replace(/\D/g, '')}?text=${d}` : `https://wa.me/?text=${d}`;
   React.useEffect(() => {
@@ -1007,6 +1007,18 @@ function LanguageSwitcher() {
       '-'
     ),
     e('it', 'IT'),
+    React.createElement(
+      'span',
+      { style: { color: 'rgba(245,240,232,0.18)', fontSize: '10px' } },
+      '-'
+    ),
+    e('fr', 'FR'),
+    React.createElement(
+      'span',
+      { style: { color: 'rgba(245,240,232,0.18)', fontSize: '10px' } },
+      '-'
+    ),
+    e('ru', 'RU'),
     React.createElement(
       'span',
       { style: { color: 'rgba(245,240,232,0.18)', fontSize: '10px' } },
@@ -1819,7 +1831,7 @@ function QuizFlow() {
       videoStep: c,
       videos: videoSteps,
       visible: s,
-      onVideoReached75: () => {},
+      onVideoReached95: () => {},
       onNext: () => {
         Dt('video_continue_click', {
           video_step: c,

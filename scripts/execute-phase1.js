@@ -8,9 +8,13 @@
 const fs = require('fs');
 const https = require('https');
 
-const SUPABASE_URL = 'https://xlpiisbozpgmemxhtivj.supabase.co';
-const SUPABASE_SERVICE_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhscGlpc2JvenBnbWVteGh0aXZqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDc5NTU1MiwiZXhwIjoyMDkwMzcxNTUyfQ.2ek_Ay-7igxTHXSxkO03mH1ty53kB35nrZLix7gGOqI';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xlpiisbozpgmemxhtivj.supabase.co';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+
+if (!SUPABASE_SERVICE_KEY) {
+  console.error('ERROR: SUPABASE_SERVICE_KEY environment variable is required');
+  process.exit(1);
+}
 
 // Polyfill for fetch (Node.js < 18)
 const fetch = globalThis.fetch || require('node-fetch');

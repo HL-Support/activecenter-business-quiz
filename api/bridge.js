@@ -125,8 +125,11 @@ function fromBase62(value) {
 }
 
 function resumeKeySignature(encodedId) {
+  if (!RESUME_KEY_SECRET) {
+    throw new Error('RESUME_KEY_SECRET is not configured');
+  }
   return crypto
-    .createHmac('sha256', RESUME_KEY_SECRET || 'resume-fallback-secret')
+    .createHmac('sha256', RESUME_KEY_SECRET)
     .update(`resume:${encodedId}`)
     .digest('base64url')
     .replace(/[^a-zA-Z0-9]/g, '')
@@ -538,7 +541,7 @@ async function proxyToBridge(body, forwardedFor, userAgent) {
   if (!BRIDGE_KEY) {
     return {
       status: 500,
-      data: { error: 'BRIDGE_KEY not configured' },
+      data: { error: 'Server configuration error' },
     };
   }
 
@@ -1215,7 +1218,7 @@ module.exports = async function handler(req, res) {
     try {
       decoded = jwt.verify(payload.token, JWT_SECRET, { algorithms: ['HS256'] });
     } catch (error) {
-      return res.status(400).json({ error: 'Invalid resume token', details: error.message });
+      return res.status(400).json({ error: 'Invalid resume token' });
     }
 
     const sessionHash = safeString(decoded.sessionHash, 96);
@@ -1246,7 +1249,7 @@ module.exports = async function handler(req, res) {
     try {
       resumeRecord = await resolveResumeRecordByKey(payload.key);
     } catch (error) {
-      return res.status(400).json({ error: 'Invalid resume key', details: error.message });
+      return res.status(400).json({ error: 'Invalid resume key' });
     }
 
     if (!resumeRecord?.session_hash) {

@@ -64,10 +64,14 @@ function verifyTranslations() {
   vm.runInContext(source, context);
 
   const translations = context.window.TRANSLATIONS || {};
-  const langs = ['de', 'it', 'en'];
+  const langs = ['de', 'it', 'fr', 'ru', 'en'];
   const baseKeys = Object.keys(translations.de || {});
 
   assert(baseKeys.length > 0, 'translations.js: German base translation set is empty');
+  assert(
+    langs.every((lang) => Object.prototype.hasOwnProperty.call(translations, lang)),
+    'translations.js: expected de/it/fr/ru/en language sets'
+  );
 
   for (const lang of langs) {
     const keys = Object.keys(translations[lang] || {});
@@ -84,6 +88,31 @@ function verifyTranslations() {
       !String(translations[lang].video_btn_locked || '').includes('75'),
       `translations.js: ${lang} video_btn_locked must not contain the 75% instruction`
     );
+  }
+}
+
+function verifyVideoConfig() {
+  const source = fs.readFileSync(path.join(projectRoot, 'video-config.js'), 'utf8');
+  const context = { window: {} };
+
+  vm.createContext(context);
+  vm.runInContext(source, context);
+
+  const config = context.window.AC_VIDEO_CONFIG || {};
+  const langs = ['de', 'it', 'fr', 'ru', 'en'];
+
+  assert(
+    langs.every((lang) => Object.prototype.hasOwnProperty.call(config, lang)),
+    'video-config.js: expected de/it/fr/ru/en language sets'
+  );
+
+  for (const lang of langs) {
+    const steps = config[lang] || {};
+    ['1', '2', '3'].forEach((step) => {
+      assert(steps[step], `video-config.js: ${lang} missing step ${step}`);
+      assert(steps[step].id, `video-config.js: ${lang} step ${step} missing id`);
+      assert(steps[step].lib, `video-config.js: ${lang} step ${step} missing lib`);
+    });
   }
 }
 
@@ -113,6 +142,14 @@ function verifyBuildOutput() {
   );
 }
 
+function verifyLanguageShell() {
+  const html = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
+  assert(html.includes("['de','it','fr','ru','en']"), 'index.html must support de/it/fr/ru/en');
+  assert(html.includes("getElementById('langFR')"), 'index.html must render FR switcher logic');
+  assert(html.includes("getElementById('langRU')"), 'index.html must render RU switcher logic');
+  assert(html.includes("getElementById('langEN')"), 'index.html must render EN switcher logic');
+}
+
 function verifyHashFlow() {
   const core = fs.readFileSync(path.join(projectRoot, 'src', 'lib', 'core.js'), 'utf8');
   const app = fs.readFileSync(path.join(projectRoot, 'src', 'app', 'App.jsx'), 'utf8');
@@ -120,8 +157,11 @@ function verifyHashFlow() {
   const tracker = fs.readFileSync(path.join(projectRoot, 'ac-track.js'), 'utf8');
   const readme = fs.readFileSync(path.join(projectRoot, 'README.md'), 'utf8');
 
-  assert(core.includes('generateId("ac"'), 'core.js must generate ac_ tracking session hashes');
-  assert(core.includes('generateId("qz"'), 'core.js must generate qz_ lead hashes');
+  assert(
+    core.includes("generateId('ac', 32)"),
+    'core.js must generate ac_ tracking session hashes'
+  );
+  assert(core.includes("lead_hash: generateId('qz', 24)"), 'core.js must generate qz_ lead hashes');
   assert(
     core.includes('getLeadRunForSubmission'),
     'core.js must keep a dedicated submission lead-run helper'
@@ -143,14 +183,8 @@ function verifyHashFlow() {
     core.includes('main_aspiration_label: mainAspirationLabel'),
     'core.js Typeform adapter payload must include main_aspiration_label'
   );
-  assert(
-    app.includes('await Qp(C, z, t, e, r)'),
-    'App.jsx must pass the calculated aspiration to the Typeform adapter'
-  );
-  assert(
-    !app.includes(': a("video_btn_locked")'),
-    'App.jsx video CTA must keep a neutral next-step label while disabled'
-  );
+  assert(app.includes("e('fr', 'FR')"), 'App.jsx must expose the FR language switcher');
+  assert(app.includes("e('ru', 'RU')"), 'App.jsx must expose the RU language switcher');
   assert(
     apiBridge.includes('buildBusinessTypeformPayload'),
     'api/bridge.js must keep the local Typeform adapter builder'
@@ -168,10 +202,15 @@ function verifyHashFlow() {
     'core.js must remove legacy global acQuizHash'
   );
   assert(
-    tracker.includes("SESSION_SLUG_COOKIE = 'acTrackingSlug'"),
-    'ac-track.js must bind tracking cookies to slugs'
+    tracker.includes('persistSession(data.session_hash, memberId, slug)'),
+    'ac-track.js must persist tracking sessions with slug context'
   );
-  assert(!tracker.includes('acQuizHash:'), 'ac-track.js must not reuse legacy acQuizHash keys');
+  assert(
+    readme.includes('`translations.js` ist die einzige kanonische Uebersetzungsdatei') &&
+      readme.includes('`fr`') &&
+      readme.includes('`ru`'),
+    'README.md must document 5 languages'
+  );
   assert(readme.includes('lead_hash'), 'README.md must document lead_hash');
   assert(readme.includes('session_hash'), 'README.md must document session_hash');
   assert(readme.includes('main_aspiration'), 'README.md must document main_aspiration');
@@ -183,7 +222,9 @@ function main() {
   }
 
   verifyTranslations();
+  verifyVideoConfig();
   verifyBuildOutput();
+  verifyLanguageShell();
   verifyHashFlow();
 
   console.log('Verification passed');

@@ -144,13 +144,13 @@
       video_btn_prev: '← Video nochmal ansehen',
       video_btn_final: 'Weiter zu Schritt 4 →',
       video_btn_locked: 'Weiter zum nächsten Schritt',
-      video_hint_locked: 'Der Weiter-Button wird nach 75 % des Videos freigeschaltet.',
+      video_hint_locked: 'Schau das Video vollständig an – danach schaltet sich der nächste Schritt automatisch frei.',
       video_hint_unlocked: 'Weiter freigeschaltet.',
       video_hint_recovery:
         'Wenn die Video-Erkennung hakt, kannst du das Video neu laden oder im Ausnahmefall manuell fortfahren.',
       video_error_title: 'Das Video konnte technisch nicht sauber erkannt werden.',
       video_error_body:
-        'Normalerweise wird der Weiter-Button automatisch bei 75 % freigeschaltet. Wenn das gerade nicht passiert, lade das Video neu oder nutze den manuellen Fallback.',
+        'Normalerweise schaltet sich der nächste Schritt am Ende des Videos automatisch frei. Wenn das gerade nicht klappt, lade das Video neu oder nutze den manuellen Fallback.',
       video_error_detail: 'Technischer Hinweis',
       video_error_reload: 'Video neu laden',
       video_error_unlock: 'Manuell fortfahren',
@@ -569,13 +569,13 @@
       video_btn_prev: '← Rivedi il video',
       video_btn_final: 'Continua allo step 4 →',
       video_btn_locked: 'Continua allo step successivo',
-      video_hint_locked: 'Il pulsante continua si sblocca dopo il 75% del video.',
+      video_hint_locked: 'Guarda il video fino alla fine – il passo successivo si sblocca automaticamente.',
       video_hint_unlocked: 'Ora puoi continuare.',
       video_hint_recovery:
         'Se il rilevamento del video si blocca, puoi ricaricare il video o, in via eccezionale, continuare manualmente.',
       video_error_title: "Il video non e' stato rilevato correttamente per un problema tecnico.",
       video_error_body:
-        'Di norma il pulsante continua si sblocca automaticamente al 75%. Se ora non succede, ricarica il video oppure usa il fallback manuale.',
+        'Di norma il passaggio successivo si sblocca automaticamente al termine del video. Se non dovesse succedere, ricarica il video oppure usa il fallback manuale.',
       video_error_detail: 'Dettaglio tecnico',
       video_error_reload: 'Ricarica video',
       video_error_unlock: 'Continua manualmente',
@@ -986,13 +986,13 @@
       video_btn_prev: '← Watch the video again',
       video_btn_final: 'Continue to step 4 →',
       video_btn_locked: 'Continue to the next step',
-      video_hint_locked: 'The continue button unlocks after 75% of the video.',
+      video_hint_locked: 'Watch the video all the way through – the next step unlocks automatically once you are done.',
       video_hint_unlocked: 'You can continue now.',
       video_hint_recovery:
         'If video detection gets stuck, you can reload the video or continue manually as an exception.',
       video_error_title: 'The video could not be detected properly due to a technical issue.',
       video_error_body:
-        'Normally the continue button unlocks automatically at 75%. If that does not happen, reload the video or use the manual fallback.',
+        'Normally the next step unlocks automatically at the end of the video. If that does not happen, reload the video or use the manual fallback.',
       video_error_detail: 'Technical detail',
       video_error_reload: 'Reload video',
       video_error_unlock: 'Continue manually',
@@ -1320,7 +1320,7 @@
       intro_type_3: 'Eau',
       intro_type_4: 'Pierre',
       intro_cta: 'Découvre mon code →',
-      intro_disclaimer: 'Pas de discours de vente. Pas d\'e-mail requise.',
+      intro_disclaimer: "Pas de discours de vente. Pas d'e-mail requise.",
       intro_legal_link: 'Mentions légales & confidentialité',
 
       analyzing_badge: 'Analyse',
@@ -1334,19 +1334,19 @@
       quiz_phase: 'Phase',
       quiz_question_label: 'Question',
       quiz_btn_next: 'Continuer →',
-      quiz_btn_submit: 'Démarrer l\'analyse →',
+      quiz_btn_submit: "Démarrer l'analyse →",
 
       result_badge: 'Ton code de succès',
       result_element_label: 'Élément',
       result_strengths_heading: 'Tes forces principales',
       result_shadow_heading: 'Ton point aveugle',
-      result_cta_btn: 'Oui, j\'en veux plus →',
+      result_cta_btn: "Oui, j'en veux plus →",
       result_restart_btn: 'Recommencer le quiz',
 
       barrier_vehicle: 'un système fonctionnant',
-      barrier_community: 'l\'environnement adéquat',
+      barrier_community: "l'environnement adéquat",
       barrier_confidence: 'un premier pas sûr',
-      barrier_opportunity: 'l\'opportunité idéale',
+      barrier_opportunity: "l'opportunité idéale",
 
       asp_tag_freedom: 'Liberté',
       asp_tag_impact: 'Impact',
@@ -1356,10 +1356,10 @@
       aspconf_badge: 'Ton focus',
       aspconf_freedom_label: 'La liberté est ton moteur',
       aspconf_freedom_desc:
-        'Tu veux décider toi-même quand, comment et avec qui tu travailles. C\'est pourquoi tu as besoin d\'un modèle qui ne crée pas nouvelles dépendances.',
-      aspconf_impact_label: 'L\'impact est ton moteur',
+        "Tu veux décider toi-même quand, comment et avec qui tu travailles. C'est pourquoi tu as besoin d'un modèle qui ne crée pas nouvelles dépendances.",
+      aspconf_impact_label: "L'impact est ton moteur",
       aspconf_impact_desc:
-        'Ce n\'est pas seulement l\'argent pour toi. Tu veux sentir que ce que tu fais bouge vraiment quelque chose dans les autres.',
+        "Ce n'est pas seulement l'argent pour toi. Tu veux sentir que ce que tu fais bouge vraiment quelque chose dans les autres.",
       aspconf_security_label: 'La sécurité est ton moteur',
       aspconf_security_desc:
         'Tu ne cherches pas des sensations inutiles. Tu veux une vraie opportunité, mais avec une base claire et stable.',
@@ -1370,7 +1370,7 @@
       aspconf_footnote: 'Tes réponses rendent le résultat beaucoup plus personnel.',
 
       optin_badge: 'Presque fini',
-      optin_h2_line1: 'Où pouvons-nous t\'envoyer tes',
+      optin_h2_line1: "Où pouvons-nous t'envoyer tes",
       optin_h2_line2: 'vidéos?',
       optin_body:
         'Trois courtes vidéos, spécifiquement pour ton type. Pas de spam. Pas de pression. Juste des vraies infos.',
@@ -1381,53 +1381,57 @@
       optin_btn_submit: 'Débloquer les vidéos →',
       optin_btn_loading: 'Envoi en cours...',
       optin_btn_validating: 'Vérification e-mail...',
-      optin_email_error_format: 'Merci d\'entrer une adresse e-mail valide.',
+      optin_email_error_format: "Merci d'entrer une adresse e-mail valide.",
       optin_email_error_invalid:
         'Cette adresse e-mail ne semble pas valide. Vérifies-la rapidement.',
-      optin_privacy: 'Tes données seront traitées de manière confidentielle et ne seront pas partagées.',
+      optin_privacy:
+        'Tes données seront traitées de manière confidentielle et ne seront pas partagées.',
 
       video_1_title: 'Partie 1: Introduction',
-      video_1_sub: 'Dans les prochaines minutes, découvre ce que c\'est vraiment.',
+      video_1_sub: "Dans les prochaines minutes, découvre ce que c'est vraiment.",
       video_2_title: 'Partie 2: Comment ça marche',
       video_2_sub:
-        'L\'explication complète de comment le modèle est structuré et ce qui le rend différent des autres.',
+        "L'explication complète de comment le modèle est structuré et ce qui le rend différent des autres.",
       video_3_title: 'Partie 3: Vraies expériences',
-      video_3_sub: 'Des gens comme toi, ce qu\'ils ont vécu et ce qui a changé dans leurs vies.',
+      video_3_sub: "Des gens comme toi, ce qu'ils ont vécu et ce qui a changé dans leurs vies.",
       video_counter: 'Vidéo',
       video_next_label: 'Suivant',
-      video_btn_next: 'Continuer à l\'étape',
+      video_btn_next: "Continuer à l'étape",
       video_btn_prev: '← Revoir la vidéo',
-      video_btn_final: 'Continuer à l\'étape 4 →',
-      video_btn_locked: 'Continuer à l\'étape suivante',
-      video_hint_locked: 'Le bouton continuer se débloque après 75% de la vidéo.',
+      video_btn_final: "Continuer à l'étape 4 →",
+      video_btn_locked: "Continuer à l'étape suivante",
+      video_hint_locked:
+        "Regarde la vidéo jusqu'au bout – l'étape suivante se débloque automatiquement.",
       video_hint_unlocked: 'Tu peux maintenant continuer.',
       video_hint_recovery:
         'Si la détection vidéo se bloque, tu peux recharger la vidéo ou continuer manuellement en dernier recours.',
-      video_error_title: 'La vidéo n\'a pas pu être détectée correctement en raison d\'un problème technique.',
+      video_error_title:
+        "La vidéo n'a pas pu être détectée correctement en raison d'un problème technique.",
       video_error_body:
-        'Normalement le bouton continuer se débloque automatiquement à 75%. Si ce n\'est pas le cas, recharge la vidéo ou utilise le fallback manuel.',
+        "Normalement l'étape suivante se débloque automatiquement à la fin de la vidéo. Si ce n'est pas le cas, recharge la vidéo ou utilise le fallback manuel.",
       video_error_detail: 'Détail technique',
       video_error_reload: 'Recharger la vidéo',
       video_error_unlock: 'Continuer manuellement',
 
       final_badge: 'Tu as regardé toutes les trois vidéos',
-      final_h2: 'Est-ce que c\'est pour toi?',
+      final_h2: "Est-ce que c'est pour toi?",
       final_body:
         'Si tu veux simplement explorer sans engagement si ça pourrait vraiment te convenir, écris simplement. Pas de pitch, pas de pression. Juste une vraie conversation.',
       final_profile_label: 'Ton profil',
-      final_btn_whatsapp: 'Oui, j\'en veux plus',
+      final_btn_whatsapp: "Oui, j'en veux plus",
       final_btn_later: 'Je te contacterai quand je suis prêt',
-      final_footnote: 'Tu seras connecté directement via WhatsApp. Pas d\'attente, pas de formulaire.',
+      final_footnote:
+        "Tu seras connecté directement via WhatsApp. Pas d'attente, pas de formulaire.",
       final_contact_prompt: 'Des questions? Écris à',
       quicklink_whatsapp_prefix: 'Salut ',
-      quicklink_whatsapp_suffix: ', j\'ai une question.',
+      quicklink_whatsapp_suffix: ", j'ai une question.",
       final_whatsapp_prefill:
-        'Salut! Je viens de faire le quiz Code de Succès et j\'aimerais en savoir plus sur cette opportunité.',
+        "Salut! Je viens de faire le quiz Code de Succès et j'aimerais en savoir plus sur cette opportunité.",
       final_closed_h2: 'Tout va bien. Pas de pression.',
       final_closed_body: 'Si tu deviens curieux plus tard, tu sais où nous trouver.',
       final_closed_restart: 'Refaire le quiz',
-      result_barrier_intro: 'Tu l\'as dit toi-même: ce qui te manque c\'est – "',
-      result_barrier_outro: '". C\'est exactement pour ça qu\'on a quelque chose.',
+      result_barrier_intro: "Tu l'as dit toi-même: ce qui te manque c'est – \"",
+      result_barrier_outro: "\". C'est exactement pour ça qu'on a quelque chose.",
 
       legal_modal_title: 'Mentions légales & confidentialité',
       webhook_title: 'FR - Quiz Code de Succès',
@@ -1435,28 +1439,28 @@
     questions: [
       {
         phase: 'Personnalité',
-        text: 'Qu\'est-ce qui te fait vraiment sortir du lit le matin?',
+        text: "Qu'est-ce qui te fait vraiment sortir du lit le matin?",
         sub: 'Sois honnête. Pas ce que tu devrais dire, mais ce qui est vraiment vrai pour toi.',
         options: [
           {
             key: 'r',
             label: 'Buts et progrès',
-            desc: 'J\'ai un objectif devant moi et je veux voir que j\'avance.',
+            desc: "J'ai un objectif devant moi et je veux voir que j'avance.",
           },
           {
             key: 'y',
             label: 'Gens et rencontres',
-            desc: 'J\'attends avec impatience les gens que je rencontrerai ou parlerai aujourd\'hui.',
+            desc: "J'attends avec impatience les gens que je rencontrerai ou parlerai aujourd'hui.",
           },
           {
             key: 'g',
             label: 'Structure et calme',
-            desc: 'Je sais ce qui m\'attend et ça me donne la paix et l\'énergie.',
+            desc: "Je sais ce qui m'attend et ça me donne la paix et l'énergie.",
           },
           {
             key: 'b',
             label: 'Profondeur et défi',
-            desc: 'J\'ai une tâche qui me challenge vraiment et m\'intéresse.',
+            desc: "J'ai une tâche qui me challenge vraiment et m'intéresse.",
           },
         ],
       },
@@ -1468,39 +1472,39 @@
           {
             key: 'r',
             label: 'Celui qui donne la direction',
-            desc: 'Celui qui a la vue d\'ensemble et indique la direction.',
+            desc: "Celui qui a la vue d'ensemble et indique la direction.",
           },
           {
             key: 'y',
-            label: 'Celui qui crée l\'énergie',
+            label: "Celui qui crée l'énergie",
             desc: 'Celui qui crée une bonne atmosphère et entraîne les autres.',
           },
           {
             key: 'g',
             label: 'Le centre calme',
-            desc: 'Celui qui écoute et s\'assure que tout le monde se sent bien.',
+            desc: "Celui qui écoute et s'assure que tout le monde se sent bien.",
           },
           {
             key: 'b',
-            label: 'L\'observateur silencieux',
+            label: "L'observateur silencieux",
             desc: 'Celui qui analyse en arrière-plan avant de parler.',
           },
         ],
       },
       {
         phase: 'Personnalité',
-        text: 'Qu\'est-ce qui vraiment t\'agace?',
+        text: "Qu'est-ce qui vraiment t'agace?",
         sub: 'Ton plus grand déclencheur de frustration révèle ce qui compte vraiment pour toi au fond.',
         options: [
           {
             key: 'r',
             label: 'Blocages et hésitants',
-            desc: 'Quand les choses n\'avancent pas parce que quelqu\'un ne peut ou ne veut décider.',
+            desc: "Quand les choses n'avancent pas parce que quelqu'un ne peut ou ne veut décider.",
           },
           {
             key: 'y',
             label: 'Mauvaise énergie',
-            desc: 'Quand l\'ambiance tombe et que l\'énergie négative empoisonne tout.',
+            desc: "Quand l'ambiance tombe et que l'énergie négative empoisonne tout.",
           },
           {
             key: 'b',
@@ -1510,19 +1514,19 @@
           {
             key: 'g',
             label: 'Processus sans sens',
-            desc: 'Quand on me dit de faire quelque chose qui n\'a aucun sens pour moi.',
+            desc: "Quand on me dit de faire quelque chose qui n'a aucun sens pour moi.",
           },
         ],
       },
       {
         phase: 'Vie et buts',
-        text: 'Qu\'est-ce qui est le plus important pour toi dans ton travail?',
-        sub: 'Si tu ne peux avoir qu\'une seule chose, ce qui ne doit absolument pas manquer?',
+        text: "Qu'est-ce qui est le plus important pour toi dans ton travail?",
+        sub: "Si tu ne peux avoir qu'une seule chose, ce qui ne doit absolument pas manquer?",
         options: [
           {
             key: 'freedom',
             label: 'Liberté',
-            desc: 'Décider toi-même quand, comment et où tu travailles sans avoir besoin d\'autorisation.',
+            desc: "Décider toi-même quand, comment et où tu travailles sans avoir besoin d'autorisation.",
           },
           {
             key: 'impact',
@@ -1544,7 +1548,7 @@
       {
         phase: 'Vie et buts',
         text: 'À quoi ressemble ta vie idéale dans 3 ans?',
-        sub: 'Ferme les yeux un instant. Qu\'est-ce que tu vois vraiment?',
+        sub: "Ferme les yeux un instant. Qu'est-ce que tu vois vraiment?",
         options: [
           {
             key: 'freedom',
@@ -1554,29 +1558,29 @@
           {
             key: 'impact',
             label: 'Sens et expériences',
-            desc: 'J\'aide les gens, vis le monde et fais quelque chose qui a vraiment du sens.',
+            desc: "J'aide les gens, vis le monde et fais quelque chose qui a vraiment du sens.",
           },
           {
             key: 'security',
             label: 'Calme et famille',
-            desc: 'Pas de soucis d\'argent, du temps pour les gens importants et une vie stable.',
+            desc: "Pas de soucis d'argent, du temps pour les gens importants et une vie stable.",
           },
           {
             key: 'growth',
             label: 'Expertise et système',
-            desc: 'Je suis reconnu dans mon domaine et j\'ai un système qui marche sans moi.',
+            desc: "Je suis reconnu dans mon domaine et j'ai un système qui marche sans moi.",
           },
         ],
       },
       {
         phase: 'Vie et buts',
-        text: 'Qu\'est-ce qui VRAIMENT t\'empêche de vivre déjà cette vie aujourd\'hui?',
-        sub: 'La vérité ici t\'aidera plus que la réponse apparemment juste.',
+        text: "Qu'est-ce qui VRAIMENT t'empêche de vivre déjà cette vie aujourd'hui?",
+        sub: "La vérité ici t'aidera plus que la réponse apparemment juste.",
         options: [
           {
             key: 'vehicle',
             label: 'Système manquant',
-            desc: 'J\'ai la volonté, mais pas encore un système qui marche pour m\'y amener.',
+            desc: "J'ai la volonté, mais pas encore un système qui marche pour m'y amener.",
           },
           {
             key: 'community',
@@ -1586,12 +1590,12 @@
           {
             key: 'confidence',
             label: 'Sécurité manquante',
-            desc: 'J\'ai de l\'incertitude et j\'ai besoin d\'un premier pas clair et à faible risque.',
+            desc: "J'ai de l'incertitude et j'ai besoin d'un premier pas clair et à faible risque.",
           },
           {
             key: 'opportunity',
             label: 'Opportunité manquante',
-            desc: 'Je n\'ai pas encore trouvé une opportunité qui me convient vraiment et à ma vie.',
+            desc: "Je n'ai pas encore trouvé une opportunité qui me convient vraiment et à ma vie.",
           },
         ],
       },
@@ -1603,18 +1607,18 @@
         animal: 'Feu',
         tagline: 'Tu es né pour mener, pas pour suivre.',
         shadow:
-          'Parfois ton énergie peut sembler impatiente aux autres, mais c\'est juste une impulsion qui cherche une issue.',
+          "Parfois ton énergie peut sembler impatiente aux autres, mais c'est juste une impulsion qui cherche une issue.",
         strengths: [
           'Prise de décision rapide et claire',
-          'Passage cohérent de l\'idée à l\'exécution',
+          "Passage cohérent de l'idée à l'exécution",
           'Leadership naturel',
           'Autonomie et indépendance',
         ],
         fit: {
           freedom:
-            'Tu n\'as pas besoin de 9h-17h. Tu as besoin d\'un système qui se met à l\'échelle aussi vite que tu penses.',
+            "Tu n'as pas besoin de 9h-17h. Tu as besoin d'un système qui se met à l'échelle aussi vite que tu penses.",
           impact:
-            'Si tu veux un impact, tu as besoin d\'un modèle où ton énergie bouge vraiment les gens.',
+            "Si tu veux un impact, tu as besoin d'un modèle où ton énergie bouge vraiment les gens.",
           security:
             'Même si tu vas vite, tu veux une base solide. Un bon système te donne exactement ça.',
           growth:
@@ -1624,20 +1628,20 @@
           freedom:
             'Tu sais déjà ce que tu veux. La seule question est: as-tu le bon véhicule pour ça?',
           impact:
-            'Ton énergie peut tirer les autres. Ce qui compte c\'est que tu la mettes dans le bon environnement.',
+            "Ton énergie peut tirer les autres. Ce qui compte c'est que tu la mettes dans le bon environnement.",
           security:
-            'Tu ne dois pas t\'amoindrir pour te sentir sûr. Tu as juste besoin du bon modèle.',
+            "Tu ne dois pas t'amoindrir pour te sentir sûr. Tu as juste besoin du bon modèle.",
           growth:
-            'Tu n\'as pas besoin de motivation externe. Tu as besoin d\'un terrain de jeu assez grand pour toi.',
+            "Tu n'as pas besoin de motivation externe. Tu as besoin d'un terrain de jeu assez grand pour toi.",
         },
       },
       y: {
         code: 'Type B',
         name: 'Le connecteur',
         animal: 'Vent',
-        tagline: 'Ton énergie est contagieuse et c\'est ton avantage déloyale.',
+        tagline: "Ton énergie est contagieuse et c'est ton avantage déloyale.",
         shadow:
-          'Parfois tu sautes d\'une idée à l\'autre, mais ce n\'est pas un défaut. Tu as juste besoin du bon cadre.',
+          "Parfois tu sautes d'une idée à l'autre, mais ce n'est pas un défaut. Tu as juste besoin du bon cadre.",
         strengths: [
           'Enthousiasme contagieux',
           'Construire la confiance très vite',
@@ -1646,31 +1650,30 @@
         ],
         fit: {
           freedom:
-            'Tu n\'es pas construit pour les structures rigides. Tu prospères où les gens et l\'énergie peuvent croître avec toi.',
+            "Tu n'es pas construit pour les structures rigides. Tu prospères où les gens et l'énergie peuvent croître avec toi.",
           impact:
             'Si tu veux un impact, tu es le plus fort où les relations comptent plus que les processus froids.',
           security:
-            'Pour toi, la sécurité n\'est pas juste l\'argent, mais aussi un environnement qui te soutient.',
+            "Pour toi, la sécurité n'est pas juste l'argent, mais aussi un environnement qui te soutient.",
           growth:
             'Tu croît le plus quand tu rencontres de nouvelles gens, de nouveaux espaces et de nouvelles possibilités.',
         },
         cta: {
           freedom:
-            'Tu n\'as pas besoin de vendre. Tu as juste besoin d\'être toi. Un business basé sur de vraies connexions est ta maison naturelle.',
+            "Tu n'as pas besoin de vendre. Tu as juste besoin d'être toi. Un business basé sur de vraies connexions est ta maison naturelle.",
           impact:
             'Les équipes les plus fortes ne sont pas construites par une stratégie parfaite, mais par des gens comme toi.',
           security:
-            'Quand l\'environnement est juste, tu attires naturellement les gens et les opportunités.',
-          growth:
-            'Ton vrai potentiel s\'épanouit quand l\'enthousiasme rencontre la structure.',
+            "Quand l'environnement est juste, tu attires naturellement les gens et les opportunités.",
+          growth: "Ton vrai potentiel s'épanouit quand l'enthousiasme rencontre la structure.",
         },
       },
       g: {
         code: 'Type C',
-        name: 'L\'ancre',
+        name: "L'ancre",
         animal: 'Eau',
         tagline:
-          'Tu es le point fixe sur lequel les autres peuvent compter et c\'est plus rare que tu penses.',
+          "Tu es le point fixe sur lequel les autres peuvent compter et c'est plus rare que tu penses.",
         shadow:
           'Tu as tendance à mettre tes propres besoins en second, mais ton bien-être est la base de tout.',
         strengths: [
@@ -1681,28 +1684,27 @@
         ],
         fit: {
           freedom:
-            'Tu n\'as pas besoin des projecteurs. Tu as besoin de stabilité plus une vraie liberté sans amener du chaos dans ta vie.',
+            "Tu n'as pas besoin des projecteurs. Tu as besoin de stabilité plus une vraie liberté sans amener du chaos dans ta vie.",
           impact:
             'Tu ne changes pas les gens par le volume, mais par la constance, la confiance et une vraie présence.',
           security:
-            'Un modèle stable et durable compte plus pour toi que le hype. C\'est là que ta force brille.',
+            "Un modèle stable et durable compte plus pour toi que le hype. C'est là que ta force brille.",
           growth:
             'Tu ne croît pas sous la pression, mais par la clarté, la confiance et un environnement stable.',
         },
         cta: {
           freedom:
-            'Tu n\'as pas besoin d\'un spectacle. Tu as besoin d\'un modèle qui correspond à ta vie et te donne de la respiration.',
+            "Tu n'as pas besoin d'un spectacle. Tu as besoin d'un modèle qui correspond à ta vie et te donne de la respiration.",
           impact:
             'Les équipes qui durent vraiment sont formées et maintenues ensemble par des gens comme toi.',
-          security:
-            'Ta force est de construire une confiance qui tient aussi demain.',
+          security: 'Ta force est de construire une confiance qui tient aussi demain.',
           growth:
             'Avec le bon environnement, tu développes une profondeur que peu de gens atteignent jamais.',
         },
       },
       b: {
         code: 'Type D',
-        name: 'L\'architecte',
+        name: "L'architecte",
         animal: 'Pierre',
         tagline: 'Tu vois des schémas que les autres manquent complètement.',
         shadow:
@@ -1715,23 +1717,21 @@
         ],
         fit: {
           freedom:
-            'Tu n\'as pas besoin du chaos ou de promesses creuses. Tu as besoin d\'un système que tu peux comprendre et améliorer au fil du temps.',
+            "Tu n'as pas besoin du chaos ou de promesses creuses. Tu as besoin d'un système que tu peux comprendre et améliorer au fil du temps.",
           impact:
             'Ton impact commence où les autres ne voient que la surface et tu apportes vraie structure.',
           security:
             'Pour toi, la sécurité vient de la clarté, la logique et un modèle qui marche vraiment.',
-          growth:
-            'Tu croît le plus quand tu peux comprendre, affiner et maîtriser un système.',
+          growth: 'Tu croît le plus quand tu peux comprendre, affiner et maîtriser un système.',
         },
         cta: {
           freedom:
-            'Tu n\'as pas besoin de frénésie. Tu as besoin d\'un véhicule avec substance qui peut tenir à ta façon de penser.',
+            "Tu n'as pas besoin de frénésie. Tu as besoin d'un véhicule avec substance qui peut tenir à ta façon de penser.",
           impact:
             'Les meilleures structures dans un business sont créées et raffinées par des gens comme toi.',
           security:
-            'Une fois que tu comprends quelque chose, tu peux l\'agrandir avec calme et précision.',
-          growth:
-            'Ta force est de transformer des possibilités en vrais systèmes.',
+            "Une fois que tu comprends quelque chose, tu peux l'agrandir avec calme et précision.",
+          growth: 'Ta force est de transformer des possibilités en vrais systèmes.',
         },
       },
     },
@@ -1811,15 +1811,14 @@
       optin_btn_loading: 'Отправка...',
       optin_btn_validating: 'Проверка email...',
       optin_email_error_format: 'Пожалуйста, введи валидный email адрес.',
-      optin_email_error_invalid:
-        'Этот email адрес похоже недействителен. Проверь его быстро.',
-      optin_privacy: 'Твои данные будут обработаны конфиденциально и не будут переданы третьим лицам.',
+      optin_email_error_invalid: 'Этот email адрес похоже недействителен. Проверь его быстро.',
+      optin_privacy:
+        'Твои данные будут обработаны конфиденциально и не будут переданы третьим лицам.',
 
       video_1_title: 'Часть 1: Введение',
       video_1_sub: 'В следующих минутах выясни, в чем это действительно.',
       video_2_title: 'Часть 2: Как это работает',
-      video_2_sub:
-        'Полное объяснение того, как построена модель и что ее отличает от других.',
+      video_2_sub: 'Полное объяснение того, как построена модель и что ее отличает от других.',
       video_3_title: 'Часть 3: Реальные опыты',
       video_3_sub: 'Люди как ты, что они испытали и что изменилось в их жизни.',
       video_counter: 'Видео',
@@ -1828,13 +1827,13 @@
       video_btn_prev: '← Посмотреть видео еще раз',
       video_btn_final: 'Перейти к шагу 4 →',
       video_btn_locked: 'Перейти к следующему шагу',
-      video_hint_locked: 'Кнопка продолжить разблокируется после 75% видео.',
+      video_hint_locked: 'Досмотри видео до конца – следующий шаг откроется автоматически.',
       video_hint_unlocked: 'Теперь ты можешь продолжить.',
       video_hint_recovery:
         'Если обнаружение видео зависает, ты можешь перезагрузить видео или в крайнем случае продолжить вручную.',
       video_error_title: 'Видео не удалось правильно обнаружить из-за технической проблемы.',
       video_error_body:
-        'Обычно кнопка продолжить автоматически разблокируется на 75%. Если это не происходит, перезагрузи видео или используй ручной fallback.',
+        'Как правило, следующий шаг открывается автоматически в конце видео. Если этого не происходит, перезагрузи видео или воспользуйся ручным переходом.',
       video_error_detail: 'Технические детали',
       video_error_reload: 'Перезагрузить видео',
       video_error_unlock: 'Продолжить вручную',
@@ -2076,22 +2075,17 @@
         fit: {
           freedom:
             'Ты не создан для жестких структур. Ты процветаешь там, где люди и энергия могут расти с тобой.',
-          impact:
-            'Если ты хочешь влияние, ты сильнейший где отношения важнее холодных процессов.',
-          security:
-            'Для тебя безопасность это не только деньги, но и среда, которая поддерживает.',
+          impact: 'Если ты хочешь влияние, ты сильнейший где отношения важнее холодных процессов.',
+          security: 'Для тебя безопасность это не только деньги, но и среда, которая поддерживает.',
           growth:
             'Ты растешь больше всего когда встречаешь новых людей, новые места и новые возможности.',
         },
         cta: {
           freedom:
             'Тебе не нужно продавать. Тебе нужно быть собой. Бизнес основанный на реальных связях это твой естественный дом.',
-          impact:
-            'Самые сильные команды строятся не идеальной стратегией, а людьми как ты.',
-          security:
-            'Когда среда правильная, ты естественно привлекаешь людей и возможности.',
-          growth:
-            'Твой реальный потенциал раскрывается когда энтузиазм встречает структуру.',
+          impact: 'Самые сильные команды строятся не идеальной стратегией, а людьми как ты.',
+          security: 'Когда среда правильная, ты естественно привлекаешь людей и возможности.',
+          growth: 'Твой реальный потенциал раскрывается когда энтузиазм встречает структуру.',
         },
       },
       g: {
@@ -2115,16 +2109,14 @@
             'Ты не меняешь людей через громкость, а через постоянство, доверие и реальное присутствие.',
           security:
             'Стабильная и устойчивая модель для тебя важнее, чем хайп. Там твоя сила сияет.',
-          growth:
-            'Ты растешь не под давлением, а через ясность, доверие и стабильную среду.',
+          growth: 'Ты растешь не под давлением, а через ясность, доверие и стабильную среду.',
         },
         cta: {
           freedom:
             'Тебе не нужно шоу. Тебе нужна модель, которая соответствует твоей жизни и дает тебе место дышать.',
           impact:
             'Команды, которые действительно держатся, формируются и укрепляются людьми как ты.',
-          security:
-            'Твоя сила в том, чтобы строить доверие, которое держит даже завтра.',
+          security: 'Твоя сила в том, чтобы строить доверие, которое держит даже завтра.',
           growth:
             'С правильной средой ты развиваешь глубину, которую немногие когда-либо достигают.',
         },
@@ -2149,18 +2141,15 @@
             'Твое влияние начинается где другие видят только поверхность и ты вносишь реальную структуру.',
           security:
             'Для тебя безопасность растет из ясности, логики и модели, которая действительно работает.',
-          growth:
-            'Ты растешь больше всего когда можешь понять, улучшить и овладеть системой.',
+          growth: 'Ты растешь больше всего когда можешь понять, улучшить и овладеть системой.',
         },
         cta: {
           freedom:
             'Тебе не нужна спешка. Тебе нужен инструмент с веществом, который может выдержать твой способ мышления.',
-          impact:
-            'Лучшие структуры в бизнесе создаются и совершенствуются людьми как ты.',
+          impact: 'Лучшие структуры в бизнесе создаются и совершенствуются людьми как ты.',
           security:
             'Когда ты что-то понимаешь, ты можешь масштабировать это со спокойствием и точностью.',
-          growth:
-            'Твоя сила в том, чтобы превратить возможности в реальные системы.',
+          growth: 'Твоя сила в том, чтобы превратить возможности в реальные системы.',
         },
       },
     },

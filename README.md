@@ -26,7 +26,7 @@ Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
 
 - Nicht mehr direkt am ausgelieferten Bundle arbeiten. Die kanonische Frontend-Quelle ist `src/app.entry.js`.
 - Production kommt aus `dist/`, nicht aus dem Projektroot.
-- `translations.js` ist die einzige kanonische Uebersetzungsdatei fuer `de`, `it` und vorbereitend `en`.
+- `translations.js` ist die einzige kanonische Uebersetzungsdatei fuer `de`, `it`, `fr`, `ru` und `en`.
 - `video-config.js` ist die kanonische Datei fuer die drei Funnel-Videos pro Sprache.
 - Das finale Typeform-kompatible Payload wird in `api/bridge.js` gebaut und ueber den stabilen PHP-Bridge-Pfad `forward_webhook` weitergeleitet.
 - Die zentrale PHP-Bridge hat weiterhin denselben Adapter-Mirror (`forward_typeform_adapter`), damit andere Seiten spaeter dieselbe Struktur serverseitig nutzen koennen.
@@ -67,7 +67,7 @@ Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
 - `api/bridge.js` baut daraus das Typeform-aehnliche Payload und proxyt es ueber die zentrale PHP-Bridge (`https://ac-reconnect.com/db-bridge.php`) an `https://contacts.hl-support.biz/webhook/typeform`.
 - Dieser lokale Builder ist absichtlich produktionskritisch: Er verhindert, dass das Quiz kaputtgeht, wenn die zentrale Bridge auf `ac-reconnect.com` noch nicht auf dem neuesten Adapterstand ist.
 - Neben Vorname und E-Mail werden weiterhin das Ergebnisprofil, das berechnete Hauptziel (`main_aspiration` / `main_aspiration_label`) sowie alle 6 Quizfragen mit der jeweils gewaehlten Antwort in `form_response.definition.fields` und `form_response.answers` mitgesendet.
-- Die uebermittelte Webhook-Sprache muss aus der aktiven Quizsprache (`preferredLang`) kommen, nicht nur aus `navigator.language`, damit manuell umgeschaltete DE/IT/EN-Varianten auch im gespeicherten `form_response` die richtigen Frage- und Antworttexte erzeugen.
+- Die uebermittelte Webhook-Sprache muss aus der aktiven Quizsprache (`preferredLang`) kommen, nicht nur aus `navigator.language`, damit manuell umgeschaltete DE/IT/FR/RU/EN-Varianten auch im gespeicherten `form_response` die richtigen Frage- und Antworttexte erzeugen.
 - Es gibt keinen zweiten n8n-Ergebniswebhook mehr. Profil, Hauptziel, Fragen, Antworten, Name und E-Mail werden ausschliesslich im Typeform-kompatiblen Hauptpayload an HL-Support/Global-SCE uebergeben.
 
 ## Bridge-Ablauf

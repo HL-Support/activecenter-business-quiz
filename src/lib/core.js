@@ -1,5 +1,5 @@
-const MAUTIC_BASE_URL = 'https://mautic.deinedomain.com';
-const TRACKING_SESSION_KEY = 'acTrackingSession';
+const MAUTIC_BASE_URL = 'https://mautic.hl-support.biz';
+const TRACKING_SESSION_KEY = 'acQuizTrackingSession_v1';
 const TRACKING_COOKIE = 'acTrackingHash';
 const TRACKING_SESSION_TTL_MS = 60 * 60 * 1000;
 const VISITOR_KEY = 'acVisitorId';
@@ -740,43 +740,36 @@ export function getAnalyzingSteps() {
 }
 
 export function trackQuizAnalytics(eventName, payload = {}) {
-  const coach = getCoachFromStorage() || {};
-  const slug = String(
-    coach.slug || storage.getItem('acBeraterSlug') || getCurrentSlug() || 'default'
-  );
-  const hash = getTrackingSessionHash(slug, coach.member_id || '');
+  // Dynamically import trackEvent from ac-track.js to use EventBatcher
+  // This ensures events are batched, deduplicated with event_id, and persisted to localStorage
+  import('../ac-track.js').then(({ trackEvent }) => {
+    const coach = getCoachFromStorage() || {};
+    const slug = String(
+      coach.slug || storage.getItem('acBeraterSlug') || getCurrentSlug() || 'default'
+    );
+    const isResume = storage.getItem('acSessionIsResume') === 'true';
 
-  if (!hash) {
-    return;
-  }
+    // Build enriched payload with all tracking context
+    const enrichedPayload = {
+      lead_hash: getActiveLeadRun(slug, coach.member_id || '').lead_hash,
+      visitor_id: getTrackingVisitorId(),
+      is_internal_traffic: isInternalTraffic(),
+      is_resume: isResume,
+      herbalife_id: coach.member_id || '',
+      member_id: coach.member_id || '',
+      lang: getPreferredLang(),
+      ...payload,
+    };
 
-  const isResume = storage.getItem('acSessionIsResume') === 'true';
-
-  const body = {
-    hash,
-    session_hash: hash,
-    lead_hash: getActiveLeadRun(slug, coach.member_id || '').lead_hash,
-    visitor_id: getTrackingVisitorId(),
-    is_internal_traffic: isInternalTraffic(),
-    is_resume: isResume,
-    schema_version: TRACKING_SCHEMA_VERSION,
-    event_name: eventName,
-    event_at: isoNow(),
-    source_app: 'business_leads_quiz',
-    funnel: 'business',
-    herbalife_id: coach.member_id || '',
-    member_id: coach.member_id || '',
-    berater_slug: slug,
-    lang: getPreferredLang(),
-    ...payload,
-  };
-
-  fetch('/api/bridge', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    keepalive: true,
-    body: JSON.stringify({ action: 'write_analytics', payload: body }),
-  }).catch(() => {});
+    // Use trackEvent which handles:
+    // - event_id generation (unique per event for deduplication)
+    // - session_hash from localStorage (acQuizTrackingSession_v1)
+    // - berater_slug from localStorage
+    // - EventBatcher (batch, retry, localStorage persistence)
+    trackEvent(eventName, enrichedPayload);
+  }).catch(() => {
+    console.warn('Failed to import trackEvent from ac-track.js');
+  });
 }
 
 export async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {

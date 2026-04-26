@@ -1,11 +1,20 @@
 (function () {
   const BRIDGE_URL = '/api/bridge';
+  const TRACKING_SCHEMA_VERSION = 'ac_tracking_v1';
   const SESSION_KEY = 'acTrackingSession';
   const ATTRIBUTION_KEY = 'acTrackingAttribution';
   const SESSION_COOKIE = 'acTrackingHash';
   const SESSION_SLUG_COOKIE = 'acTrackingSlug';
+  const VISITOR_KEY = 'acVisitorId';
+  const VISITOR_COOKIE = 'acVisitorId';
+  const INTERNAL_KEY = 'acInternalTraffic';
+  const INTERNAL_COOKIE = 'acInternalTraffic';
   const SESSION_TTL_MS = 60 * 60 * 1000;
   const SESSION_TTL_SECONDS = Math.floor(SESSION_TTL_MS / 1000);
+  const VISITOR_TTL_MS = 180 * 24 * 60 * 60 * 1000;
+  const VISITOR_TTL_SECONDS = Math.floor(VISITOR_TTL_MS / 1000);
+  const INTERNAL_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  const INTERNAL_TTL_SECONDS = Math.floor(INTERNAL_TTL_MS / 1000);
   const VIDEO_THRESHOLDS = [25, 50, 75, 100];
   const UPDATE_ONLY_EVENTS = {
     page_view_business_info: true,
@@ -67,6 +76,22 @@
     return '';
   }
 
+  function writeCookie(name, value, maxAgeSeconds) {
+    if (!name || value === undefined || value === null || value === '') return;
+    document.cookie = [
+      name + '=' + encodeURIComponent(String(value)),
+      'Max-Age=' + maxAgeSeconds,
+      'Path=/',
+      'SameSite=Lax',
+      'Secure',
+    ].join('; ');
+  }
+
+  function clearCookie(name) {
+    if (!name) return;
+    document.cookie = [name + '=', 'Max-Age=0', 'Path=/', 'SameSite=Lax', 'Secure'].join('; ');
+  }
+
   function normalizeQuizSlug(slug) {
     return String(slug || extractSlugFromPath() || 'default').toLowerCase();
   }
@@ -74,20 +99,94 @@
   function writeSessionCookie(hash, slug) {
     if (!hash) return;
     const normalizedSlug = normalizeQuizSlug(slug);
-    document.cookie = [
-      SESSION_COOKIE + '=' + encodeURIComponent(String(hash)),
-      'Max-Age=' + SESSION_TTL_SECONDS,
-      'Path=/',
-      'SameSite=Lax',
-      'Secure',
-    ].join('; ');
-    document.cookie = [
-      SESSION_SLUG_COOKIE + '=' + encodeURIComponent(normalizedSlug),
-      'Max-Age=' + SESSION_TTL_SECONDS,
-      'Path=/',
-      'SameSite=Lax',
-      'Secure',
-    ].join('; ');
+    writeCookie(SESSION_COOKIE, hash, SESSION_TTL_SECONDS);
+    writeCookie(SESSION_SLUG_COOKIE, normalizedSlug, SESSION_TTL_SECONDS);
+  }
+
+  function parseBooleanFlag(value) {
+    const normalized = String(value || '')
+      .trim()
+      .toLowerCase();
+    if (!normalized) return null;
+    if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+    if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+    return null;
+  }
+
+  function generateVisitorId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return 'av_' + window.crypto.randomUUID().replace(/-/g, '');
+    }
+    return 'av_' + nowTs().toString(36) + '_' + randomHex(16);
+  }
+
+  function persistVisitorId(visitorId) {
+    if (!visitorId) return visitorId;
+    writeLocalStorage(VISITOR_KEY, String(visitorId));
+    writeCookie(VISITOR_COOKIE, visitorId, VISITOR_TTL_SECONDS);
+    return String(visitorId);
+  }
+
+  function getTrackingVisitorId() {
+    const storedVisitorId = String(readLocalStorage(VISITOR_KEY) || '').trim();
+    if (storedVisitorId.indexOf('av_') === 0) {
+      return persistVisitorId(storedVisitorId);
+    }
+
+    const cookieVisitorId = String(readCookie(VISITOR_COOKIE) || '').trim();
+    if (cookieVisitorId.indexOf('av_') === 0) {
+      return persistVisitorId(cookieVisitorId);
+    }
+
+    return persistVisitorId(generateVisitorId());
+  }
+
+  function persistInternalTraffic(value) {
+    if (value === null || value === undefined) return false;
+    const normalized = Boolean(value);
+    writeLocalStorage(INTERNAL_KEY, normalized ? '1' : '0');
+    if (normalized) {
+      writeCookie(INTERNAL_COOKIE, '1', INTERNAL_TTL_SECONDS);
+    } else {
+      clearCookie(INTERNAL_COOKIE);
+    }
+    return normalized;
+  }
+
+  function isPreviewOrLocalHost() {
+    const host = String(window.location.hostname || '').toLowerCase();
+    return (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '0.0.0.0' ||
+      host.endsWith('.vercel.app')
+    );
+  }
+
+  function getInternalTrafficFlag() {
+    const params = new URLSearchParams(window.location.search || '');
+    const explicitFlag =
+      parseBooleanFlag(params.get('internal')) ??
+      parseBooleanFlag(params.get('internal_traffic')) ??
+      parseBooleanFlag(params.get('qa')) ??
+      parseBooleanFlag(params.get('test'));
+
+    if (explicitFlag !== null) {
+      return persistInternalTraffic(explicitFlag);
+    }
+
+    if (isPreviewOrLocalHost()) {
+      return persistInternalTraffic(true);
+    }
+
+    const storedFlag =
+      parseBooleanFlag(readLocalStorage(INTERNAL_KEY)) ??
+      parseBooleanFlag(readCookie(INTERNAL_COOKIE));
+    if (storedFlag !== null) {
+      return persistInternalTraffic(storedFlag);
+    }
+
+    return false;
   }
 
   function readCoachMemberId() {
@@ -288,6 +387,8 @@
     if (!session) return Promise.resolve(null);
 
     const attribution = buildAttribution();
+    const visitorId = getTrackingVisitorId();
+    const isInternalTraffic = getInternalTrafficFlag();
 
     if (session.hash) {
       persistSession(session.hash, memberId || session.memberId || '', slug || session.slug || '');
@@ -305,6 +406,9 @@
           session_hash: session.hash ? String(session.hash) : '',
           reset_session: Boolean(options.resetSession),
           member_id: memberId,
+          schema_version: TRACKING_SCHEMA_VERSION,
+          visitor_id: visitorId,
+          is_internal_traffic: isInternalTraffic,
           utm_source: attribution.utm_source,
           utm_medium: attribution.utm_medium,
           utm_campaign: attribution.utm_campaign,
@@ -395,4 +499,6 @@
   window.acTrack = track;
   window.acTrackPageView = trackPageView;
   window.acTrackVideo = registerVideo;
+  window.acTrackGetVisitorId = getTrackingVisitorId;
+  window.acTrackIsInternalTraffic = getInternalTrafficFlag;
 })();

@@ -117,13 +117,13 @@ class EventBatcher {
             console.warn('Event batch recovery failed:', error);
           }
         }
-      } catch (error) {
+      } catch (_error) {
         // Network error - put events back in queue
         this.queue.unshift(...batch);
         try {
           localStorage.setItem(EVENT_BATCH_KEY, JSON.stringify(this.queue));
-        } catch (error) {
-          console.warn('Event batch recovery failed:', error);
+        } catch (_error) {
+          console.warn('Event batch recovery failed:', _error);
         }
       }
     };
@@ -147,7 +147,7 @@ export function trackEvent(eventName, payload = {}) {
   let beraterSlug = '';
 
   try {
-    const sessionData = JSON.parse(localStorage.getItem('acTrackingSession') || 'null');
+    const sessionData = JSON.parse(localStorage.getItem('acQuizTrackingSession_v1') || 'null');
     sessionHash = sessionData?.hash || '';
   } catch (error) {
     console.warn('Session data parse failed:', error);

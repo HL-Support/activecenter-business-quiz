@@ -5,6 +5,8 @@
   "scripts": {
     "build": "node build.js",
     "verify": "node scripts/verify.js",
+    "guard:deploy": "node scripts/guard-production-deploy.js",
+    "deploy:prod": "npm run verify && npm run build && npm run guard:deploy && npx vercel deploy --prod --yes",
     "lint": "eslint . --ext .js,.jsx",
     "lint:fix": "eslint . --ext .js,.jsx --fix",
     "format": "prettier --write \"**/*.{js,jsx,json}\"",
