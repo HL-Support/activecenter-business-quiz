@@ -29,9 +29,13 @@
 ## Workflow
 
 - `npm install`
-- `npm run build`
 - `npm run verify`
-- `vercel deploy --prod --yes`
+- `npm run build`
+- Committe alle beabsichtigten Aenderungen.
+- Pushe `main` zu `origin/main`.
+- Production-Deploys laufen ausschliesslich ueber `npm run deploy:prod`.
+- Nie direkt `npx vercel deploy --prod` aus einem schmutzigen oder nicht gepushten lokalen Stand ausfuehren.
+- Der Deploy-Guard muss vor Production gruen sein: sauberer Working Tree, Branch `main`, `HEAD == origin/main`.
 
 ## Kritische Dateien
 
