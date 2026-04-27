@@ -744,11 +744,10 @@ export function trackQuizAnalytics(eventName, payload = {}) {
   // Dynamically import trackEvent from ac-track.js to use EventBatcher
   // This ensures events are batched, deduplicated with event_id, and persisted to localStorage
   import('../ac-track.js').then(({ trackEvent }) => {
-    const coach = getCoachFromStorage() || {};
     const slug = String(
-      coach.slug || storage.getItem('acBeraterSlug') || getCurrentSlug() || 'default'
+      storage.getItem('acBeraterSlug') || (getCoachFromStorage() || {}).slug || getCurrentSlug() || 'default'
     );
-    const memberId = String(storage.getItem('acMemberId') || coach.member_id || '');
+    const memberId = String(storage.getItem('acMemberId') || '');
     const isResume = storage.getItem('acSessionIsResume') === 'true';
 
     // Build enriched payload with all tracking context
