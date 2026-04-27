@@ -477,6 +477,7 @@ export async function initializeQuizEnvironment() {
   const coach = normalizeCoach(coachResponse, slug);
 
   storage.setItem('acCoach', JSON.stringify(coach));
+  storage.setItem('acMemberId', coach.member_id || '');
   storage.setItem('acBeraterSlug', coach.slug || slug);
   document.title = applyBrandName(document.title, coach);
   getTrackingSessionHash(coach.slug || slug, coach.member_id || '');
@@ -747,16 +748,17 @@ export function trackQuizAnalytics(eventName, payload = {}) {
     const slug = String(
       coach.slug || storage.getItem('acBeraterSlug') || getCurrentSlug() || 'default'
     );
+    const memberId = String(storage.getItem('acMemberId') || coach.member_id || '');
     const isResume = storage.getItem('acSessionIsResume') === 'true';
 
     // Build enriched payload with all tracking context
     const enrichedPayload = {
-      lead_hash: getActiveLeadRun(slug, coach.member_id || '').lead_hash,
+      lead_hash: getActiveLeadRun(slug, memberId).lead_hash,
       visitor_id: getTrackingVisitorId(),
       is_internal_traffic: isInternalTraffic(),
       is_resume: isResume,
-      herbalife_id: coach.member_id || '',
-      member_id: coach.member_id || '',
+      herbalife_id: memberId,
+      member_id: memberId,
       lang: getPreferredLang(),
       ...payload,
     };
@@ -881,13 +883,14 @@ export async function forwardQuizSubmission(
   const slug = String(
     coach.slug || storage.getItem('acBeraterSlug') || getCurrentSlug() || 'default'
   ).toLowerCase();
+  const memberId = String(storage.getItem('acMemberId') || coach.member_id || '');
   const leadRun = markLeadRun(
     slug,
-    getLeadRunForSubmission(slug, coach.member_id || ''),
+    getLeadRunForSubmission(slug, memberId),
     'submitting'
   );
   const hash = leadRun.lead_hash;
-  const sessionHash = leadRun.session_hash || getTrackingSessionHash(slug, coach.member_id || '');
+  const sessionHash = leadRun.session_hash || getTrackingSessionHash(slug, memberId);
   const visitorId = leadRun.visitor_id || getTrackingVisitorId();
 
   if (!hash) {
@@ -930,8 +933,8 @@ export async function forwardQuizSubmission(
             main_aspiration: mainAspiration,
             main_aspiration_label: mainAspirationLabel,
             lang,
-            member_id: String(coach.member_id || ''),
-            ref_id: String(coach.member_id || ''),
+            member_id: memberId,
+            ref_id: memberId,
             survey_id: '12',
           },
           calculated: { score: 0 },

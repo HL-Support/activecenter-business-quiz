@@ -181,7 +181,7 @@ async function resolveResumeKeyPayload(key) {
 
 function applyResumePayload({ sessionHash, email, lastVideoStep }) {
   localStorage.setItem(
-    'acTrackingSession',
+    'acQuizTrackingSession_v1',
     JSON.stringify({
       hash: sessionHash,
       memberId: '',

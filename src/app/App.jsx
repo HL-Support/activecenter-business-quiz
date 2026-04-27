@@ -1090,6 +1090,7 @@ function QuizFlow() {
       () =>
         getCoachFromStorage() || {
           slug: le.getItem('acBeraterSlug') || 'default',
+          member_id: le.getItem('acMemberId') || '',
         },
       []
     );
