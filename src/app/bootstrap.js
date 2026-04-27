@@ -14,31 +14,26 @@ const MISSING_COACH_COPY = {
     badge: 'Oops',
     title: 'Leider nichts gefunden',
     body: 'Dieser Link ist unvollständig oder nicht mehr gültig. Bitte frage deinen Ansprechpartner nach dem korrekten Link.',
-    retry: 'Erneut versuchen',
   },
   it: {
     badge: 'Oops',
     title: 'Purtroppo non abbiamo trovato nulla',
     body: 'Questo link è incompleto o non è più valido. Chiedi al tuo referente il link corretto.',
-    retry: 'Riprova',
   },
   en: {
     badge: 'Oops',
     title: 'Nothing found here',
     body: 'This link is incomplete or no longer valid. Please ask your contact person for the correct link.',
-    retry: 'Try again',
   },
   fr: {
     badge: 'Oops',
     title: "Rien trouvé ici",
     body: "Ce lien est incomplet ou n'est plus valable. Demande à ton interlocuteur le lien correct.",
-    retry: 'Réessayer',
   },
   ru: {
     badge: 'Oops',
     title: 'К сожалению, ничего не найдено',
     body: 'Эта ссылка неполная или больше не действительна. Попроси своего контактного человека прислать правильную ссылку.',
-    retry: 'Попробовать снова',
   },
 };
 
@@ -250,12 +245,6 @@ function renderMissingCoachPage() {
               color:rgba(245,240,232,0.55);margin:0 0 36px;
               max-width:360px;margin-left:auto;margin-right:auto;">${copy.body}</p>
 
-            <button id="retryMissingCoach" style="
-              background:linear-gradient(135deg,#C9A84C,#C9A84CAA);
-              color:#0A0A0A;border:none;border-radius:100px;
-              padding:14px 36px;font-size:15px;font-weight:600;
-              cursor:pointer;letter-spacing:0.3px;
-              font-family:'DM Sans',system-ui,sans-serif;">${copy.retry}</button>
           </div>
 
         </div>
@@ -270,9 +259,6 @@ function renderMissingCoachPage() {
       });
     });
 
-    document.getElementById('retryMissingCoach').addEventListener('click', function () {
-      window.location.reload();
-    });
   }
 
   render(getPreferredLang());
