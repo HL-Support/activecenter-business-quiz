@@ -24,7 +24,27 @@ import {
   secondaryButtonStyle as Su,
   inputStyle as od,
   resetLeadRun as resetRun,
+  getActiveLeadRun,
 } from '../lib/core.js';
+
+const UPDATE_RESULT_WEBHOOK = 'https://n8n.hl-support.biz/webhook/update_result_by_hash';
+
+function sendVideoProgressWebhook(slug, memberId, completedStep, videoSteps, videoProgressStore) {
+  const totalSteps = Object.keys(videoSteps).length;
+  let completedCount = 0;
+  for (let step = 1; step <= totalSteps; step++) {
+    if (videoProgressStore.isVideoCompleted(slug, step) || step === completedStep) completedCount++;
+  }
+  const leadRun = getActiveLeadRun(slug, memberId);
+  const hash = leadRun?.lead_hash || '';
+  if (!hash) return;
+  fetch(UPDATE_RESULT_WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    keepalive: true,
+    body: JSON.stringify({ hash, personalityType: completedCount + '/3 Videos 100%' }),
+  }).catch(() => {});
+}
 
 function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
   const iframe = document.getElementById(iframeId);
@@ -1832,7 +1852,11 @@ function QuizFlow() {
       videoStep: c,
       videos: videoSteps,
       visible: s,
-      onVideoReached95: () => {},
+      onVideoReached95: (completedStep) => {
+        const slug = le.getItem('acBeraterSlug') || 'default';
+        const memberId = le.getItem('acMemberId') || '';
+        sendVideoProgressWebhook(slug, memberId, completedStep, videoSteps, ld);
+      },
       onNext: () => {
         Dt('video_continue_click', {
           video_step: c,
