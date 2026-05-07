@@ -7,7 +7,6 @@ import {
   storage as le,
   videoProgressStore as ld,
   trackQuizAnalytics as Dt,
-  validateEmailAddress as Wp,
   submitMauticLead as Hp,
   forwardQuizSubmission as Qp,
   getVideoConfig as Ap,
@@ -280,23 +279,20 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
   const [i, u] = React.useState(''),
     [s, d] = React.useState(''),
     [g, y] = React.useState(!1),
-    [h, w] = React.useState(!1),
     [S, k] = React.useState(''),
     I = e?.accentColor || '#C9A84C',
     f = s.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/),
     c = i.trim().length > 0 && f && !S,
-    m = async (C) => {
-      if ((d(C), k(''), !C)) return;
-      if (!C.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    m = (C) => {
+      d(C);
+      if (S) k('');
+    },
+    v = async () => {
+      if (g) return;
+      if (!i.trim() || !s.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
         k(a('optin_email_error_format'));
         return;
       }
-      w(!0);
-      const z = await Wp(C);
-      (w(!1), z || k(a('optin_email_error_invalid')));
-    },
-    v = async () => {
-      if (!c || h || g) return;
       y(!0);
       const C = i.trim(),
         z = s.trim();
@@ -341,7 +337,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
     { style: at },
     React.createElement(
       'div',
-      { style: { ...ct(l), maxWidth: '540px', textAlign: 'center' } },
+      { style: { ...ct(l), maxWidth: '620px', textAlign: 'center' } },
       React.createElement('div', { style: { fontSize: '42px', marginBottom: '8px' } }, e?.emoji),
       React.createElement('span', { style: Ot }, a('optin_badge')),
       React.createElement(
@@ -358,7 +354,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
             color: 'rgba(245,240,232,0.52)',
             fontSize: '14px',
             lineHeight: 1.7,
-            marginBottom: '28px',
+            marginBottom: '22px',
           },
         },
         a('optin_body')
@@ -367,107 +363,258 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
         'div',
         {
           style: {
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            marginBottom: '20px',
-            textAlign: 'left',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))',
+            gap: '9px',
+            marginBottom: '18px',
           },
         },
-        React.createElement(
-          'div',
-          null,
-          React.createElement(
-            'label',
-            {
-              style: {
-                color: 'rgba(245,240,232,0.45)',
-                fontSize: '10.5px',
-                letterSpacing: '2.5px',
-                textTransform: 'uppercase',
-                display: 'block',
-                marginBottom: '7px',
-              },
-            },
-            a('optin_label_firstname')
-          ),
-          React.createElement('input', {
-            type: 'text',
-            placeholder: a('optin_placeholder_firstname'),
-            value: i,
-            onChange: (C) => u(C.target.value),
-            style: od,
-            onFocus: (C) => (C.target.style.borderColor = I),
-            onBlur: (C) => (C.target.style.borderColor = 'rgba(255,255,255,0.1)'),
-          })
-        ),
-        React.createElement(
-          'div',
-          null,
-          React.createElement(
-            'label',
-            {
-              style: {
-                color: 'rgba(245,240,232,0.45)',
-                fontSize: '10.5px',
-                letterSpacing: '2.5px',
-                textTransform: 'uppercase',
-                display: 'block',
-                marginBottom: '7px',
-              },
-            },
-            a('optin_label_email'),
-            ' ',
-            h && '\u{1F504}'
-          ),
-          React.createElement('input', {
-            type: 'email',
-            placeholder: a('optin_placeholder_email'),
-            value: s,
-            onChange: (C) => m(C.target.value),
-            onKeyDown: (C) => C.key === 'Enter' && c && v(),
-            style: {
-              ...od,
-              borderColor: S ? '#ff6b6b' : 'rgba(255,255,255,0.1)',
-            },
-            onFocus: (C) => (C.target.style.borderColor = S ? '#ff6b6b' : I),
-            onBlur: (C) => (C.target.style.borderColor = S ? '#ff6b6b' : 'rgba(255,255,255,0.1)'),
-            disabled: h,
-          }),
-          S &&
+        ['optin_teaser_1', 'optin_teaser_2', 'optin_teaser_3', 'optin_teaser_4'].map(
+          (C, z) =>
             React.createElement(
-              'p',
+              'div',
               {
-                style: { color: '#ff6b6b', fontSize: '12px', marginTop: '5px' },
+                key: C,
+                style: {
+                  background: 'rgba(255,255,255,0.025)',
+                  border: `1px solid ${I}1F`,
+                  borderRadius: '12px',
+                  padding: '12px 13px',
+                  textAlign: 'left',
+                  minHeight: '56px',
+                  opacity: 0.78,
+                },
               },
-              '\u26A0\uFE0F ',
-              S
+              React.createElement(
+                'div',
+                {
+                  style: {
+                    color: I,
+                    fontSize: '10px',
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase',
+                    marginBottom: '5px',
+                  },
+                },
+                String(z + 1).padStart(2, '0')
+              ),
+              React.createElement(
+                'p',
+                {
+                  style: {
+                    color: 'rgba(245,240,232,0.68)',
+                    fontSize: '12.5px',
+                    lineHeight: 1.45,
+                  },
+                },
+                a(C)
+              )
             )
         )
       ),
       React.createElement(
-        'button',
-        {
-          onClick: v,
-          disabled: !c || g || h,
-          style: {
-            ...In(I, '#0A0A0A', { width: '100%' }),
-            opacity: c && !g && !h ? 1 : 0.35,
-            cursor: c && !g && !h ? 'pointer' : 'not-allowed',
-          },
-        },
-        a(h ? 'optin_btn_validating' : g ? 'optin_btn_loading' : 'optin_btn_submit')
-      ),
-      React.createElement(
-        'p',
+        'div',
         {
           style: {
-            color: 'rgba(245,240,232,0.2)',
-            fontSize: '11.5px',
-            marginTop: '14px',
+            background: `linear-gradient(180deg, ${I}18 0%, rgba(255,255,255,0.045) 100%)`,
+            border: `1px solid ${I}55`,
+            borderRadius: '20px',
+            padding: '20px',
+            textAlign: 'left',
+            boxShadow: `0 22px 70px ${I}12, inset 0 1px 0 rgba(255,255,255,0.08)`,
+            marginTop: '4px',
+            position: 'relative',
+            overflow: 'hidden',
           },
         },
-        a('optin_privacy')
+        React.createElement('div', {
+          style: {
+            position: 'absolute',
+            top: '-52px',
+            right: '-42px',
+            width: '130px',
+            height: '130px',
+            borderRadius: '50%',
+            background: `${I}1C`,
+            filter: 'blur(6px)',
+          },
+        }),
+        React.createElement(
+          'div',
+          { style: { position: 'relative', marginBottom: '16px' } },
+          React.createElement(
+            'span',
+            {
+              style: {
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '7px',
+                color: '#0A0A0A',
+                background: I,
+                borderRadius: '100px',
+                padding: '6px 11px',
+                fontSize: '10px',
+                fontWeight: '800',
+                letterSpacing: '1.9px',
+                textTransform: 'uppercase',
+                marginBottom: '11px',
+              },
+            },
+            '\u2713 ',
+            a('optin_form_badge')
+          ),
+          React.createElement(
+            'h3',
+            {
+              style: {
+                color: '#F5F0E8',
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontSize: 'clamp(25px, 3vw, 34px)',
+                lineHeight: 1.12,
+                margin: '0 0 7px',
+                fontWeight: '700',
+              },
+            },
+            a('optin_form_heading')
+          ),
+          React.createElement(
+            'p',
+            {
+              style: {
+                color: 'rgba(245,240,232,0.62)',
+                fontSize: '13.5px',
+                lineHeight: 1.6,
+                margin: 0,
+              },
+            },
+            a('optin_form_subheading')
+          )
+        ),
+        React.createElement(
+          'div',
+          {
+            style: {
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '13px',
+              marginBottom: '16px',
+            },
+          },
+          React.createElement(
+            'div',
+            null,
+            React.createElement(
+              'label',
+              {
+                style: {
+                  color: 'rgba(245,240,232,0.64)',
+                  fontSize: '10.5px',
+                  letterSpacing: '2.5px',
+                  textTransform: 'uppercase',
+                  display: 'block',
+                  marginBottom: '7px',
+                },
+              },
+              a('optin_label_firstname')
+            ),
+            React.createElement('input', {
+              type: 'text',
+              placeholder: a('optin_placeholder_firstname'),
+              value: i,
+              onChange: (C) => u(C.target.value),
+              style: {
+                ...od,
+                background: 'rgba(7,11,20,0.62)',
+                borderColor: 'rgba(245,240,232,0.16)',
+                borderRadius: '14px',
+                padding: '16px 18px',
+                fontSize: '16px',
+              },
+              onFocus: (C) => (C.target.style.borderColor = I),
+              onBlur: (C) => (C.target.style.borderColor = 'rgba(245,240,232,0.16)'),
+            })
+          ),
+          React.createElement(
+            'div',
+            null,
+            React.createElement(
+              'label',
+              {
+                style: {
+                  color: 'rgba(245,240,232,0.64)',
+                  fontSize: '10.5px',
+                  letterSpacing: '2.5px',
+                  textTransform: 'uppercase',
+                  display: 'block',
+                  marginBottom: '7px',
+              },
+            },
+            a('optin_label_email'),
+              ' '
+            ),
+            React.createElement('input', {
+              type: 'email',
+              placeholder: a('optin_placeholder_email'),
+              value: s,
+              onChange: (C) => m(C.target.value),
+              onKeyDown: (C) => C.key === 'Enter' && c && v(),
+              style: {
+                ...od,
+                background: 'rgba(7,11,20,0.62)',
+                borderColor: S ? '#ff6b6b' : 'rgba(245,240,232,0.16)',
+                borderRadius: '14px',
+                padding: '16px 18px',
+                fontSize: '16px',
+              },
+              onFocus: (C) => (C.target.style.borderColor = S ? '#ff6b6b' : I),
+              onBlur: (C) =>
+                (C.target.style.borderColor = S ? '#ff6b6b' : 'rgba(245,240,232,0.16)'),
+            }),
+            S &&
+              React.createElement(
+                'p',
+                {
+                  style: { color: '#ff6b6b', fontSize: '12px', marginTop: '5px' },
+                },
+                '\u26A0\uFE0F ',
+                S
+              )
+          )
+        ),
+        React.createElement(
+          'button',
+          {
+            onClick: v,
+            disabled: !c || g,
+            style: {
+              ...In(I, '#0A0A0A', {
+                width: '100%',
+                minHeight: '58px',
+                fontSize: '16px',
+                fontWeight: '800',
+                boxShadow: c && !g ? `0 16px 42px ${I}30` : 'none',
+              }),
+              opacity: c && !g ? 1 : 0.42,
+              cursor: c && !g ? 'pointer' : 'not-allowed',
+            },
+          },
+          a(g ? 'optin_btn_loading' : 'optin_btn_submit')
+        ),
+        React.createElement(
+          'p',
+          {
+            style: {
+              color: 'rgba(245,240,232,0.38)',
+              fontSize: '11.5px',
+              lineHeight: 1.55,
+              margin: '13px 0 0',
+              textAlign: 'center',
+            },
+          },
+          '\u{1F512} ',
+          a('optin_privacy')
+        )
       )
     )
   );
@@ -1127,17 +1274,33 @@ function QuizFlow() {
       localStorage.removeItem('acResumeFromLink');
       const videoStep = parseInt(localStorage.getItem('acResumeVideoStep') || '1', 10);
       localStorage.removeItem('acResumeVideoStep');
-      t('videos');
-      if (videoStep > 1 && videoStep <= 3) {
-        setTimeout(() => {
-          const videoSelector =
-            document.querySelector(`[data-video-step="${videoStep}"]`) ||
-            document.querySelector(`[data-step="${videoStep}"]`);
-          if (videoSelector) videoSelector.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+      const resumeTarget = localStorage.getItem('acResumeTarget') || 'result';
+      const resumeProfileCode = localStorage.getItem('acResumeProfileCode') || '';
+      const resumeAspiration = localStorage.getItem('acResumeAspiration') || 'freedom';
+      const resumeBarrier = localStorage.getItem('acResumeBarrier') || '';
+      localStorage.removeItem('acResumeTarget');
+      localStorage.removeItem('acResumeProfileCode');
+      localStorage.removeItem('acResumeAspiration');
+      localStorage.removeItem('acResumeBarrier');
+
+      if (resumeProfileCode && profiles[resumeProfileCode]) {
+        y(profiles[resumeProfileCode]);
+      }
+      w(resumeAspiration || 'freedom');
+      if (resumeBarrier) {
+        const restoredAnswers = [];
+        restoredAnswers[5] = { barrier: resumeBarrier };
+        o(restoredAnswers);
+      }
+
+      if (resumeTarget === 'videos') {
+        m(videoStep > 1 && videoStep <= Object.keys(videoSteps).length ? videoStep : 1);
+        t('videos');
+      } else {
+        t('result');
       }
     }
-  }, []);
+  }, [profiles, videoSteps]);
   React.useEffect(() => {
     if (e !== 'quiz' || !questions[n]) return;
     Dt('question_viewed', {
@@ -1208,7 +1371,7 @@ function QuizFlow() {
                     quiz_barrier: L[5]?.barrier || '',
                     quiz_completed_at: new Date().toISOString(),
                   }),
-                  v(() => t('result')));
+                  v(() => t('optin')));
               }, 500)));
         }, 620);
     },
@@ -1448,7 +1611,29 @@ function QuizFlow() {
         impact: a('asp_tag_impact'),
         security: a('asp_tag_security'),
         growth: a('asp_tag_growth'),
-      };
+      },
+      ae = [
+        {
+          number: '01',
+          label: a('result_snapshot_type_label'),
+          value: g.name,
+        },
+        {
+          number: '02',
+          label: a('result_snapshot_energy_label'),
+          value: a(`result_snapshot_energy_${h}`),
+        },
+        {
+          number: '03',
+          label: a('result_snapshot_blocker_label'),
+          value: L?.barrier ? j[L.barrier] : a('result_snapshot_blocker_fallback'),
+        },
+        {
+          number: '04',
+          label: a('result_snapshot_access_label'),
+          value: a('result_snapshot_access_text'),
+        },
+      ];
     return React.createElement(
       'div',
       { style: at },
@@ -1481,6 +1666,95 @@ function QuizFlow() {
               },
             },
             g.tagline
+          )
+        ),
+        React.createElement(
+          'div',
+          {
+            style: {
+              background: 'rgba(255,255,255,0.025)',
+              border: `1px solid ${g.accentColor}24`,
+              borderRadius: '16px',
+              padding: '18px',
+              marginBottom: '18px',
+            },
+          },
+          React.createElement(
+            'p',
+            {
+              style: {
+                color: 'rgba(245,240,232,0.38)',
+                fontSize: '10.5px',
+                letterSpacing: '2.5px',
+                textTransform: 'uppercase',
+                marginBottom: '13px',
+              },
+            },
+            a('result_snapshot_heading')
+          ),
+          React.createElement(
+            'div',
+            {
+              style: {
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                gap: '9px',
+              },
+            },
+            ae.map((je) =>
+              React.createElement(
+                'div',
+                {
+                  key: je.number,
+                  style: {
+                    background: 'rgba(7,11,20,0.38)',
+                    border: `1px solid ${g.accentColor}1F`,
+                    borderRadius: '12px',
+                    padding: '13px 14px',
+                    minHeight: '82px',
+                  },
+                },
+                React.createElement(
+                  'div',
+                  {
+                    style: {
+                      color: g.accentColor,
+                      fontSize: '10px',
+                      letterSpacing: '2px',
+                      textTransform: 'uppercase',
+                      marginBottom: '7px',
+                    },
+                  },
+                  je.number
+                ),
+                React.createElement(
+                  'p',
+                  {
+                    style: {
+                      color: 'rgba(245,240,232,0.42)',
+                      fontSize: '10.5px',
+                      letterSpacing: '1.8px',
+                      textTransform: 'uppercase',
+                      marginBottom: '5px',
+                    },
+                  },
+                  je.label
+                ),
+                React.createElement(
+                  'p',
+                  {
+                    style: {
+                      color: '#F5F0E8',
+                      fontSize: '13.5px',
+                      lineHeight: 1.45,
+                      fontWeight: '600',
+                      margin: 0,
+                    },
+                  },
+                  je.value
+                )
+              )
+            )
           )
         ),
         React.createElement(
@@ -1698,10 +1972,23 @@ function QuizFlow() {
               color: 'rgba(245,240,232,0.52)',
               fontSize: '14.5px',
               lineHeight: 1.65,
-              marginBottom: '30px',
+              marginBottom: '14px',
             },
           },
           g.ctaMap[h] || g.ctaMap.freedom
+        ),
+        React.createElement(
+          'p',
+          {
+            style: {
+              color: g.accentColor,
+              fontSize: '13.5px',
+              lineHeight: 1.6,
+              marginBottom: '18px',
+              fontWeight: '600',
+            },
+          },
+          a('result_video_access_note')
         ),
         React.createElement(
           'div',
@@ -1725,26 +2012,11 @@ function QuizFlow() {
                   main_aspiration_label: getAspirationLabel(h),
                   result_cta_clicked_at: new Date().toISOString(),
                 });
-                v(() => t('optin'));
+                v(() => t('videos'));
               },
               style: In(g.accentColor, '#0A0A0A', { width: '100%' }),
             },
             a('result_cta_btn')
-          ),
-          React.createElement(
-            'button',
-            {
-              onClick: N,
-              style: {
-                background: 'none',
-                border: 'none',
-                color: 'rgba(245,240,232,0.25)',
-                cursor: 'pointer',
-                fontSize: '12.5px',
-                textDecoration: 'underline',
-              },
-            },
-            a('result_restart_btn')
           )
         )
       )
@@ -1844,7 +2116,7 @@ function QuizFlow() {
       berater: coach.slug || le.getItem('acBeraterSlug') || 'default',
       aspiration: h,
       visible: s,
-      onSubmit: () => v(() => t('videos')),
+      onSubmit: () => v(() => t('result')),
     });
   if (e === 'videos')
     return React.createElement(VideoStep, {
