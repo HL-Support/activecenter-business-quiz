@@ -932,6 +932,8 @@ export async function forwardQuizSubmission(
             main_aspiration: mainAspiration,
             main_aspiration_label: mainAspirationLabel,
             lang,
+            berater_slug: slug,
+            slug,
             member_id: memberId,
             ref_id: memberId,
             survey_id: '12',

@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const esbuild = require('esbuild');
-const { spawnSync } = require('child_process');
 
 const projectRoot = path.resolve(__dirname, '..');
 const filesToSyntaxCheck = [
@@ -27,31 +26,16 @@ function runNodeCheck(filePath) {
     return;
   }
 
-  if (path.extname(filePath) === '.jsx') {
-    try {
-      esbuild.transformSync(fs.readFileSync(filePath, 'utf8'), {
-        loader: 'jsx',
-        format: 'esm',
-        target: 'es2020',
-      });
-      return;
-    } catch (error) {
-      throw new Error(
-        `Syntax check failed for ${path.relative(projectRoot, filePath)}\n${error.message}`,
-        { cause: error }
-      );
-    }
-  }
-
-  const result = spawnSync(process.execPath, ['--check', filePath], {
-    cwd: projectRoot,
-    stdio: 'pipe',
-    encoding: 'utf8',
-  });
-
-  if (result.status !== 0) {
+  try {
+    esbuild.transformSync(fs.readFileSync(filePath, 'utf8'), {
+      loader: path.extname(filePath) === '.jsx' ? 'jsx' : 'js',
+      format: 'cjs',
+      target: 'es2020',
+    });
+  } catch (error) {
     throw new Error(
-      `Syntax check failed for ${path.relative(projectRoot, filePath)}\n${result.stderr || result.stdout}`
+      `Syntax check failed for ${path.relative(projectRoot, filePath)}\n${error.message}`,
+      { cause: error }
     );
   }
 }

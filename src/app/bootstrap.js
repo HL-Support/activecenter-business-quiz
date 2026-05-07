@@ -55,9 +55,13 @@ function decodeResumePayload(token) {
     const sessionHash = decoded.sessionHash;
     const email = decoded.email;
     const lastVideoStep = decoded.lastVideoStep || 1;
+    const resumeTarget = decoded.resumeTarget || 'result';
+    const profileCode = decoded.profileCode || '';
+    const aspiration = decoded.aspiration || '';
+    const barrier = decoded.barrier || '';
 
     if (!sessionHash || !email) return null;
-    return { sessionHash, email, lastVideoStep };
+    return { sessionHash, email, lastVideoStep, resumeTarget, profileCode, aspiration, barrier };
   } catch (error) {
     console.warn('Resume token decode failed:', error);
     return null;
@@ -88,6 +92,10 @@ async function resolveResumePayload(token) {
       sessionHash: data.sessionHash,
       email: data.email,
       lastVideoStep: data.lastVideoStep || 1,
+      resumeTarget: data.resumeTarget || 'result',
+      profileCode: data.profileCode || '',
+      aspiration: data.aspiration || '',
+      barrier: data.barrier || '',
     };
   } catch (error) {
     console.warn('Resume token resolve failed, falling back to embedded payload:', error);
@@ -119,6 +127,10 @@ async function resolveResumeKeyPayload(key) {
       sessionHash: data.sessionHash,
       email: data.email || '',
       lastVideoStep: data.lastVideoStep || 1,
+      resumeTarget: data.resumeTarget || 'result',
+      profileCode: data.profileCode || '',
+      aspiration: data.aspiration || '',
+      barrier: data.barrier || '',
     };
   } catch (error) {
     console.warn('Resume key resolve failed:', error);
@@ -126,7 +138,15 @@ async function resolveResumeKeyPayload(key) {
   }
 }
 
-function applyResumePayload({ sessionHash, email, lastVideoStep }) {
+function applyResumePayload({
+  sessionHash,
+  email,
+  lastVideoStep,
+  resumeTarget,
+  profileCode,
+  aspiration,
+  barrier,
+}) {
   localStorage.setItem(
     'acQuizTrackingSession_v1',
     JSON.stringify({
@@ -147,6 +167,10 @@ function applyResumePayload({ sessionHash, email, lastVideoStep }) {
 
   localStorage.setItem('acResumeFromLink', 'true');
   localStorage.setItem('acResumeVideoStep', String(lastVideoStep || 1));
+  localStorage.setItem('acResumeTarget', resumeTarget === 'videos' ? 'videos' : 'result');
+  if (profileCode) localStorage.setItem('acResumeProfileCode', String(profileCode));
+  if (aspiration) localStorage.setItem('acResumeAspiration', String(aspiration));
+  if (barrier) localStorage.setItem('acResumeBarrier', String(barrier));
   localStorage.setItem('acSessionIsResume', 'true');
   return true;
 }

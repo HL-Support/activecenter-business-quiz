@@ -114,8 +114,18 @@ cd business_leads_quiz
 npm install
 npm run build
 npm run verify
-vercel deploy --prod --yes
+npm run deploy:preview
 ```
+
+`npm run deploy:preview` creates a Vercel Preview URL and does not overwrite `https://quiz.activecenter.info`.
+
+After the Preview URL has been tested, commit and push `main`, then promote the exact tested deployment:
+
+```bash
+npm run promote:prod -- <preview-url>
+```
+
+Do not deploy directly with `npx vercel deploy --prod`. Production should only be updated by promoting a tested Preview deployment.
 
 ## Relevante Dateien
 

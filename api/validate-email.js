@@ -5,7 +5,7 @@
  * POST /api/validate-email
  * { email: "test@example.com" }
  *
- * Response: { valid: true/false, reason: "valid|invalid|catch_all|unknown|..." }
+ * Response: { valid: true/false, reason: "...", status: "...", sub_status: "..." }
  */
 
 const ZEROBOUNCE_API_KEY = process.env.ZEROBOUNCE_API_KEY;
@@ -23,18 +23,22 @@ export default async function handler(req, res) {
   }
 
   // Basic format check
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(200).json({
       valid: false,
       reason: 'invalid_format',
+      status: 'invalid',
+      sub_status: '',
     });
   }
 
   try {
     if (!ZEROBOUNCE_API_KEY) {
       return res.status(200).json({
-        valid: true,
-        reason: 'missing_api_key_fallback',
+        valid: false,
+        reason: 'missing_api_key',
+        status: 'unknown',
+        sub_status: '',
       });
     }
 
@@ -45,34 +49,34 @@ export default async function handler(req, res) {
 
     if (!zeroBounceResponse.ok) {
       console.error('ZeroBounce API error:', zeroBounceResponse.status);
-      // Fallback: accept email if ZeroBounce is down
       return res.status(200).json({
-        valid: true,
-        reason: 'api_error_fallback',
+        valid: false,
+        reason: 'api_error',
+        status: 'unknown',
+        sub_status: '',
       });
     }
 
     const data = await zeroBounceResponse.json();
 
-    // Reject only clearly bad statuses to avoid blocking valid corporate domains.
-    // `do_not_mail` from ZeroBounce is too aggressive for this funnel and was
-    // rejecting legitimate addresses like internal business domains.
-    const reason = String(data.status || 'unknown')
-      .toLowerCase()
-      .replace(/-/g, '_');
-    const blockedStatuses = new Set(['invalid', 'spamtrap', 'abuse']);
-    const isValid = !blockedStatuses.has(reason);
+    const status = String(data.status || 'unknown').toLowerCase();
+    const subStatus = String(data.sub_status || '').toLowerCase();
+    const allowedSubStatuses = new Set(['role_based', 'catch-all', 'accept_all']);
+    const isValid = status === 'valid' || allowedSubStatuses.has(subStatus);
 
     return res.status(200).json({
       valid: isValid,
-      reason: reason,
+      reason: subStatus || status,
+      status,
+      sub_status: subStatus,
     });
   } catch (error) {
     console.error('Email validation error:', error.message);
-    // On error, be permissive (don't block valid emails due to API issues)
     return res.status(200).json({
-      valid: true,
-      reason: 'api_error_fallback',
+      valid: false,
+      reason: 'api_error',
+      status: 'unknown',
+      sub_status: '',
     });
   }
 }

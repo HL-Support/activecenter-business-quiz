@@ -1,13 +1,24 @@
 # Deployment Workflow
 
-Production is only allowed from a clean, pushed `main` branch.
+Production is promoted from a tested Vercel Preview deployment.
+
+## Preview First
 
 1. Make changes locally.
-2. Run `npm run verify` and `npm run build`.
-3. Commit the intended changes.
-4. Push `main` to GitHub.
-5. Deploy with `npm run deploy:prod`.
+2. Run `npm run deploy:preview`.
+3. Test the returned Preview URL, including a real coach slug like `/markus`.
+4. Commit the intended changes.
+5. Push `main` to GitHub.
+6. Promote the tested Preview URL with:
 
-`npm run deploy:prod` runs the deploy guard before Vercel. The guard blocks production if the working tree is dirty or if `HEAD` is not already on `origin/main`.
+```bash
+npm run promote:prod -- <preview-url>
+```
 
-Do not run `npx vercel deploy --prod` directly from an uncommitted local state.
+`npm run deploy:preview` runs `npm run build`, `npm run verify`, then creates a Vercel Preview deployment. It does not overwrite `https://quiz.activecenter.info`.
+
+`npm run promote:prod` runs the production guard before Vercel. The guard blocks promotion if the working tree is dirty, the current branch is not `main`, or `HEAD` is not already on `origin/main`.
+
+`npm run deploy:prod -- <preview-url>` is kept as an alias for the same guarded promotion flow.
+
+Do not run `npx vercel deploy --prod` directly. Production should only receive a Preview deployment that was tested first.

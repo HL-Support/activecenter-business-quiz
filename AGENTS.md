@@ -29,13 +29,16 @@
 ## Workflow
 
 - `npm install`
-- `npm run verify`
 - `npm run build`
+- `npm run verify`
+- `npm run deploy:preview`
+- Teste die Preview-URL mit realem Coach-Slug, bevor Production geaendert wird.
 - Committe alle beabsichtigten Aenderungen.
 - Pushe `main` zu `origin/main`.
-- Production-Deploys laufen ausschliesslich ueber `npm run deploy:prod`.
-- Nie direkt `npx vercel deploy --prod` aus einem schmutzigen oder nicht gepushten lokalen Stand ausfuehren.
-- Der Deploy-Guard muss vor Production gruen sein: sauberer Working Tree, Branch `main`, `HEAD == origin/main`.
+- Production wird ausschliesslich durch Promote einer getesteten Preview live geschaltet: `npm run promote:prod -- <preview-url>`.
+- `npm run deploy:prod -- <preview-url>` ist nur ein Alias fuer denselben Promote-Flow.
+- Nie direkt `npx vercel deploy --prod` ausfuehren.
+- Der Promote-Guard muss vor Production gruen sein: sauberer Working Tree, Branch `main`, `HEAD == origin/main`.
 
 ## Kritische Dateien
 

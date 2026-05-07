@@ -85,19 +85,38 @@ function normalizeResumeSlug(slug) {
   return /^[a-z0-9_-]+$/.test(normalized) && normalized !== 'default' ? normalized : '';
 }
 
-function resumeBaseUrl(slug) {
+function requestOrigin(req) {
+  const forwardedHost = String(req?.headers?.['x-forwarded-host'] || '').split(',')[0].trim();
+  const host = forwardedHost || String(req?.headers?.host || '').trim();
+  if (!host) return '';
+
+  const forwardedProto = String(req?.headers?.['x-forwarded-proto'] || '').split(',')[0].trim();
+  const proto = forwardedProto || (host.includes('localhost') ? 'http' : 'https');
+  return `${proto}://${host}`;
+}
+
+function resumeBaseUrl(slug, req) {
   const normalizedSlug = normalizeResumeSlug(slug);
+  const configuredBase = String(process.env.RESUME_BASE_URL || '').replace(/\/+$/, '');
+  const currentOrigin = requestOrigin(req);
+  const useCurrentOrigin =
+    currentOrigin &&
+    /(^https?:\/\/localhost(:\d+)?$)|(^https?:\/\/127\.0\.0\.1(:\d+)?$)|(\.vercel\.app$)/i.test(
+      currentOrigin
+    );
+  const base = configuredBase || (useCurrentOrigin ? currentOrigin : 'https://quiz.activecenter.info');
+
   return normalizedSlug
-    ? `https://quiz.activecenter.info/${normalizedSlug}`
-    : 'https://quiz.activecenter.info';
+    ? `${base}/${normalizedSlug}`
+    : base;
 }
 
-function longResumeUrl(token, slug) {
-  return `${resumeBaseUrl(slug)}?resume=${encodeURIComponent(String(token || ''))}`;
+function longResumeUrl(token, slug, req) {
+  return `${resumeBaseUrl(slug, req)}?resume=${encodeURIComponent(String(token || ''))}`;
 }
 
-function shortResumeUrl(key, slug) {
-  return `${resumeBaseUrl(slug)}?r=${encodeURIComponent(String(key || ''))}`;
+function shortResumeUrl(key, slug, req) {
+  return `${resumeBaseUrl(slug, req)}?r=${encodeURIComponent(String(key || ''))}`;
 }
 
 function toBase62(value) {
@@ -219,6 +238,65 @@ async function determineLastVideoStep(sessionHash) {
   }
 
   return 1;
+}
+
+function videoProgressFromSession(session) {
+  if (!session) return { lastVideoStep: 1, hasVideoProgress: false };
+  if (session.video3_max_pct && Number(session.video3_max_pct) > 0) {
+    return { lastVideoStep: 3, hasVideoProgress: true };
+  }
+  if (session.video2_max_pct && Number(session.video2_max_pct) > 0) {
+    return { lastVideoStep: 2, hasVideoProgress: true };
+  }
+  if (session.video1_max_pct && Number(session.video1_max_pct) > 0) {
+    return { lastVideoStep: 1, hasVideoProgress: true };
+  }
+  return { lastVideoStep: 1, hasVideoProgress: false };
+}
+
+async function loadResumeState(sessionHash) {
+  const fallback = {
+    resumeTarget: 'result',
+    lastVideoStep: 1,
+    profileCode: '',
+    aspiration: '',
+    barrier: '',
+  };
+  if (!sessionHash) return fallback;
+
+  try {
+    const encodedHash = encodeURIComponent(sessionHash);
+    const [quizResponse, trackingResponse, ctaResponse] = await Promise.all([
+      supabaseRequest(
+        `quiz_sessions?hash=eq.${encodedHash}&select=quiz_profile,quiz_aspiration,quiz_barrier,video1_max_pct,video2_max_pct,video3_max_pct&limit=1`
+      ),
+      supabaseRequest(
+        `tracking_sessions?session_hash=eq.${encodedHash}&select=quiz_profile,main_aspiration,quiz_barrier&limit=1`
+      ),
+      supabaseRequest(
+        `tracking_events?session_hash=eq.${encodedHash}&event_name=eq.result_cta_click&select=id&limit=1`
+      ),
+    ]);
+    const quizRows = await quizResponse?.json?.();
+    const trackingRows = await trackingResponse?.json?.();
+    const ctaRows = await ctaResponse?.json?.();
+    const quizSession = Array.isArray(quizRows) ? quizRows[0] : null;
+    const trackingSession = Array.isArray(trackingRows) ? trackingRows[0] : null;
+    const progress = videoProgressFromSession(quizSession);
+    const hasResultCtaClick = Array.isArray(ctaRows) && ctaRows.length > 0;
+
+    return {
+      resumeTarget: hasResultCtaClick || progress.hasVideoProgress ? 'videos' : 'result',
+      lastVideoStep: progress.lastVideoStep,
+      profileCode: safeString(trackingSession?.quiz_profile || quizSession?.quiz_profile, 8) || '',
+      aspiration:
+        safeString(trackingSession?.main_aspiration || quizSession?.quiz_aspiration, 60) || '',
+      barrier: safeString(trackingSession?.quiz_barrier || quizSession?.quiz_barrier, 60) || '',
+    };
+  } catch (error) {
+    console.warn('Could not load resume state, defaulting to result:', error.message);
+    return fallback;
+  }
 }
 
 async function ensureResumeSessionRecord({ sessionHash, email, leadHash, context }) {
@@ -535,6 +613,47 @@ async function writeToSupabaseAsync(payload) {
   } catch (error) {
     console.error('Supabase error:', error.message);
   }
+}
+
+async function persistBusinessSubmissionForResume(input) {
+  const hidden = input?.hidden || {};
+  const sessionHash = safeString(hidden.session_hash || hidden.tracking_hash || hidden.hash, 96);
+  const leadHash = safeString(hidden.lead_hash || hidden.hash, 96);
+  if (!sessionHash && !leadHash) return;
+
+  const selectedAnswers = Array.isArray(input.selected_answers) ? input.selected_answers : [];
+  const profile = input.profile && typeof input.profile === 'object' ? input.profile : {};
+  const profileCode = safeString(profile.code, 40);
+  const profileName = safeString(profile.name || profile.animal, 100);
+  const aspiration = safeString(input.main_aspiration || hidden.main_aspiration, 60);
+  const barrier = safeString(
+    selectedAnswers.find((answer) => answer && answer.barrier)?.barrier,
+    60
+  );
+  const submittedAt = safeString(input.submitted_at || nowIso(), 40);
+
+  await writeToSupabaseAsync({
+    hash: leadHash || sessionHash,
+    session_hash: sessionHash || leadHash,
+    lead_hash: leadHash || sessionHash,
+    herbalife_id: safeString(hidden.member_id || hidden.ref_id, 80),
+    member_id: safeString(hidden.member_id || hidden.ref_id, 80),
+    berater_slug: safeString(hidden.berater_slug || hidden.slug || hidden.coach_slug, 80),
+    source_app: 'business_leads_quiz',
+    funnel: 'business',
+    lang: safeString(hidden.lang, 10),
+    quiz_profile: profileCode,
+    quiz_profile_name: profileName,
+    quiz_aspiration: aspiration,
+    main_aspiration: aspiration,
+    main_aspiration_label: safeString(input.main_aspiration_label || hidden.main_aspiration_label, 120),
+    quiz_barrier: barrier,
+    form_first_name: safeString(input.first_name, 120),
+    form_email: safeString(input.email, 160),
+    form_submitted_at: submittedAt,
+    event_name: 'form_submit',
+    event_at: submittedAt,
+  });
 }
 
 async function proxyToBridge(body, forwardedFor, userAgent) {
@@ -1123,6 +1242,7 @@ module.exports = async function handler(req, res) {
     }
 
     const webhookPayload = buildBusinessTypeformPayload(payload);
+    await persistBusinessSubmissionForResume(payload);
     const result = await proxyToBridge(
       {
         action: 'forward_webhook',
@@ -1167,7 +1287,7 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Missing sessionHash or email' });
     }
 
-    const lastVideoStep = await determineLastVideoStep(payload.sessionHash);
+    const resumeState = await loadResumeState(payload.sessionHash);
     let resumeSession = null;
     try {
       resumeSession = await ensureResumeSessionRecord({
@@ -1185,7 +1305,11 @@ module.exports = async function handler(req, res) {
         sessionHash: payload.sessionHash,
         email: payload.email,
         context: payload.context || 'quiz',
-        lastVideoStep: lastVideoStep,
+        lastVideoStep: resumeState.lastVideoStep,
+        resumeTarget: resumeState.resumeTarget,
+        profileCode: resumeState.profileCode,
+        aspiration: resumeState.aspiration,
+        barrier: resumeState.barrier,
       },
       JWT_SECRET,
       { algorithm: 'HS256' }
@@ -1193,15 +1317,19 @@ module.exports = async function handler(req, res) {
 
     const resumeSlug = safeString(payload.slug || payload.berater_slug || payload.coach_slug, 80);
     const shortKey = resumeSession?.id ? createResumeKey(resumeSession.id) : null;
-    const shortUrl = shortKey ? shortResumeUrl(shortKey, resumeSlug) : null;
+    const shortUrl = shortKey ? shortResumeUrl(shortKey, resumeSlug, req) : null;
 
     return res.status(200).json({
       success: true,
       token,
-      lastVideoStep,
+      lastVideoStep: resumeState.lastVideoStep,
+      resumeTarget: resumeState.resumeTarget,
+      profileCode: resumeState.profileCode,
+      aspiration: resumeState.aspiration,
+      barrier: resumeState.barrier,
       shortKey,
       shortUrl,
-      resumeUrl: shortUrl || longResumeUrl(token, resumeSlug),
+      resumeUrl: shortUrl || longResumeUrl(token, resumeSlug, req),
     });
   }
 
@@ -1229,14 +1357,18 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Resume token missing required fields' });
     }
 
-    const lastVideoStep = await determineLastVideoStep(sessionHash);
+    const resumeState = await loadResumeState(sessionHash);
 
     return res.status(200).json({
       success: true,
       sessionHash,
       email,
       context,
-      lastVideoStep,
+      lastVideoStep: resumeState.lastVideoStep,
+      resumeTarget: resumeState.resumeTarget,
+      profileCode: resumeState.profileCode,
+      aspiration: resumeState.aspiration,
+      barrier: resumeState.barrier,
     });
   }
 
@@ -1270,14 +1402,18 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const lastVideoStep = await determineLastVideoStep(sessionHash);
+    const resumeState = await loadResumeState(sessionHash);
 
     return res.status(200).json({
       success: true,
       sessionHash,
       email,
       context: safeString(resumeRecord.funnel || 'quiz', 32) || 'quiz',
-      lastVideoStep,
+      lastVideoStep: resumeState.lastVideoStep,
+      resumeTarget: resumeState.resumeTarget,
+      profileCode: resumeState.profileCode,
+      aspiration: resumeState.aspiration,
+      barrier: resumeState.barrier,
     });
   }
 
