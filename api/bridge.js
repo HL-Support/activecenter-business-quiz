@@ -21,6 +21,12 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const JWT_SECRET = process.env.JWT_SECRET;
 const RESUME_KEY_SECRET = process.env.RESUME_KEY_SECRET || JWT_SECRET;
 const TRACKING_SCHEMA_VERSION = 'ac_tracking_v1';
+const POSTMARK_SERVER_TOKEN = process.env.POSTMARK_SERVER_TOKEN;
+const POSTMARK_FROM = process.env.POSTMARK_FROM || 'Activecenter-Support <mail@mail.hl-support.biz>';
+const POSTMARK_MESSAGE_STREAM = process.env.POSTMARK_MESSAGE_STREAM || 'outbound';
+const BRAND_LOGO_URL = 'https://hl-support.biz/storage/images/cwemaillogo-1bcb4f.png';
+const BRAND_PRIVACY_URL = 'https://impressum.hl-support.biz/privacy.html';
+const DEFAULT_COACH_LANGUAGE_OVERRIDES = { markus: 'de' };
 
 const TYPEFORM_TARGET = 'https://contacts.hl-support.biz/webhook/typeform';
 const ALLOWED_ADAPTER_KEYS = new Set(['business_leads_quiz_v1']);
@@ -63,6 +69,26 @@ function safeTrackingString(record, keys, maxLength = 255) {
 function safeInteger(value) {
   const number = Number(value);
   return Number.isFinite(number) ? Math.max(0, Math.floor(number)) : null;
+}
+
+function normalizeLanguage(...values) {
+  for (const value of values) {
+    const lang = String(value || '')
+      .trim()
+      .toLowerCase()
+      .slice(0, 2);
+    if (['de', 'it', 'en', 'fr', 'ru'].includes(lang)) return lang;
+  }
+  return 'de';
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function safeTrackingInteger(record, keys) {
@@ -195,6 +221,11 @@ async function supabaseRequest(path, options = {}) {
   }
 
   return response;
+}
+
+async function supabaseJson(path, options = {}) {
+  const response = await supabaseRequest(path, options);
+  return response ? response.json() : null;
 }
 
 async function insertIgnoringDuplicates(table, conflictColumn, record) {
@@ -685,6 +716,558 @@ async function proxyToBridge(body, forwardedFor, userAgent) {
   return { status: response.status, data };
 }
 
+async function sendPostmarkEmail(message) {
+  if (!POSTMARK_SERVER_TOKEN) {
+    return {
+      ok: false,
+      status: 501,
+      data: { error: 'POSTMARK_SERVER_TOKEN is not configured' },
+    };
+  }
+
+  const response = await fetch('https://api.postmarkapp.com/email', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'X-Postmark-Server-Token': POSTMARK_SERVER_TOKEN,
+    },
+    body: JSON.stringify(message),
+  });
+
+  const text = await response.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { raw: text };
+  }
+
+  return { ok: response.ok, status: response.status, data };
+}
+
+const HOT_LEAD_EMAIL_I18N = {
+  de: {
+    subject: (name) => `Hot Lead: ${name} hat alle 3 Videos angesehen`,
+    preheader: 'Ein Kontakt hat alle 3 Info-Videos vollständig angeschaut.',
+    title: 'Hot Lead aus quiz.activecenter.info',
+    greeting: (name) => `Hallo ${name},`,
+    intro:
+      'ein Kontakt hat alle 3 Info-Videos vollständig angeschaut. Das zeigt großes Interesse und ist ein guter Moment für eine persönliche Nachricht.',
+    labels: {
+      name: 'Name',
+      email: 'E-Mail',
+      type: 'Typ',
+      aspiration: 'Zielsetzung',
+      barrier: 'Was ihn aktuell zurückhält',
+      completedAt: 'Abgeschlossen am',
+    },
+    footerReason:
+      'Diese Benachrichtigung wurde automatisch erstellt, weil ein Quiz-Kontakt alle 3 Info-Videos vollständig angeschaut hat.',
+    privacyLabel: 'Impressum &amp; Datenschutz',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; Alle Rechte vorbehalten',
+    profiles: {
+      A: 'Typ A Der Macher',
+      B: 'Typ B Der Netzwerker',
+      C: 'Typ C Der Anker',
+      D: 'Typ D Der Architekt',
+    },
+    aspirations: {
+      freedom: 'Freiheit',
+      impact: 'Wirkung',
+      security: 'Sicherheit',
+      growth: 'Wachstum',
+    },
+    barriers: {
+      vehicle: 'ein funktionierendes System',
+      community: 'das richtige Umfeld',
+      confidence: 'einen sicheren ersten Schritt',
+      opportunity: 'die passende Möglichkeit',
+    },
+  },
+  it: {
+    subject: (name) => `Hot lead: ${name} ha guardato tutti e 3 i video`,
+    preheader: 'Un contatto ha guardato completamente tutti e 3 i video informativi.',
+    title: 'Hot lead da quiz.activecenter.info',
+    greeting: (name) => `Ciao ${name},`,
+    intro:
+      'un contatto ha guardato completamente tutti e 3 i video informativi. Questo mostra un grande interesse ed è un buon momento per un messaggio personale.',
+    labels: {
+      name: 'Nome',
+      email: 'E-mail',
+      type: 'Tipo',
+      aspiration: 'Obiettivo',
+      barrier: 'Cosa lo trattiene al momento',
+      completedAt: 'Completato il',
+    },
+    footerReason:
+      'Questa notifica è stata creata automaticamente perché un contatto del quiz ha guardato completamente tutti e 3 i video informativi.',
+    privacyLabel: 'Note legali &amp; privacy',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; Tutti i diritti riservati',
+    profiles: {
+      A: 'Tipo A Il realizzatore',
+      B: 'Tipo B Il connettore',
+      C: "Tipo C L'ancora",
+      D: "Tipo D L'architetto",
+    },
+    aspirations: {
+      freedom: 'Libertà',
+      impact: 'Impatto',
+      security: 'Sicurezza',
+      growth: 'Crescita',
+    },
+    barriers: {
+      vehicle: 'un sistema che funziona',
+      community: "l'ambiente giusto",
+      confidence: 'un primo passo sicuro',
+      opportunity: "l'opportunità giusta",
+    },
+  },
+  en: {
+    subject: (name) => `Hot lead: ${name} watched all 3 videos`,
+    preheader: 'A contact has watched all 3 info videos all the way through.',
+    title: 'Hot lead from quiz.activecenter.info',
+    greeting: (name) => `Hi ${name},`,
+    intro:
+      'a contact has watched all 3 info videos all the way through. This shows strong interest and it is a good moment for a personal message.',
+    labels: {
+      name: 'Name',
+      email: 'Email',
+      type: 'Type',
+      aspiration: 'Goal',
+      barrier: 'What is currently holding them back',
+      completedAt: 'Completed on',
+    },
+    footerReason:
+      'This notification was created automatically because a quiz contact watched all 3 info videos all the way through.',
+    privacyLabel: 'Legal notice &amp; privacy',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; All rights reserved',
+    profiles: {
+      A: 'Type A The doer',
+      B: 'Type B The connector',
+      C: 'Type C The anchor',
+      D: 'Type D The architect',
+    },
+    aspirations: {
+      freedom: 'Freedom',
+      impact: 'Impact',
+      security: 'Security',
+      growth: 'Growth',
+    },
+    barriers: {
+      vehicle: 'a working system',
+      community: 'the right environment',
+      confidence: 'a safe first step',
+      opportunity: 'the right opportunity',
+    },
+  },
+  fr: {
+    subject: (name) => `Lead chaud : ${name} a regardé les 3 vidéos`,
+    preheader: "Un contact a regardé les 3 vidéos d'information jusqu'au bout.",
+    title: 'Lead chaud depuis quiz.activecenter.info',
+    greeting: (name) => `Bonjour ${name},`,
+    intro:
+      "un contact a regardé les 3 vidéos d'information jusqu'au bout. Cela montre un grand intérêt et c'est un bon moment pour un message personnel.",
+    labels: {
+      name: 'Nom',
+      email: 'E-mail',
+      type: 'Type',
+      aspiration: 'Objectif',
+      barrier: 'Ce qui le bloque actuellement',
+      completedAt: 'Terminé le',
+    },
+    footerReason:
+      "Cette notification a été créée automatiquement parce qu'un contact du quiz a regardé les 3 vidéos d'information jusqu'au bout.",
+    privacyLabel: 'Mentions légales &amp; confidentialité',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; Tous droits réservés',
+    profiles: {
+      A: 'Type A Le faiseur',
+      B: 'Type B Le connecteur',
+      C: "Type C L'ancre",
+      D: "Type D L'architecte",
+    },
+    aspirations: {
+      freedom: 'Liberté',
+      impact: 'Impact',
+      security: 'Sécurité',
+      growth: 'Croissance',
+    },
+    barriers: {
+      vehicle: 'un système fonctionnant',
+      community: "l'environnement adéquat",
+      confidence: 'un premier pas sûr',
+      opportunity: "l'opportunité idéale",
+    },
+  },
+  ru: {
+    subject: (name) => `Горячий лид: ${name} посмотрел(а) все 3 видео`,
+    preheader: 'Контакт полностью посмотрел все 3 информационных видео.',
+    title: 'Горячий лид с quiz.activecenter.info',
+    greeting: (name) => `Здравствуйте, ${name},`,
+    intro:
+      'контакт полностью посмотрел все 3 информационных видео. Это показывает высокий интерес и это хороший момент для личного сообщения.',
+    labels: {
+      name: 'Имя',
+      email: 'E-mail',
+      type: 'Тип',
+      aspiration: 'Цель',
+      barrier: 'Что сейчас останавливает',
+      completedAt: 'Завершено',
+    },
+    footerReason:
+      'Это уведомление было создано автоматически, потому что контакт из квиза полностью посмотрел все 3 информационных видео.',
+    privacyLabel: 'Правовая информация и конфиденциальность',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; Все права защищены',
+    profiles: {
+      A: 'Тип A Деятель',
+      B: 'Тип B Соединитель',
+      C: 'Тип C Якорь',
+      D: 'Тип D Архитектор',
+    },
+    aspirations: {
+      freedom: 'Свобода',
+      impact: 'Влияние',
+      security: 'Безопасность',
+      growth: 'Рост',
+    },
+    barriers: {
+      vehicle: 'работающая система',
+      community: 'правильная среда',
+      confidence: 'безопасный первый шаг',
+      opportunity: 'правильная возможность',
+    },
+  },
+};
+
+function detectCoachLanguage(coach, session, payload) {
+  const country = String(coach?.address?.country || coach?.country || '').trim().toUpperCase();
+  let overrideMap = DEFAULT_COACH_LANGUAGE_OVERRIDES;
+  try {
+    overrideMap = {
+      ...DEFAULT_COACH_LANGUAGE_OVERRIDES,
+      ...JSON.parse(process.env.COACH_LANGUAGE_OVERRIDES_JSON || '{}'),
+    };
+  } catch {}
+  const slug = String(payload?.berater_slug || payload?.slug || coach?.sub_domain || session?.berater_slug || '')
+    .trim()
+    .toLowerCase();
+  const slugLanguage = overrideMap[slug] || '';
+  const countryLanguage =
+    {
+      DE: 'de',
+      AT: 'de',
+      CH: 'de',
+      IT: 'it',
+      FR: 'fr',
+      BE: 'fr',
+      RU: 'ru',
+      GB: 'en',
+      UK: 'en',
+      US: 'en',
+      CA: 'en',
+      AU: 'en',
+    }[country] || '';
+  return normalizeLanguage(
+    coach?.preferred_newsletter_language,
+    coach?.preferred_language,
+    coach?.language,
+    coach?.lang,
+    coach?.locale,
+    session?.coach_preferred_language,
+    payload?.coach_language,
+    slugLanguage,
+    countryLanguage,
+    session?.lang,
+    payload?.lang,
+    'de'
+  );
+}
+
+function normalizeProfileCode(value) {
+  const match = String(value || '').match(/\b([ABCD])\b/i);
+  return match ? match[1].toUpperCase() : '';
+}
+
+function normalizeAspirationKey(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  const map = {
+    freedom: 'freedom',
+    freiheit: 'freedom',
+    libertà: 'freedom',
+    liberta: 'freedom',
+    liberté: 'freedom',
+    liberte: 'freedom',
+    свобода: 'freedom',
+    impact: 'impact',
+    wirkung: 'impact',
+    impatto: 'impact',
+    влияние: 'impact',
+    security: 'security',
+    sicherheit: 'security',
+    sicurezza: 'security',
+    sécurité: 'security',
+    securite: 'security',
+    безопасность: 'security',
+    growth: 'growth',
+    wachstum: 'growth',
+    crescita: 'growth',
+    croissance: 'growth',
+    рост: 'growth',
+  };
+  return map[normalized] || '';
+}
+
+function normalizeBarrierKey(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (
+    normalized === 'vehicle' ||
+    normalized.includes('system') ||
+    normalized.includes('sistema') ||
+    normalized.includes('système') ||
+    normalized.includes('система')
+  ) {
+    return 'vehicle';
+  }
+  if (
+    normalized === 'community' ||
+    normalized.includes('umfeld') ||
+    normalized.includes('ambiente') ||
+    normalized.includes('environnement') ||
+    normalized.includes('сред')
+  ) {
+    return 'community';
+  }
+  if (
+    normalized === 'confidence' ||
+    normalized.includes('schritt') ||
+    normalized.includes('passo') ||
+    normalized.includes('pas ') ||
+    normalized.includes('шаг')
+  ) {
+    return 'confidence';
+  }
+  if (
+    normalized === 'opportunity' ||
+    normalized.includes('möglichkeit') ||
+    normalized.includes('opportun') ||
+    normalized.includes('opportunité') ||
+    normalized.includes('возмож')
+  ) {
+    return 'opportunity';
+  }
+  return '';
+}
+
+function formatLocalizedDateTime(value, lang) {
+  const date = new Date(value || nowIso());
+  if (Number.isNaN(date.getTime())) return '';
+  const formatter = new Intl.DateTimeFormat('de-DE', {
+    timeZone: 'Europe/Berlin',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  const parts = Object.fromEntries(formatter.formatToParts(date).map((part) => [part.type, part.value]));
+  if (lang === 'it' || lang === 'fr') {
+    return `${parts.day}/${parts.month}/${parts.year} - ${parts.hour}:${parts.minute}`;
+  }
+  if (lang === 'en') {
+    return `${parts.month}/${parts.day}/${parts.year} - ${parts.hour}:${parts.minute}`;
+  }
+  if (lang === 'ru') {
+    return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute}`;
+  }
+  return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute} Uhr`;
+}
+
+function buildDefaultFooter(reason, lang = 'de') {
+  const copy = HOT_LEAD_EMAIL_I18N[lang] || HOT_LEAD_EMAIL_I18N.de;
+  return [
+    `<p style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#999999;">${escapeHtml(reason)}</p>`,
+    `<p style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#999999;"><a href="${BRAND_PRIVACY_URL}" style="color:#999999;text-decoration:underline;">${copy.privacyLabel}</a></p>`,
+    `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#999999;">${copy.copyrightLabel}</p>`,
+  ].join('');
+}
+
+function buildBrandedEmailShell({ preheader, bodyHtml, footerHtml, brandName = 'Activecenter' }) {
+  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
+  <title></title>
+  <style type="text/css" rel="stylesheet" media="all">
+    #outlook a { padding: 0; }
+    body { width: 100% !important; height: 100%; margin: 0; -webkit-text-size-adjust: none; -ms-text-size-adjust: 100%; }
+    a img { border: none; }
+    td { word-break: break-word; }
+    body, td, th { font-family: Arial, Helvetica, sans-serif; }
+    td, th { font-size: 16px; }
+    p, ul, ol { margin: 0 0 18px 0; font-size: 16px; line-height: 1.65; color: #2d2d2d; }
+    p:last-child { margin-bottom: 0; }
+    a { color: #212529; text-decoration: underline; }
+    .email-wrapper    { width: 100%; margin: 0; padding: 0; background-color: #f0f0f0; }
+    .email-body_inner { width: 570px; margin: 0 auto; padding: 0; background-color: #ffffff; }
+    .content-cell     { padding: 36px 40px; }
+    .email-footer     { width: 570px; margin: 0 auto; padding: 0; text-align: center; }
+    .email-footer p   { color: #999999; font-size: 12px; line-height: 1.6; }
+    .email-footer a   { color: #999999; text-decoration: underline; }
+    .email-masthead   { background-color: #212529; padding: 16px 24px; }
+    @media only screen and (max-width: 600px) {
+      .email-body_inner, .email-footer { width: 100% !important; }
+      .content-cell   { padding: 24px 20px !important; }
+      .email-masthead { padding: 14px 16px !important; }
+      .logo-img       { width: 150px !important; }
+    }
+    :root { color-scheme: light; }
+  </style>
+  <!--[if mso]><style type="text/css">body,td,th,p,a,.f-fallback{font-family:Arial,sans-serif !important;}</style><![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#f0f0f0;-webkit-text-size-adjust:none;-ms-text-size-adjust:100%;" bgcolor="#f0f0f0">
+<table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation" bgcolor="#f0f0f0">
+<tr><td align="center" style="padding:24px 8px;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+  <tr><td>
+    <table class="email-body_inner" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation" style="border-radius:4px 4px 0 0;overflow:hidden;">
+      <tr><td class="email-masthead" bgcolor="#212529" style="background-color:#212529;padding:16px 24px;border-radius:4px 4px 0 0;">
+        <img src="${BRAND_LOGO_URL}" width="180" alt="${escapeHtml(brandName)}" class="logo-img f-fallback" style="display:block;border:0;outline:none;text-decoration:none;height:auto;width:180px;max-width:180px;" />
+      </td></tr>
+    </table>
+  </td></tr>
+  <tr><td width="570" cellpadding="0" cellspacing="0">
+    <table class="email-body_inner" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation" bgcolor="#ffffff">
+      <tr><td class="content-cell f-fallback" style="padding:36px 40px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;">
+        <span style="display:none !important;visibility:hidden;mso-hide:all;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${escapeHtml(preheader || '')}</span>
+        ${bodyHtml}
+      </td></tr>
+    </table>
+  </td></tr>
+  <tr><td>
+    <table class="email-footer" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
+      <tr><td class="content-cell f-fallback" align="center" style="padding:24px 40px 32px 40px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#999999;text-align:center;">
+        ${footerHtml}
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function buildAllVideosCompletedCoachEmail({ session, coach, payload }) {
+  const lang = detectCoachLanguage(coach, session, payload);
+  const copy = HOT_LEAD_EMAIL_I18N[lang] || HOT_LEAD_EMAIL_I18N.de;
+  const firstName = session.form_first_name || payload.first_name || 'Interessent';
+  const email = session.form_email || payload.email || '';
+  const rawProfileCode = session.quiz_profile || payload.quiz_profile || '';
+  const profileCode = normalizeProfileCode(rawProfileCode);
+  const fallbackProfile = [rawProfileCode, session.quiz_profile_name || payload.quiz_profile_name]
+    .filter(Boolean)
+    .join(' - ');
+  const profileLabel = copy.profiles[profileCode] || fallbackProfile || '-';
+  const rawAspiration =
+    session.main_aspiration_label || session.quiz_aspiration || payload.quiz_aspiration || '';
+  const aspiration = copy.aspirations[normalizeAspirationKey(rawAspiration)] || rawAspiration || '-';
+  const rawBarrier = session.quiz_barrier || payload.quiz_barrier || '';
+  const barrier = copy.barriers[normalizeBarrierKey(rawBarrier)] || rawBarrier || '-';
+  const completedAt = formatLocalizedDateTime(payload.completed_at || nowIso(), lang);
+  const coachFirstName = coach.first_name || 'Markus';
+  const brandName = coach.organisation_name || coach.org_name || coach.company || 'Activecenter';
+  const subject = copy.subject(firstName);
+  const rows = [
+    [copy.labels.name, firstName],
+    [copy.labels.email, email],
+    [copy.labels.type, profileLabel],
+    [copy.labels.aspiration, aspiration],
+    [copy.labels.barrier, barrier],
+    [copy.labels.completedAt, completedAt],
+  ];
+  const htmlRows = rows
+    .map(
+      ([label, value]) =>
+        `<tr><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;font-weight:700;width:180px;">${escapeHtml(label)}</td><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;">${escapeHtml(value)}</td></tr>`
+    )
+    .join('');
+  const textRows = rows.map(([label, value]) => `${label}: ${value || '-'}`).join('\n');
+  const bodyHtml = [
+    `<h1 style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:28px;line-height:1.3;color:#212529;">${escapeHtml(copy.title)}</h1>`,
+    `<p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;">${escapeHtml(copy.greeting(coachFirstName))}</p>`,
+    `<p style="margin:0 0 24px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;">${escapeHtml(copy.intro)}</p>`,
+    '<table style="width:100%;border-collapse:collapse;margin:0 0 8px 0;">',
+    htmlRows,
+    '</table>',
+  ].join('');
+
+  return {
+    to: coach.email,
+    subject,
+    html: buildBrandedEmailShell({
+      preheader: copy.preheader,
+      bodyHtml,
+      brandName,
+      footerHtml: buildDefaultFooter(copy.footerReason, lang),
+    }),
+    text: [
+      copy.title,
+      '',
+      copy.greeting(coachFirstName),
+      '',
+      copy.intro,
+      '',
+      textRows,
+    ].join('\n'),
+  };
+}
+
+async function loadCompletionNotificationContext(payload, forwardedFor, userAgent) {
+  const leadHash = safeString(payload.lead_hash || payload.hash, 96);
+  const sessionHash = safeString(payload.session_hash || payload.tracking_hash, 96);
+  const sessionRows = sessionHash
+    ? await supabaseJson(
+        `tracking_sessions?session_hash=eq.${encodeURIComponent(sessionHash)}&select=*&limit=1`
+      )
+    : leadHash
+      ? await supabaseJson(
+          `tracking_sessions?lead_hash=eq.${encodeURIComponent(leadHash)}&select=*&limit=1`
+        )
+      : [];
+  const trackingSession = Array.isArray(sessionRows) ? sessionRows[0] || {} : {};
+  const quizRows = leadHash
+    ? await supabaseJson(`quiz_sessions?hash=eq.${encodeURIComponent(leadHash)}&select=*&limit=1`)
+    : [];
+  const quizSession = Array.isArray(quizRows) ? quizRows[0] || {} : {};
+  const session = {
+    ...trackingSession,
+    ...quizSession,
+    form_first_name: quizSession.form_first_name || trackingSession.form_first_name,
+    form_email: quizSession.form_email || trackingSession.form_email,
+    quiz_profile: quizSession.quiz_profile || trackingSession.quiz_profile,
+    quiz_profile_name: quizSession.quiz_profile_name || trackingSession.quiz_profile_name,
+    quiz_aspiration: quizSession.quiz_aspiration || trackingSession.main_aspiration,
+    main_aspiration_label: trackingSession.main_aspiration_label,
+    quiz_barrier: quizSession.quiz_barrier || trackingSession.quiz_barrier,
+  };
+  const slug = safeString(
+    payload.berater_slug || payload.slug || session.berater_slug || trackingSession.berater_slug,
+    80
+  );
+  const coachResult = await proxyToBridge(
+    { action: 'lookup_subdomain', subdomain: slug || 'default' },
+    forwardedFor,
+    userAgent
+  );
+
+  return { leadHash, sessionHash, session, slug, coach: coachResult.data || {} };
+}
+
 function generateId(prefix, length = 24) {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let out = `${prefix}_`;
@@ -1170,8 +1753,9 @@ module.exports = async function handler(req, res) {
   }
 
   if (action === 'lookup_subdomain') {
+    const normalizedSubdomain = String(subdomain || 'default').trim().toLowerCase();
     const result = await proxyToBridge(
-      { action: 'lookup_subdomain', subdomain: subdomain || 'default' },
+      { action: 'lookup_subdomain', subdomain: normalizedSubdomain },
       forwardedFor,
       userAgent
     );
@@ -1227,6 +1811,106 @@ module.exports = async function handler(req, res) {
       processed,
       failed,
       total: events.length,
+    });
+  }
+
+  if (action === 'notify_all_videos_completed') {
+    if (!payload) {
+      return res.status(400).json({ error: 'Missing payload' });
+    }
+
+    const completedSteps = Array.isArray(payload.completed_steps)
+      ? payload.completed_steps.map((step) => safeInteger(step)).filter(Boolean)
+      : [];
+    const hasAllVideos = [1, 2, 3].every((step) => completedSteps.includes(step));
+    if (!hasAllVideos) {
+      return res.status(202).json({
+        success: true,
+        email_sent: false,
+        reason: 'not_all_videos_completed',
+      });
+    }
+
+    const context = await loadCompletionNotificationContext(payload, forwardedFor, userAgent);
+    const notificationKey = crypto
+      .createHash('sha256')
+      .update(`all-videos-completed:${context.leadHash || context.sessionHash || ''}`)
+      .digest('hex')
+      .slice(0, 40);
+    const notificationEventId = `evt_video_all_done_${notificationKey}`;
+    const existingRows = await supabaseJson(
+      `tracking_events?event_id=eq.${encodeURIComponent(notificationEventId)}&select=id&limit=1`
+    );
+    if (Array.isArray(existingRows) && existingRows.length > 0) {
+      return res.status(200).json({
+        success: true,
+        email_sent: false,
+        skipped: true,
+        reason: 'already_notified',
+      });
+    }
+
+    if (!context.coach.email) {
+      return res.status(202).json({
+        success: false,
+        email_sent: false,
+        reason: 'coach_email_missing',
+      });
+    }
+
+    const email = buildAllVideosCompletedCoachEmail({
+      session: context.session,
+      coach: context.coach,
+      payload,
+      slug: context.slug,
+    });
+    const postmark = await sendPostmarkEmail({
+      From: POSTMARK_FROM,
+      To: email.to,
+      Subject: email.subject,
+      HtmlBody: email.html,
+      TextBody: email.text,
+      MessageStream: POSTMARK_MESSAGE_STREAM,
+      Metadata: {
+        lead_hash: String(context.leadHash || ''),
+        session_hash: String(context.sessionHash || ''),
+        event_type: 'all_videos_completed',
+      },
+    });
+
+    if (!postmark.ok) {
+      return res.status(postmark.status || 502).json({
+        success: false,
+        email_sent: false,
+        reason: 'postmark_send_failed',
+        postmark: postmark.data,
+      });
+    }
+
+    await insertIgnoringDuplicates('tracking_events', 'event_id', {
+      event_id: notificationEventId,
+      session_hash: context.sessionHash || context.leadHash || notificationEventId,
+      lead_hash: context.leadHash || null,
+      member_id: safeString(payload.member_id || context.session.herbalife_id, 80),
+      berater_slug: context.slug || null,
+      source_app: 'business_leads_quiz',
+      funnel: 'business',
+      lang: safeString(payload.lang || context.session.lang, 10),
+      event_name: 'video_all_completed_coach_email_sent',
+      event_at: safeString(payload.completed_at || nowIso(), 40),
+      properties: {
+        coach_email: context.coach.email,
+        postmark_message_id:
+          postmark.data?.MessageID || postmark.data?.MessageId || postmark.data?.messageId || null,
+        completed_steps: completedSteps,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      email_sent: true,
+      postmark_message_id:
+        postmark.data?.MessageID || postmark.data?.MessageId || postmark.data?.messageId || null,
     });
   }
 

@@ -427,7 +427,7 @@ async function lookupCoach(slug) {
   const response = await fetch('/api/bridge', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'lookup_subdomain', subdomain: slug }),
+    body: JSON.stringify({ action: 'lookup_subdomain', subdomain: String(slug || '').trim().toLowerCase() }),
   });
 
   return response.json();
@@ -446,6 +446,8 @@ function normalizeCoach(rawCoach, slug) {
     first_name: rawCoach.first_name || 'Coach',
     phone: rawCoach.phone || '',
     email: rawCoach.email || '',
+    preferred_newsletter_language: rawCoach.preferred_newsletter_language || '',
+    language: rawCoach.preferred_newsletter_language || rawCoach.language || rawCoach.lang || '',
     avatar_300: rawCoach.avatar_300 || '',
     avatar_600: rawCoach.avatar_600 || '',
     address: rawCoach.address || null,
