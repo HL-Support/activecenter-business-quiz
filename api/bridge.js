@@ -687,7 +687,7 @@ async function persistBusinessSubmissionForResume(input) {
   });
 }
 
-async function proxyToBridge(body, forwardedFor, userAgent) {
+async function proxyToBridgeOnce(body, forwardedFor, userAgent, timeoutMs) {
   if (!BRIDGE_KEY) {
     return {
       status: 500,
@@ -695,16 +695,29 @@ async function proxyToBridge(body, forwardedFor, userAgent) {
     };
   }
 
-  const response = await fetch(BRIDGE_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Bridge-Key': BRIDGE_KEY,
-      'X-Forwarded-For': forwardedFor || '',
-      'User-Agent': userAgent || '',
-    },
-    body: JSON.stringify(body),
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  let response;
+  try {
+    response = await fetch(BRIDGE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Bridge-Key': BRIDGE_KEY,
+        'X-Forwarded-For': forwardedFor || '',
+        'User-Agent': userAgent || '',
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    clearTimeout(timer);
+    const isTimeout = err.name === 'AbortError';
+    console.error('proxyToBridge fetch error:', err.message);
+    return { status: isTimeout ? 504 : 502, data: { error: isTimeout ? 'upstream_timeout' : 'upstream_error' } };
+  }
+  clearTimeout(timer);
 
   const text = await response.text();
   let data;
@@ -714,6 +727,17 @@ async function proxyToBridge(body, forwardedFor, userAgent) {
     data = { raw: text };
   }
   return { status: response.status, data };
+}
+
+async function proxyToBridge(body, forwardedFor, userAgent, timeoutMs = 8000) {
+  const result = await proxyToBridgeOnce(body, forwardedFor, userAgent, timeoutMs);
+  // Retry once on 5xx or timeout — n8n occasionally returns 500 under load
+  if (result.status >= 500) {
+    console.warn(`proxyToBridge first attempt returned ${result.status}, retrying in 1.5s…`);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return proxyToBridgeOnce(body, forwardedFor, userAgent, timeoutMs);
+  }
+  return result;
 }
 
 async function sendPostmarkEmail(message) {
@@ -947,7 +971,7 @@ function detectCoachLanguage(coach, session, payload) {
       ...DEFAULT_COACH_LANGUAGE_OVERRIDES,
       ...JSON.parse(process.env.COACH_LANGUAGE_OVERRIDES_JSON || '{}'),
     };
-  } catch {}
+  } catch (_) { /* ignore parse errors, use defaults */ }
   const slug = String(payload?.berater_slug || payload?.slug || coach?.sub_domain || session?.berater_slug || '')
     .trim()
     .toLowerCase();
@@ -1926,17 +1950,21 @@ module.exports = async function handler(req, res) {
     }
 
     const webhookPayload = buildBusinessTypeformPayload(payload);
-    await persistBusinessSubmissionForResume(payload);
-    const result = await proxyToBridge(
-      {
-        action: 'forward_webhook',
-        payload: webhookPayload,
-        target,
-        meta,
-      },
-      forwardedFor,
-      userAgent
-    );
+    const [result] = await Promise.all([
+      proxyToBridge(
+        {
+          action: 'forward_webhook',
+          payload: webhookPayload,
+          target,
+          meta,
+        },
+        forwardedFor,
+        userAgent
+      ),
+      persistBusinessSubmissionForResume(payload).catch((err) =>
+        console.warn('persistBusinessSubmissionForResume failed (non-critical):', err.message)
+      ),
+    ]);
     result.data = { ...result.data, adapter_key: adapterKey, payload: webhookPayload };
     return res.status(result.status).json(result.data);
   }
