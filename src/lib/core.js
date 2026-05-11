@@ -884,7 +884,20 @@ export async function forwardQuizSubmission(
   const slug = String(
     coach.slug || storage.getItem('acBeraterSlug') || getCurrentSlug() || 'default'
   ).toLowerCase();
-  const memberId = String(storage.getItem('acMemberId') || coach.member_id || '');
+  let memberId = String(storage.getItem('acMemberId') || coach.member_id || '');
+
+  // If member_id is missing but slug is valid, re-fetch from bridge to recover it
+  if (!memberId && slug && slug !== 'default') {
+    try {
+      const freshCoach = await lookupCoach(slug);
+      if (freshCoach?.herbalife_id) {
+        memberId = String(freshCoach.herbalife_id);
+        storage.setItem('acMemberId', memberId);
+        storage.setItem('acCoach', JSON.stringify(normalizeCoach(freshCoach, slug)));
+      }
+    } catch (e) { console.warn('member_id recovery failed:', e?.message); }
+  }
+
   const leadRun = markLeadRun(
     slug,
     getLeadRunForSubmission(slug, memberId),
