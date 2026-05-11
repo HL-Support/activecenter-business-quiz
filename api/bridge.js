@@ -726,12 +726,14 @@ async function proxyToBridgeOnce(body, forwardedFor, userAgent, timeoutMs) {
   } catch (_) {
     data = { raw: text };
   }
+  if (response.status >= 400) {
+    console.error(`proxyToBridgeOnce upstream ${response.status}:`, text.slice(0, 500));
+  }
   return { status: response.status, data };
 }
 
 async function proxyToBridge(body, forwardedFor, userAgent, timeoutMs = 8000) {
   const result = await proxyToBridgeOnce(body, forwardedFor, userAgent, timeoutMs);
-  // Retry once on 5xx or timeout — n8n occasionally returns 500 under load
   if (result.status >= 500) {
     console.warn(`proxyToBridge first attempt returned ${result.status}, retrying in 1.5s…`);
     await new Promise((resolve) => setTimeout(resolve, 1500));
