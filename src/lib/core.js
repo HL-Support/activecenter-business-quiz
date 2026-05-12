@@ -12,6 +12,7 @@ const TRACKING_SCHEMA_VERSION = 'ac_tracking_v1';
 const LEGACY_QUIZ_HASH_KEY = 'acQuizHash';
 const LEGACY_QUIZ_HASH_PREFIX = 'acQuizHash:';
 const LEAD_RUN_PREFIX = 'acLeadRun:';
+const DEFAULT_VIDEO_COUNT = 3;
 const DEFAULT_COACH = {
   slug: 'default',
   member_id: '',
@@ -104,6 +105,19 @@ export function getCurrentSlug() {
   const firstPathSegment =
     window.location.pathname.replace(/^\/+/, '').toLowerCase().split('/')[0] || 'default';
   return validateSlug(firstPathSegment) ? firstPathSegment : 'default';
+}
+
+function normalizeCoachSlugCandidate(value) {
+  const slug = String(value || '').trim().toLowerCase();
+  return slug && slug !== 'default' && validateSlug(slug) ? slug : '';
+}
+
+function firstValidCoachSlug(...values) {
+  for (const value of values) {
+    const slug = normalizeCoachSlugCandidate(value);
+    if (slug) return slug;
+  }
+  return '';
 }
 
 export function isoNow() {
@@ -431,6 +445,20 @@ async function lookupCoach(slug) {
   });
 
   return response.json();
+}
+
+async function recoverCoachMemberId(slug) {
+  const normalizedSlug = String(slug || '').trim().toLowerCase();
+  if (!normalizedSlug || normalizedSlug === 'default') return '';
+
+  const freshCoach = await lookupCoach(normalizedSlug);
+  const memberId = String(freshCoach?.herbalife_id || freshCoach?.member_id || '').trim();
+  if (!memberId) return '';
+
+  storage.setItem('acMemberId', memberId);
+  storage.setItem('acBeraterSlug', normalizedSlug);
+  storage.setItem('acCoach', JSON.stringify(normalizeCoach(freshCoach, normalizedSlug)));
+  return memberId;
 }
 
 function normalizeCoach(rawCoach, slug) {
@@ -881,21 +909,17 @@ export async function forwardQuizSubmission(
   aspiration = 'freedom'
 ) {
   const coach = getCoachFromStorage() || {};
-  const slug = String(
-    coach.slug || storage.getItem('acBeraterSlug') || getCurrentSlug() || 'default'
-  ).toLowerCase();
+  const slug =
+    firstValidCoachSlug(coach.slug, storage.getItem('acBeraterSlug'), getCurrentSlug()) ||
+    'default';
   let memberId = String(storage.getItem('acMemberId') || coach.member_id || '');
 
-  // If member_id is missing but slug is valid, re-fetch from bridge to recover it
   if (!memberId && slug && slug !== 'default') {
     try {
-      const freshCoach = await lookupCoach(slug);
-      if (freshCoach?.herbalife_id) {
-        memberId = String(freshCoach.herbalife_id);
-        storage.setItem('acMemberId', memberId);
-        storage.setItem('acCoach', JSON.stringify(normalizeCoach(freshCoach, slug)));
-      }
-    } catch (e) { console.warn('member_id recovery failed:', e?.message); }
+      memberId = await recoverCoachMemberId(slug);
+    } catch (e) {
+      console.warn('member_id recovery failed:', e?.message);
+    }
   }
 
   const leadRun = markLeadRun(
@@ -916,6 +940,28 @@ export async function forwardQuizSubmission(
   const submittedAt = isoNow();
   const mainAspiration = normalizeAspiration(aspiration);
   const mainAspirationLabel = getAspirationLabel(mainAspiration);
+
+  function sendInitialPointsResultUpdate() {
+    fetch('/api/bridge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        action: 'update_points_result',
+        payload: {
+          lead_hash: hash,
+          session_hash: sessionHash,
+          berater_slug: slug,
+          member_id: memberId,
+          lang,
+          video_step: 0,
+          completed_count: 0,
+          total_videos: DEFAULT_VIDEO_COUNT,
+          completion_reason: 'initial_form_submit',
+        },
+      }),
+    }).catch(() => undefined);
+  }
 
   return fetchWithTimeout(
     '/api/bridge',
@@ -981,6 +1027,7 @@ export async function forwardQuizSubmission(
     .then((response) => {
       if (response.ok) {
         markLeadRun(slug, leadRun, 'submitted');
+        sendInitialPointsResultUpdate();
       } else {
         markLeadRun(slug, leadRun, 'active');
       }

@@ -148,6 +148,8 @@
       optin_email_error_format: 'Bitte gib eine gültige E-Mail-Adresse ein.',
       optin_email_error_invalid:
         'Diese E-Mail-Adresse wirkt nicht zustellbar. Bitte prüfe sie kurz.',
+      optin_submit_error:
+        'Wir konnten deinen Ansprechpartner gerade nicht sicher zuordnen. Bitte lade die Seite neu und versuche es noch einmal.',
       optin_privacy: 'Kein Spam, versprochen.',
 
       video_1_title: 'Teil 1: Einführung',
@@ -594,6 +596,8 @@
       optin_email_error_format: 'Inserisci un indirizzo e-mail valido.',
       optin_email_error_invalid:
         'Questo indirizzo e-mail sembra non essere raggiungibile. Controllalo un attimo.',
+      optin_submit_error:
+        'Non siamo riusciti ad assegnare il tuo referente. Ricarica la pagina e riprova.',
       optin_privacy: 'Niente spam, promesso.',
 
       video_1_title: 'Parte 1: Introduzione',
@@ -1031,6 +1035,8 @@
       optin_email_error_format: 'Please enter a valid email address.',
       optin_email_error_invalid:
         'This email address does not seem deliverable. Please double-check it.',
+      optin_submit_error:
+        'We could not securely assign your advisor. Please reload the page and try again.',
       optin_privacy: 'No spam, promise.',
 
       video_1_title: 'Part 1: Introduction',
@@ -1464,6 +1470,8 @@
       optin_email_error_format: "Merci d'entrer une adresse e-mail valide.",
       optin_email_error_invalid:
         'Cette adresse e-mail ne semble pas valide. Vérifies-la rapidement.',
+      optin_submit_error:
+        "Nous n'avons pas pu identifier ton conseiller. Recharge la page et reessaie.",
       optin_privacy: 'Pas de spam, promis.',
 
       video_1_title: 'Partie 1: Introduction',
@@ -1911,6 +1919,8 @@
       optin_btn_validating: 'Проверка email...',
       optin_email_error_format: 'Пожалуйста, введи валидный email адрес.',
       optin_email_error_invalid: 'Этот email адрес похоже недействителен. Проверь его быстро.',
+      optin_submit_error:
+        'Не удалось надежно определить твоего консультанта. Перезагрузи страницу и попробуй еще раз.',
       optin_privacy: 'Без спама. Обещаем.',
 
       video_1_title: 'Часть 1: Введение',

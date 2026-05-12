@@ -26,23 +26,118 @@ import {
   getActiveLeadRun,
 } from '../lib/core.js';
 
-const UPDATE_RESULT_WEBHOOK = 'https://n8n.hl-support.biz/webhook/update_result_by_hash';
+const VIDEO_FULL_COMPLETION_KEY_PREFIX = 'acVideoFullCompletion_';
+const VIDEO_COMPLETION_NOTIFY_KEY_PREFIX = 'acVideoCompletionCoachNotify_';
+const VIDEO_POINTS_COMPLETION_KEY_PREFIX = 'acVideoPointsCompletion_';
 
-function sendVideoProgressWebhook(slug, memberId, completedStep, videoSteps, videoProgressStore) {
-  const totalSteps = Object.keys(videoSteps).length;
-  let completedCount = 0;
-  for (let step = 1; step <= totalSteps; step++) {
-    if (videoProgressStore.isVideoCompleted(slug, step) || step === completedStep) completedCount++;
+function readStoredObject(key) {
+  try {
+    return JSON.parse(le.getItem(key) || '{}') || {};
+  } catch {
+    return {};
   }
+}
+
+function storeObject(key, value) {
+  try {
+    le.setItem(key, JSON.stringify(value || {}));
+  } catch {
+    // Storage failure is non-critical for progress bookkeeping.
+  }
+}
+
+function leadScopedVideoKey(prefix, slug, memberId) {
   const leadRun = getActiveLeadRun(slug, memberId);
-  const hash = leadRun?.lead_hash || '';
-  if (!hash) return;
-  fetch(UPDATE_RESULT_WEBHOOK, {
+  return {
+    key: `${prefix}${slug}_${leadRun?.lead_hash || leadRun?.session_hash || 'anonymous'}`,
+    leadRun,
+  };
+}
+
+function sendVideoProgressWebhook(
+  slug,
+  memberId,
+  completedStep,
+  videoSteps,
+  completionReason = 'unique_watch_95'
+) {
+  const totalSteps = Object.keys(videoSteps).length;
+  const { key, leadRun } = leadScopedVideoKey(VIDEO_POINTS_COMPLETION_KEY_PREFIX, slug, memberId);
+  const sessionHash = leadRun?.session_hash || '';
+  const leadHash = leadRun?.lead_hash || '';
+  if (!sessionHash && !leadHash) return;
+  if (completionReason === 'manual_unlock') return;
+
+  const completed = readStoredObject(key);
+  completed[completedStep] = true;
+  storeObject(key, completed);
+  const completedCount = Object.keys(completed)
+    .map((step) => Number(step))
+    .filter((step) => completed[step] === true && step >= 1 && step <= totalSteps).length;
+
+  fetch('/api/bridge', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     keepalive: true,
-    body: JSON.stringify({ hash, personalityType: completedCount + '/3 Videos 100%' }),
+    body: JSON.stringify({
+      action: 'update_points_result',
+      payload: {
+        lead_hash: leadHash,
+        session_hash: sessionHash,
+        berater_slug: slug,
+        member_id: memberId,
+        lang: getPreferredLang(),
+        video_step: completedStep,
+        completed_count: completedCount,
+        total_videos: totalSteps,
+        completion_reason: completionReason,
+      },
+    }),
   }).catch(() => {});
+}
+
+function sendAllVideosCompletedCoachNotification(slug, memberId, completedStep, videoSteps) {
+  const totalSteps = Object.keys(videoSteps).length;
+  const { key, leadRun } = leadScopedVideoKey(VIDEO_FULL_COMPLETION_KEY_PREFIX, slug, memberId);
+  const completed = readStoredObject(key);
+  completed[completedStep] = true;
+  storeObject(key, completed);
+
+  const completedSteps = Object.keys(completed)
+    .map((step) => Number(step))
+    .filter((step) => completed[step] === true && step >= 1 && step <= totalSteps)
+    .sort((left, right) => left - right);
+
+  if (completedSteps.length < totalSteps) return;
+
+  const notifyKey = `${VIDEO_COMPLETION_NOTIFY_KEY_PREFIX}${slug}_${leadRun?.lead_hash || leadRun?.session_hash || 'anonymous'}`;
+  if (le.getItem(notifyKey) === 'sent') return;
+
+  fetch('/api/bridge', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    keepalive: true,
+    body: JSON.stringify({
+      action: 'notify_all_videos_completed',
+      payload: {
+        hash: leadRun?.lead_hash || '',
+        lead_hash: leadRun?.lead_hash || '',
+        session_hash: leadRun?.session_hash || '',
+        berater_slug: slug,
+        member_id: memberId,
+        lang: getPreferredLang(),
+        completed_steps: completedSteps,
+        completed_at: new Date().toISOString(),
+      },
+    }),
+  })
+    .then((response) => response.json().catch(() => ({})))
+    .then((data) => {
+      if (data && data.success && data.email_sent) {
+        le.setItem(notifyKey, 'sent');
+      }
+    })
+    .catch(() => {});
 }
 
 function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
@@ -242,7 +337,9 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
     player.on('ended', function () {
       if (destroyed) return;
       markWatched(lastSecond, duration || lastSecond);
-      track('video_completed', buildProgressPayload('playerjs_ended', 100));
+      const completedPayload = buildProgressPayload('playerjs_ended', 100);
+      track('video_completed', completedPayload);
+      if (options.onCompleted) options.onCompleted(videoStep, completedPayload);
       emitProgress('playerjs_ended', !0);
       if (uniqueWatchedPercent() >= 95) unlock('ended');
     });
@@ -296,11 +393,12 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
       y(!0);
       const C = i.trim(),
         z = s.trim();
-      (Dt('form_submit', {
-        form_first_name: C,
-        form_email: z,
-        form_submitted_at: new Date().toISOString(),
-      }),
+      try {
+        Dt('form_submit', {
+          form_first_name: C,
+          form_email: z,
+          form_submitted_at: new Date().toISOString(),
+        });
         await Hp({
           vorname: C,
           email: z,
@@ -308,19 +406,28 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
           barriere: t[5]?.barrier || '',
           aspiration: r,
           berater: n,
-        }),
-        await Qp(C, z, t, e, r),
-        ld.clear(n || 'default'));
-      try {
-        window.acTrack &&
-          (await Promise.race([
-            window.acTrack('quiz_form_submit', { pageKey: 'quiz' }),
-            new Promise((V) => setTimeout(V, 500)),
-          ]));
-      } catch (_error) {
-        // intentionally empty - tracking error is non-critical
+        });
+        const submitResult = await Qp(C, z, t, e, r);
+        if (!submitResult || submitResult.success === false || submitResult.error) {
+          throw new Error(submitResult?.error || 'submit_failed');
+        }
+        ld.clear(n || 'default');
+        try {
+          window.acTrack &&
+            (await Promise.race([
+              window.acTrack('quiz_form_submit', { pageKey: 'quiz' }),
+              new Promise((V) => setTimeout(V, 500)),
+            ]));
+        } catch (_error) {
+          // intentionally empty - tracking error is non-critical
+        }
+        y(!1);
+        o();
+      } catch (error) {
+        console.warn('Quiz submission failed:', error?.message || error);
+        y(!1);
+        k(a('optin_submit_error'));
       }
-      (y(!1), o());
     };
   React.useEffect(() => {
     Dt('optin_viewed', {
@@ -627,6 +734,7 @@ function VideoStep({
   onNext: l,
   onPrev: o,
   onVideoReached95: i,
+  onVideoFullyCompleted: b,
 }) {
   const u = n[t];
   if (!u) return null;
@@ -660,13 +768,16 @@ function VideoStep({
       const L = qp(
         T,
         t,
-        () => {
-          (h(!0), ld.setVideoCompleted(V, t), k('unlocked'), f(null), i && i(t));
+        (unlockReason) => {
+          (h(!0), ld.setVideoCompleted(V, t), k('unlocked'), f(null), i && i(t, unlockReason));
         },
         function (j) {
           (j?.status && k(j.status), f(j?.reason || null));
         },
-        { videoId: u.id || `quiz_video_${t}` }
+        {
+          videoId: u.id || `quiz_video_${t}`,
+          onCompleted: (j) => b && b(j),
+        }
       );
       return () => {
         L && L();
@@ -880,7 +991,7 @@ function VideoStep({
                       ld.setVideoCompleted(V, t),
                       k('unlocked'),
                       f('manual_unlock'),
-                      i && i(t));
+                      i && i(t, 'manual_unlock'));
                   },
                   style: Su({
                     color: 'rgba(245,240,232,0.78)',
@@ -2124,10 +2235,15 @@ function QuizFlow() {
       videoStep: c,
       videos: videoSteps,
       visible: s,
-      onVideoReached95: (completedStep) => {
+      onVideoReached95: (completedStep, completionReason) => {
         const slug = le.getItem('acBeraterSlug') || 'default';
         const memberId = le.getItem('acMemberId') || '';
-        sendVideoProgressWebhook(slug, memberId, completedStep, videoSteps, ld);
+        sendVideoProgressWebhook(slug, memberId, completedStep, videoSteps, completionReason);
+      },
+      onVideoFullyCompleted: (completedStep) => {
+        const slug = le.getItem('acBeraterSlug') || 'default';
+        const memberId = le.getItem('acMemberId') || '';
+        sendAllVideosCompletedCoachNotification(slug, memberId, completedStep, videoSteps);
       },
       onNext: () => {
         Dt('video_continue_click', {
