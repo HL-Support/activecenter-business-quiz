@@ -49,6 +49,7 @@ Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
   - `tracking_sessions`: eine aktuelle Session-/Lead-Zusammenfassung pro `session_hash`.
   - `tracking_events`: append-only Eventlog fuer jeden relevanten Funnel-Schritt.
   - `tracking_video_progress`: eine kompakte Video-Zusammenfassung pro `session_hash` und Video-Step.
+  - `lead_profiles`: ein kompakter Journey-State pro Lead/Session mit Profil, Ziel, Barriere, Lifecycle-Stage und naechstem CTA.
 - Das auszufuehrende Schema liegt in `supabase-schema.sql`.
 - Neue Supabase-Tabellen sind bewusst additive. Wenn sie noch nicht existieren, loggt die API nur `Supabase tracking error`, aber der alte Webhook- und `quiz_sessions`-Flow laeuft weiter.
 - `tracking_sessions` ist die Dashboard-Aggregation und darf durch spaetere Events ohne Name/E-Mail/Profil/Ziel nicht wieder mit leeren Werten ueberschrieben werden.
@@ -58,6 +59,7 @@ Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
 - Vorspulen wird erkannt. Wenn ein Nutzer ueber den bereits real angeschauten Bereich hinausspringt, setzt der Player auf den letzten erlaubten Bereich zurueck. Der 75-Prozent-Weiterbutton wird nur durch echte Unique-Watch-Zeit freigeschaltet.
 - `max_playhead_percent` bleibt als separates Feld erhalten, damit man spaeter erkennen kann, ob jemand stark gespult hat.
 - `member_id` ist der zentrale Tenant-/Coach-Schluessel fuer spaetere Dashboards. Coaches sehen spaeter Daten mit ihrer eigenen `member_id`; der interne Admin bekommt alle Daten.
+- `lead_profiles.next_step` steuert spaetere Follow-up-Logik: `watch_video_1`, `watch_video_2`, `watch_video_3`, `signal_interest`, `personal_follow_up`.
 - Die vorbereitete Tabelle `coach_access` ist nur ein Scope-Mapping. Die eigentliche Authentifizierung soll weiterhin gegen die bestehende MySQL/Laravel-User-Tabelle laufen.
 
 ## Webhook-Format

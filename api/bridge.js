@@ -554,12 +554,253 @@ async function writeTrackingEvent(payload) {
   }
 }
 
+const PROFILE_STAGE_RANK = {
+  profiled: 1,
+  video_1_watched: 2,
+  video_2_watched: 3,
+  video_3_watched: 4,
+  interest_signaled: 5,
+  product_info_sent: 6,
+  info_call_booked: 7,
+  info_call_done: 8,
+  not_interested: 9,
+};
+
+function canonicalSuccessCode(value) {
+  const raw = String(value || '')
+    .trim()
+    .toLowerCase();
+  if (!raw) return null;
+  if (['r', 'feuer', 'fire', 'typ a', 'tipo a', 'type a'].includes(raw)) return 'feuer';
+  if (['y', 'wind', 'typ b', 'tipo b', 'type b'].includes(raw)) return 'wind';
+  if (['g', 'wasser', 'water', 'typ c', 'tipo c', 'type c'].includes(raw)) return 'wasser';
+  if (['b', 'fels', 'rock', 'typ d', 'tipo d', 'type d'].includes(raw)) return 'fels';
+  if (raw.includes('feuer') || raw.includes('fire')) return 'feuer';
+  if (raw.includes('wind')) return 'wind';
+  if (raw.includes('wasser') || raw.includes('water')) return 'wasser';
+  if (raw.includes('fels') || raw.includes('rock')) return 'fels';
+  return null;
+}
+
+function normalizedEmailHash(email) {
+  const normalized = String(email || '')
+    .trim()
+    .toLowerCase();
+  if (!normalized) return null;
+  return crypto.createHash('sha256').update(normalized).digest('hex');
+}
+
+function watchedVideoStepFromPayload(payload, eventName) {
+  const directStep = safeInteger(payload.video_step);
+  const uniquePercent = safeInteger(payload.unique_watched_percent);
+  const progressPercent = safeInteger(payload.progress_percent);
+  const completedByEvent =
+    eventName === 'video_completed' ||
+    eventName === 'video_unlocked' ||
+    uniquePercent >= 95 ||
+    progressPercent >= 95;
+
+  if (directStep && completedByEvent) return Math.min(3, directStep);
+
+  const video3 = safeInteger(payload.video3_max_pct);
+  if (video3 >= 95) return 3;
+  const video2 = safeInteger(payload.video2_max_pct);
+  if (video2 >= 95) return 2;
+  const video1 = safeInteger(payload.video1_max_pct);
+  if (video1 >= 95) return 1;
+  return 0;
+}
+
+function journeyStateFor({ completedVideoStep, interestSignaled }) {
+  if (interestSignaled) {
+    return { lifecycleStage: 'interest_signaled', nextStep: 'personal_follow_up' };
+  }
+  if (completedVideoStep >= 3) {
+    return { lifecycleStage: 'video_3_watched', nextStep: 'signal_interest' };
+  }
+  if (completedVideoStep === 2) {
+    return { lifecycleStage: 'video_2_watched', nextStep: 'watch_video_3' };
+  }
+  if (completedVideoStep === 1) {
+    return { lifecycleStage: 'video_1_watched', nextStep: 'watch_video_2' };
+  }
+  return { lifecycleStage: 'profiled', nextStep: 'watch_video_1' };
+}
+
+function strongerStage(currentStage, candidateStage) {
+  const currentRank = PROFILE_STAGE_RANK[currentStage] || 0;
+  const candidateRank = PROFILE_STAGE_RANK[candidateStage] || 0;
+  if (currentStage && !currentRank) return currentStage;
+  return candidateRank >= currentRank ? candidateStage : currentStage;
+}
+
+async function loadLeadProfile(profileKey) {
+  const rows = await supabaseJson(
+    `lead_profiles?profile_key=eq.${encodeURIComponent(profileKey)}&select=profile_key,lifecycle_stage,next_step,last_completed_video_step,interest_signaled_at&limit=1`
+  );
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+async function recordLifecycleTransition({ identity, profileKey, fromStage, toStage, nextStep, eventAt }) {
+  if (!toStage || fromStage === toStage) return;
+
+  await supabaseRequest('tracking_events', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(
+      compactObject({
+        event_id: generateId('evt_lifecycle', 28),
+        session_hash: identity.sessionHash || profileKey,
+        lead_hash: identity.leadHash,
+        member_id: identity.memberId,
+        berater_slug: identity.slug,
+        source_app: identity.sourceApp,
+        funnel: identity.funnel,
+        event_name: 'lifecycle_stage_changed',
+        event_at: eventAt,
+        properties: {
+          profile_key: profileKey,
+          from_stage: fromStage || null,
+          to_stage: toStage,
+          next_step: nextStep,
+        },
+      })
+    ),
+  });
+}
+
+async function upsertLeadProfile(payload) {
+  const identity = trackingIdentity(payload || {});
+  const profileKey = identity.sessionHash || identity.leadHash;
+  if (!profileKey) return null;
+
+  try {
+    const eventName = eventNameOf(payload);
+    const eventAt = safeString(
+      payload.event_at ||
+        payload.form_submitted_at ||
+        payload.quiz_completed_at ||
+        payload.cta_clicked_at ||
+        nowIso(),
+      40
+    );
+    const current = await loadLeadProfile(profileKey);
+    const currentVideoStep = safeInteger(current?.last_completed_video_step) || 0;
+    const eventVideoStep = watchedVideoStepFromPayload(payload, eventName);
+    const completedVideoStep = Math.max(currentVideoStep, eventVideoStep);
+    const ctaType = String(payload.cta_type || payload.final_cta_type || '').toLowerCase();
+    const email = safeString(payload.form_email || payload.email, 160);
+    const successCode = canonicalSuccessCode(
+      payload.success_code || payload.quiz_profile || payload.profile_code || payload.profile
+    );
+    const mainAspiration = safeString(payload.main_aspiration || payload.quiz_aspiration, 60);
+    const hasProfileSignal =
+      email ||
+      successCode ||
+      mainAspiration ||
+      payload.form_submitted_at ||
+      payload.quiz_completed_at ||
+      eventVideoStep > 0 ||
+      ctaType;
+    if (!current && !hasProfileSignal) return null;
+
+    const interestSignaled =
+      current?.interest_signaled_at ||
+      ctaType === 'whatsapp' ||
+      ctaType === 'interest' ||
+      ctaType === 'interested';
+    const state = journeyStateFor({
+      completedVideoStep,
+      interestSignaled: Boolean(interestSignaled),
+    });
+    const lifecycleStage = strongerStage(current?.lifecycle_stage, state.lifecycleStage);
+    const nextStep =
+      lifecycleStage === current?.lifecycle_stage && current?.next_step
+        ? current.next_step
+        : state.nextStep;
+    const emailNormalized = email ? email.trim().toLowerCase() : null;
+    const tags = [
+      successCode ? `ac:profile:${successCode}` : null,
+      mainAspiration ? `ac:goal:${mainAspiration}` : null,
+      payload.lang ? `ac:lang:${normalizeLanguage(payload.lang)}` : null,
+      `ac:next:${nextStep}`,
+    ].filter(Boolean);
+
+    const record = compactObject({
+      profile_key: profileKey,
+      session_hash: identity.sessionHash || undefined,
+      lead_hash: identity.leadHash || undefined,
+      email_normalized: emailNormalized || undefined,
+      email_hash: normalizedEmailHash(emailNormalized) || undefined,
+      first_name: safeTrackingString(payload, ['form_first_name', 'first_name'], 120),
+      lang: payload.lang ? normalizeLanguage(payload.lang) : undefined,
+      country: safeTrackingString(payload, 'country', 5),
+      member_id: identity.memberId || undefined,
+      berater_slug: identity.slug || undefined,
+      source_app: identity.sourceApp || undefined,
+      funnel: identity.funnel || undefined,
+      success_code: successCode || undefined,
+      success_code_label: safeTrackingString(payload, ['quiz_profile_name', 'profile_name'], 100),
+      main_aspiration: mainAspiration || undefined,
+      main_aspiration_label: safeTrackingString(
+        payload,
+        ['main_aspiration_label', 'quiz_aspiration_label'],
+        120
+      ),
+      initial_barrier: safeTrackingString(payload, 'quiz_barrier', 60),
+      lifecycle_stage: lifecycleStage,
+      next_step: nextStep,
+      last_completed_video_step: completedVideoStep,
+      profiled_at:
+        payload.form_submitted_at || payload.quiz_completed_at || email || successCode
+          ? eventAt
+          : undefined,
+      video_1_watched_at: eventVideoStep === 1 ? eventAt : undefined,
+      video_2_watched_at: eventVideoStep === 2 ? eventAt : undefined,
+      video_3_watched_at: eventVideoStep === 3 ? eventAt : undefined,
+      interest_signaled_at: !current?.interest_signaled_at && interestSignaled ? eventAt : undefined,
+      tags,
+      last_event_name: eventName,
+      last_event_at: eventAt,
+      updated_at: nowIso(),
+    });
+
+    await supabaseRequest('lead_profiles?on_conflict=profile_key', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(record),
+    });
+
+    await recordLifecycleTransition({
+      identity,
+      profileKey,
+      fromStage: current?.lifecycle_stage || null,
+      toStage: lifecycleStage,
+      nextStep,
+      eventAt,
+    });
+
+    return { profileKey, lifecycleStage, nextStep };
+  } catch (error) {
+    console.error('Lead profile update error:', error.message);
+    return null;
+  }
+}
+
 async function writeToSupabaseAsync(payload) {
   try {
     if (!SUPABASE_URL || !SUPABASE_KEY) return;
     if (!payload.hash) return;
 
     await writeTrackingEvent(payload);
+
+    await upsertLeadProfile(payload);
 
     const fullUpsertData = {
       hash: payload.hash,

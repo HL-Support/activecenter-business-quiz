@@ -159,6 +159,57 @@ CREATE INDEX IF NOT EXISTS idx_tracking_video_session_hash ON public.tracking_vi
 CREATE INDEX IF NOT EXISTS idx_tracking_video_member_id ON public.tracking_video_progress(member_id);
 CREATE INDEX IF NOT EXISTS idx_tracking_video_step ON public.tracking_video_progress(video_step);
 
+-- Compact lead journey state. Detailed history remains in tracking_events.
+CREATE TABLE IF NOT EXISTS public.lead_profiles (
+    id BIGSERIAL PRIMARY KEY,
+    profile_key VARCHAR(96) NOT NULL UNIQUE,
+    session_hash VARCHAR(96),
+    lead_hash VARCHAR(96),
+
+    email_normalized VARCHAR(160),
+    email_hash VARCHAR(96),
+    first_name VARCHAR(120),
+    lang VARCHAR(10) DEFAULT 'de',
+    country VARCHAR(5),
+    member_id VARCHAR(80),
+    berater_slug VARCHAR(80),
+    source_app VARCHAR(80) DEFAULT 'business_leads_quiz',
+    funnel VARCHAR(80) DEFAULT 'business',
+
+    success_code VARCHAR(40),
+    success_code_label VARCHAR(100),
+    main_aspiration VARCHAR(60),
+    main_aspiration_label VARCHAR(120),
+    initial_barrier VARCHAR(60),
+
+    lifecycle_stage VARCHAR(40) NOT NULL DEFAULT 'profiled',
+    next_step VARCHAR(60) NOT NULL DEFAULT 'watch_video_1',
+    last_completed_video_step SMALLINT NOT NULL DEFAULT 0 CHECK (last_completed_video_step BETWEEN 0 AND 3),
+
+    profiled_at TIMESTAMPTZ,
+    video_1_watched_at TIMESTAMPTZ,
+    video_2_watched_at TIMESTAMPTZ,
+    video_3_watched_at TIMESTAMPTZ,
+    interest_signaled_at TIMESTAMPTZ,
+    product_info_sent_at TIMESTAMPTZ,
+    info_call_booked_at TIMESTAMPTZ,
+    info_call_done_at TIMESTAMPTZ,
+
+    tags TEXT[] DEFAULT ARRAY[]::TEXT[],
+    last_event_name VARCHAR(80),
+    last_event_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_lead_profiles_session_hash ON public.lead_profiles(session_hash);
+CREATE INDEX IF NOT EXISTS idx_lead_profiles_lead_hash ON public.lead_profiles(lead_hash);
+CREATE INDEX IF NOT EXISTS idx_lead_profiles_email_hash ON public.lead_profiles(email_hash);
+CREATE INDEX IF NOT EXISTS idx_lead_profiles_member_id ON public.lead_profiles(member_id);
+CREATE INDEX IF NOT EXISTS idx_lead_profiles_stage ON public.lead_profiles(lifecycle_stage);
+CREATE INDEX IF NOT EXISTS idx_lead_profiles_next_step ON public.lead_profiles(next_step);
+CREATE INDEX IF NOT EXISTS idx_lead_profiles_success_code ON public.lead_profiles(success_code);
+
 -- Future dashboard access mapping.
 -- Authentication stays in the existing MySQL/Laravel users table; this table only maps a verified login to Supabase scopes.
 CREATE TABLE IF NOT EXISTS public.coach_access (
@@ -177,6 +228,7 @@ CREATE INDEX IF NOT EXISTS idx_coach_access_role ON public.coach_access(role);
 ALTER TABLE public.tracking_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tracking_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tracking_video_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lead_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.coach_access ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Allow service role" ON public.tracking_sessions;
@@ -189,6 +241,10 @@ CREATE POLICY "Allow service role" ON public.tracking_events
 
 DROP POLICY IF EXISTS "Allow service role" ON public.tracking_video_progress;
 CREATE POLICY "Allow service role" ON public.tracking_video_progress
+    FOR ALL USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "Allow service role" ON public.lead_profiles;
+CREATE POLICY "Allow service role" ON public.lead_profiles
     FOR ALL USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
 
 DROP POLICY IF EXISTS "Allow service role" ON public.coach_access;
