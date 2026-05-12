@@ -53,6 +53,23 @@ function safeString(value, maxLength = 255) {
   return String(value).slice(0, maxLength);
 }
 
+function normalizePersonName(value, maxLength = 120) {
+  const text = safeString(value, maxLength);
+  if (!text) return text;
+  const normalized = text.trim().replace(/\s+/g, ' ');
+  if (!normalized) return '';
+
+  return normalized
+    .split(/([\s'-]+)/)
+    .map((part) => {
+      if (!part || /^[\s'-]+$/.test(part)) return part;
+      const lower = part.toLocaleLowerCase('de-DE');
+      const chars = Array.from(lower);
+      return chars[0].toLocaleUpperCase('de-DE') + chars.slice(1).join('');
+    })
+    .join('');
+}
+
 function hasTrackingValue(value) {
   return value !== undefined && value !== null && value !== '';
 }
@@ -67,6 +84,11 @@ function firstTrackingValue(record, keys) {
 function safeTrackingString(record, keys, maxLength = 255) {
   const value = firstTrackingValue(record, Array.isArray(keys) ? keys : [keys]);
   return value === undefined ? undefined : safeString(value, maxLength);
+}
+
+function safeTrackingPersonName(record, keys, maxLength = 120) {
+  const value = firstTrackingValue(record, Array.isArray(keys) ? keys : [keys]);
+  return value === undefined ? undefined : normalizePersonName(value, maxLength);
 }
 
 function safeInteger(value) {
@@ -473,7 +495,7 @@ async function writeTrackingEvent(payload) {
           120
         ),
         quiz_barrier: safeTrackingString(payload, 'quiz_barrier', 60),
-        form_first_name: safeTrackingString(payload, 'form_first_name', 120),
+        form_first_name: safeTrackingPersonName(payload, 'form_first_name', 120),
         form_email: safeTrackingString(payload, 'form_email', 160),
         form_submitted_at: safeTrackingString(payload, 'form_submitted_at', 40),
         final_cta_type: safeTrackingString(payload, 'cta_type', 60),
@@ -735,7 +757,7 @@ async function upsertLeadProfile(payload) {
       lead_hash: identity.leadHash || undefined,
       email_normalized: emailNormalized || undefined,
       email_hash: normalizedEmailHash(emailNormalized) || undefined,
-      first_name: safeTrackingString(payload, ['form_first_name', 'first_name'], 120),
+      first_name: safeTrackingPersonName(payload, ['form_first_name', 'first_name'], 120),
       lang: payload.lang ? normalizeLanguage(payload.lang) : undefined,
       country: safeTrackingString(payload, 'country', 5),
       member_id: identity.memberId || undefined,
@@ -815,7 +837,7 @@ async function writeToSupabaseAsync(payload) {
       quiz_aspiration: payload.quiz_aspiration || null,
       quiz_barrier: payload.quiz_barrier || null,
       quiz_completed_at: payload.quiz_completed_at || null,
-      form_first_name: payload.form_first_name || null,
+      form_first_name: normalizePersonName(payload.form_first_name, 120) || null,
       form_email: payload.form_email || null,
       form_submitted_at: payload.form_submitted_at || null,
       video1_watched_sec: payload.video1_watched_sec || 0,
@@ -931,7 +953,7 @@ async function persistBusinessSubmissionForResume(input) {
     main_aspiration: aspiration,
     main_aspiration_label: safeString(input.main_aspiration_label || hidden.main_aspiration_label, 120),
     quiz_barrier: barrier,
-    form_first_name: safeString(input.first_name, 120),
+    form_first_name: normalizePersonName(input.first_name, 120),
     form_email: safeString(input.email, 160),
     form_submitted_at: submittedAt,
     event_name: 'form_submit',
@@ -1086,7 +1108,7 @@ async function sendIdentityAlertEmail({ payload, error, forwardedFor, userAgent 
   if (!IDENTITY_ALERT_EMAIL) return { ok: false, status: 501, data: { error: 'alert_email_missing' } };
 
   const hidden = payload?.hidden || {};
-  const firstName = safeString(payload?.first_name, 120) || '';
+  const firstName = normalizePersonName(payload?.first_name, 120) || '';
   const email = safeString(payload?.email, 160) || '';
   const slug = safeString(
     hidden.berater_slug || hidden.slug || hidden.coach_slug || payload?.berater_slug || payload?.slug,
@@ -1226,7 +1248,7 @@ async function resolvePointsResultContext(payload) {
     80
   );
   const email = safeString(trackingSession.form_email || quizSession.form_email || payload?.email, 160);
-  const firstName = safeString(
+  const firstName = normalizePersonName(
     trackingSession.form_first_name || quizSession.form_first_name || payload?.first_name,
     120
   );
@@ -1249,7 +1271,7 @@ async function sendPointsResultAlertEmail({ error, context = {}, payload = {}, n
     ['Session Hash', context.sessionHash || payload.session_hash || ''],
     ['Slug', context.slug || payload.berater_slug || payload.slug || ''],
     ['Member ID', context.memberId || payload.member_id || ''],
-    ['Name', context.firstName || payload.first_name || ''],
+    ['Name', normalizePersonName(context.firstName || payload.first_name, 120) || ''],
     ['E-Mail', context.email || payload.email || ''],
     ['Video Step', safeString(payload.video_step, 20) || ''],
     ['Completed Count', safeString(payload.completed_count, 20) || ''],
@@ -1755,7 +1777,7 @@ function buildBrandedEmailShell({ preheader, bodyHtml, footerHtml, brandName = '
 function buildAllVideosCompletedCoachEmail({ session, coach, payload }) {
   const lang = detectCoachLanguage(coach, session, payload);
   const copy = HOT_LEAD_EMAIL_I18N[lang] || HOT_LEAD_EMAIL_I18N.de;
-  const firstName = session.form_first_name || payload.first_name || 'Interessent';
+  const firstName = normalizePersonName(session.form_first_name || payload.first_name, 120) || 'Interessent';
   const email = session.form_email || payload.email || '';
   const rawProfileCode = session.quiz_profile || payload.quiz_profile || '';
   const profileCode = normalizeProfileCode(rawProfileCode);
@@ -2260,7 +2282,7 @@ function buildBusinessTypeformPayload(input) {
     answers.push({
       type: 'text',
       answer_url: answerUrl(BUSINESS_SCHEMA.formId, token, firstNameField.id),
-      text: String(input.first_name || '').trim(),
+      text: normalizePersonName(input.first_name, 120) || '',
       field: { id: firstNameField.id, type: firstNameField.type, ref: firstNameField.ref },
     });
   }
