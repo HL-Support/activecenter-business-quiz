@@ -166,6 +166,9 @@ async function collectHealth() {
       `lead_sync_outbox?status=eq.processing&locked_at=lt.${encodeURIComponent(tenMinutesAgo)}&select=id`
     ),
     outbox_dead: await countRows('lead_sync_outbox?status=eq.dead&select=id'),
+    migration_unresolved_open: await countRows(
+      'lead_migration_unresolved?resolved_at=is.null&select=id'
+    ),
     recent_leads_1h: await countRows(
       `lead_state?created_at=gte.${encodeURIComponent(oneHourAgo)}&select=lead_hash`
     ),

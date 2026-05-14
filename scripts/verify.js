@@ -220,6 +220,7 @@ function verifyHashFlow() {
   assert(
     leadHealth.includes('lead_sync_outbox?status=eq.dead') &&
       leadHealth.includes('outbox_processing_stale') &&
+      leadHealth.includes('migration_unresolved_open') &&
       leadHealth.includes('sendAlertEmail') &&
       leadHealth.includes('lead_system_health_last_alert'),
     'lead system health endpoint must monitor outbox failures and dedupe alerts'

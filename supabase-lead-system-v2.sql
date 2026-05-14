@@ -129,6 +129,21 @@ CREATE TABLE IF NOT EXISTS public.lead_events (
   created_at                  timestamptz DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS public.lead_migration_unresolved (
+  id                           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  source_table                 text NOT NULL,
+  source_id                    text NOT NULL,
+  reason                       text NOT NULL,
+  session_hash                 text,
+  lead_hash_candidate          text,
+  payload                      jsonb DEFAULT '{}'::jsonb,
+  resolved_at                  timestamptz,
+  resolved_lead_hash           text REFERENCES public.lead_state(lead_hash) ON DELETE SET NULL,
+  created_at                   timestamptz DEFAULT now(),
+  updated_at                   timestamptz DEFAULT now(),
+  UNIQUE (source_table, source_id)
+);
+
 CREATE TABLE IF NOT EXISTS public.lead_sync_outbox (
   id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   lead_hash       text REFERENCES public.lead_state(lead_hash) ON DELETE CASCADE,
@@ -191,6 +206,8 @@ CREATE INDEX IF NOT EXISTS idx_le_ref_time ON public.lead_events(ref_id, event_a
 CREATE INDEX IF NOT EXISTS idx_le_name_time ON public.lead_events(event_name, event_at DESC);
 CREATE INDEX IF NOT EXISTS idx_le_video_time ON public.lead_events(video_step, event_at DESC);
 CREATE INDEX IF NOT EXISTS idx_le_question_time ON public.lead_events(question_ref, event_at DESC);
+CREATE INDEX IF NOT EXISTS idx_lmu_reason ON public.lead_migration_unresolved(reason, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_lmu_session ON public.lead_migration_unresolved(session_hash);
 
 CREATE INDEX IF NOT EXISTS idx_outbox_pending ON public.lead_sync_outbox(status, next_attempt_at)
   WHERE status IN ('pending','failed');
@@ -230,6 +247,11 @@ CREATE TRIGGER trg_lead_sync_outbox_updated_at
 DROP TRIGGER IF EXISTS trg_lead_video_progress_updated_at ON public.lead_video_progress;
 CREATE TRIGGER trg_lead_video_progress_updated_at
   BEFORE UPDATE ON public.lead_video_progress
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_lead_migration_unresolved_updated_at ON public.lead_migration_unresolved;
+CREATE TRIGGER trg_lead_migration_unresolved_updated_at
+  BEFORE UPDATE ON public.lead_migration_unresolved
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
@@ -663,6 +685,7 @@ ALTER TABLE public.lead_state ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lead_video_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lead_answers_current ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lead_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lead_migration_unresolved ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lead_sync_outbox ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.app_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lead_access_permissions ENABLE ROW LEVEL SECURITY;
@@ -718,6 +741,11 @@ CREATE POLICY le_select ON public.lead_events
     ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin'
     OR member_id = ((select auth.jwt()) -> 'app_metadata' ->> 'member_id')
   );
+
+DROP POLICY IF EXISTS lmu_admin_select ON public.lead_migration_unresolved;
+CREATE POLICY lmu_admin_select ON public.lead_migration_unresolved
+  FOR SELECT TO authenticated
+  USING (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
 
 DROP POLICY IF EXISTS outbox_admin_select ON public.lead_sync_outbox;
 CREATE POLICY outbox_admin_select ON public.lead_sync_outbox
