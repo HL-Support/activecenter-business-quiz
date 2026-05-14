@@ -23,8 +23,8 @@ function getHeader(req, name) {
 }
 
 function timingSafeEqualText(a, b) {
-  const left = Buffer.from(String(a || ''));
-  const right = Buffer.from(String(b || ''));
+  const left = Buffer.from(String(a || '').trim());
+  const right = Buffer.from(String(b || '').trim());
   if (left.length !== right.length) return false;
   return crypto.timingSafeEqual(left, right);
 }
