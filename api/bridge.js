@@ -2625,6 +2625,14 @@ module.exports = async function handler(req, res) {
 
     const submissionPayload = identity.payload;
     const webhookPayload = buildBusinessTypeformPayload(submissionPayload);
+    const leadSystemFlag = String(
+      webhookPayload.hidden?.lead_system_v2_enabled ||
+        submissionPayload.hidden?.lead_system_v2_enabled ||
+        ''
+    )
+      .trim()
+      .toLowerCase();
+    const usesLeadSystemV2 = leadSystemFlag === '1' || leadSystemFlag === 'true';
     const [result] = await Promise.all([
       proxyToBridge(
         {
@@ -2636,10 +2644,39 @@ module.exports = async function handler(req, res) {
         forwardedFor,
         userAgent
       ),
-      persistBusinessSubmissionForResume(submissionPayload).catch((err) =>
-        console.warn('persistBusinessSubmissionForResume failed (non-critical):', err.message)
-      ),
+      usesLeadSystemV2
+        ? Promise.resolve(null)
+        : persistBusinessSubmissionForResume(submissionPayload).catch((err) =>
+            console.warn('persistBusinessSubmissionForResume failed (non-critical):', err.message)
+          ),
     ]);
+
+    // Server-side initial points_result: fire after MySQL row is created (no client dependency)
+    if (!usesLeadSystemV2 && result.status >= 200 && result.status < 300) {
+      const prLeadHash = safeString(webhookPayload.hidden?.hash || webhookPayload.hidden?.lead_hash, 96);
+      const prLang = normalizeLanguage(webhookPayload.hidden?.lang || submissionPayload.lang);
+      if (isLeadHash(prLeadHash)) {
+        (async () => {
+          const label = buildPointsResultLabel(0, 3, prLang);
+          const n8nPayload = { hash: prLeadHash, personalityType: label };
+          let n8nResult = await callN8nUpdateResult(n8nPayload);
+          if (shouldRetryPointsResult(n8nResult)) {
+            await new Promise((r) => setTimeout(r, 3000));
+            n8nResult = await callN8nUpdateResult(n8nPayload);
+          }
+          if (!pointsResultSucceeded(n8nResult)) {
+            sendPointsResultAlertEmail({
+              error: 'initial_points_result_failed',
+              context: { leadHash: prLeadHash, lang: prLang },
+              payload: submissionPayload,
+              n8nPayload,
+              result: n8nResult,
+            }).catch((err) => console.warn('sendPointsResultAlertEmail failed:', err.message));
+          }
+        })().catch((err) => console.warn('initial points_result update failed:', err.message));
+      }
+    }
+
     result.data = { ...result.data, adapter_key: adapterKey, payload: webhookPayload };
     return res.status(result.status).json(result.data);
   }

@@ -34,33 +34,35 @@ Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
 
 ## Tracking und Session-Verhalten
 
-- Quiz-Tracking-Sessions sind slug- und coach-spezifisch.
-- `session_hash`/`tracking_hash` beginnt mit `ac_` und ist ausschliesslich fuer Attribution, Pageviews, Quiz-Progress, Video-Events und Ergebniszuordnung gedacht.
-- `lead_hash` beginnt mit `qz_` und ist die finale eindeutige Lead-/Submission-ID. Im Typeform-kompatiblen Payload steht diese ID bewusst auch in `form_response.hidden.hash`, weil das HL-Support-System diese Spalte fuer die finale Survey-Zuordnung nutzt.
+- Zielarchitektur v2: Ein Lead hat genau eine kanonische ID: `lead_hash = qz_...`.
+- `/api/lead/init` erzeugt oder findet diese ID idempotent ueber `client_seed`.
+- `/api/lead-track` ist der neue Writer fuer `lead_events`, `lead_state`, `lead_answers_current`, `lead_video_progress` und `lead_sync_outbox`.
+- `/api/lead-outbox-worker` ist der einzige Outbox-Zusteller. n8n oder Vercel Cron duerfen nur diesen Endpoint triggern; Statuswechsel passieren ueber Supabase-RPCs.
+- Der neue Pfad wird ueber Supabase `app_config` gesteuert: `new_lead_writer_enabled`, `new_lead_writer_percent`, `legacy_writer_enabled`, `outbox_worker_enabled`.
+- `session_hash`/`tracking_hash` mit `ac_` ist nur noch Legacy-/Fallback-Kontext waehrend des Cutovers.
+- Im Typeform-kompatiblen Payload steht `lead_hash` weiterhin in `form_response.hidden.hash`, weil HL-Support diese Spalte fuer die finale Survey-Zuordnung nutzt.
 - `form_response.token` ist der stabile Idempotency-/Dedupe-Key fuer denselben Submit-Versuch und darf nicht mit Tracking- oder Lead-Hash vermischt werden.
 - Alte `acQuizHash`-Keys werden beim Start entfernt und nicht mehr als Tracking-Session wiederverwendet.
-- Tracking-Cookies werden zusammen mit dem zugehoerigen Slug geschrieben, damit Sessions nicht coach-uebergreifend wiederverwendet werden.
 - Ungueltige oder leere Coach-Daten fuehren auf `https://www.global-sce.com/`.
 
 ## Supabase Tracking Layer
 
-- `api/bridge.js` schreibt weiterhin die alte Summary-Tabelle `quiz_sessions`, damit bestehende Auswertungen kompatibel bleiben.
-- Zusaetzlich schreibt `api/bridge.js` jetzt in drei neue kanonische Tracking-Tabellen:
-  - `tracking_sessions`: eine aktuelle Session-/Lead-Zusammenfassung pro `session_hash`.
-  - `tracking_events`: append-only Eventlog fuer jeden relevanten Funnel-Schritt.
-  - `tracking_video_progress`: eine kompakte Video-Zusammenfassung pro `session_hash` und Video-Step.
-  - `lead_profiles`: ein kompakter Journey-State pro Lead/Session mit Profil, Ziel, Barriere, Lifecycle-Stage und naechstem CTA.
-- Das auszufuehrende Schema liegt in `supabase-schema.sql`.
-- Neue Supabase-Tabellen sind bewusst additive. Wenn sie noch nicht existieren, loggt die API nur `Supabase tracking error`, aber der alte Webhook- und `quiz_sessions`-Flow laeuft weiter.
-- `tracking_sessions` ist die Dashboard-Aggregation und darf durch spaetere Events ohne Name/E-Mail/Profil/Ziel nicht wieder mit leeren Werten ueberschrieben werden.
-- Das Analytics-Dashboard der Landingpage liest diese gemeinsamen Tabellen ueber `landing-page/api/bridge.js` als `shared_tracking` aus.
+- Das neue Schema liegt in `supabase-lead-system-v2.sql`.
+- Neue Wahrheit:
+  - `lead_state`: Identitaet, Coach/Referral, Kontakt, Profil, Lifecycle.
+  - `lead_video_progress`: einzige Video-Wahrheit, monotone Updates per RPC.
+  - `lead_answers_current`: aktueller Antwortstand je Frage.
+  - `lead_events`: append-only Eventlog.
+  - `lead_sync_outbox`: einziger Sync-Kanal zu MySQL/n8n/Mautic/Postmark; Claiming, Done, Failed und Dead laufen atomar per RPC.
+  - `v_lead_state_full`: berechnete Reporting-View mit Rank.
+- Alte Tabellen wie `quiz_sessions`, `tracking_sessions`, `tracking_events`, `tracking_video_progress` bleiben waehrend des Cutovers Legacy-/Archivkontext und duerfen nicht als neue Wahrheit erweitert werden.
+- `api/bridge.js` darf im v2-Pfad keine Legacy-Resume- oder initiale `points_result`-Writes ausloesen.
 - Wichtige Events: `page_view`, `quiz_started`, `question_viewed`, `question_answered`, `aspiration_confirmed`, `quiz_result`, `result_cta_click`, `optin_viewed`, `form_submit`, `video_viewed`, `video_started`, `video_progress`, `video_seeked`, `video_unlocked`, `video_completed`, `video_continue_click`, `final_viewed`, `cta_click`.
-- Video-Tracking misst nicht mehr nur den Playhead, sondern eindeutig gesehene Sekunden. Progress-Events werden in 5-Prozent-Buckets gespeichert; die Video-Summary enthaelt trotzdem den exakten `unique_watched_percent` als ganze Prozentzahl.
+- Video-Tracking misst eindeutig gesehene Sekunden. Progress-Events werden in 5-Prozent-Buckets gesendet; `lead_video_progress` speichert den maximalen `unique_watched_percent` und darf nur steigen.
 - Vorspulen wird erkannt. Wenn ein Nutzer ueber den bereits real angeschauten Bereich hinausspringt, setzt der Player auf den letzten erlaubten Bereich zurueck. Der 75-Prozent-Weiterbutton wird nur durch echte Unique-Watch-Zeit freigeschaltet.
 - `max_playhead_percent` bleibt als separates Feld erhalten, damit man spaeter erkennen kann, ob jemand stark gespult hat.
-- `member_id` ist der zentrale Tenant-/Coach-Schluessel fuer spaetere Dashboards. Coaches sehen spaeter Daten mit ihrer eigenen `member_id`; der interne Admin bekommt alle Daten.
-- `lead_profiles.next_step` steuert spaetere Follow-up-Logik: `watch_video_1`, `watch_video_2`, `watch_video_3`, `signal_interest`, `personal_follow_up`.
-- Die vorbereitete Tabelle `coach_access` ist nur ein Scope-Mapping. Die eigentliche Authentifizierung soll weiterhin gegen die bestehende MySQL/Laravel-User-Tabelle laufen.
+- `member_id` ist der zentrale Coach-Schluessel.
+- `ref_id` ist Attribution; wenn kein echter Referral-Code vorhanden ist, gilt `ref_id = member_id`.
 
 ## Webhook-Format
 

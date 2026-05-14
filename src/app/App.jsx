@@ -24,6 +24,7 @@ import {
   inputStyle as od,
   resetLeadRun as resetRun,
   getActiveLeadRun,
+  isLeadSystemV2Active,
 } from '../lib/core.js';
 
 const VIDEO_FULL_COMPLETION_KEY_PREFIX = 'acVideoFullCompletion_';
@@ -71,6 +72,7 @@ function sendVideoProgressWebhook(
   const completed = readStoredObject(key);
   completed[completedStep] = true;
   storeObject(key, completed);
+  if (isLeadSystemV2Active(slug)) return;
   const completedCount = Object.keys(completed)
     .map((step) => Number(step))
     .filter((step) => completed[step] === true && step >= 1 && step <= totalSteps).length;
@@ -413,7 +415,8 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
         }
         ld.clear(n || 'default');
         try {
-          window.acTrack &&
+          !isLeadSystemV2Active(n || 'default') &&
+            window.acTrack &&
             (await Promise.race([
               window.acTrack('quiz_form_submit', { pageKey: 'quiz' }),
               new Promise((V) => setTimeout(V, 500)),

@@ -12,6 +12,7 @@ const TRACKING_SCHEMA_VERSION = 'ac_tracking_v1';
 const LEGACY_QUIZ_HASH_KEY = 'acQuizHash';
 const LEGACY_QUIZ_HASH_PREFIX = 'acQuizHash:';
 const LEAD_RUN_PREFIX = 'acLeadRun:';
+const LEAD_SYSTEM_STATE_PREFIX = 'acLeadSystemV2:';
 const DEFAULT_VIDEO_COUNT = 3;
 const DEFAULT_COACH = {
   slug: 'default',
@@ -150,6 +151,24 @@ function generateId(prefix, length = 24) {
   }
 
   return `${prefix}_${nowTs().toString(36)}_${randomString(length)}`;
+}
+
+function generateClientSeed() {
+  if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+    return window.crypto.randomUUID();
+  }
+
+  return [
+    randomString(8),
+    randomString(4),
+    `4${randomString(3)}`,
+    `a${randomString(3)}`,
+    randomString(12),
+  ].join('-');
+}
+
+function isServerLeadHash(value) {
+  return /^qz_[a-zA-Z0-9_]{8,96}$/.test(String(value || ''));
 }
 
 function readJson(key) {
@@ -291,6 +310,19 @@ function getLeadRunKey(slug = getCurrentSlug()) {
   return `${LEAD_RUN_PREFIX}${String(slug || 'default').toLowerCase()}`;
 }
 
+function getLeadSystemStateKey(slug = getCurrentSlug()) {
+  return `${LEAD_SYSTEM_STATE_PREFIX}${String(slug || 'default').toLowerCase()}`;
+}
+
+function readLeadSystemState(slug = getCurrentSlug()) {
+  const state = readJson(getLeadSystemStateKey(slug));
+  return state && typeof state === 'object' ? state : null;
+}
+
+function writeLeadSystemState(slug, state) {
+  storage.setItem(getLeadSystemStateKey(slug), JSON.stringify(state || {}));
+}
+
 export function getTrackingSessionHash(slug = getCurrentSlug(), memberId = '') {
   const normalizedSlug = String(slug || 'default').toLowerCase();
   const normalizedMemberId = String(memberId || '');
@@ -339,6 +371,7 @@ function createLeadRun(slug = getCurrentSlug(), memberId = '') {
   const visitorId = getTrackingVisitorId();
   const leadRun = {
     lead_hash: generateId('qz', 24),
+    client_seed: generateClientSeed(),
     token: generateId('tf', 28).replace(/_/g, ''),
     event_id: generateId('evt', 24).replace(/_/g, '').toUpperCase(),
     session_hash: sessionHash,
@@ -362,6 +395,7 @@ export function getActiveLeadRun(slug = getCurrentSlug(), memberId = '') {
     const sessionHash = existing.session_hash || getTrackingSessionHash(normalizedSlug, memberId);
     const updated = {
       ...existing,
+      client_seed: existing.client_seed || generateClientSeed(),
       session_hash: sessionHash,
       tracking_hash: existing.tracking_hash || sessionHash,
       visitor_id: existing.visitor_id || getTrackingVisitorId(),
@@ -399,6 +433,111 @@ function markLeadRun(slug, leadRun, state) {
   };
   storage.setItem(getLeadRunKey(slug), JSON.stringify(updated));
   return updated;
+}
+
+function normalizeEventNameForLeadSystem(eventName) {
+  const name = String(eventName || '');
+  if (name === 'question_answered') return 'quiz_answer';
+  if (name === 'cta_click') return 'cta_clicked';
+  return name;
+}
+
+function isNewLeadWriterActive(slug = getCurrentSlug()) {
+  const state = readLeadSystemState(slug);
+  return state?.enabled === true && isServerLeadHash(state.lead_hash);
+}
+
+export function isLeadSystemV2Active(slug = getCurrentSlug()) {
+  return isNewLeadWriterActive(slug);
+}
+
+function updateLeadRunWithServerHash(slug, memberId, leadHash, enabled) {
+  const current = getActiveLeadRun(slug, memberId);
+  const updated = {
+    ...current,
+    lead_hash: isServerLeadHash(leadHash) ? leadHash : current.lead_hash,
+    lead_system_v2_enabled: enabled === true,
+    updatedAt: isoNow(),
+  };
+  storage.setItem(getLeadRunKey(slug), JSON.stringify(updated));
+  return updated;
+}
+
+async function initializeLeadSystemV2(coach, slug) {
+  const normalizedSlug = String(slug || coach?.slug || getCurrentSlug() || 'default').toLowerCase();
+  const memberId = String(coach?.member_id || storage.getItem('acMemberId') || '');
+  const leadRun = getActiveLeadRun(normalizedSlug, memberId);
+  const params = new URLSearchParams(window.location.search || '');
+  const response = await fetch('/api/lead/init', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_seed: leadRun.client_seed,
+      lead_hash: leadRun.lead_hash,
+      member_id: memberId,
+      ref_id: params.get('ref') || params.get('ref_id') || memberId,
+      ref_type: params.get('ref') || params.get('ref_id') ? 'referral_code' : 'member',
+      berater_slug: normalizedSlug,
+      source_app: 'business_leads_quiz',
+      funnel_key: 'business',
+      lang: getPreferredLang(),
+      country: getCurrentCountry(),
+      utm_source: params.get('utm_source') || '',
+      utm_medium: params.get('utm_medium') || '',
+      utm_campaign: params.get('utm_campaign') || '',
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  const enabled = response.ok && data.enabled === true && isServerLeadHash(data.lead_hash);
+  const updatedRun = enabled
+    ? updateLeadRunWithServerHash(normalizedSlug, memberId, data.lead_hash, true)
+    : leadRun;
+
+  writeLeadSystemState(normalizedSlug, {
+    enabled,
+    lead_hash: enabled ? updatedRun.lead_hash : leadRun.lead_hash,
+    client_seed: leadRun.client_seed,
+    flags: data.flags || null,
+    checkedAt: isoNow(),
+  });
+
+  return { enabled, leadRun: updatedRun, flags: data.flags || null };
+}
+
+function sendLeadTrackEvent(eventName, payload = {}) {
+  const slug = String(
+    storage.getItem('acBeraterSlug') || (getCoachFromStorage() || {}).slug || getCurrentSlug() || 'default'
+  );
+  const memberId = String(storage.getItem('acMemberId') || '');
+  const leadRun = getActiveLeadRun(slug, memberId);
+  const normalizedName = normalizeEventNameForLeadSystem(eventName);
+  const eventPayload = {
+    ...payload,
+    lead_hash: leadRun.lead_hash,
+    client_seed: leadRun.client_seed,
+    visitor_id: getTrackingVisitorId(),
+    member_id: memberId,
+    ref_id: payload.ref_id || memberId,
+    berater_slug: slug,
+    source_app: 'business_leads_quiz',
+    funnel_key: 'business',
+    lang: getPreferredLang(),
+    event_at: payload.event_at || payload.visited_at || payload.form_submitted_at || isoNow(),
+    is_internal_traffic: isInternalTraffic(),
+    is_resume: storage.getItem('acSessionIsResume') === 'true',
+  };
+
+  fetch('/api/lead-track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    keepalive: true,
+    body: JSON.stringify({
+      lead_hash: leadRun.lead_hash,
+      event_name: normalizedName,
+      payload: eventPayload,
+    }),
+  }).catch(() => undefined);
 }
 
 export function getCoachFromStorage() {
@@ -512,6 +651,17 @@ export async function initializeQuizEnvironment() {
   document.title = applyBrandName(document.title, coach);
   getTrackingSessionHash(coach.slug || slug, coach.member_id || '');
   getActiveLeadRun(coach.slug || slug, coach.member_id || '');
+
+  try {
+    await initializeLeadSystemV2(coach, coach.slug || slug);
+  } catch (error) {
+    writeLeadSystemState(coach.slug || slug, {
+      enabled: false,
+      error: error?.message || 'lead_system_init_failed',
+      checkedAt: isoNow(),
+    });
+    console.warn('Lead system v2 init failed:', error);
+  }
 
   trackQuizAnalytics('page_view', {
     visited_at: isoNow(),
@@ -771,12 +921,17 @@ export function getAnalyzingSteps() {
 }
 
 export function trackQuizAnalytics(eventName, payload = {}) {
+  const slug = String(
+    storage.getItem('acBeraterSlug') || (getCoachFromStorage() || {}).slug || getCurrentSlug() || 'default'
+  );
+  if (isNewLeadWriterActive(slug)) {
+    sendLeadTrackEvent(eventName, payload);
+    return;
+  }
+
   // Dynamically import trackEvent from ac-track.js to use EventBatcher
   // This ensures events are batched, deduplicated with event_id, and persisted to localStorage
   import('../ac-track.js').then(({ trackEvent }) => {
-    const slug = String(
-      storage.getItem('acBeraterSlug') || (getCoachFromStorage() || {}).slug || getCurrentSlug() || 'default'
-    );
     const memberId = String(storage.getItem('acMemberId') || '');
     const isResume = storage.getItem('acSessionIsResume') === 'true';
 
@@ -940,8 +1095,10 @@ export async function forwardQuizSubmission(
   const submittedAt = isoNow();
   const mainAspiration = normalizeAspiration(aspiration);
   const mainAspirationLabel = getAspirationLabel(mainAspiration);
+  const leadSystemV2Enabled = isNewLeadWriterActive(slug);
 
   function sendInitialPointsResultUpdate() {
+    if (isNewLeadWriterActive(slug)) return;
     fetch('/api/bridge', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -988,6 +1145,8 @@ export async function forwardQuizSubmission(
             lead_hash: hash,
             session_hash: sessionHash,
             tracking_hash: sessionHash,
+            client_seed: leadRun.client_seed || '',
+            lead_system_v2_enabled: leadSystemV2Enabled ? '1' : '0',
             visitor_id: visitorId,
             schema_version: TRACKING_SCHEMA_VERSION,
             main_aspiration: mainAspiration,
@@ -1027,6 +1186,25 @@ export async function forwardQuizSubmission(
     .then((response) => {
       if (response.ok) {
         markLeadRun(slug, leadRun, 'submitted');
+        if (isNewLeadWriterActive(slug)) {
+          sendLeadTrackEvent('form_submitted', {
+            first_name: firstName,
+            email,
+            form_first_name: firstName,
+            form_email: email,
+            form_submitted_at: submittedAt,
+            submitted_at: submittedAt,
+            profile_code: profile?.code || profile?.animal || '',
+            profile_label: profile?.name || profile?.animal || '',
+            main_aspiration: mainAspiration,
+            main_aspiration_label: mainAspirationLabel,
+            initial_barrier: selectedAnswers?.[5]?.barrier || '',
+            member_id: memberId,
+            ref_id: memberId,
+            berater_slug: slug,
+            lang,
+          });
+        }
         sendInitialPointsResultUpdate();
       } else {
         markLeadRun(slug, leadRun, 'active');

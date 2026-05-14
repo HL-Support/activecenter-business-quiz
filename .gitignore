@@ -17,5 +17,6 @@ phase1-migration.sql
 scripts/PHASE1-FINAL-CORRECT.sql
 scripts/phase1-migration.py
 output/
+supabase/.temp/
 
 .env*.local

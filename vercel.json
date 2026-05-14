@@ -30,5 +30,8 @@
       ]
     }
   ],
-  "rewrites": [{ "source": "/:slug([a-z0-9_-]+)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/api/lead/init", "destination": "/api/lead-init" },
+    { "source": "/:slug([a-z0-9_-]+)", "destination": "/index.html" }
+  ]
 }

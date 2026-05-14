@@ -19,12 +19,16 @@
 
 ## Tracking-Regeln
 
-- Tracking-Sessions sind slug- und coach-spezifisch zu behandeln.
-- `session_hash`/`tracking_hash` ist die Attribution-ID und beginnt mit `ac_`.
-- `lead_hash` ist die finale Submission-ID und beginnt mit `qz_`; diese ID wird in `form_response.hidden.hash` an HL-Support gesendet.
+- Zielarchitektur v2: `lead_hash` ist die kanonische Lead-ID und beginnt mit `qz_`.
+- Der neue aktive Writer-Pfad ist Frontend -> `/api/lead-track` -> Supabase `lead_*` Tabellen.
+- `client_seed` macht `/api/lead/init` idempotent; gleiche Seed-Anfragen muessen denselben `lead_hash` liefern.
+- `session_hash`/`tracking_hash` mit `ac_` ist nur noch Legacy-/Fallback-Kontext und darf nicht als neue Wahrheit ausgebaut werden.
+- `lead_hash` wird in `form_response.hidden.hash` an HL-Support gesendet.
 - `form_response.token` ist der stabile Dedupe-/Retry-Key fuer denselben Submit-Versuch.
-- Keine globalen oder alten `acQuizHash`-Reuses ueber verschiedene Coach-Slugs hinweg.
-- Session-Reuse darf nur fuer denselben Coach-Slug erfolgen.
+- Keine globalen oder alten `acQuizHash`-Reuses.
+- Video-Fortschritt in v2 darf nur in `lead_video_progress` steigen, niemals sinken.
+- MySQL `points_result` ist nur Kopie via Outbox, nicht Source of Truth.
+- n8n ist nur Sync-Worker fuer `lead_sync_outbox`, kein paralleler Writer. Es triggert `/api/lead-outbox-worker`; der Worker claimt Jobs atomar und markiert sie per Supabase-RPC als `done`, `failed` oder `dead`.
 
 ## Workflow
 
