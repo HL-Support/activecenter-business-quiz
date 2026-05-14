@@ -12,6 +12,7 @@ const {
 } = require('../server/lead-system');
 
 const N8N_UPDATE_RESULT_URL = process.env.N8N_UPDATE_RESULT_URL;
+const N8N_UPDATE_RESULT_SECRET = String(process.env.N8N_UPDATE_RESULT_SECRET || '').trim();
 const WORKER_SECRET = process.env.LEAD_OUTBOX_WORKER_SECRET || process.env.BRIDGE_KEY;
 
 const MYSQL_SYNC_TYPES = new Set(['mysql_initial_rank', 'mysql_rank_update']);
@@ -101,9 +102,14 @@ async function callN8nUpdateResult(job) {
     throw new Error(`invalid_lead_hash:${leadHash}`);
   }
 
+  const headers = { 'Content-Type': 'application/json' };
+  if (N8N_UPDATE_RESULT_SECRET) {
+    headers['X-Update-Secret'] = N8N_UPDATE_RESULT_SECRET;
+  }
+
   const response = await fetch(N8N_UPDATE_RESULT_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({
       hash: leadHash,
       personalityType: rankLabel(rank, lang),
