@@ -16,6 +16,7 @@ const filesToSyntaxCheck = [
   path.join(projectRoot, 'api', 'lead-init.js'),
   path.join(projectRoot, 'api', 'lead-track.js'),
   path.join(projectRoot, 'api', 'lead-outbox-worker.js'),
+  path.join(projectRoot, 'api', 'lead-system-health.js'),
   path.join(projectRoot, 'api', 'validate-email.js'),
   path.join(projectRoot, 'api', 'init-quiz-db.js'),
 ];
@@ -145,6 +146,7 @@ function verifyHashFlow() {
   const apiBridge = fs.readFileSync(path.join(projectRoot, 'api', 'bridge.js'), 'utf8');
   const leadTrack = fs.readFileSync(path.join(projectRoot, 'api', 'lead-track.js'), 'utf8');
   const leadWorker = fs.readFileSync(path.join(projectRoot, 'api', 'lead-outbox-worker.js'), 'utf8');
+  const leadHealth = fs.readFileSync(path.join(projectRoot, 'api', 'lead-system-health.js'), 'utf8');
   const leadInit = fs.readFileSync(path.join(projectRoot, 'api', 'lead-init.js'), 'utf8');
   const leadSql = fs.readFileSync(path.join(projectRoot, 'supabase-lead-system-v2.sql'), 'utf8');
   const tracker = fs.readFileSync(path.join(projectRoot, 'ac-track.js'), 'utf8');
@@ -214,6 +216,13 @@ function verifyHashFlow() {
       leadWorker.includes("supabaseRpc('mark_outbox_done'") &&
       leadWorker.includes("supabaseRpc('mark_outbox_failed'"),
     'lead v2 API must use Supabase RPCs for init, video progress, and outbox'
+  );
+  assert(
+    leadHealth.includes('lead_sync_outbox?status=eq.dead') &&
+      leadHealth.includes('outbox_processing_stale') &&
+      leadHealth.includes('sendAlertEmail') &&
+      leadHealth.includes('lead_system_health_last_alert'),
+    'lead system health endpoint must monitor outbox failures and dedupe alerts'
   );
   assert(
     leadSql.includes('WITH (security_invoker = true)') &&
