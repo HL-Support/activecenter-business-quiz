@@ -14,10 +14,21 @@
 
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+
+function cleanEnvSecret(value) {
+  return String(value || '')
+    .replace(/\\n$/g, '')
+    .trim();
+}
+
 const BRIDGE_URL = process.env.BRIDGE_URL || 'https://ac-reconnect.com/db-bridge.php';
-const BRIDGE_KEY = process.env.BRIDGE_KEY;
+const HBA_READ_BRIDGE_URL =
+  process.env.HBA_READ_BRIDGE_URL ||
+  process.env.MYSQL_READ_BRIDGE_URL ||
+  'https://origin-reconnect.ac-reconnect.com/hba-bridge.php';
+const BRIDGE_KEY = cleanEnvSecret(process.env.BRIDGE_KEY);
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xlpiisbozpgmemxhtivj.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_KEY = cleanEnvSecret(process.env.SUPABASE_SERVICE_KEY);
 const JWT_SECRET = process.env.JWT_SECRET;
 const RESUME_KEY_SECRET = process.env.RESUME_KEY_SECRET || JWT_SECRET;
 const TRACKING_SCHEMA_VERSION = 'ac_tracking_v1';
@@ -259,6 +270,133 @@ async function supabaseRequest(path, options = {}) {
 async function supabaseJson(path, options = {}) {
   const response = await supabaseRequest(path, options);
   return response ? response.json() : null;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function readMysqlTable(table, where, limit = 1) {
+  if (!BRIDGE_KEY || !HBA_READ_BRIDGE_URL) {
+    return [];
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 6500);
+  let response;
+  try {
+    response = await fetch(HBA_READ_BRIDGE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Bridge-Key': BRIDGE_KEY,
+      },
+      body: JSON.stringify({
+        action: 'read_table',
+        table,
+        where,
+        limit,
+        offset: 0,
+      }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(`mysql_read_bridge_invalid_json:${table}:${text.slice(0, 180)}`);
+  }
+
+  if (!response.ok || data.ok === false || data.error) {
+    throw new Error(`mysql_read_bridge_failed:${table}:${response.status}:${data.error || text.slice(0, 180)}`);
+  }
+
+  return Array.isArray(data.data) ? data.data : [];
+}
+
+function numberOrNull(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function joinPhone(prefix, number) {
+  const left = safeString(prefix, 30);
+  const right = safeString(number, 80);
+  return [left, right].filter(Boolean).join(' ').trim() || null;
+}
+
+async function loadFinalBusinessLeadContext(leadHash) {
+  if (!isLeadHash(leadHash)) {
+    return { found: false, reason: 'invalid_lead_hash' };
+  }
+
+  const retryDelays = [0, 700, 1500, 3000, 5000];
+  let lastReason = 'not_found';
+
+  for (const delay of retryDelays) {
+    if (delay) await sleep(delay);
+
+    const surveys = await readMysqlTable('typeform_surveys', { hash: leadHash }, 1);
+    const survey = surveys[0] || null;
+    if (!survey) {
+      lastReason = 'survey_not_found';
+      continue;
+    }
+
+    const contactId = numberOrNull(survey.contact_id);
+    if (!contactId) {
+      lastReason = 'survey_missing_contact_id';
+      continue;
+    }
+
+    const contacts = await readMysqlTable('contacts', { id: contactId }, 1);
+    const contact = contacts[0] || null;
+    if (!contact) {
+      lastReason = 'contact_not_found';
+      continue;
+    }
+
+    let coach = null;
+    const coachId = numberOrNull(contact.coach_id);
+    if (coachId) {
+      coach = (await readMysqlTable('users', { id: coachId }, 1))[0] || null;
+    }
+    if (!coach && contact.member_id) {
+      coach = (await readMysqlTable('users', { herbalife_id: String(contact.member_id).trim() }, 1))[0] || null;
+    }
+
+    const finalMemberId = safeString(contact.member_id || coach?.herbalife_id, 120);
+    const finalRefId = safeString(coach?.herbalife_id || finalMemberId || survey.ref_id, 120);
+    const finalSlug = safeString(coach?.sub_domain, 80);
+    const rawOrganisationId = numberOrNull(coach?.organization_id || coach?.organisation_id);
+    const organisationId = rawOrganisationId && rawOrganisationId > 0 ? rawOrganisationId : null;
+
+    return {
+      found: true,
+      source: 'mysql_final_readback',
+      lead_hash: leadHash,
+      mysql_survey_id: numberOrNull(survey.id),
+      mysql_contact_id: contactId,
+      mysql_coach_id: coachId,
+      member_id: finalMemberId || null,
+      ref_id: finalRefId || finalMemberId || null,
+      berater_slug: finalSlug || null,
+      organisation_id: organisationId,
+      first_name: normalizePersonName(contact.first_name, 120) || null,
+      email: safeString(contact.email, 180)?.toLowerCase() || null,
+      phone: joinPhone(contact.phone_prefix, contact.phone_number),
+      form_submitted_at: safeString(survey.submitted_at || survey.created_at, 40) || null,
+      coach_herbalife_id: safeString(coach?.herbalife_id, 120) || null,
+      coach_found: !!coach,
+    };
+  }
+
+  return { found: false, reason: lastReason };
 }
 
 async function insertIgnoringDuplicates(table, conflictColumn, record) {
@@ -2323,6 +2461,98 @@ function buildBusinessTypeformPayload(input) {
   };
 }
 
+function typeformHidden(payload) {
+  return payload?.form_response?.hidden || payload?.hidden || {};
+}
+
+async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhookPayload, finalContext = null) {
+  const hidden = {
+    ...(submissionPayload?.hidden || {}),
+    ...typeformHidden(webhookPayload),
+  };
+  const leadHash = safeString(hidden.lead_hash || hidden.hash || submissionPayload?.lead_hash, 96);
+  const email = safeString(submissionPayload?.email || webhookPayload?.email, 180).toLowerCase();
+
+  if (!isLeadHash(leadHash) || !email) {
+    return { persisted: false, reason: 'missing_lead_hash_or_email' };
+  }
+
+  const submittedAt = safeString(
+    webhookPayload?.form_response?.submitted_at ||
+      webhookPayload?.form_response?.landed_at ||
+      submissionPayload?.submitted_at ||
+      submissionPayload?.landed_at ||
+      new Date().toISOString(),
+    40
+  );
+  const profile = submissionPayload?.profile || {};
+  const lang = normalizeLanguage(hidden.lang, submissionPayload?.lang, webhookPayload?.form_response?.language);
+  const finalLead = finalContext?.found ? finalContext : null;
+  const finalEmail = safeString(finalLead?.email || email, 180)?.toLowerCase() || email;
+  const memberId =
+    safeString(finalLead?.member_id || hidden.member_id || submissionPayload?.member_id, 120) || null;
+  const refId =
+    safeString(finalLead?.ref_id || hidden.ref_id || hidden.member_id || submissionPayload?.ref_id, 120) ||
+    memberId;
+
+  await supabaseRequest('lead_state?on_conflict=lead_hash', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify({
+      lead_hash: leadHash,
+      client_seed: safeString(hidden.client_seed, 120) || null,
+      member_id: memberId,
+      ref_id: refId,
+      ref_type: refId && refId !== memberId ? 'referral_code' : 'member',
+      berater_slug:
+        safeString(finalLead?.berater_slug || hidden.berater_slug || hidden.slug || submissionPayload?.berater_slug, 80) ||
+        null,
+      organisation_id:
+        finalLead && Number.isFinite(Number(finalLead.organisation_id)) && Number(finalLead.organisation_id) > 0
+          ? Number(finalLead.organisation_id)
+          : undefined,
+      source_app: 'business_leads_quiz',
+      funnel_key: 'business',
+      lang,
+      country: safeString(hidden.c || submissionPayload?.country, 10) || null,
+      first_name:
+        normalizePersonName(finalLead?.first_name || submissionPayload?.first_name || webhookPayload?.first_name, 120) ||
+        null,
+      email: finalEmail,
+      email_normalized: finalEmail,
+      email_hash: normalizedEmailHash(finalEmail),
+      phone: safeString(finalLead?.phone || submissionPayload?.phone, 80) || null,
+      form_submitted_at: submittedAt,
+      profile_code: safeString(profile.code || profile.animal || submissionPayload?.profile_code, 40) || null,
+      profile_label: safeString(profile.name || profile.animal || submissionPayload?.profile_label, 160) || null,
+      main_aspiration: safeString(hidden.main_aspiration || submissionPayload?.main_aspiration, 80) || null,
+      main_aspiration_label:
+        safeString(hidden.main_aspiration_label || submissionPayload?.main_aspiration_label, 180) || null,
+      lifecycle_stage: 'contact_known',
+      mysql_survey_id: finalLead?.mysql_survey_id || undefined,
+      sync_status: finalLead ? 'mysql_final_synced' : 'pending',
+      last_event_at: submittedAt,
+    }),
+  });
+
+  return {
+    persisted: true,
+    leadHash,
+    final_mysql_sync: finalLead
+      ? {
+          found: true,
+          mysql_survey_id: finalLead.mysql_survey_id || null,
+          mysql_contact_id: finalLead.mysql_contact_id || null,
+          mysql_coach_id: finalLead.mysql_coach_id || null,
+          organisation_id: finalLead.organisation_id || null,
+        }
+      : finalContext || { found: false, reason: 'not_requested' },
+  };
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -2625,8 +2855,12 @@ module.exports = async function handler(req, res) {
 
     const submissionPayload = identity.payload;
     const webhookPayload = buildBusinessTypeformPayload(submissionPayload);
+    const webhookHidden = {
+      ...(submissionPayload.hidden || {}),
+      ...typeformHidden(webhookPayload),
+    };
     const leadSystemFlag = String(
-      webhookPayload.hidden?.lead_system_v2_enabled ||
+      webhookHidden.lead_system_v2_enabled ||
         submissionPayload.hidden?.lead_system_v2_enabled ||
         ''
     )
@@ -2651,10 +2885,30 @@ module.exports = async function handler(req, res) {
           ),
     ]);
 
+    let leadSystemV2Persisted = null;
+    if (result.status >= 200 && result.status < 300) {
+      const finalLeadHash = safeString(
+        webhookHidden.lead_hash || webhookHidden.hash || submissionPayload.lead_hash,
+        96
+      );
+      const finalBusinessLeadContext = await loadFinalBusinessLeadContext(finalLeadHash).catch((err) => {
+        console.warn('loadFinalBusinessLeadContext failed:', err.message);
+        return { found: false, reason: 'mysql_final_readback_error', error: err.message };
+      });
+      leadSystemV2Persisted = await persistBusinessSubmissionToLeadStateV2(
+        submissionPayload,
+        webhookPayload,
+        finalBusinessLeadContext
+      ).catch((err) => {
+        console.warn('persistBusinessSubmissionToLeadStateV2 failed:', err.message);
+        return { persisted: false, error: err.message };
+      });
+    }
+
     // Server-side initial points_result: fire after MySQL row is created (no client dependency)
     if (!usesLeadSystemV2 && result.status >= 200 && result.status < 300) {
-      const prLeadHash = safeString(webhookPayload.hidden?.hash || webhookPayload.hidden?.lead_hash, 96);
-      const prLang = normalizeLanguage(webhookPayload.hidden?.lang || submissionPayload.lang);
+      const prLeadHash = safeString(webhookHidden.hash || webhookHidden.lead_hash, 96);
+      const prLang = normalizeLanguage(webhookHidden.lang || submissionPayload.lang);
       if (isLeadHash(prLeadHash)) {
         (async () => {
           const label = buildPointsResultLabel(0, 3, prLang);
@@ -2677,7 +2931,12 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    result.data = { ...result.data, adapter_key: adapterKey, payload: webhookPayload };
+    result.data = {
+      ...result.data,
+      adapter_key: adapterKey,
+      lead_system_v2_persisted: leadSystemV2Persisted,
+      payload: webhookPayload,
+    };
     return res.status(result.status).json(result.data);
   }
 
