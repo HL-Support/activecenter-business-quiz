@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.lead_state (
   ref_id                text,
   ref_type              text CHECK (ref_type IN ('member','referral_code','campaign','unknown')) DEFAULT 'member',
   berater_slug          text,
+  organisation_id       int,
 
   source_app            text,
   funnel_key            text,
@@ -192,6 +193,7 @@ CREATE TABLE IF NOT EXISTS public.lead_access_permissions (
 
 CREATE INDEX IF NOT EXISTS idx_ls_member_created ON public.lead_state(member_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ls_ref_created ON public.lead_state(ref_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ls_organisation_created ON public.lead_state(organisation_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ls_email_hash ON public.lead_state(email_hash);
 CREATE INDEX IF NOT EXISTS idx_ls_email_norm ON public.lead_state(email_normalized);
 CREATE INDEX IF NOT EXISTS idx_ls_last_event ON public.lead_state(last_event_at DESC);

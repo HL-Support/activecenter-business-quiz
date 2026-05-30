@@ -14,7 +14,6 @@
 
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-
 function cleanEnvSecret(value) {
   return String(value || '')
     .replace(/\\n$/g, '')
@@ -445,60 +444,382 @@ async function determineLastVideoStep(sessionHash) {
 function videoProgressFromSession(session) {
   if (!session) return { lastVideoStep: 1, hasVideoProgress: false };
   if (session.video3_max_pct && Number(session.video3_max_pct) > 0) {
-    return { lastVideoStep: 3, hasVideoProgress: true };
+    return { lastVideoStep: 3, hasVideoProgress: true, resumeStartPercent: Number(session.video3_max_pct) || 0 };
   }
   if (session.video2_max_pct && Number(session.video2_max_pct) > 0) {
-    return { lastVideoStep: 2, hasVideoProgress: true };
+    return { lastVideoStep: 2, hasVideoProgress: true, resumeStartPercent: Number(session.video2_max_pct) || 0 };
   }
   if (session.video1_max_pct && Number(session.video1_max_pct) > 0) {
-    return { lastVideoStep: 1, hasVideoProgress: true };
+    return { lastVideoStep: 1, hasVideoProgress: true, resumeStartPercent: Number(session.video1_max_pct) || 0 };
   }
   return { lastVideoStep: 1, hasVideoProgress: false };
 }
 
-async function loadResumeState(sessionHash) {
+function clampResumePercent(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 0;
+  return Math.max(0, Math.min(90, Math.floor(number)));
+}
+
+function resumeStateFromVideoProgress(rows) {
+  const progressRows = Array.isArray(rows)
+    ? rows
+        .map((row) => ({
+          videoStep: safeInteger(row.video_step),
+          uniquePercent: Number(row.max_unique_watched_percent || 0),
+          playheadPercent: Number(row.max_playhead_percent || 0),
+          lastUpdateAt: safeString(row.last_update_at, 40),
+          completedAt: safeString(row.completed_at, 40),
+        }))
+        .filter((row) => row.videoStep >= 1 && row.videoStep <= 3)
+    : [];
+
+  if (!progressRows.length) {
+    return { lastVideoStep: 1, hasVideoProgress: false, resumeStartPercent: 0 };
+  }
+
+  const byStep = new Map(progressRows.map((row) => [row.videoStep, row]));
+  const partialRows = progressRows
+    .filter((row) => row.uniquePercent > 0 && row.uniquePercent < 95)
+    .sort((a, b) => {
+      if (Date.parse(b.lastUpdateAt || '') !== Date.parse(a.lastUpdateAt || '')) {
+        return Date.parse(b.lastUpdateAt || '') - Date.parse(a.lastUpdateAt || '');
+      }
+      return b.videoStep - a.videoStep;
+    });
+
+  if (partialRows[0]) {
+    return {
+      lastVideoStep: partialRows[0].videoStep,
+      hasVideoProgress: true,
+      resumeStartPercent: clampResumePercent(partialRows[0].uniquePercent),
+    };
+  }
+
+  let completedStep = 0;
+  for (const step of [1, 2, 3]) {
+    const row = byStep.get(step);
+    if (row && row.uniquePercent >= 95) completedStep = step;
+  }
+
+  if (completedStep >= 3) {
+    return {
+      lastVideoStep: 3,
+      hasVideoProgress: true,
+      resumeTarget: 'final',
+      resumeStartPercent: 0,
+    };
+  }
+
+  if (completedStep > 0) {
+    return {
+      lastVideoStep: completedStep + 1,
+      hasVideoProgress: true,
+      resumeStartPercent: 0,
+    };
+  }
+
+  return { lastVideoStep: 1, hasVideoProgress: false, resumeStartPercent: 0 };
+}
+
+function normalizeResumeProfileCode(value) {
+  const raw = safeString(value, 40).toLowerCase();
+  if (!raw) return '';
+  if (raw === 'r' || raw === 'a' || raw === 'typ a' || raw === 'type a' || raw === 'tipo a' || raw.includes('macher')) return 'R';
+  if (raw === 'y' || raw === 'typ b' || raw === 'type b' || raw === 'tipo b' || raw.includes('netzwerker')) return 'Y';
+  if (raw === 'g' || raw === 'c' || raw === 'typ c' || raw === 'type c' || raw === 'tipo c' || raw.includes('anker')) return 'G';
+  if (raw === 'b' || raw === 'd' || raw === 'typ d' || raw === 'type d' || raw === 'tipo d' || raw.includes('architekt')) return 'B';
+  return raw.toUpperCase();
+}
+
+async function loadResumeState({ sessionHash = '', leadHash = '' } = {}) {
   const fallback = {
     resumeTarget: 'result',
     lastVideoStep: 1,
+    resumeStartPercent: 0,
     profileCode: '',
     aspiration: '',
     barrier: '',
   };
-  if (!sessionHash) return fallback;
+  if (!sessionHash && !isLeadHash(leadHash)) return fallback;
 
   try {
-    const encodedHash = encodeURIComponent(sessionHash);
-    const [quizResponse, trackingResponse, ctaResponse] = await Promise.all([
-      supabaseRequest(
-        `quiz_sessions?hash=eq.${encodedHash}&select=quiz_profile,quiz_aspiration,quiz_barrier,video1_max_pct,video2_max_pct,video3_max_pct&limit=1`
-      ),
-      supabaseRequest(
-        `tracking_sessions?session_hash=eq.${encodedHash}&select=quiz_profile,main_aspiration,quiz_barrier&limit=1`
-      ),
-      supabaseRequest(
-        `tracking_events?session_hash=eq.${encodedHash}&event_name=eq.result_cta_click&select=id&limit=1`
-      ),
-    ]);
+    const encodedHash = sessionHash ? encodeURIComponent(sessionHash) : '';
+    const encodedLeadHash = isLeadHash(leadHash) ? encodeURIComponent(leadHash) : '';
+    const [leadResponse, progressResponse, quizResponse, trackingResponse, ctaResponse] =
+      await Promise.all([
+        encodedLeadHash
+          ? supabaseRequest(
+              `lead_state?lead_hash=eq.${encodedLeadHash}&select=profile_code,main_aspiration,initial_barrier&limit=1`
+            )
+          : null,
+        encodedLeadHash
+          ? supabaseRequest(
+              `lead_video_progress?lead_hash=eq.${encodedLeadHash}&select=video_step,max_unique_watched_percent,max_playhead_percent,last_update_at,completed_at&order=video_step.asc`
+            )
+          : null,
+        encodedHash
+          ? supabaseRequest(
+              `quiz_sessions?hash=eq.${encodedHash}&select=quiz_profile,quiz_aspiration,quiz_barrier,video1_max_pct,video2_max_pct,video3_max_pct&limit=1`
+            )
+          : null,
+        encodedHash
+          ? supabaseRequest(
+              `tracking_sessions?session_hash=eq.${encodedHash}&select=quiz_profile,main_aspiration,quiz_barrier&limit=1`
+            )
+          : null,
+        encodedHash
+          ? supabaseRequest(
+              `tracking_events?session_hash=eq.${encodedHash}&event_name=eq.result_cta_click&select=id&limit=1`
+            )
+          : null,
+      ]);
+    const leadRows = await leadResponse?.json?.();
+    const progressRows = await progressResponse?.json?.();
     const quizRows = await quizResponse?.json?.();
     const trackingRows = await trackingResponse?.json?.();
     const ctaRows = await ctaResponse?.json?.();
+    const leadState = Array.isArray(leadRows) ? leadRows[0] : null;
     const quizSession = Array.isArray(quizRows) ? quizRows[0] : null;
     const trackingSession = Array.isArray(trackingRows) ? trackingRows[0] : null;
-    const progress = videoProgressFromSession(quizSession);
+    const v2Progress = resumeStateFromVideoProgress(progressRows);
+    const legacyProgress = videoProgressFromSession(quizSession);
+    const progress = v2Progress.hasVideoProgress ? v2Progress : legacyProgress;
     const hasResultCtaClick = Array.isArray(ctaRows) && ctaRows.length > 0;
+    const resumeTarget =
+      progress.resumeTarget || (hasResultCtaClick || progress.hasVideoProgress ? 'videos' : 'result');
 
     return {
-      resumeTarget: hasResultCtaClick || progress.hasVideoProgress ? 'videos' : 'result',
+      resumeTarget,
       lastVideoStep: progress.lastVideoStep,
-      profileCode: safeString(trackingSession?.quiz_profile || quizSession?.quiz_profile, 8) || '',
+      resumeStartPercent: clampResumePercent(progress.resumeStartPercent),
+      profileCode: normalizeResumeProfileCode(
+        leadState?.profile_code || trackingSession?.quiz_profile || quizSession?.quiz_profile
+      ),
       aspiration:
-        safeString(trackingSession?.main_aspiration || quizSession?.quiz_aspiration, 60) || '',
-      barrier: safeString(trackingSession?.quiz_barrier || quizSession?.quiz_barrier, 60) || '',
+        safeString(
+          leadState?.main_aspiration || trackingSession?.main_aspiration || quizSession?.quiz_aspiration,
+          60
+        ) || '',
+      barrier:
+        safeString(leadState?.initial_barrier || trackingSession?.quiz_barrier || quizSession?.quiz_barrier, 60) ||
+        '',
     };
   } catch (error) {
     console.warn('Could not load resume state, defaulting to result:', error.message);
     return fallback;
   }
+}
+
+async function loadLeadStateByHash(leadHash, depth = 0) {
+  if (!isLeadHash(leadHash)) return {};
+  const response = await supabaseRequest(
+    `lead_state?lead_hash=eq.${encodeURIComponent(leadHash)}&select=lead_hash,member_id,ref_id,berater_slug,lang,first_name,email,email_normalized,form_submitted_at,profile_code,main_aspiration,initial_barrier,lifecycle_stage,migration_flags&limit=1`
+  );
+  const rows = await response?.json?.();
+  const row = Array.isArray(rows) ? rows[0] || {} : {};
+  const mergedInto = safeString(row?.migration_flags?.merged_into, 96);
+  if (
+    depth < 3 &&
+    safeString(row.lifecycle_stage, 80).toLowerCase() === 'merged_duplicate' &&
+    isLeadHash(mergedInto) &&
+    mergedInto !== leadHash
+  ) {
+    return loadLeadStateByHash(mergedInto, depth + 1);
+  }
+  return row;
+}
+
+async function persistContactLeadStateFromResumePayload(payload) {
+  const leadHash = safeString(payload?.leadHash || payload?.lead_hash, 96);
+  const email = safeString(payload?.email, 180).toLowerCase();
+  const firstName = normalizePersonName(payload?.firstName || payload?.first_name, 120);
+
+  if (!isLeadHash(leadHash) || !email || !firstName) {
+    return { persisted: false, reason: 'missing_required_contact_fields' };
+  }
+
+  const submittedAt = safeString(
+    payload?.submittedAt || payload?.submitted_at || new Date().toISOString(),
+    40
+  );
+  const memberId = safeString(payload?.memberId || payload?.member_id, 120) || null;
+  const refId = safeString(payload?.refId || payload?.ref_id || payload?.memberId || payload?.member_id, 120) || memberId;
+
+  await supabaseRequest('lead_state?on_conflict=lead_hash', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify({
+      lead_hash: leadHash,
+      member_id: memberId,
+      ref_id: refId,
+      ref_type: refId && refId !== memberId ? 'referral_code' : 'member',
+      berater_slug: safeString(payload?.beraterSlug || payload?.berater_slug || payload?.slug, 80) || null,
+      source_app: 'business_leads_quiz',
+      funnel_key: 'business',
+      lang: normalizeLanguage(payload?.lang || payload?.language),
+      first_name: firstName,
+      email,
+      email_normalized: email,
+      form_submitted_at: submittedAt,
+      profile_code: safeString(payload?.profileCode || payload?.profile_code, 40) || null,
+      profile_label: safeString(payload?.profileLabel || payload?.profile_label, 160) || null,
+      main_aspiration: safeString(payload?.mainAspiration || payload?.main_aspiration, 80) || null,
+      main_aspiration_label:
+        safeString(payload?.mainAspirationLabel || payload?.main_aspiration_label, 180) || null,
+      initial_barrier: safeString(payload?.barrier || payload?.initial_barrier, 120) || null,
+      lifecycle_stage: 'contact_known',
+      last_event_at: submittedAt,
+    }),
+  });
+
+  return { persisted: true, leadHash };
+}
+
+async function resolveContactLeadForResume({ sessionHash, email, leadHash, fallbackContact }) {
+  let resolvedLeadHash = isLeadHash(leadHash) ? leadHash : '';
+  let leadState = resolvedLeadHash ? await loadLeadStateByHash(resolvedLeadHash) : {};
+  if (isLeadHash(leadState.lead_hash)) resolvedLeadHash = safeString(leadState.lead_hash, 96);
+
+  const shouldPersistFallbackContact =
+    fallbackContact &&
+    (!leadState.lead_hash ||
+      !leadState.email ||
+      !leadState.first_name ||
+      !leadState.form_submitted_at ||
+      (fallbackContact.lang && normalizeLanguage(fallbackContact.lang) !== leadState.lang));
+
+  if (shouldPersistFallbackContact) {
+    const persisted = await persistContactLeadStateFromResumePayload({
+      ...fallbackContact,
+      leadHash: resolvedLeadHash || fallbackContact.leadHash || fallbackContact.lead_hash,
+      email: email || fallbackContact.email,
+    });
+    if (persisted.persisted) {
+      resolvedLeadHash = persisted.leadHash;
+      leadState = await loadLeadStateByHash(resolvedLeadHash);
+      if (isLeadHash(leadState.lead_hash)) resolvedLeadHash = safeString(leadState.lead_hash, 96);
+    }
+  }
+
+  if (!leadState.lead_hash && sessionHash) {
+    const trackingResponse = await supabaseRequest(
+      `tracking_sessions?session_hash=eq.${encodeURIComponent(sessionHash)}&select=lead_hash,form_email,form_first_name,member_id,berater_slug,lang&limit=1`
+    );
+    const trackingRows = await trackingResponse?.json?.();
+    const trackingSession = Array.isArray(trackingRows) ? trackingRows[0] || {} : {};
+    if (isLeadHash(trackingSession.lead_hash)) {
+      resolvedLeadHash = safeString(trackingSession.lead_hash, 96);
+      leadState = await loadLeadStateByHash(resolvedLeadHash);
+      if (isLeadHash(leadState.lead_hash)) resolvedLeadHash = safeString(leadState.lead_hash, 96);
+    }
+  }
+
+  if (!leadState.lead_hash && email) {
+    const normalizedEmail = safeString(email, 180).toLowerCase();
+    const response = await supabaseRequest(
+      `lead_state?email_normalized=eq.${encodeURIComponent(normalizedEmail)}&lifecycle_stage=neq.merged_duplicate&select=lead_hash,member_id,ref_id,berater_slug,lang,first_name,email,email_normalized,form_submitted_at,profile_code,main_aspiration,initial_barrier,lifecycle_stage,migration_flags&order=form_submitted_at.desc&limit=1`
+    );
+    const rows = await response?.json?.();
+    leadState = Array.isArray(rows) ? rows[0] || {} : {};
+    resolvedLeadHash = safeString(leadState.lead_hash, 96);
+  }
+
+  return {
+    leadHash: isLeadHash(resolvedLeadHash) ? resolvedLeadHash : '',
+    leadState: leadState || {},
+  };
+}
+
+async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhookPayload, finalContext = null) {
+  const hidden = {
+    ...(submissionPayload?.hidden || {}),
+    ...typeformHidden(webhookPayload),
+  };
+  const leadHash = safeString(hidden.lead_hash || hidden.hash || submissionPayload?.lead_hash, 96);
+  const email = safeString(submissionPayload?.email || webhookPayload?.email, 180).toLowerCase();
+
+  if (!isLeadHash(leadHash) || !email) {
+    return { persisted: false, reason: 'missing_lead_hash_or_email' };
+  }
+
+  const submittedAt = safeString(
+    webhookPayload?.form_response?.submitted_at ||
+      webhookPayload?.form_response?.landed_at ||
+      submissionPayload?.submitted_at ||
+      submissionPayload?.landed_at ||
+      new Date().toISOString(),
+    40
+  );
+  const profile = submissionPayload?.profile || {};
+  const lang = normalizeLanguage(hidden.lang, submissionPayload?.lang, webhookPayload?.form_response?.language);
+  const finalLead = finalContext?.found ? finalContext : null;
+  const finalEmail = safeString(finalLead?.email || email, 180)?.toLowerCase() || email;
+  const memberId =
+    safeString(finalLead?.member_id || hidden.member_id || submissionPayload?.member_id, 120) || null;
+  const refId =
+    safeString(finalLead?.ref_id || hidden.ref_id || hidden.member_id || submissionPayload?.ref_id, 120) ||
+    memberId;
+
+  await supabaseRequest('lead_state?on_conflict=lead_hash', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify({
+      lead_hash: leadHash,
+      client_seed: safeString(hidden.client_seed, 120) || null,
+      member_id: memberId,
+      ref_id: refId,
+      ref_type: refId && refId !== memberId ? 'referral_code' : 'member',
+      berater_slug:
+        safeString(finalLead?.berater_slug || hidden.berater_slug || hidden.slug || submissionPayload?.berater_slug, 80) ||
+        null,
+      organisation_id:
+        finalLead && Number.isFinite(Number(finalLead.organisation_id)) && Number(finalLead.organisation_id) > 0
+          ? Number(finalLead.organisation_id)
+          : undefined,
+      source_app: 'business_leads_quiz',
+      funnel_key: 'business',
+      lang,
+      country: safeString(hidden.c || submissionPayload?.country, 10) || null,
+      first_name:
+        normalizePersonName(finalLead?.first_name || submissionPayload?.first_name || webhookPayload?.first_name, 120) ||
+        null,
+      email: finalEmail,
+      email_normalized: finalEmail,
+      email_hash: normalizedEmailHash(finalEmail),
+      phone: safeString(finalLead?.phone || submissionPayload?.phone, 80) || null,
+      form_submitted_at: submittedAt,
+      profile_code: safeString(profile.code || profile.animal || submissionPayload?.profile_code, 40) || null,
+      profile_label: safeString(profile.name || profile.animal || submissionPayload?.profile_label, 160) || null,
+      main_aspiration: safeString(hidden.main_aspiration || submissionPayload?.main_aspiration, 80) || null,
+      main_aspiration_label:
+        safeString(hidden.main_aspiration_label || submissionPayload?.main_aspiration_label, 180) || null,
+      lifecycle_stage: 'contact_known',
+      mysql_survey_id: finalLead?.mysql_survey_id || undefined,
+      sync_status: finalLead ? 'mysql_final_synced' : 'pending',
+      last_event_at: submittedAt,
+    }),
+  });
+
+  return {
+    persisted: true,
+    leadHash,
+    final_mysql_sync: finalLead
+      ? {
+          found: true,
+          mysql_survey_id: finalLead.mysql_survey_id || null,
+          mysql_contact_id: finalLead.mysql_contact_id || null,
+          mysql_coach_id: finalLead.mysql_coach_id || null,
+          organisation_id: finalLead.organisation_id || null,
+        }
+      : finalContext || { found: false, reason: 'not_requested' },
+  };
 }
 
 async function ensureResumeSessionRecord({ sessionHash, email, leadHash, context }) {
@@ -748,6 +1069,52 @@ function normalizedEmailHash(email) {
     .toLowerCase();
   if (!normalized) return null;
   return crypto.createHash('sha256').update(normalized).digest('hex');
+}
+
+async function sendMetaCAPILead({ email, firstName, clientIp, userAgent, eventId }) {
+  const META_PIXEL_ID = process.env.META_PIXEL_ID;
+  const META_CAPI_TOKEN = process.env.META_CAPI_TOKEN;
+  if (!META_PIXEL_ID || !META_CAPI_TOKEN) return;
+  const emailHash = normalizedEmailHash(email);
+  if (!emailHash) return;
+
+  const userData = {
+    em: [emailHash],
+    client_ip_address: clientIp || '',
+    client_user_agent: userAgent || '',
+  };
+  if (firstName) {
+    userData.fn = [crypto.createHash('sha256').update(String(firstName).trim().toLowerCase()).digest('hex')];
+  }
+
+  const payload = {
+    data: [
+      {
+        event_name: 'Lead',
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: eventId || `capi_${Date.now()}`,
+        action_source: 'website',
+        event_source_url: 'https://business.activecenter.info/markus',
+        user_data: userData,
+        custom_data: {
+          content_name: 'Erfolgscode Quiz',
+          content_category: 'Business Opportunity',
+        },
+      },
+    ],
+  };
+  if (process.env.META_CAPI_TEST_CODE) {
+    payload.test_event_code = process.env.META_CAPI_TEST_CODE;
+  }
+
+  const response = await fetch(
+    `https://graph.facebook.com/v21.0/${META_PIXEL_ID}/events?access_token=${META_CAPI_TOKEN}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+  );
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    console.warn(`Meta CAPI responded ${response.status}: ${text.slice(0, 200)}`);
+  }
 }
 
 function watchedVideoStepFromPayload(payload, eventName) {
@@ -2032,7 +2399,7 @@ function normalizeLang(lang) {
   const value = String(lang || '')
     .toLowerCase()
     .trim();
-  return ['de', 'it', 'en'].includes(value) ? value : 'de';
+  return ['de', 'it', 'en', 'fr', 'ru'].includes(value) ? value : 'de';
 }
 
 function normalizeAspiration(value) {
@@ -2167,6 +2534,14 @@ const BUSINESS_COPY = {
       ],
     ],
   },
+};
+
+const BUSINESS_ASPIRATION_LABELS = {
+  de: { freedom: 'Freiheit', impact: 'Wirkung', security: 'Sicherheit', growth: 'Wachstum' },
+  it: { freedom: 'Libertà', impact: 'Impatto', security: 'Sicurezza', growth: 'Crescita' },
+  en: { freedom: 'Freedom', impact: 'Impact', security: 'Security', growth: 'Growth' },
+  fr: { freedom: 'Liberté', impact: 'Impact', security: 'Sécurité', growth: 'Croissance' },
+  ru: { freedom: 'Свобода', impact: 'Влияние', security: 'Стабильность', growth: 'Рост' },
 };
 
 const BUSINESS_SCHEMA = {
@@ -2322,6 +2697,10 @@ function appendTextVariable(variables, key, value) {
   return [...variables, { key, type: 'text', text: value }];
 }
 
+function typeformHidden(payload) {
+  return payload?.form_response?.hidden || payload?.hidden || {};
+}
+
 function buildBusinessTypeformPayload(input) {
   const hidden = { ...((input && input.hidden) || {}) };
   const lang = normalizeLang(hidden.lang || input.lang);
@@ -2338,11 +2717,12 @@ function buildBusinessTypeformPayload(input) {
     .find(Boolean);
   const mainAspiration =
     normalizeAspiration(input.main_aspiration || hidden.main_aspiration) || derivedAspiration;
+  const suppliedMainAspirationLabel = String(
+    input.main_aspiration_label || hidden.main_aspiration_label || ''
+  ).trim();
+  const aspirationLabels = BUSINESS_ASPIRATION_LABELS[lang] || BUSINESS_ASPIRATION_LABELS.de;
   const mainAspirationLabel = String(
-    input.main_aspiration_label ||
-      hidden.main_aspiration_label ||
-      copy.aspirations[mainAspiration] ||
-      ''
+    (mainAspiration && aspirationLabels[mainAspiration]) || suppliedMainAspirationLabel || ''
   ).trim();
   let variables = Array.isArray(input.variables) ? [...input.variables] : [];
 
@@ -2458,98 +2838,6 @@ function buildBusinessTypeformPayload(input) {
       answers,
       ending: { id: BUSINESS_SCHEMA.ending.id, ref: BUSINESS_SCHEMA.ending.ref },
     },
-  };
-}
-
-function typeformHidden(payload) {
-  return payload?.form_response?.hidden || payload?.hidden || {};
-}
-
-async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhookPayload, finalContext = null) {
-  const hidden = {
-    ...(submissionPayload?.hidden || {}),
-    ...typeformHidden(webhookPayload),
-  };
-  const leadHash = safeString(hidden.lead_hash || hidden.hash || submissionPayload?.lead_hash, 96);
-  const email = safeString(submissionPayload?.email || webhookPayload?.email, 180).toLowerCase();
-
-  if (!isLeadHash(leadHash) || !email) {
-    return { persisted: false, reason: 'missing_lead_hash_or_email' };
-  }
-
-  const submittedAt = safeString(
-    webhookPayload?.form_response?.submitted_at ||
-      webhookPayload?.form_response?.landed_at ||
-      submissionPayload?.submitted_at ||
-      submissionPayload?.landed_at ||
-      new Date().toISOString(),
-    40
-  );
-  const profile = submissionPayload?.profile || {};
-  const lang = normalizeLanguage(hidden.lang, submissionPayload?.lang, webhookPayload?.form_response?.language);
-  const finalLead = finalContext?.found ? finalContext : null;
-  const finalEmail = safeString(finalLead?.email || email, 180)?.toLowerCase() || email;
-  const memberId =
-    safeString(finalLead?.member_id || hidden.member_id || submissionPayload?.member_id, 120) || null;
-  const refId =
-    safeString(finalLead?.ref_id || hidden.ref_id || hidden.member_id || submissionPayload?.ref_id, 120) ||
-    memberId;
-
-  await supabaseRequest('lead_state?on_conflict=lead_hash', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Prefer: 'resolution=merge-duplicates,return=minimal',
-    },
-    body: JSON.stringify({
-      lead_hash: leadHash,
-      client_seed: safeString(hidden.client_seed, 120) || null,
-      member_id: memberId,
-      ref_id: refId,
-      ref_type: refId && refId !== memberId ? 'referral_code' : 'member',
-      berater_slug:
-        safeString(finalLead?.berater_slug || hidden.berater_slug || hidden.slug || submissionPayload?.berater_slug, 80) ||
-        null,
-      organisation_id:
-        finalLead && Number.isFinite(Number(finalLead.organisation_id)) && Number(finalLead.organisation_id) > 0
-          ? Number(finalLead.organisation_id)
-          : undefined,
-      source_app: 'business_leads_quiz',
-      funnel_key: 'business',
-      lang,
-      country: safeString(hidden.c || submissionPayload?.country, 10) || null,
-      first_name:
-        normalizePersonName(finalLead?.first_name || submissionPayload?.first_name || webhookPayload?.first_name, 120) ||
-        null,
-      email: finalEmail,
-      email_normalized: finalEmail,
-      email_hash: normalizedEmailHash(finalEmail),
-      phone: safeString(finalLead?.phone || submissionPayload?.phone, 80) || null,
-      form_submitted_at: submittedAt,
-      profile_code: safeString(profile.code || profile.animal || submissionPayload?.profile_code, 40) || null,
-      profile_label: safeString(profile.name || profile.animal || submissionPayload?.profile_label, 160) || null,
-      main_aspiration: safeString(hidden.main_aspiration || submissionPayload?.main_aspiration, 80) || null,
-      main_aspiration_label:
-        safeString(hidden.main_aspiration_label || submissionPayload?.main_aspiration_label, 180) || null,
-      lifecycle_stage: 'contact_known',
-      mysql_survey_id: finalLead?.mysql_survey_id || undefined,
-      sync_status: finalLead ? 'mysql_final_synced' : 'pending',
-      last_event_at: submittedAt,
-    }),
-  });
-
-  return {
-    persisted: true,
-    leadHash,
-    final_mysql_sync: finalLead
-      ? {
-          found: true,
-          mysql_survey_id: finalLead.mysql_survey_id || null,
-          mysql_contact_id: finalLead.mysql_contact_id || null,
-          mysql_coach_id: finalLead.mysql_coach_id || null,
-          organisation_id: finalLead.organisation_id || null,
-        }
-      : finalContext || { found: false, reason: 'not_requested' },
   };
 }
 
@@ -2905,6 +3193,23 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    // Meta CAPI — server-side Lead event, non-blocking, fires after lead is persisted
+    if (result.status >= 200 && result.status < 300) {
+      const capiEmail = safeString(submissionPayload.email || webhookPayload.email, 180);
+      const capiFirstName = normalizePersonName(submissionPayload.first_name, 120);
+      const capiLeadHash = safeString(
+        webhookHidden.lead_hash || webhookHidden.hash,
+        96
+      );
+      sendMetaCAPILead({
+        email: capiEmail,
+        firstName: capiFirstName,
+        clientIp: forwardedFor,
+        userAgent,
+        eventId: capiLeadHash ? `capi_${capiLeadHash}` : undefined,
+      }).catch((err) => console.warn('Meta CAPI Lead failed (non-critical):', err.message));
+    }
+
     // Server-side initial points_result: fire after MySQL row is created (no client dependency)
     if (!usesLeadSystemV2 && result.status >= 200 && result.status < 300) {
       const prLeadHash = safeString(webhookHidden.hash || webhookHidden.lead_hash, 96);
@@ -2970,13 +3275,26 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Missing sessionHash or email' });
     }
 
-    const resumeState = await loadResumeState(payload.sessionHash);
+    const contactLead = await resolveContactLeadForResume({
+      sessionHash: safeString(payload.sessionHash, 96),
+      email: safeString(payload.email, 255),
+      leadHash: safeString(payload.leadHash || payload.lead_hash, 96),
+      fallbackContact: payload.contact || null,
+    });
+    if (!contactLead.leadHash) {
+      return res.status(409).json({ error: 'Resume contact not found' });
+    }
+
+    const resumeState = await loadResumeState({
+      sessionHash: safeString(payload.sessionHash, 96),
+      leadHash: contactLead.leadHash,
+    });
     let resumeSession = null;
     try {
       resumeSession = await ensureResumeSessionRecord({
         sessionHash: payload.sessionHash,
         email: safeString(payload.email, 255),
-        leadHash: safeString(payload.leadHash || payload.lead_hash, 96),
+        leadHash: contactLead.leadHash,
         context: safeString(payload.context || 'quiz', 80),
       });
     } catch (error) {
@@ -2987,9 +3305,11 @@ module.exports = async function handler(req, res) {
       {
         sessionHash: payload.sessionHash,
         email: payload.email,
+        leadHash: contactLead.leadHash,
         context: payload.context || 'quiz',
         lastVideoStep: resumeState.lastVideoStep,
         resumeTarget: resumeState.resumeTarget,
+        resumeStartPercent: resumeState.resumeStartPercent,
         profileCode: resumeState.profileCode,
         aspiration: resumeState.aspiration,
         barrier: resumeState.barrier,
@@ -3005,8 +3325,10 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({
       success: true,
       token,
+      leadHash: contactLead.leadHash,
       lastVideoStep: resumeState.lastVideoStep,
       resumeTarget: resumeState.resumeTarget,
+      resumeStartPercent: resumeState.resumeStartPercent,
       profileCode: resumeState.profileCode,
       aspiration: resumeState.aspiration,
       barrier: resumeState.barrier,
@@ -3040,15 +3362,30 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Resume token missing required fields' });
     }
 
-    const resumeState = await loadResumeState(sessionHash);
+    const contactLead = await resolveContactLeadForResume({
+      sessionHash,
+      email,
+      leadHash: safeString(decoded.leadHash || decoded.lead_hash, 96),
+    });
+    if (!contactLead.leadHash) {
+      return res.status(409).json({ error: 'Resume contact not found' });
+    }
+    const resumeState = await loadResumeState({ sessionHash, leadHash: contactLead.leadHash });
+    const leadState = contactLead.leadState || {};
 
     return res.status(200).json({
       success: true,
       sessionHash,
+      leadHash: contactLead.leadHash,
       email,
+      firstName: safeString(leadState.first_name, 120) || '',
+      memberId: safeString(leadState.member_id, 120) || '',
+      refId: safeString(leadState.ref_id || leadState.member_id, 120) || '',
+      beraterSlug: safeString(leadState.berater_slug, 80) || '',
       context,
       lastVideoStep: resumeState.lastVideoStep,
       resumeTarget: resumeState.resumeTarget,
+      resumeStartPercent: resumeState.resumeStartPercent,
       profileCode: resumeState.profileCode,
       aspiration: resumeState.aspiration,
       barrier: resumeState.barrier,
@@ -3085,15 +3422,30 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const resumeState = await loadResumeState(sessionHash);
+    const contactLead = await resolveContactLeadForResume({
+      sessionHash,
+      email,
+      leadHash: safeString(resumeRecord.lead_hash, 96),
+    });
+    if (!contactLead.leadHash) {
+      return res.status(409).json({ error: 'Resume contact not found' });
+    }
+    const resumeState = await loadResumeState({ sessionHash, leadHash: contactLead.leadHash });
+    const leadState = contactLead.leadState || {};
 
     return res.status(200).json({
       success: true,
       sessionHash,
+      leadHash: contactLead.leadHash,
       email,
+      firstName: safeString(leadState.first_name, 120) || '',
+      memberId: safeString(leadState.member_id, 120) || '',
+      refId: safeString(leadState.ref_id || leadState.member_id, 120) || '',
+      beraterSlug: safeString(leadState.berater_slug, 80) || '',
       context: safeString(resumeRecord.funnel || 'quiz', 32) || 'quiz',
       lastVideoStep: resumeState.lastVideoStep,
       resumeTarget: resumeState.resumeTarget,
+      resumeStartPercent: resumeState.resumeStartPercent,
       profileCode: resumeState.profileCode,
       aspiration: resumeState.aspiration,
       barrier: resumeState.barrier,

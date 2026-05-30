@@ -71,7 +71,9 @@ export const storage = {
 };
 
 export function getPreferredLang() {
-  const preferred = storage.getItem('preferredLang');
+  const slug =
+    window.location.pathname.replace(/^\/+/, '').toLowerCase().split('/')[0] || 'default';
+  const preferred = storage.getItem(`preferredLang:${slug}`);
   if (preferred && ['de', 'it', 'fr', 'ru', 'en'].includes(preferred)) {
     return preferred;
   }
@@ -94,7 +96,7 @@ export function setPreferredLang(lang) {
     return;
   }
 
-  storage.setItem('preferredLang', lang);
+  storage.setItem(`preferredLang:${getCurrentSlug()}`, lang);
   window.location.reload();
 }
 
@@ -463,6 +465,38 @@ function updateLeadRunWithServerHash(slug, memberId, leadHash, enabled) {
   return updated;
 }
 
+export function adoptResumeLeadRun({
+  slug = getCurrentSlug(),
+  memberId = '',
+  leadHash = '',
+  sessionHash = '',
+}) {
+  const normalizedSlug = String(slug || 'default').toLowerCase();
+  if (!isServerLeadHash(leadHash)) return null;
+
+  const existing = getActiveLeadRun(normalizedSlug, memberId);
+  const trackingHash = sessionHash || existing.session_hash || getTrackingSessionHash(normalizedSlug, memberId);
+  const updated = {
+    ...existing,
+    lead_hash: leadHash,
+    session_hash: trackingHash,
+    tracking_hash: trackingHash,
+    member_id: String(memberId || existing.member_id || ''),
+    state: existing.state || 'submitted',
+    lead_system_v2_enabled: true,
+    updatedAt: isoNow(),
+  };
+  storage.setItem(getLeadRunKey(normalizedSlug), JSON.stringify(updated));
+  writeLeadSystemState(normalizedSlug, {
+    enabled: true,
+    lead_hash: leadHash,
+    client_seed: updated.client_seed,
+    source: 'resume',
+    checkedAt: isoNow(),
+  });
+  return updated;
+}
+
 async function initializeLeadSystemV2(coach, slug) {
   const normalizedSlug = String(slug || coach?.slug || getCurrentSlug() || 'default').toLowerCase();
   const memberId = String(coach?.member_id || storage.getItem('acMemberId') || '');
@@ -485,6 +519,7 @@ async function initializeLeadSystemV2(coach, slug) {
       utm_source: params.get('utm_source') || '',
       utm_medium: params.get('utm_medium') || '',
       utm_campaign: params.get('utm_campaign') || '',
+      utm_content: params.get('utm_content') || '',
     }),
   });
 

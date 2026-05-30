@@ -141,6 +141,12 @@ async function main() {
     console.log('video-config.js copied to dist');
   }
 
+  const fontsDir = path.join(projectRoot, 'fonts');
+  if (fs.existsSync(fontsDir)) {
+    fs.cpSync(fontsDir, path.join(distDir, 'fonts'), { recursive: true });
+    console.log('fonts copied to dist');
+  }
+
   const outputHtml = buildHtmlShell(sourceHtml);
   fs.writeFileSync(path.join(distDir, 'index.html'), outputHtml, 'utf8');
 }

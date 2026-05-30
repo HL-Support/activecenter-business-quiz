@@ -34,6 +34,50 @@ function normalizeEventName(eventName) {
   return name;
 }
 
+const ASPIRATION_LABELS = {
+  de: {
+    freedom: 'Freiheit',
+    impact: 'Wirkung',
+    security: 'Sicherheit',
+    growth: 'Wachstum',
+  },
+  it: {
+    freedom: 'Libertà',
+    impact: 'Impatto',
+    security: 'Sicurezza',
+    growth: 'Crescita',
+  },
+  en: {
+    freedom: 'Freedom',
+    impact: 'Impact',
+    security: 'Security',
+    growth: 'Growth',
+  },
+  fr: {
+    freedom: 'Liberté',
+    impact: 'Impact',
+    security: 'Sécurité',
+    growth: 'Croissance',
+  },
+  ru: {
+    freedom: 'Свобода',
+    impact: 'Влияние',
+    security: 'Стабильность',
+    growth: 'Рост',
+  },
+};
+
+function normalizeAspiration(value) {
+  const key = safeString(value, 80).toLowerCase();
+  return ['freedom', 'impact', 'security', 'growth'].includes(key) ? key : '';
+}
+
+function localizedAspirationLabel(lang, aspiration, fallback) {
+  const key = normalizeAspiration(aspiration);
+  const labels = ASPIRATION_LABELS[normalizeLanguage(lang)] || ASPIRATION_LABELS.de;
+  return (key && labels[key]) || safeString(fallback, 180) || null;
+}
+
 async function insertLeadEvent({ leadHash, eventName, eventAt, payload }) {
   const record = {
     event_uid: eventUid(payload),
@@ -111,12 +155,16 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload) {
   }
 
   if (eventName === 'quiz_result') {
+    const mainAspiration = normalizeAspiration(payload.main_aspiration || payload.quiz_aspiration);
     await patchLeadState(leadHash, {
       profile_code: safeString(payload.profile_code || payload.quiz_profile, 40) || null,
       profile_label: safeString(payload.profile_label || payload.quiz_profile_name, 160) || null,
-      main_aspiration: safeString(payload.main_aspiration || payload.quiz_aspiration, 80) || null,
-      main_aspiration_label:
-        safeString(payload.main_aspiration_label || payload.quiz_aspiration_label, 180) || null,
+      main_aspiration: mainAspiration || null,
+      main_aspiration_label: localizedAspirationLabel(
+        lang,
+        mainAspiration,
+        payload.main_aspiration_label || payload.quiz_aspiration_label
+      ),
       initial_barrier: safeString(payload.initial_barrier || payload.quiz_barrier, 120) || null,
       lifecycle_stage: 'profile_known',
       last_event_at: eventAt,
@@ -145,7 +193,7 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload) {
   }
 
   if (eventName === 'video_progress' || eventName === 'video_unlocked' || eventName === 'video_completed') {
-    await supabaseRpc('upsert_video_progress_monotonic', {
+    const rankRows = await supabaseRpc('upsert_video_progress_monotonic', {
       p_lead_hash: leadHash,
       p_video_step: safeInteger(payload.video_step),
       p_video_id: safeString(payload.video_id, 120) || null,
@@ -161,6 +209,16 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload) {
       p_event_at: eventAt,
       p_lang: lang,
     });
+    const rankResult = Array.isArray(rankRows) ? rankRows[0] : rankRows;
+    if (rankResult?.rank_changed === true && safeInteger(rankResult.completed_rank) >= 3) {
+      await enqueueSync(leadHash, 'coach_hot_lead_email', {
+        lang,
+        rank: safeInteger(rankResult.completed_rank),
+        reason: 'all_videos_completed',
+        event_at: eventAt,
+        video_step: safeInteger(payload.video_step),
+      });
+    }
     return;
   }
 

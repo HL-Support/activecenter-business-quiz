@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   initializeQuizEnvironment,
+  adoptResumeLeadRun,
   getCurrentSlug,
   validateSlug,
   getPreferredLang,
@@ -56,12 +57,22 @@ function decodeResumePayload(token) {
     const email = decoded.email;
     const lastVideoStep = decoded.lastVideoStep || 1;
     const resumeTarget = decoded.resumeTarget || 'result';
+    const resumeStartPercent = decoded.resumeStartPercent || 0;
     const profileCode = decoded.profileCode || '';
     const aspiration = decoded.aspiration || '';
     const barrier = decoded.barrier || '';
 
     if (!sessionHash || !email) return null;
-    return { sessionHash, email, lastVideoStep, resumeTarget, profileCode, aspiration, barrier };
+    return {
+      sessionHash,
+      email,
+      lastVideoStep,
+      resumeTarget,
+      resumeStartPercent,
+      profileCode,
+      aspiration,
+      barrier,
+    };
   } catch (error) {
     console.warn('Resume token decode failed:', error);
     return null;
@@ -90,9 +101,15 @@ async function resolveResumePayload(token) {
 
     return {
       sessionHash: data.sessionHash,
+      leadHash: data.leadHash || '',
       email: data.email,
+      firstName: data.firstName || '',
+      memberId: data.memberId || '',
+      refId: data.refId || '',
+      beraterSlug: data.beraterSlug || '',
       lastVideoStep: data.lastVideoStep || 1,
       resumeTarget: data.resumeTarget || 'result',
+      resumeStartPercent: data.resumeStartPercent || 0,
       profileCode: data.profileCode || '',
       aspiration: data.aspiration || '',
       barrier: data.barrier || '',
@@ -125,9 +142,15 @@ async function resolveResumeKeyPayload(key) {
 
     return {
       sessionHash: data.sessionHash,
+      leadHash: data.leadHash || '',
       email: data.email || '',
+      firstName: data.firstName || '',
+      memberId: data.memberId || '',
+      refId: data.refId || '',
+      beraterSlug: data.beraterSlug || '',
       lastVideoStep: data.lastVideoStep || 1,
       resumeTarget: data.resumeTarget || 'result',
+      resumeStartPercent: data.resumeStartPercent || 0,
       profileCode: data.profileCode || '',
       aspiration: data.aspiration || '',
       barrier: data.barrier || '',
@@ -141,8 +164,13 @@ async function resolveResumeKeyPayload(key) {
 function applyResumePayload({
   sessionHash,
   email,
+  leadHash,
+  firstName,
+  memberId,
+  beraterSlug,
   lastVideoStep,
   resumeTarget,
+  resumeStartPercent,
   profileCode,
   aspiration,
   barrier,
@@ -151,8 +179,8 @@ function applyResumePayload({
     'acQuizTrackingSession_v1',
     JSON.stringify({
       hash: sessionHash,
-      memberId: '',
-      slug: '',
+      memberId: memberId || '',
+      slug: beraterSlug || '',
       updatedAt: Date.now(),
     })
   );
@@ -160,14 +188,24 @@ function applyResumePayload({
   localStorage.setItem(
     'acBizLead',
     JSON.stringify({
-      firstName: email.split('@')[0],
+      firstName: firstName || email.split('@')[0],
       email: email,
     })
   );
 
+  if (leadHash) {
+    adoptResumeLeadRun({
+      slug: beraterSlug || getCurrentSlug(),
+      memberId: memberId || '',
+      leadHash,
+      sessionHash,
+    });
+  }
+
   localStorage.setItem('acResumeFromLink', 'true');
   localStorage.setItem('acResumeVideoStep', String(lastVideoStep || 1));
   localStorage.setItem('acResumeTarget', resumeTarget === 'videos' ? 'videos' : 'result');
+  localStorage.setItem('acResumeStartPercent', String(resumeStartPercent || 0));
   if (profileCode) localStorage.setItem('acResumeProfileCode', String(profileCode));
   if (aspiration) localStorage.setItem('acResumeAspiration', String(aspiration));
   if (barrier) localStorage.setItem('acResumeBarrier', String(barrier));

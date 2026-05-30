@@ -163,7 +163,9 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
     durationTimeout = null,
     progressBuckets = {},
     watchedSeconds = new Set(),
-    videoId = options.videoId || `quiz_video_${videoStep}`;
+    videoId = options.videoId || `quiz_video_${videoStep}`,
+    resumeStartPercent = Math.max(0, Math.min(90, Number(options.resumeStartPercent || 0))),
+    resumeApplied = resumeStartPercent <= 0;
 
   function setStatus(status, reason) {
     onStatus && !destroyed && onStatus({ status, reason: reason || null });
@@ -266,6 +268,32 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
     maxAllowedSecond = Math.max(maxAllowedSecond, end + 2);
   }
 
+  function seedResumeProgress(player) {
+    if (resumeApplied || !(duration > 0)) return;
+    resumeApplied = !0;
+    const startSecond = Math.max(
+      0,
+      Math.min(Math.floor((duration * resumeStartPercent) / 100), Math.max(0, Math.floor(duration - 3)))
+    );
+    if (startSecond <= 0) return;
+
+    for (let second = 0; second < startSecond; second += 1) {
+      watchedSeconds.add(second);
+    }
+    maxAllowedSecond = Math.max(maxAllowedSecond, startSecond + 2);
+    lastSecond = startSecond;
+    maxPlayheadPercent = Math.max(maxPlayheadPercent, resumeStartPercent);
+    track('video_resume_seek', {
+      resume_start_percent: resumeStartPercent,
+      resume_start_second: startSecond,
+    });
+    try {
+      player.setCurrentTime(startSecond);
+    } catch {
+      trackHealth('resume_seek_failed', String(startSecond));
+    }
+  }
+
   function seekBack(player, attemptedSecond) {
     const allowed = Math.max(0, Math.min(maxAllowedSecond, duration || maxAllowedSecond));
     seekCount += 1;
@@ -317,6 +345,7 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
       if (destroyed || !data || !(data.duration > 0)) return;
       duration = data.duration;
       const current = Math.max(0, Number(data.seconds || 0));
+      seedResumeProgress(player);
       hasProgress ||
         ((hasProgress = !0),
         progressTimeout && clearTimeout(progressTimeout),
@@ -414,6 +443,16 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
           throw new Error(submitResult?.error || 'submit_failed');
         }
         ld.clear(n || 'default');
+        try {
+          if (typeof window.fbq === 'function') {
+            window.fbq('track', 'Lead', {
+              content_name: 'Erfolgscode Quiz',
+              content_category: 'Business Opportunity',
+            });
+          }
+        } catch (_fbqError) {
+          // pixel error is non-critical
+        }
         try {
           !isLeadSystemV2Active(n || 'default') &&
             window.acTrack &&
@@ -738,6 +777,7 @@ function VideoStep({
   onPrev: o,
   onVideoReached95: i,
   onVideoFullyCompleted: b,
+  resumeStartPercent = 0,
 }) {
   const u = n[t];
   if (!u) return null;
@@ -779,13 +819,14 @@ function VideoStep({
         },
         {
           videoId: u.id || `quiz_video_${t}`,
+          resumeStartPercent,
           onCompleted: (j) => b && b(j),
         }
       );
       return () => {
         L && L();
       };
-    }, [t, V, T, i]),
+    }, [t, V, T, i, b, resumeStartPercent, u.id]),
     React.createElement(
       'div',
       { style: { ...at, justifyContent: 'flex-start', paddingTop: '28px' } },
@@ -1363,6 +1404,8 @@ function QuizFlow() {
     [S, k] = React.useState(0),
     [I, f] = React.useState(null),
     [c, m] = React.useState(1),
+    [resumeStartPercent, setResumeStartPercent] = React.useState(0),
+    [resumeVideoStep, setResumeVideoStep] = React.useState(0),
     videoSteps = React.useMemo(() => Ap(), []),
     questions = React.useMemo(() => jp(), []),
     profiles = React.useMemo(() => Bp(), []),
@@ -1389,10 +1432,15 @@ function QuizFlow() {
       const videoStep = parseInt(localStorage.getItem('acResumeVideoStep') || '1', 10);
       localStorage.removeItem('acResumeVideoStep');
       const resumeTarget = localStorage.getItem('acResumeTarget') || 'result';
+      const storedResumeStartPercent = parseInt(
+        localStorage.getItem('acResumeStartPercent') || '0',
+        10
+      );
       const resumeProfileCode = localStorage.getItem('acResumeProfileCode') || '';
       const resumeAspiration = localStorage.getItem('acResumeAspiration') || 'freedom';
       const resumeBarrier = localStorage.getItem('acResumeBarrier') || '';
       localStorage.removeItem('acResumeTarget');
+      localStorage.removeItem('acResumeStartPercent');
       localStorage.removeItem('acResumeProfileCode');
       localStorage.removeItem('acResumeAspiration');
       localStorage.removeItem('acResumeBarrier');
@@ -1408,9 +1456,19 @@ function QuizFlow() {
       }
 
       if (resumeTarget === 'videos') {
-        m(videoStep > 1 && videoStep <= Object.keys(videoSteps).length ? videoStep : 1);
+        const normalizedVideoStep =
+          videoStep > 1 && videoStep <= Object.keys(videoSteps).length ? videoStep : 1;
+        m(normalizedVideoStep);
+        setResumeVideoStep(normalizedVideoStep);
+        setResumeStartPercent(
+          Number.isFinite(storedResumeStartPercent)
+            ? Math.max(0, Math.min(90, storedResumeStartPercent))
+            : 0
+        );
         t('videos');
       } else {
+        setResumeStartPercent(0);
+        setResumeVideoStep(0);
         t('result');
       }
     }
@@ -2237,6 +2295,7 @@ function QuizFlow() {
       profile: g,
       videoStep: c,
       videos: videoSteps,
+      resumeStartPercent: c === resumeVideoStep ? resumeStartPercent : 0,
       visible: s,
       onVideoReached95: (completedStep, completionReason) => {
         const slug = le.getItem('acBeraterSlug') || 'default';

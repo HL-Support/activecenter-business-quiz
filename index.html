@@ -5,7 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Erfolgscode Quiz | Activecenter</title>
     <meta name="description" content="Entdecke deinen Erfolgscode in 4 Minuten. Welcher Erfolgstyp steckt wirklich in dir?">
+    <meta name="facebook-domain-verification" content="5kg7v90q4a6cabp7j11lo12vdfug0g" />
     <link rel="icon" type="image/png" sizes="32x32" href="https://ik.imagekit.io/b40kqkuhj/icons/favicon-32x32.png">
+    <!-- Meta Pixel -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1322007176552913');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1322007176552913&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel -->
     <script src="https://assets.mediadelivery.net/playerjs/player-0.1.0.min.js"></script>
     <script src="/video-config.js"></script>
     <script src="/translations.js"></script>
@@ -59,8 +77,13 @@
         .replace(/ActiveCenter/g, getOrganisationName())
         .replace(/Activecenter/g, getOrganisationName());
       // ── i18n Sprachenverwaltung ────────────────────────────────────
+      function getCurrentSlugForLanguage() {
+        var slug = (window.location.pathname || '').replace(/^\/+/, '').toLowerCase().split('/')[0] || 'default';
+        return /^[a-z0-9_-]{1,25}$/.test(slug) ? slug : 'default';
+      }
+
       var currentLang = (function() {
-        var stored = localStorage.getItem('preferredLang');
+        var stored = localStorage.getItem('preferredLang:' + getCurrentSlugForLanguage());
         if (stored && ['de','it','fr','ru','en'].includes(stored)) return stored;
         var browser = (navigator.language || 'de').split('-')[0].toLowerCase();
         return ['it','fr','ru','en'].includes(browser) ? browser : 'de';
@@ -68,7 +91,7 @@
 
       function setLang(lang) {
         if (['de','it','fr','ru','en'].includes(lang)) {
-          localStorage.setItem('preferredLang', lang);
+          localStorage.setItem('preferredLang:' + getCurrentSlugForLanguage(), lang);
           window.location.reload();
         }
       }

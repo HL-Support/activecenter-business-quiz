@@ -9,6 +9,7 @@ const {
   sendJson,
   setLeadCookie,
   shouldUseNewWriter,
+  supabaseJson,
   supabaseRpc,
 } = require('../server/lead-system');
 
@@ -41,6 +42,41 @@ module.exports = async function handler(req, res) {
     const refId = safeString(body.ref_id || body.member_id, 120);
     const memberId = safeString(body.member_id, 120);
     const requestedLeadHash = safeString(body.lead_hash, 96);
+
+    if (isLeadHash(requestedLeadHash)) {
+      const existingRows = await supabaseJson(
+        `lead_state?lead_hash=eq.${encodeURIComponent(requestedLeadHash)}&select=lead_hash,utm_source,utm_medium,utm_campaign&limit=1`
+      );
+      const existingRow = Array.isArray(existingRows) ? existingRows[0] : null;
+      const existingLeadHash = existingRow?.lead_hash || '';
+      if (isLeadHash(existingLeadHash)) {
+        // Backfill UTMs if the lead has none but the current request has them
+        const incomingUtmSource = safeString(body.utm_source, 120) || null;
+        if (incomingUtmSource && !existingRow.utm_source) {
+          await supabaseJson(
+            `lead_state?lead_hash=eq.${encodeURIComponent(existingLeadHash)}`,
+            {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+              body: JSON.stringify({
+                utm_source: incomingUtmSource,
+                utm_medium: safeString(body.utm_medium, 120) || null,
+                utm_campaign: safeString(body.utm_campaign, 120) || null,
+              }),
+            }
+          ).catch((err) => console.warn('UTM backfill failed (non-critical):', err?.message));
+        }
+        setLeadCookie(res, existingLeadHash);
+        return sendJson(res, 200, {
+          success: true,
+          enabled: true,
+          lead_hash: existingLeadHash,
+          adopted: true,
+          flags,
+        });
+      }
+    }
+
     const generatedLeadHash = isLeadHash(requestedLeadHash) ? requestedLeadHash : generateLeadHash();
 
     const rows = await supabaseRpc('init_lead', {
@@ -60,6 +96,7 @@ module.exports = async function handler(req, res) {
       p_utm_source: safeString(body.utm_source, 120) || null,
       p_utm_medium: safeString(body.utm_medium, 120) || null,
       p_utm_campaign: safeString(body.utm_campaign, 120) || null,
+      p_utm_content: safeString(body.utm_content, 120) || null,
     });
 
     const leadHash = Array.isArray(rows) ? rows[0]?.lead_hash : rows?.lead_hash;

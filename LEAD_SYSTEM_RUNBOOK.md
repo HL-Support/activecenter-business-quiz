@@ -1,5 +1,7 @@
 # Lead System v2 Runbook
 
+Detailarchitektur: `LEAD_SYSTEM_V2_ARCHITECTURE.md`.
+
 ## Production Source Of Truth
 
 Supabase v2 is the source of truth:
@@ -12,6 +14,8 @@ Supabase v2 is the source of truth:
 - `lead_sync_outbox`: async MySQL sync jobs
 
 MySQL `typeform_surveys.points_result` is a downstream copy written by the Outbox worker.
+Labels are written as UTF-8 text with accents/umlauts, for example `Alle 3 Infovideos vollständig angeschaut`.
+It is only synced for real contact leads. Visitors or resume-only rows without contact data are skipped as `not_a_contact_lead`.
 
 ## Live Flags
 
@@ -36,6 +40,14 @@ where key = 'new_lead_writer_enabled';
 - MySQL result writer: `Update "Result" by hash`
 
 The MySQL result writer requires `X-Update-Secret`; public unauthenticated writes must fail before MySQL.
+
+Hot-lead coach emails are also v2 Outbox jobs:
+
+- `coach_hot_lead_email`
+- created when video progress raises `completed_rank` to 3
+- sent by `api/lead-outbox-worker.js` through Postmark
+- deduped by `lead_events.event_uid = hot_lead_email_<lead_hash>`
+- success event: `hot_lead_coach_email_sent`
 
 ## Health Check
 
@@ -92,8 +104,30 @@ Minimum checks:
 - every old `tracking_sessions.lead_hash` exists in `lead_state`
 - every resolvable old `tracking_video_progress` row has equal-or-higher progress in `lead_video_progress`
 - every MySQL rank is less than or equal to `v_lead_state_full.completed_rank`
+- one-time backfill script: `node scripts/backfill-points-result-v2.js`; use `APPLY_POINTS_RESULT_BACKFILL=1` only after the dry-run report is checked.
 - every resolvable old tracking event exists in `lead_events`
 - unresolvable old events are stored in `lead_migration_unresolved`
+
+Contact completeness check from 2026-05-14:
+
+- MySQL `qz_...` contacts: 161 checked, 0 missing in `lead_state`
+- `quiz_sessions` contacts with email: 194 checked, 0 missing in `lead_state`
+- `tracking_sessions` contacts with email: 142 checked, 0 missing in `lead_state`
+- Contact hydration gaps across these sets: 0
+
+If any future contact exists in legacy but not in v2, treat it as a migration defect.
+
+## Resume Links
+
+Resume links must resolve to a contact `lead_hash`.
+
+Expected behavior:
+
+1. `generate_resume_token` refuses to generate a resume link if no contact lead can be resolved.
+2. `resolve_resume_token` and `resolve_resume_key` return `leadHash`, `memberId`, `refId`, `beraterSlug`, name and email.
+3. The frontend adopts that `leadHash` before `/api/lead/init`.
+4. A resume visit must not create a new anonymous `qz_...` row.
+5. If a resume link cannot be mapped to `lead_state`, the API returns `409 Resume contact not found`.
 
 Latest reconciliation report path used during cutover:
 
@@ -110,5 +144,41 @@ The production E2E must verify:
 3. `/api/lead-track` writes quiz answer, result, form submission, and video progress.
 4. `lead_video_progress` only moves upward.
 5. `lead_sync_outbox` writes MySQL rank 0 through rank 3.
-6. `v_lead_state_full.completed_rank` and MySQL `points_result` agree.
-7. no open Outbox jobs remain.
+6. For a contact lead with rank 3, `coach_hot_lead_email` is processed once and `hot_lead_coach_email_sent` exists.
+7. `v_lead_state_full.completed_rank` and MySQL `points_result` agree for contact leads.
+8. no open Outbox jobs remain.
+
+## Name Normalization Incident 2026-05-14
+
+The active n8n workflow `AC - Lead Post Processor - Business Leads Quiz`
+contained a bad regex after an API/JSON patch: `\s` had become plain `s` in
+three Code nodes. This caused names like `Annelies` -> `Annelie` and
+`Lukas Pramstaller` -> `Luka Pram taller` in generated emails.
+
+Fixed live nodes:
+
+- `Code - Normalize Candidate Rows`
+- `Code - Build Lead Model`
+- `Code - Apply Resume Link`
+
+Correct pattern:
+
+```js
+.replace(/\s+/g, ' ')
+.split(/([\s'-]+)/)
+```
+
+Pre-fix backup:
+
+```text
+n8n/backups/9RZdrLxfA8IRhd55-before-name-regex-fix-2026-05-14T11-48-39-046Z.json
+```
+
+Verification after the fix:
+
+- live workflow stayed active
+- `badRegexCount=0`
+- `Lukas Pramstaller`, `Annelies`, `Anne-Lies`, `Hans Peter`, and `Patrizia Schenk` normalize correctly
+
+Future n8n regex patches must be verified live after API/JSON upload because
+escaping mistakes can silently turn `\s` into `s`.

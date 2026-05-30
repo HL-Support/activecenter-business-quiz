@@ -14,7 +14,7 @@ window.AC_VIDEO_CONFIG = (() => {
     it: {
       1: { id: '28db3abf-fe1c-420f-bb45-ef0b00a57820', lib: '242544' },
       2: { id: 'faeaba22-5c20-4faf-9d1d-e2910bccfa89', lib: '242544' },
-      3: { id: '3983963b-2af3-4d28-ad5c-a5b98801a34a', lib: '242544' },
+      3: { id: 'c8d6494f-3021-4278-88b2-4d0c000e53ef', lib: '242544' },
     },
     fr: {
       1: { id: '7cc0b2d1-7893-406c-9ff1-9aed9080bac0', lib: '242544' },
