@@ -135,6 +135,14 @@ function eventNameOf(payload) {
   return safeString(payload.event_name || payload.event || payload.name || 'unknown_event', 80);
 }
 
+function normalizeLeadEventName(eventName) {
+  const name = safeString(eventName, 100);
+  if (name === 'question_answered') return 'quiz_answer';
+  if (name === 'form_submit') return 'form_submitted';
+  if (name === 'cta_click') return 'cta_clicked';
+  return name;
+}
+
 function sessionHashOf(payload) {
   return safeString(payload.session_hash || payload.tracking_hash || payload.hash, 96);
 }
@@ -1320,12 +1328,203 @@ async function upsertLeadProfile(payload) {
   }
 }
 
+function numericPercent(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 0;
+  return Math.max(0, Math.min(100, number));
+}
+
+function leadHashOf(payload) {
+  const direct = safeString(payload?.lead_hash, 96);
+  if (isLeadHash(direct)) return direct;
+  const hash = safeString(payload?.hash, 96);
+  return isLeadHash(hash) ? hash : '';
+}
+
+async function supabaseRpc(functionName, body = {}) {
+  const response = await supabaseRequest(`rpc/${functionName}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+    },
+    body: JSON.stringify(body),
+  });
+  return response ? response.json() : null;
+}
+
+async function ensureLeadStateForCanonicalMirror(leadHash, payload, eventAt) {
+  if (!isLeadHash(leadHash)) return;
+
+  await supabaseRequest('lead_state?on_conflict=lead_hash', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=ignore-duplicates,return=minimal',
+    },
+    body: JSON.stringify(
+      compactObject({
+        lead_hash: leadHash,
+        client_seed: safeString(payload.client_seed, 120) || undefined,
+        member_id: safeString(payload.member_id || payload.herbalife_id, 120) || undefined,
+        ref_id:
+          safeString(payload.ref_id || payload.member_id || payload.herbalife_id, 120) ||
+          undefined,
+        ref_type: 'member',
+        berater_slug: safeString(payload.berater_slug || payload.slug, 80) || undefined,
+        source_app: safeString(payload.source_app || 'business_leads_quiz', 80),
+        funnel_key: safeString(payload.funnel_key || payload.funnel || 'business', 80),
+        lang: normalizeLanguage(payload.lang),
+        country: safeString(payload.country, 5) || undefined,
+        first_seen_at: eventAt,
+        last_seen_at: eventAt,
+        last_event_at: eventAt,
+      })
+    ),
+  });
+}
+
+async function insertCanonicalLeadEvent(leadHash, eventName, eventAt, payload) {
+  const eventUid = safeString(payload.event_id || payload.event_uid, 96) || generateId('evt_legacy', 28);
+  await supabaseRequest('lead_events?on_conflict=event_uid', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=ignore-duplicates,return=minimal',
+    },
+    body: JSON.stringify(
+      compactObject({
+        event_uid: eventUid,
+        lead_hash: leadHash,
+        event_name: eventName,
+        event_at: eventAt,
+        member_id: safeString(payload.member_id || payload.herbalife_id, 120) || null,
+        ref_id: safeString(payload.ref_id || payload.member_id || payload.herbalife_id, 120) || null,
+        berater_slug: safeString(payload.berater_slug || payload.slug, 80) || null,
+        source_app: safeString(payload.source_app || 'business_leads_quiz', 80),
+        funnel_key: safeString(payload.funnel_key || payload.funnel || 'business', 80),
+        video_step: payload.video_step ? safeInteger(payload.video_step) : null,
+        question_ref: safeString(payload.question_ref, 120) || null,
+        unique_watched_percent:
+          payload.unique_watched_percent === undefined && payload.progress_percent === undefined
+            ? null
+            : numericPercent(payload.unique_watched_percent ?? payload.progress_percent),
+        playhead_percent:
+          payload.max_playhead_percent === undefined && payload.playhead_percent === undefined
+            ? null
+            : numericPercent(payload.max_playhead_percent ?? payload.playhead_percent),
+        payload: { ...payload, lead_hash: leadHash },
+      })
+    ),
+  });
+}
+
+async function enqueueLeadSync(leadHash, syncType, contextData) {
+  await supabaseRpc('enqueue_lead_sync', {
+    p_lead_hash: leadHash,
+    p_sync_type: syncType,
+    p_context_data: contextData || {},
+  });
+}
+
+async function mirrorLegacyTrackingToLeadSystemV2(payload) {
+  const leadHash = leadHashOf(payload);
+  if (!leadHash) return { mirrored: false, reason: 'missing_canonical_lead_hash' };
+
+  const eventName = normalizeLeadEventName(eventNameOf(payload));
+  const eventAt = safeString(
+    payload.event_at ||
+      payload.visited_at ||
+      payload.form_submitted_at ||
+      payload.submitted_at ||
+      payload.cta_clicked_at ||
+      payload.result_cta_clicked_at ||
+      nowIso(),
+    40
+  );
+  const lang = normalizeLanguage(payload.lang);
+
+  await ensureLeadStateForCanonicalMirror(leadHash, payload, eventAt);
+  await insertCanonicalLeadEvent(leadHash, eventName, eventAt, payload);
+
+  if (eventName === 'form_submitted') {
+    const email = safeString(payload.email || payload.form_email, 180)?.toLowerCase() || null;
+    await patchByEquals(
+      'lead_state',
+      'lead_hash',
+      leadHash,
+      compactObject({
+        first_name: normalizePersonName(payload.first_name || payload.form_first_name, 120) || null,
+        email,
+        email_normalized: email,
+        email_hash: normalizedEmailHash(email),
+        form_submitted_at: safeString(payload.submitted_at || payload.form_submitted_at || eventAt, 40),
+        lifecycle_stage: 'contact_known',
+        lang,
+        last_event_at: eventAt,
+      })
+    );
+    return { mirrored: true, eventName };
+  }
+
+  if (eventName === 'video_progress' || eventName === 'video_unlocked' || eventName === 'video_completed') {
+    const videoStep = safeInteger(payload.video_step);
+    if (!videoStep) return { mirrored: true, eventName, skipped_progress: true };
+
+    const progressPercent = numericPercent(payload.unique_watched_percent ?? payload.progress_percent);
+    const playheadPercent = numericPercent(payload.max_playhead_percent ?? payload.playhead_percent);
+    const rankRows = await supabaseRpc('upsert_video_progress_monotonic', {
+      p_lead_hash: leadHash,
+      p_video_step: videoStep,
+      p_video_id: safeString(payload.video_id, 120) || null,
+      p_unique_watched_percent: eventName === 'video_completed' ? Math.max(progressPercent, 100) : progressPercent,
+      p_playhead_percent: eventName === 'video_completed' ? Math.max(playheadPercent, 100) : playheadPercent,
+      p_unique_watched_seconds: safeInteger(payload.unique_watched_seconds) || 0,
+      p_event_at: eventAt,
+      p_lang: lang,
+    });
+    const rankResult = Array.isArray(rankRows) ? rankRows[0] : rankRows;
+    if (rankResult?.rank_changed === true && safeInteger(rankResult.completed_rank) >= 3) {
+      await enqueueLeadSync(leadHash, 'coach_hot_lead_email', {
+        lang,
+        rank: safeInteger(rankResult.completed_rank),
+        reason: 'all_videos_completed',
+        event_at: eventAt,
+        video_step: videoStep,
+      });
+    }
+    return { mirrored: true, eventName, rank: rankResult?.completed_rank ?? null };
+  }
+
+  if (eventName === 'cta_clicked') {
+    await patchByEquals(
+      'lead_state',
+      'lead_hash',
+      leadHash,
+      compactObject({
+        cta_type: safeString(payload.cta_type, 80) || undefined,
+        cta_clicked_at: safeString(payload.cta_clicked_at || eventAt, 40),
+        lifecycle_stage: 'cta_clicked',
+        last_event_at: eventAt,
+      })
+    );
+    return { mirrored: true, eventName };
+  }
+
+  await patchByEquals('lead_state', 'lead_hash', leadHash, { last_event_at: eventAt });
+  return { mirrored: true, eventName };
+}
+
 async function writeToSupabaseAsync(payload) {
   try {
     if (!SUPABASE_URL || !SUPABASE_KEY) return;
     if (!payload.hash) return;
 
     await writeTrackingEvent(payload);
+
+    await mirrorLegacyTrackingToLeadSystemV2(payload).catch((error) => {
+      console.error('Canonical lead mirror error:', error.message);
+    });
 
     await upsertLeadProfile(payload);
 
@@ -2962,6 +3161,41 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    const canonicalLeadHash = leadHashOf(payload);
+    if (canonicalLeadHash) {
+      const completedAt = safeString(payload.completed_at || nowIso(), 40);
+      for (const step of completedSteps) {
+        await mirrorLegacyTrackingToLeadSystemV2({
+          ...payload,
+          lead_hash: canonicalLeadHash,
+          event_id: `legacy_notify_video_completed_${canonicalLeadHash}_${step}`,
+          event_name: 'video_completed',
+          event_at: completedAt,
+          video_step: step,
+          unique_watched_percent: 100,
+          progress_percent: 100,
+          max_playhead_percent: 100,
+        }).catch((error) => {
+          console.error('Canonical all-videos mirror error:', error.message);
+        });
+      }
+      await enqueueLeadSync(canonicalLeadHash, 'coach_hot_lead_email', {
+        lang: normalizeLanguage(payload.lang),
+        rank: 3,
+        reason: 'legacy_all_videos_notification_canonical_outbox',
+        event_at: completedAt,
+      }).catch((error) => {
+        console.error('Canonical hot-lead enqueue error:', error.message);
+      });
+      return res.status(200).json({
+        success: true,
+        email_sent: true,
+        skipped_direct_email: true,
+        reason: 'canonical_outbox_handles_hot_lead',
+        lead_hash: canonicalLeadHash,
+      });
+    }
+
     const context = await loadCompletionNotificationContext(payload, forwardedFor, userAgent);
     const notificationKey = crypto
       .createHash('sha256')
@@ -3075,6 +3309,24 @@ module.exports = async function handler(req, res) {
       0,
       Math.min(safeInteger(payload.completed_count) || 0, totalVideos)
     );
+    if (isLeadHash(context.leadHash) && completedCount > 0) {
+      const eventAt = safeString(payload.event_at || payload.completed_at || nowIso(), 40);
+      for (let step = 1; step <= completedCount; step += 1) {
+        await mirrorLegacyTrackingToLeadSystemV2({
+          ...payload,
+          lead_hash: context.leadHash,
+          event_id: `legacy_points_video_completed_${context.leadHash}_${step}`,
+          event_name: 'video_completed',
+          event_at: eventAt,
+          video_step: step,
+          unique_watched_percent: 100,
+          progress_percent: 100,
+          max_playhead_percent: 100,
+        }).catch((error) => {
+          console.error('Canonical points-result mirror error:', error.message);
+        });
+      }
+    }
     const label = buildPointsResultLabel(completedCount, totalVideos, context.lang);
     const n8nPayload = {
       hash: context.leadHash,
