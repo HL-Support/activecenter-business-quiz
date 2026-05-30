@@ -78,6 +78,23 @@ function localizedAspirationLabel(lang, aspiration, fallback) {
   return (key && labels[key]) || safeString(fallback, 180) || null;
 }
 
+function normalizePersonName(value, maxLength = 120) {
+  const text = safeString(value, maxLength);
+  if (!text) return text || '';
+  const normalized = text.trim().replace(/\s+/g, ' ');
+  if (!normalized) return '';
+
+  return normalized
+    .split(/([\s'-]+)/)
+    .map((part) => {
+      if (!part || /^[\s'-]+$/.test(part)) return part;
+      const lower = part.toLocaleLowerCase('de-DE');
+      const chars = Array.from(lower);
+      return chars[0].toLocaleUpperCase('de-DE') + chars.slice(1).join('');
+    })
+    .join('');
+}
+
 async function insertLeadEvent({ leadHash, eventName, eventAt, payload }) {
   const record = {
     event_uid: eventUid(payload),
@@ -174,7 +191,7 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload) {
 
   if (eventName === 'form_submitted') {
     await patchLeadState(leadHash, {
-      first_name: safeString(payload.first_name || payload.form_first_name, 120) || null,
+      first_name: normalizePersonName(payload.first_name || payload.form_first_name, 120) || null,
       email: safeString(payload.email || payload.form_email, 180) || null,
       email_normalized: normalizeEmail(payload.email || payload.form_email) || null,
       email_hash: hashEmail(payload.email || payload.form_email) || null,
