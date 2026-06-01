@@ -79,14 +79,14 @@ function decodeResumePayload(token) {
   }
 }
 
-async function resolveResumePayload(token) {
+async function resolveResumePayload(token, target = '') {
   try {
     const response = await fetch('/api/bridge', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: 'resolve_resume_token',
-        payload: { token },
+        payload: { token, resumeTarget: target === 'videos' ? 'videos' : undefined },
       }),
     });
 
@@ -120,14 +120,14 @@ async function resolveResumePayload(token) {
   }
 }
 
-async function resolveResumeKeyPayload(key) {
+async function resolveResumeKeyPayload(key, target = '') {
   try {
     const response = await fetch('/api/bridge', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: 'resolve_resume_key',
-        payload: { key },
+        payload: { key, resumeTarget: target === 'videos' ? 'videos' : undefined },
       }),
     });
 
@@ -217,9 +217,10 @@ async function processResumeToken() {
   const params = new URLSearchParams(window.location.search);
   const resumeKey = params.get('r');
   const token = params.get('resume');
+  const resumeTarget = params.get('target') === 'videos' ? 'videos' : '';
 
   if (resumeKey) {
-    const resolvedByKey = await resolveResumeKeyPayload(resumeKey);
+    const resolvedByKey = await resolveResumeKeyPayload(resumeKey, resumeTarget);
     if (resolvedByKey) {
       return applyResumePayload(resolvedByKey);
     }
@@ -227,7 +228,7 @@ async function processResumeToken() {
 
   if (!token) return false;
 
-  const resolved = await resolveResumePayload(token);
+  const resolved = await resolveResumePayload(token, resumeTarget);
   if (!resolved) {
     return false;
   }

@@ -188,12 +188,16 @@ function resumeBaseUrl(slug, req) {
     : base;
 }
 
-function longResumeUrl(token, slug, req) {
-  return `${resumeBaseUrl(slug, req)}?resume=${encodeURIComponent(String(token || ''))}`;
+function resumeTargetQuery(target) {
+  return target === 'videos' ? '&target=videos' : '';
 }
 
-function shortResumeUrl(key, slug, req) {
-  return `${resumeBaseUrl(slug, req)}?r=${encodeURIComponent(String(key || ''))}`;
+function longResumeUrl(token, slug, req, target = '') {
+  return `${resumeBaseUrl(slug, req)}?resume=${encodeURIComponent(String(token || ''))}${resumeTargetQuery(target)}`;
+}
+
+function shortResumeUrl(key, slug, req, target = '') {
+  return `${resumeBaseUrl(slug, req)}?r=${encodeURIComponent(String(key || ''))}${resumeTargetQuery(target)}`;
 }
 
 function toBase62(value) {
@@ -636,6 +640,20 @@ async function loadLeadStateByHash(leadHash, depth = 0) {
     return loadLeadStateByHash(mergedInto, depth + 1);
   }
   return row;
+}
+
+function requestedResumeTarget(value) {
+  const target = safeString(value, 32).toLowerCase();
+  return target === 'videos' ? 'videos' : '';
+}
+
+function resumeStateForRequestedTarget(resumeState, target) {
+  if (target !== 'videos' || resumeState.resumeTarget === 'final') return resumeState;
+  return {
+    ...resumeState,
+    resumeTarget: 'videos',
+    lastVideoStep: resumeState.resumeTarget === 'videos' ? resumeState.lastVideoStep : 1,
+  };
 }
 
 async function persistContactLeadStateFromResumePayload(payload) {
@@ -3537,10 +3555,16 @@ module.exports = async function handler(req, res) {
       return res.status(409).json({ error: 'Resume contact not found' });
     }
 
-    const resumeState = await loadResumeState({
-      sessionHash: safeString(payload.sessionHash, 96),
-      leadHash: contactLead.leadHash,
-    });
+    const targetOverride = requestedResumeTarget(
+      payload.resumeTarget || payload.resume_target || payload.target
+    );
+    const resumeState = resumeStateForRequestedTarget(
+      await loadResumeState({
+        sessionHash: safeString(payload.sessionHash, 96),
+        leadHash: contactLead.leadHash,
+      }),
+      targetOverride
+    );
     let resumeSession = null;
     try {
       resumeSession = await ensureResumeSessionRecord({
@@ -3572,7 +3596,7 @@ module.exports = async function handler(req, res) {
 
     const resumeSlug = safeString(payload.slug || payload.berater_slug || payload.coach_slug, 80);
     const shortKey = resumeSession?.id ? createResumeKey(resumeSession.id) : null;
-    const shortUrl = shortKey ? shortResumeUrl(shortKey, resumeSlug, req) : null;
+    const shortUrl = shortKey ? shortResumeUrl(shortKey, resumeSlug, req, resumeState.resumeTarget) : null;
 
     return res.status(200).json({
       success: true,
@@ -3586,7 +3610,7 @@ module.exports = async function handler(req, res) {
       barrier: resumeState.barrier,
       shortKey,
       shortUrl,
-      resumeUrl: shortUrl || longResumeUrl(token, resumeSlug, req),
+      resumeUrl: shortUrl || longResumeUrl(token, resumeSlug, req, resumeState.resumeTarget),
     });
   }
 
@@ -3622,7 +3646,10 @@ module.exports = async function handler(req, res) {
     if (!contactLead.leadHash) {
       return res.status(409).json({ error: 'Resume contact not found' });
     }
-    const resumeState = await loadResumeState({ sessionHash, leadHash: contactLead.leadHash });
+    const resumeState = resumeStateForRequestedTarget(
+      await loadResumeState({ sessionHash, leadHash: contactLead.leadHash }),
+      requestedResumeTarget(decoded.resumeTarget)
+    );
     const leadState = contactLead.leadState || {};
 
     return res.status(200).json({
@@ -3682,7 +3709,10 @@ module.exports = async function handler(req, res) {
     if (!contactLead.leadHash) {
       return res.status(409).json({ error: 'Resume contact not found' });
     }
-    const resumeState = await loadResumeState({ sessionHash, leadHash: contactLead.leadHash });
+    const resumeState = resumeStateForRequestedTarget(
+      await loadResumeState({ sessionHash, leadHash: contactLead.leadHash }),
+      requestedResumeTarget(payload.resumeTarget || payload.resume_target || payload.target)
+    );
     const leadState = contactLead.leadState || {};
 
     return res.status(200).json({
