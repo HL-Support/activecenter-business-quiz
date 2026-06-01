@@ -633,7 +633,7 @@ async function loadLeadStateByHash(leadHash, depth = 0) {
   const mergedInto = safeString(row?.migration_flags?.merged_into, 96);
   if (
     depth < 3 &&
-    safeString(row.lifecycle_stage, 80).toLowerCase() === 'merged_duplicate' &&
+    (safeString(row.lifecycle_stage, 80) || '').toLowerCase() === 'merged_duplicate' &&
     isLeadHash(mergedInto) &&
     mergedInto !== leadHash
   ) {
