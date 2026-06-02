@@ -50,19 +50,23 @@ module.exports = async function handler(req, res) {
       const existingRow = Array.isArray(existingRows) ? existingRows[0] : null;
       const existingLeadHash = existingRow?.lead_hash || '';
       if (isLeadHash(existingLeadHash)) {
-        // Backfill UTMs if the lead has none but the current request has them
-        const incomingUtmSource = safeString(body.utm_source, 120) || null;
-        if (incomingUtmSource && !existingRow.utm_source) {
+        const incomingUtm = {
+          utm_source: safeString(body.utm_source, 120) || null,
+          utm_medium: safeString(body.utm_medium, 120) || null,
+          utm_campaign: safeString(body.utm_campaign, 120) || null,
+        };
+        const utmPatch = {};
+        for (const [key, value] of Object.entries(incomingUtm)) {
+          if (value && !existingRow[key]) utmPatch[key] = value;
+        }
+
+        if (Object.keys(utmPatch).length > 0) {
           await supabaseJson(
             `lead_state?lead_hash=eq.${encodeURIComponent(existingLeadHash)}`,
             {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-              body: JSON.stringify({
-                utm_source: incomingUtmSource,
-                utm_medium: safeString(body.utm_medium, 120) || null,
-                utm_campaign: safeString(body.utm_campaign, 120) || null,
-              }),
+              body: JSON.stringify(utmPatch),
             }
           ).catch((err) => console.warn('UTM backfill failed (non-critical):', err?.message));
         }

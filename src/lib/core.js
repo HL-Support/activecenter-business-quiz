@@ -8,6 +8,7 @@ const VISITOR_TTL_MS = 180 * 24 * 60 * 60 * 1000;
 const INTERNAL_KEY = 'acInternalTraffic';
 const INTERNAL_COOKIE = 'acInternalTraffic';
 const INTERNAL_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const ATTRIBUTION_KEY = 'acTrackingAttribution';
 const TRACKING_SCHEMA_VERSION = 'ac_tracking_v1';
 const LEGACY_QUIZ_HASH_KEY = 'acQuizHash';
 const LEGACY_QUIZ_HASH_PREFIX = 'acQuizHash:';
@@ -69,6 +70,37 @@ export const storage = {
     }
   },
 };
+
+function parseStoredJson(key) {
+  try {
+    return JSON.parse(storage.getItem(key) || 'null') || {};
+  } catch {
+    return {};
+  }
+}
+
+function getLeadAttribution() {
+  const params = new URLSearchParams(window.location.search || '');
+  const stored = parseStoredJson(ATTRIBUTION_KEY);
+  const next = {
+    utm_source: params.get('utm_source') || stored.utm_source || '',
+    utm_medium: params.get('utm_medium') || stored.utm_medium || '',
+    utm_campaign: params.get('utm_campaign') || stored.utm_campaign || '',
+    utm_content: params.get('utm_content') || stored.utm_content || '',
+  };
+
+  if (next.utm_source || next.utm_medium || next.utm_campaign || next.utm_content) {
+    storage.setItem(
+      ATTRIBUTION_KEY,
+      JSON.stringify({
+        ...stored,
+        ...next,
+      })
+    );
+  }
+
+  return next;
+}
 
 export function getPreferredLang() {
   const slug =
@@ -502,6 +534,7 @@ async function initializeLeadSystemV2(coach, slug) {
   const memberId = String(coach?.member_id || storage.getItem('acMemberId') || '');
   const leadRun = getActiveLeadRun(normalizedSlug, memberId);
   const params = new URLSearchParams(window.location.search || '');
+  const attribution = getLeadAttribution();
   const response = await fetch('/api/lead/init', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -516,10 +549,10 @@ async function initializeLeadSystemV2(coach, slug) {
       funnel_key: 'business',
       lang: getPreferredLang(),
       country: getCurrentCountry(),
-      utm_source: params.get('utm_source') || '',
-      utm_medium: params.get('utm_medium') || '',
-      utm_campaign: params.get('utm_campaign') || '',
-      utm_content: params.get('utm_content') || '',
+      utm_source: attribution.utm_source,
+      utm_medium: attribution.utm_medium,
+      utm_campaign: attribution.utm_campaign,
+      utm_content: attribution.utm_content,
     }),
   });
 
