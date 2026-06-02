@@ -815,6 +815,11 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
   const refId =
     safeString(finalLead?.ref_id || hidden.ref_id || hidden.member_id || submissionPayload?.ref_id, 120) ||
     memberId;
+  const attribution = {
+    ...(submissionPayload?.attribution || {}),
+    ...hidden,
+    ...submissionPayload,
+  };
 
   await supabaseRequest('lead_state?on_conflict=lead_hash', {
     method: 'POST',
@@ -822,7 +827,7 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
       'Content-Type': 'application/json',
       Prefer: 'resolution=merge-duplicates,return=minimal',
     },
-    body: JSON.stringify({
+    body: JSON.stringify(compactObject({
       lead_hash: leadHash,
       client_seed: safeString(hidden.client_seed, 120) || null,
       member_id: memberId,
@@ -852,11 +857,19 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
       main_aspiration: safeString(hidden.main_aspiration || submissionPayload?.main_aspiration, 80) || null,
       main_aspiration_label:
         safeString(hidden.main_aspiration_label || submissionPayload?.main_aspiration_label, 180) || null,
+      utm_source: safeTrackingString(attribution, 'utm_source', 120),
+      utm_medium: safeTrackingString(attribution, 'utm_medium', 120),
+      utm_campaign: safeTrackingString(attribution, 'utm_campaign', 180),
+      utm_content: safeTrackingString(attribution, 'utm_content', 180),
+      fbclid: safeTrackingString(attribution, 'fbclid', 500),
+      fbc: safeTrackingString(attribution, 'fbc', 500),
+      fbp: safeTrackingString(attribution, 'fbp', 120),
+      event_source_url: safeTrackingString(attribution, 'event_source_url', 1000),
       lifecycle_stage: 'contact_known',
       mysql_survey_id: finalLead?.mysql_survey_id || undefined,
       sync_status: finalLead ? 'mysql_final_synced' : 'pending',
       last_event_at: submittedAt,
-    }),
+    })),
   });
 
   return {
@@ -1123,7 +1136,16 @@ function normalizedEmailHash(email) {
   return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 
-async function sendMetaCAPILead({ email, firstName, clientIp, userAgent, eventId }) {
+async function sendMetaCAPILead({
+  email,
+  firstName,
+  clientIp,
+  userAgent,
+  eventId,
+  fbc,
+  fbp,
+  eventSourceUrl,
+}) {
   const META_PIXEL_ID = process.env.META_PIXEL_ID;
   const META_CAPI_TOKEN = process.env.META_CAPI_TOKEN;
   if (!META_PIXEL_ID || !META_CAPI_TOKEN) return;
@@ -1138,6 +1160,10 @@ async function sendMetaCAPILead({ email, firstName, clientIp, userAgent, eventId
   if (firstName) {
     userData.fn = [crypto.createHash('sha256').update(String(firstName).trim().toLowerCase()).digest('hex')];
   }
+  const metaFbc = safeString(fbc, 500);
+  const metaFbp = safeString(fbp, 120);
+  if (metaFbc) userData.fbc = metaFbc;
+  if (metaFbp) userData.fbp = metaFbp;
 
   const payload = {
     data: [
@@ -1146,7 +1172,7 @@ async function sendMetaCAPILead({ email, firstName, clientIp, userAgent, eventId
         event_time: Math.floor(Date.now() / 1000),
         event_id: eventId || `capi_${Date.now()}`,
         action_source: 'website',
-        event_source_url: 'https://business.activecenter.info/markus',
+        event_source_url: safeString(eventSourceUrl, 1000) || 'https://business.activecenter.info/markus',
         user_data: userData,
         custom_data: {
           content_name: 'Erfolgscode Quiz',
@@ -3552,12 +3578,20 @@ module.exports = async function handler(req, res) {
         webhookHidden.lead_hash || webhookHidden.hash,
         96
       );
+      const capiAttribution = {
+        ...(submissionPayload.attribution || {}),
+        ...webhookHidden,
+        ...submissionPayload,
+      };
       sendMetaCAPILead({
         email: capiEmail,
         firstName: capiFirstName,
         clientIp: forwardedFor,
         userAgent,
         eventId: capiLeadHash ? `capi_${capiLeadHash}` : undefined,
+        fbc: safeTrackingString(capiAttribution, 'fbc', 500),
+        fbp: safeTrackingString(capiAttribution, 'fbp', 120),
+        eventSourceUrl: safeTrackingString(capiAttribution, 'event_source_url', 1000),
       }).catch((err) => console.warn('Meta CAPI Lead failed (non-critical):', err.message));
     }
 

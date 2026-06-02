@@ -79,17 +79,61 @@ function parseStoredJson(key) {
   }
 }
 
+function getCookieValue(name) {
+  const target = `${encodeURIComponent(name)}=`;
+  return String(document.cookie || '')
+    .split(';')
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(target))
+    ?.slice(target.length) || '';
+}
+
+function safeAttributionValue(value, maxLength = 500) {
+  return String(value || '').trim().slice(0, maxLength);
+}
+
+function buildFbcValue(fbclid) {
+  const clickId = safeAttributionValue(fbclid, 500);
+  if (!clickId) return '';
+  return `fb.1.${Math.floor(Date.now() / 1000)}.${clickId}`;
+}
+
 function getLeadAttribution() {
   const params = new URLSearchParams(window.location.search || '');
   const stored = parseStoredJson(ATTRIBUTION_KEY);
+  const hasFreshAttribution =
+    params.has('utm_source') ||
+    params.has('utm_medium') ||
+    params.has('utm_campaign') ||
+    params.has('utm_content') ||
+    params.has('fbclid');
+  const fbclid = safeAttributionValue(params.get('fbclid') || stored.fbclid, 500);
+  const cookieFbc = safeAttributionValue(getCookieValue('_fbc'), 500);
+  const cookieFbp = safeAttributionValue(getCookieValue('_fbp'), 120);
   const next = {
-    utm_source: params.get('utm_source') || stored.utm_source || '',
-    utm_medium: params.get('utm_medium') || stored.utm_medium || '',
-    utm_campaign: params.get('utm_campaign') || stored.utm_campaign || '',
-    utm_content: params.get('utm_content') || stored.utm_content || '',
+    utm_source: safeAttributionValue(params.get('utm_source') || stored.utm_source, 120),
+    utm_medium: safeAttributionValue(params.get('utm_medium') || stored.utm_medium, 120),
+    utm_campaign: safeAttributionValue(params.get('utm_campaign') || stored.utm_campaign, 180),
+    utm_content: safeAttributionValue(params.get('utm_content') || stored.utm_content, 180),
+    fbclid,
+    fbc: cookieFbc || safeAttributionValue(stored.fbc, 500) || buildFbcValue(fbclid),
+    fbp: cookieFbp || safeAttributionValue(stored.fbp, 120),
+    event_source_url: safeAttributionValue(
+      hasFreshAttribution ? window.location.href : stored.event_source_url || window.location.href,
+      1000
+    ),
   };
 
-  if (next.utm_source || next.utm_medium || next.utm_campaign || next.utm_content) {
+  if (
+    next.utm_source ||
+    next.utm_medium ||
+    next.utm_campaign ||
+    next.utm_content ||
+    next.fbclid ||
+    next.fbc ||
+    next.fbp ||
+    next.event_source_url
+  ) {
     storage.setItem(
       ATTRIBUTION_KEY,
       JSON.stringify({
@@ -553,6 +597,10 @@ async function initializeLeadSystemV2(coach, slug) {
       utm_medium: attribution.utm_medium,
       utm_campaign: attribution.utm_campaign,
       utm_content: attribution.utm_content,
+      fbclid: attribution.fbclid,
+      fbc: attribution.fbc,
+      fbp: attribution.fbp,
+      event_source_url: attribution.event_source_url,
     }),
   });
 
@@ -1164,6 +1212,8 @@ export async function forwardQuizSubmission(
   const mainAspiration = normalizeAspiration(aspiration);
   const mainAspirationLabel = getAspirationLabel(mainAspiration);
   const leadSystemV2Enabled = isNewLeadWriterActive(slug);
+  const attribution = getLeadAttribution();
+  const metaEventId = `capi_${hash}`;
 
   function sendInitialPointsResultUpdate() {
     if (isNewLeadWriterActive(slug)) return;
@@ -1205,6 +1255,14 @@ export async function forwardQuizSubmission(
           profile: profile || null,
           main_aspiration: mainAspiration,
           main_aspiration_label: mainAspirationLabel,
+          utm_source: attribution.utm_source,
+          utm_medium: attribution.utm_medium,
+          utm_campaign: attribution.utm_campaign,
+          utm_content: attribution.utm_content,
+          fbclid: attribution.fbclid,
+          fbc: attribution.fbc,
+          fbp: attribution.fbp,
+          event_source_url: attribution.event_source_url,
           landed_at: submittedAt,
           submitted_at: submittedAt,
           hidden: {
@@ -1219,6 +1277,14 @@ export async function forwardQuizSubmission(
             schema_version: TRACKING_SCHEMA_VERSION,
             main_aspiration: mainAspiration,
             main_aspiration_label: mainAspirationLabel,
+            utm_source: attribution.utm_source,
+            utm_medium: attribution.utm_medium,
+            utm_campaign: attribution.utm_campaign,
+            utm_content: attribution.utm_content,
+            fbclid: attribution.fbclid,
+            fbc: attribution.fbc,
+            fbp: attribution.fbp,
+            event_source_url: attribution.event_source_url,
             lang,
             berater_slug: slug,
             slug,
@@ -1246,6 +1312,8 @@ export async function forwardQuizSubmission(
           token: leadRun.token,
           mainAspiration,
           mainAspirationLabel,
+          metaEventId,
+          attribution,
         },
       }),
     },
@@ -1271,13 +1339,25 @@ export async function forwardQuizSubmission(
             ref_id: memberId,
             berater_slug: slug,
             lang,
+            utm_source: attribution.utm_source,
+            utm_medium: attribution.utm_medium,
+            utm_campaign: attribution.utm_campaign,
+            utm_content: attribution.utm_content,
+            fbclid: attribution.fbclid,
+            fbc: attribution.fbc,
+            fbp: attribution.fbp,
+            event_source_url: attribution.event_source_url,
           });
         }
         sendInitialPointsResultUpdate();
       } else {
         markLeadRun(slug, leadRun, 'active');
       }
-      return response.json().catch(() => ({}));
+      return response.json().catch(() => ({})).then((data) => ({
+        ...data,
+        lead_hash: data.lead_hash || hash,
+        meta_event_id: data.meta_event_id || metaEventId,
+      }));
     })
     .catch((error) => {
       markLeadRun(slug, leadRun, 'active');

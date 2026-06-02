@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
 
     if (isLeadHash(requestedLeadHash)) {
       const existingRows = await supabaseJson(
-        `lead_state?lead_hash=eq.${encodeURIComponent(requestedLeadHash)}&select=lead_hash,utm_source,utm_medium,utm_campaign&limit=1`
+        `lead_state?lead_hash=eq.${encodeURIComponent(requestedLeadHash)}&select=lead_hash,utm_source,utm_medium,utm_campaign,utm_content,fbclid,fbc,fbp,event_source_url&limit=1`
       );
       const existingRow = Array.isArray(existingRows) ? existingRows[0] : null;
       const existingLeadHash = existingRow?.lead_hash || '';
@@ -54,6 +54,11 @@ module.exports = async function handler(req, res) {
           utm_source: safeString(body.utm_source, 120) || null,
           utm_medium: safeString(body.utm_medium, 120) || null,
           utm_campaign: safeString(body.utm_campaign, 120) || null,
+          utm_content: safeString(body.utm_content, 180) || null,
+          fbclid: safeString(body.fbclid, 500) || null,
+          fbc: safeString(body.fbc, 500) || null,
+          fbp: safeString(body.fbp, 120) || null,
+          event_source_url: safeString(body.event_source_url, 1000) || null,
         };
         const utmPatch = {};
         for (const [key, value] of Object.entries(incomingUtm)) {
@@ -100,6 +105,11 @@ module.exports = async function handler(req, res) {
       p_utm_source: safeString(body.utm_source, 120) || null,
       p_utm_medium: safeString(body.utm_medium, 120) || null,
       p_utm_campaign: safeString(body.utm_campaign, 120) || null,
+      p_utm_content: safeString(body.utm_content, 180) || null,
+      p_fbclid: safeString(body.fbclid, 500) || null,
+      p_fbc: safeString(body.fbc, 500) || null,
+      p_fbp: safeString(body.fbp, 120) || null,
+      p_event_source_url: safeString(body.event_source_url, 1000) || null,
     });
 
     const leadHash = Array.isArray(rows) ? rows[0]?.lead_hash : rows?.lead_hash;
