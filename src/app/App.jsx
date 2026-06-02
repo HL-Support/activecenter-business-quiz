@@ -445,10 +445,16 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
         ld.clear(n || 'default');
         try {
           if (typeof window.fbq === 'function') {
-            window.fbq('track', 'Lead', {
+            const metaEventId = submitResult?.meta_event_id;
+            const leadPayload = {
               content_name: 'Erfolgscode Quiz',
               content_category: 'Business Opportunity',
-            });
+            };
+            if (metaEventId) {
+              window.fbq('track', 'Lead', leadPayload, { eventID: metaEventId });
+            } else {
+              window.fbq('track', 'Lead', leadPayload);
+            }
           }
         } catch (_fbqError) {
           // pixel error is non-critical
