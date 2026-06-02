@@ -21,7 +21,7 @@ if (!SUPABASE_SERVICE_KEY) {
   process.exit(1);
 }
 
-async function supabaseSQL(sql) {
+async function _supabaseSQL(sql) {
   return new Promise((resolve, reject) => {
     const url = new URL(SUPABASE_URL);
     const options = {
@@ -49,7 +49,7 @@ async function supabaseSQL(sql) {
           } else {
             resolve(result);
           }
-        } catch (e) {
+        } catch (_e) {
           resolve({ raw: data, status: res.statusCode });
         }
       });
@@ -62,7 +62,7 @@ async function supabaseSQL(sql) {
 }
 
 // Alternative: Use direct fetch if Node 18+
-async function executeSQL(sql) {
+async function _executeSQL(sql) {
   try {
     console.log(`\n📝 Executing SQL:\n${sql.substring(0, 100)}...\n`);
 

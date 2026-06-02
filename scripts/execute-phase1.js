@@ -6,7 +6,6 @@
  */
 
 const fs = require('fs');
-const https = require('https');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xlpiisbozpgmemxhtivj.supabase.co';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;

@@ -28,8 +28,6 @@
     video_75: true,
     video_100: true,
   };
-  const videoRegistry = [];
-
   function safeJsonParse(value) {
     if (!value) return null;
     try {

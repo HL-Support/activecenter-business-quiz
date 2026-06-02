@@ -139,7 +139,7 @@ async function sendAlertEmail(health) {
   });
 
   const text = await response.text();
-  let data = {};
+  let data;
   try {
     data = text ? JSON.parse(text) : {};
   } catch {
