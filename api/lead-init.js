@@ -100,7 +100,6 @@ module.exports = async function handler(req, res) {
       p_utm_source: safeString(body.utm_source, 120) || null,
       p_utm_medium: safeString(body.utm_medium, 120) || null,
       p_utm_campaign: safeString(body.utm_campaign, 120) || null,
-      p_utm_content: safeString(body.utm_content, 120) || null,
     });
 
     const leadHash = Array.isArray(rows) ? rows[0]?.lead_hash : rows?.lead_hash;
