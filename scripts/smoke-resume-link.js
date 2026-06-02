@@ -4,6 +4,7 @@ const baseUrl = (process.env.RESUME_SMOKE_BASE_URL || 'https://business.activece
 const email = process.env.RESUME_SMOKE_EMAIL || 'preview-smoke@example.com';
 const slug = process.env.RESUME_SMOKE_SLUG || 'markus';
 const memberId = process.env.RESUME_SMOKE_MEMBER_ID || '24';
+const organisationId = process.env.RESUME_SMOKE_ORGANISATION_ID || '2';
 
 async function postBridge(payload) {
   const response = await fetch(`${baseUrl}/api/bridge`, {
@@ -46,6 +47,7 @@ async function main() {
         firstName: 'Smoke',
         lang: 'de',
         memberId,
+        organisationId,
       },
     },
   });
@@ -73,6 +75,25 @@ async function main() {
   assert.strictEqual(resolved.resumeTarget, 'videos', 'resolved resumeTarget must be videos');
   assert.ok(Number(resolved.lastVideoStep) >= 1, 'resolved lastVideoStep must be >= 1');
 
+  await postBridge({
+    action: 'write_analytics',
+    payload: {
+      hash: leadHash,
+      lead_hash: leadHash,
+      session_hash: sessionHash,
+      event_id: `smoke_test_lead_marked_${leadHash}`,
+      event_name: 'test_lead_marked',
+      event_at: new Date().toISOString(),
+      member_id: memberId,
+      ref_id: memberId,
+      berater_slug: slug,
+      source_app: 'business_leads_quiz_smoke',
+      funnel_key: 'business',
+      organisation_id: organisationId,
+      reason: 'resume_smoke_test',
+    },
+  });
+
   console.log(
     JSON.stringify(
       {
@@ -81,6 +102,7 @@ async function main() {
         resumeTarget: resolved.resumeTarget,
         lastVideoStep: resolved.lastVideoStep,
         shortUrlHasTarget: resumeUrl.includes('target=videos'),
+        testLeadMarked: true,
       },
       null,
       2

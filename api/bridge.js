@@ -670,6 +670,14 @@ async function persistContactLeadStateFromResumePayload(payload) {
     40
   );
   const memberId = safeString(payload?.memberId || payload?.member_id, 120) || null;
+  const organisationId =
+    safeString(
+      payload?.organisationId ||
+        payload?.organisation_id ||
+        payload?.organizationId ||
+        payload?.organization_id,
+      120
+    ) || null;
   const refId = safeString(payload?.refId || payload?.ref_id || payload?.memberId || payload?.member_id, 120) || memberId;
 
   await supabaseRequest('lead_state?on_conflict=lead_hash', {
@@ -681,6 +689,7 @@ async function persistContactLeadStateFromResumePayload(payload) {
     body: JSON.stringify({
       lead_hash: leadHash,
       member_id: memberId,
+      ...(organisationId ? { organisation_id: organisationId } : {}),
       ref_id: refId,
       ref_type: refId && refId !== memberId ? 'referral_code' : 'member',
       berater_slug: safeString(payload?.beraterSlug || payload?.berater_slug || payload?.slug, 80) || null,
