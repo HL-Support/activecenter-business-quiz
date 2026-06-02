@@ -24,6 +24,8 @@ const POSTMARK_FROM = process.env.POSTMARK_FROM || 'Activecenter-Support <mail@m
 const POSTMARK_MESSAGE_STREAM = process.env.POSTMARK_MESSAGE_STREAM || 'outbound';
 const HOT_LEAD_OUTBOX_EMAIL_ENABLED =
   String(process.env.HOT_LEAD_OUTBOX_EMAIL_ENABLED || '').trim() === '1';
+const BRAND_LOGO_URL = 'https://hl-support.biz/storage/images/cwemaillogo-1bcb4f.png';
+const BRAND_PRIVACY_URL = 'https://hl-support.biz/impressum-datenschutz/';
 
 const MYSQL_SYNC_TYPES = new Set(['mysql_initial_rank', 'mysql_rank_update']);
 const SUPPORTED_SYNC_TYPES = new Set([...MYSQL_SYNC_TYPES, 'coach_hot_lead_email']);
@@ -107,6 +109,414 @@ function escapeHtml(value) {
     '"': '&quot;',
     "'": '&#39;',
   })[char]);
+}
+
+const HOT_LEAD_EMAIL_I18N = {
+  de: {
+    subject: (name) => `Hot Lead: ${name} hat alle 3 Videos angesehen`,
+    preheader: 'Ein Kontakt hat alle 3 Info-Videos vollständig angeschaut.',
+    title: (slug) => `Hot Lead aus business.activecenter.info/${slug || ''}`,
+    greeting: (name) => `Hallo ${name},`,
+    intro:
+      'ein Kontakt hat alle 3 Info-Videos vollständig angeschaut. Das zeigt großes Interesse und ist ein guter Moment für eine persönliche Nachricht.',
+    labels: {
+      name: 'Name',
+      email: 'E-Mail',
+      type: 'Typ',
+      aspiration: 'Zielsetzung',
+      barrier: 'Was ihn aktuell zurückhält',
+      completedAt: 'Abgeschlossen am',
+    },
+    footerReason:
+      'Diese Benachrichtigung wurde automatisch erstellt, weil ein Quiz-Kontakt alle 3 Info-Videos vollständig angeschaut hat.',
+    privacyLabel: 'Impressum &amp; Datenschutz',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; Alle Rechte vorbehalten',
+    profiles: {
+      A: 'Typ A Der Macher',
+      B: 'Typ B Der Netzwerker',
+      C: 'Typ C Der Anker',
+      D: 'Typ D Der Architekt',
+    },
+    aspirations: {
+      freedom: 'Freiheit',
+      impact: 'Wirkung',
+      security: 'Sicherheit',
+      growth: 'Wachstum',
+    },
+    barriers: {
+      vehicle: 'ein funktionierendes System',
+      community: 'das richtige Umfeld',
+      confidence: 'einen sicheren ersten Schritt',
+      opportunity: 'die passende Möglichkeit',
+    },
+  },
+  it: {
+    subject: (name) => `Hot lead: ${name} ha guardato tutti e 3 i video`,
+    preheader: 'Un contatto ha guardato completamente tutti e 3 i video informativi.',
+    title: (slug) => `Hot lead da business.activecenter.info/${slug || ''}`,
+    greeting: (name) => `Ciao ${name},`,
+    intro:
+      'un contatto ha guardato completamente tutti e 3 i video informativi. Questo mostra un grande interesse ed è un buon momento per un messaggio personale.',
+    labels: {
+      name: 'Nome',
+      email: 'E-mail',
+      type: 'Tipo',
+      aspiration: 'Obiettivo',
+      barrier: 'Cosa lo trattiene al momento',
+      completedAt: 'Completato il',
+    },
+    footerReason:
+      'Questa notifica è stata creata automaticamente perché un contatto del quiz ha guardato completamente tutti e 3 i video informativi.',
+    privacyLabel: 'Note legali &amp; privacy',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; Tutti i diritti riservati',
+    profiles: {
+      A: 'Tipo A Il realizzatore',
+      B: 'Tipo B Il connettore',
+      C: "Tipo C L'ancora",
+      D: "Tipo D L'architetto",
+    },
+    aspirations: {
+      freedom: 'Libertà',
+      impact: 'Impatto',
+      security: 'Sicurezza',
+      growth: 'Crescita',
+    },
+    barriers: {
+      vehicle: 'un sistema che funziona',
+      community: "l'ambiente giusto",
+      confidence: 'un primo passo sicuro',
+      opportunity: "l'opportunità giusta",
+    },
+  },
+  en: {
+    subject: (name) => `Hot lead: ${name} watched all 3 videos`,
+    preheader: 'A contact has watched all 3 info videos all the way through.',
+    title: (slug) => `Hot lead from business.activecenter.info/${slug || ''}`,
+    greeting: (name) => `Hi ${name},`,
+    intro:
+      'a contact has watched all 3 info videos all the way through. This shows strong interest and it is a good moment for a personal message.',
+    labels: {
+      name: 'Name',
+      email: 'Email',
+      type: 'Type',
+      aspiration: 'Goal',
+      barrier: 'What is currently holding them back',
+      completedAt: 'Completed on',
+    },
+    footerReason:
+      'This notification was created automatically because a quiz contact watched all 3 info videos all the way through.',
+    privacyLabel: 'Legal notice &amp; privacy',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; All rights reserved',
+    profiles: {
+      A: 'Type A The doer',
+      B: 'Type B The connector',
+      C: 'Type C The anchor',
+      D: 'Type D The architect',
+    },
+    aspirations: {
+      freedom: 'Freedom',
+      impact: 'Impact',
+      security: 'Security',
+      growth: 'Growth',
+    },
+    barriers: {
+      vehicle: 'a working system',
+      community: 'the right environment',
+      confidence: 'a safe first step',
+      opportunity: 'the right opportunity',
+    },
+  },
+  fr: {
+    subject: (name) => `Lead chaud : ${name} a regardé les 3 vidéos`,
+    preheader: "Un contact a regardé les 3 vidéos d'information jusqu'au bout.",
+    title: (slug) => `Lead chaud depuis business.activecenter.info/${slug || ''}`,
+    greeting: (name) => `Bonjour ${name},`,
+    intro:
+      "un contact a regardé les 3 vidéos d'information jusqu'au bout. Cela montre un grand intérêt et c'est un bon moment pour un message personnel.",
+    labels: {
+      name: 'Nom',
+      email: 'E-mail',
+      type: 'Type',
+      aspiration: 'Objectif',
+      barrier: 'Ce qui le bloque actuellement',
+      completedAt: 'Terminé le',
+    },
+    footerReason:
+      "Cette notification a été créée automatiquement parce qu'un contact du quiz a regardé les 3 vidéos d'information jusqu'au bout.",
+    privacyLabel: 'Mentions légales &amp; confidentialité',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; Tous droits réservés',
+    profiles: {
+      A: 'Type A Le faiseur',
+      B: 'Type B Le connecteur',
+      C: "Type C L'ancre",
+      D: "Type D L'architecte",
+    },
+    aspirations: {
+      freedom: 'Liberté',
+      impact: 'Impact',
+      security: 'Sécurité',
+      growth: 'Croissance',
+    },
+    barriers: {
+      vehicle: 'un système fonctionnant',
+      community: "l'environnement adéquat",
+      confidence: 'un premier pas sûr',
+      opportunity: "l'opportunité idéale",
+    },
+  },
+  ru: {
+    subject: (name) => `Горячий лид: ${name} посмотрел(а) все 3 видео`,
+    preheader: 'Контакт полностью посмотрел все 3 информационных видео.',
+    title: (slug) => `Горячий лид с business.activecenter.info/${slug || ''}`,
+    greeting: (name) => `Здравствуйте, ${name},`,
+    intro:
+      'контакт полностью посмотрел все 3 информационных видео. Это показывает высокий интерес и это хороший момент для личного сообщения.',
+    labels: {
+      name: 'Имя',
+      email: 'E-mail',
+      type: 'Тип',
+      aspiration: 'Цель',
+      barrier: 'Что сейчас останавливает',
+      completedAt: 'Завершено',
+    },
+    footerReason:
+      'Это уведомление было создано автоматически, потому что контакт из квиза полностью посмотрел все 3 информационных видео.',
+    privacyLabel: 'Правовая информация и конфиденциальность',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; Все права защищены',
+    profiles: {
+      A: 'Тип A Деятель',
+      B: 'Тип B Соединитель',
+      C: 'Тип C Якорь',
+      D: 'Тип D Архитектор',
+    },
+    aspirations: {
+      freedom: 'Свобода',
+      impact: 'Влияние',
+      security: 'Безопасность',
+      growth: 'Рост',
+    },
+    barriers: {
+      vehicle: 'работающая система',
+      community: 'правильная среда',
+      confidence: 'безопасный первый шаг',
+      opportunity: 'правильная возможность',
+    },
+  },
+};
+
+function normalizeProfileCode(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  const letter = normalized.match(/\b([abcd])\b/i);
+  if (letter) return letter[1].toUpperCase();
+  if (normalized.includes('feuer') || normalized.includes('macher') || normalized.includes('realizzatore') || normalized.includes('doer')) return 'A';
+  if (normalized.includes('wind') || normalized.includes('netzwerker') || normalized.includes('connettore') || normalized.includes('connector')) return 'B';
+  if (normalized.includes('wasser') || normalized.includes('anker') || normalized.includes('ancora') || normalized.includes('anchor')) return 'C';
+  if (normalized.includes('fels') || normalized.includes('architekt') || normalized.includes('architetto') || normalized.includes('architect')) return 'D';
+  return '';
+}
+
+function normalizeAspirationKey(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  const map = {
+    freedom: 'freedom',
+    freiheit: 'freedom',
+    liberta: 'freedom',
+    libertà: 'freedom',
+    liberte: 'freedom',
+    liberté: 'freedom',
+    свобода: 'freedom',
+    impact: 'impact',
+    wirkung: 'impact',
+    impatto: 'impact',
+    влияние: 'impact',
+    security: 'security',
+    sicherheit: 'security',
+    sicurezza: 'security',
+    securite: 'security',
+    sécurité: 'security',
+    безопасность: 'security',
+    growth: 'growth',
+    wachstum: 'growth',
+    crescita: 'growth',
+    croissance: 'growth',
+    рост: 'growth',
+  };
+  return map[normalized] || '';
+}
+
+function normalizeBarrierKey(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (
+    normalized === 'vehicle' ||
+    normalized.includes('system') ||
+    normalized.includes('sistema') ||
+    normalized.includes('système') ||
+    normalized.includes('система')
+  ) {
+    return 'vehicle';
+  }
+  if (
+    normalized === 'community' ||
+    normalized.includes('umfeld') ||
+    normalized.includes('ambiente') ||
+    normalized.includes('environnement') ||
+    normalized.includes('сред')
+  ) {
+    return 'community';
+  }
+  if (
+    normalized === 'confidence' ||
+    normalized.includes('sicherheit') ||
+    normalized.includes('sicurezza') ||
+    normalized.includes('sécurité') ||
+    normalized.includes('schritt') ||
+    normalized.includes('passo') ||
+    normalized.includes('pas ') ||
+    normalized.includes('шаг')
+  ) {
+    return 'confidence';
+  }
+  if (
+    normalized === 'opportunity' ||
+    normalized.includes('möglichkeit') ||
+    normalized.includes('opportun') ||
+    normalized.includes('возмож')
+  ) {
+    return 'opportunity';
+  }
+  return '';
+}
+
+function formatLocalizedDateTime(value, lang) {
+  const date = new Date(value || new Date().toISOString());
+  if (Number.isNaN(date.getTime())) return '';
+  const formatter = new Intl.DateTimeFormat('de-DE', {
+    timeZone: 'Europe/Berlin',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  const parts = Object.fromEntries(formatter.formatToParts(date).map((part) => [part.type, part.value]));
+  if (lang === 'it' || lang === 'fr') return `${parts.day}/${parts.month}/${parts.year} - ${parts.hour}:${parts.minute}`;
+  if (lang === 'en') return `${parts.month}/${parts.day}/${parts.year} - ${parts.hour}:${parts.minute}`;
+  if (lang === 'ru') return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute}`;
+  return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute} Uhr`;
+}
+
+function detectCoachLanguage(coach, lead, job) {
+  const country = String(coach?.address?.country || coach?.country || '').trim().toUpperCase();
+  const countryLanguage =
+    {
+      DE: 'de',
+      AT: 'de',
+      CH: 'de',
+      IT: 'it',
+      FR: 'fr',
+      BE: 'fr',
+      RU: 'ru',
+      GB: 'en',
+      UK: 'en',
+      US: 'en',
+      CA: 'en',
+      AU: 'en',
+    }[country] || '';
+  const candidates = [
+    coach?.preferred_newsletter_language,
+    coach?.preferred_language,
+    coach?.language,
+    coach?.lang,
+    coach?.locale,
+    job?.context_data?.lang,
+    lead?.lang,
+    countryLanguage,
+  ];
+  for (const value of candidates) {
+    const lang = String(value || '').trim().toLowerCase().slice(0, 2);
+    if (['de', 'it', 'en', 'fr', 'ru'].includes(lang)) return lang;
+  }
+  return normalizeLanguage('de');
+}
+
+function buildDefaultFooter(reason, lang = 'de') {
+  const copy = HOT_LEAD_EMAIL_I18N[lang] || HOT_LEAD_EMAIL_I18N.de;
+  return [
+    `<p style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#999999;">${escapeHtml(reason)}</p>`,
+    `<p style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#999999;"><a href="${BRAND_PRIVACY_URL}" style="color:#999999;text-decoration:underline;">${copy.privacyLabel}</a></p>`,
+    `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#999999;">${copy.copyrightLabel}</p>`,
+  ].join('');
+}
+
+function buildBrandedEmailShell({ preheader, bodyHtml, footerHtml, brandName = 'Activecenter' }) {
+  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
+  <title></title>
+  <style type="text/css" rel="stylesheet" media="all">
+    #outlook a { padding: 0; }
+    body { width: 100% !important; height: 100%; margin: 0; -webkit-text-size-adjust: none; -ms-text-size-adjust: 100%; }
+    a img { border: none; }
+    td { word-break: break-word; }
+    body, td, th { font-family: Arial, Helvetica, sans-serif; }
+    td, th { font-size: 16px; }
+    p, ul, ol { margin: 0 0 18px 0; font-size: 16px; line-height: 1.65; color: #2d2d2d; }
+    p:last-child { margin-bottom: 0; }
+    a { color: #212529; text-decoration: underline; }
+    .email-wrapper    { width: 100%; margin: 0; padding: 0; background-color: #f0f0f0; }
+    .email-body_inner { width: 570px; margin: 0 auto; padding: 0; background-color: #ffffff; }
+    .content-cell     { padding: 36px 40px; }
+    .email-footer     { width: 570px; margin: 0 auto; padding: 0; text-align: center; }
+    .email-footer p   { color: #999999; font-size: 12px; line-height: 1.6; }
+    .email-footer a   { color: #999999; text-decoration: underline; }
+    .email-masthead   { background-color: #212529; padding: 16px 24px; }
+    @media only screen and (max-width: 600px) {
+      .email-body_inner, .email-footer { width: 100% !important; }
+      .content-cell   { padding: 24px 20px !important; }
+      .email-masthead { padding: 14px 16px !important; }
+      .logo-img       { width: 150px !important; }
+    }
+    :root { color-scheme: light; }
+  </style>
+  <!--[if mso]><style type="text/css">body,td,th,p,a,.f-fallback{font-family:Arial,sans-serif !important;}</style><![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#f0f0f0;-webkit-text-size-adjust:none;-ms-text-size-adjust:100%;" bgcolor="#f0f0f0">
+<table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation" bgcolor="#f0f0f0">
+<tr><td align="center" style="padding:24px 8px;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+  <tr><td>
+    <table class="email-body_inner" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation" style="border-radius:4px 4px 0 0;overflow:hidden;">
+      <tr><td class="email-masthead" bgcolor="#212529" style="background-color:#212529;padding:16px 24px;border-radius:4px 4px 0 0;">
+        <img src="${BRAND_LOGO_URL}" width="180" alt="${escapeHtml(brandName)}" class="logo-img f-fallback" style="display:block;border:0;outline:none;text-decoration:none;height:auto;width:180px;max-width:180px;" />
+      </td></tr>
+    </table>
+  </td></tr>
+  <tr><td width="570" cellpadding="0" cellspacing="0">
+    <table class="email-body_inner" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation" bgcolor="#ffffff">
+      <tr><td class="content-cell f-fallback" style="padding:36px 40px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;">
+        <span style="display:none !important;visibility:hidden;mso-hide:all;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${escapeHtml(preheader || '')}</span>
+        ${bodyHtml}
+      </td></tr>
+    </table>
+  </td></tr>
+  <tr><td>
+    <table class="email-footer" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
+      <tr><td class="content-cell f-fallback" align="center" style="padding:24px 40px 32px 40px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#999999;text-align:center;">
+        ${footerHtml}
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
 }
 
 function hasContactData(lead) {
@@ -255,52 +665,68 @@ function answerSummary(answers) {
 }
 
 function buildHotLeadEmail({ lead, coach, answers, job }) {
-  const lang = normalizeLanguage(lead.lang || job.context_data?.lang || 'de');
+  const lang = detectCoachLanguage(coach, lead, job);
+  const copy = HOT_LEAD_EMAIL_I18N[lang] || HOT_LEAD_EMAIL_I18N.de;
   const firstName = safeString(lead.first_name, 120) || 'Interessent';
   const email = safeString(lead.email || lead.email_normalized, 180) || '-';
-  const coachFirstName = safeString(coach?.first_name || coach?.name, 80) || 'Hallo';
-  const profile = safeString(lead.profile_label || lead.profile_code, 180) || '-';
-  const aspiration = safeString(lead.main_aspiration_label, 180) || '-';
-  const barrier = safeString(lead.initial_barrier, 180) || '-';
-  const completedAt =
-    safeString(lead.video3_completed_at || job.context_data?.event_at, 80) || new Date().toISOString();
-  const source = `business.activecenter.info/${safeString(lead.berater_slug, 80) || ''}`;
-  const subjectByLang = {
-    de: `Hot Lead: ${firstName} hat alle 3 Videos angesehen`,
-    it: `Hot lead: ${firstName} ha guardato tutti e 3 i video`,
-    en: `Hot lead: ${firstName} watched all 3 videos`,
-    fr: `Hot lead : ${firstName} a regarde les 3 videos`,
-    ru: `Hot lead: ${firstName} prosmotrel vse 3 video`,
-  };
-  const introByLang = {
-    de: 'ein Kontakt hat alle drei Info-Videos vollstaendig angeschaut. Das ist ein klares Hot-Lead-Signal.',
-    it: 'un contatto ha guardato tutti e tre i video informativi. Questo e un chiaro segnale hot lead.',
-    en: 'a contact watched all three information videos. This is a clear hot-lead signal.',
-    fr: 'un contact a regarde les trois videos informatives. C est un signal hot lead clair.',
-    ru: 'kontakt prosmotrel vse tri informatsionnyh video. Eto yavnyj signal hot lead.',
-  };
+  const coachFirstName = safeString(coach?.first_name || coach?.name, 80) || 'Markus';
+  const brandName = safeString(
+    coach?.organisation_name || coach?.org_name || coach?.company || 'Activecenter',
+    120
+  );
+  const rawProfile = [lead.profile_code, lead.profile_label].filter(Boolean).join(' ');
+  const profileCode = normalizeProfileCode(rawProfile);
+  const profile = copy.profiles[profileCode] || safeString(lead.profile_label || lead.profile_code, 180) || '-';
+  const rawAspiration = lead.main_aspiration || lead.main_aspiration_label || '';
+  const aspiration =
+    copy.aspirations[normalizeAspirationKey(rawAspiration)] ||
+    safeString(lead.main_aspiration_label || lead.main_aspiration, 180) ||
+    '-';
+  const rawBarrier = lead.initial_barrier || lead.initial_barrier_label || '';
+  const barrier =
+    copy.barriers[normalizeBarrierKey(rawBarrier)] ||
+    safeString(lead.initial_barrier_label || lead.initial_barrier, 180) ||
+    '-';
+  const completedAt = formatLocalizedDateTime(
+    lead.video3_completed_at || job.context_data?.event_at || new Date().toISOString(),
+    lang
+  );
+  const slug = safeString(lead.berater_slug, 80).toLowerCase();
+  const subject = copy.subject(firstName);
   const rows = [
-    ['Name', firstName],
-    ['E-Mail', email],
-    ['Typ', profile],
-    ['Wunsch', aspiration],
-    ['Barriere', barrier],
-    ['Video-Status', '3/3 vollstaendig angeschaut'],
-    ['Abgeschlossen am', completedAt],
-    ['Quelle', source],
+    [copy.labels.name, firstName],
+    [copy.labels.email, email],
+    [copy.labels.type, profile],
+    [copy.labels.aspiration, aspiration],
+    [copy.labels.barrier, barrier],
+    [copy.labels.completedAt, completedAt],
   ];
   const htmlRows = rows
-    .map(([label, value]) => `<tr><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;font-weight:700;width:170px;">${escapeHtml(label)}</td><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;">${escapeHtml(value)}</td></tr>`)
+    .map(([label, value]) => `<tr><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;font-weight:700;width:180px;">${escapeHtml(label)}</td><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;">${escapeHtml(value || '-')}</td></tr>`)
     .join('');
-  const html = `<!doctype html><html><body style="margin:0;background:#f0f0f0;font-family:Arial,Helvetica,sans-serif;color:#212529;"><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" style="padding:32px 12px;"><table width="570" cellpadding="0" cellspacing="0" role="presentation" style="max-width:570px;width:100%;background:#ffffff;border-radius:4px;overflow:hidden;"><tr><td style="background:#212529;padding:16px 24px;"><strong style="color:#ffffff;font-size:18px;">Activecenter</strong></td></tr><tr><td style="padding:32px 40px;"><h1 style="margin:0 0 20px;font-size:28px;line-height:1.3;">${escapeHtml(subjectByLang[lang] || subjectByLang.de)}</h1><p style="font-size:16px;line-height:1.65;margin:0 0 16px;">Hallo ${escapeHtml(coachFirstName)},</p><p style="font-size:16px;line-height:1.65;margin:0 0 24px;">${escapeHtml(introByLang[lang] || introByLang.de)}</p><table style="width:100%;border-collapse:collapse;">${htmlRows}</table></td></tr></table></td></tr></table></body></html>`;
+  const textRows = rows.map(([label, value]) => `${label}: ${value || '-'}`).join('\n');
+  const bodyHtml = [
+    `<h1 style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:28px;line-height:1.3;color:#212529;">${escapeHtml(copy.title(slug))}</h1>`,
+    `<p style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;">${escapeHtml(copy.greeting(coachFirstName))}</p>`,
+    `<p style="margin:0 0 24px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;">${escapeHtml(copy.intro)}</p>`,
+    '<table style="width:100%;border-collapse:collapse;margin:0 0 8px 0;">',
+    htmlRows,
+    '</table>',
+  ].join('');
+  const html = buildBrandedEmailShell({
+    preheader: copy.preheader,
+    bodyHtml,
+    brandName,
+    footerHtml: buildDefaultFooter(copy.footerReason, lang),
+  });
   const text = [
-    subjectByLang[lang] || subjectByLang.de,
+    copy.title(slug),
     '',
-    `Hallo ${coachFirstName},`,
+    copy.greeting(coachFirstName),
     '',
-    introByLang[lang] || introByLang.de,
+    copy.intro,
     '',
-    ...rows.map(([label, value]) => `${label}: ${value}`),
+    textRows,
     '',
     'Quiz-Antworten:',
     answerSummary(answers),
@@ -309,7 +735,7 @@ function buildHotLeadEmail({ lead, coach, answers, job }) {
   return {
     From: POSTMARK_FROM,
     To: coach.email,
-    Subject: subjectByLang[lang] || subjectByLang.de,
+    Subject: subject,
     HtmlBody: html,
     TextBody: text,
     MessageStream: POSTMARK_MESSAGE_STREAM,
