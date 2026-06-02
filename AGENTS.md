@@ -1,5 +1,26 @@
 # Business Leads Quiz
 
+## Shared Operating Layer
+
+- Read `D:\OneDrive\Antigravity Laptop\agent-core\governance\GOVERNANCE_RULES.json` before substantial work.
+- Use direct brain helpers from `D:\OneDrive\Antigravity Laptop\agent-core\scripts\direct-api-helpers.ps1`.
+- Session start:
+  ```powershell
+  . "D:\OneDrive\Antigravity Laptop\agent-core\scripts\direct-api-helpers.ps1"
+  Read-Memory -Query "business leads quiz aktuelle entscheidungen status"
+  ```
+- Use `Query-KnowledgeBase` for AnythingLLM and `Save-Memory -Tier PROJECT` for durable project updates.
+- Before commits, pushes, branch cleanup, worktree cleanup, or deploys follow `D:\OneDrive\Antigravity Laptop\activecenter-web\.agents\skills\git-deploy-safety\SKILL.md`.
+- Safety project key: `business_leads_quiz`.
+- Required root checks:
+  ```bash
+  npm run safety:status
+  npm run safety:guard -- --project business_leads_quiz
+  npm run safety:deploy -- --project business_leads_quiz
+  ```
+- GitHub CI: `Activecenter Safety` / job `safety`.
+- `main` has Branch Protection requiring `safety`; Vercel Production Branch is `main`.
+
 ## Aktueller Lieferzustand
 
 - Dieses Unterprojekt ist ein separates Vercel-Projekt.
