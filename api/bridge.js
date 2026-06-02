@@ -626,7 +626,7 @@ async function loadResumeState({ sessionHash = '', leadHash = '' } = {}) {
 async function loadLeadStateByHash(leadHash, depth = 0) {
   if (!isLeadHash(leadHash)) return {};
   const response = await supabaseRequest(
-    `lead_state?lead_hash=eq.${encodeURIComponent(leadHash)}&select=lead_hash,member_id,ref_id,berater_slug,lang,first_name,email,email_normalized,form_submitted_at,profile_code,main_aspiration,initial_barrier,lifecycle_stage,migration_flags&limit=1`
+    `lead_state?lead_hash=eq.${encodeURIComponent(leadHash)}&select=lead_hash,member_id,organisation_id,ref_id,berater_slug,lang,first_name,email,email_normalized,form_submitted_at,profile_code,main_aspiration,initial_barrier,lifecycle_stage,migration_flags&limit=1`
   );
   const rows = await response?.json?.();
   const row = Array.isArray(rows) ? rows[0] || {} : {};
@@ -725,7 +725,12 @@ async function resolveContactLeadForResume({ sessionHash, email, leadHash, fallb
       !leadState.email ||
       !leadState.first_name ||
       !leadState.form_submitted_at ||
-      (fallbackContact.lang && normalizeLanguage(fallbackContact.lang) !== leadState.lang));
+      (fallbackContact.lang && normalizeLanguage(fallbackContact.lang) !== leadState.lang) ||
+      (!leadState.organisation_id &&
+        (fallbackContact.organisationId ||
+          fallbackContact.organisation_id ||
+          fallbackContact.organizationId ||
+          fallbackContact.organization_id)));
 
   if (shouldPersistFallbackContact) {
     const persisted = await persistContactLeadStateFromResumePayload({
@@ -756,7 +761,7 @@ async function resolveContactLeadForResume({ sessionHash, email, leadHash, fallb
   if (!leadState.lead_hash && email) {
     const normalizedEmail = safeString(email, 180).toLowerCase();
     const response = await supabaseRequest(
-      `lead_state?email_normalized=eq.${encodeURIComponent(normalizedEmail)}&lifecycle_stage=neq.merged_duplicate&select=lead_hash,member_id,ref_id,berater_slug,lang,first_name,email,email_normalized,form_submitted_at,profile_code,main_aspiration,initial_barrier,lifecycle_stage,migration_flags&order=form_submitted_at.desc&limit=1`
+      `lead_state?email_normalized=eq.${encodeURIComponent(normalizedEmail)}&lifecycle_stage=neq.merged_duplicate&select=lead_hash,member_id,organisation_id,ref_id,berater_slug,lang,first_name,email,email_normalized,form_submitted_at,profile_code,main_aspiration,initial_barrier,lifecycle_stage,migration_flags&order=form_submitted_at.desc&limit=1`
     );
     const rows = await response?.json?.();
     leadState = Array.isArray(rows) ? rows[0] || {} : {};
