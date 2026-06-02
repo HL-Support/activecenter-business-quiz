@@ -316,7 +316,7 @@ async function readMysqlTable(table, where, limit = 1) {
   }
 
   const text = await response.text();
-  let data = {};
+  let data;
   try {
     data = text ? JSON.parse(text) : {};
   } catch {
@@ -403,7 +403,7 @@ async function loadFinalBusinessLeadContext(leadHash) {
       phone: joinPhone(contact.phone_prefix, contact.phone_number),
       form_submitted_at: safeString(survey.submitted_at || survey.created_at, 40) || null,
       coach_herbalife_id: safeString(coach?.herbalife_id, 120) || null,
-      coach_found: !!coach,
+      coach_found: Boolean(coach),
     };
   }
 
@@ -431,26 +431,6 @@ async function patchByEquals(table, column, value, record) {
     },
     body: JSON.stringify(record),
   });
-}
-
-async function determineLastVideoStep(sessionHash) {
-  if (!sessionHash) return 1;
-
-  try {
-    const queryPath = `quiz_sessions?hash=eq.${encodeURIComponent(sessionHash)}`;
-    const sessionResponse = await supabaseRequest(queryPath);
-    const sessions = await sessionResponse?.json?.();
-    const session = Array.isArray(sessions) ? sessions[0] : null;
-
-    if (!session) return 1;
-    if (session.video3_max_pct && Number(session.video3_max_pct) > 0) return 3;
-    if (session.video2_max_pct && Number(session.video2_max_pct) > 0) return 2;
-    if (session.video1_max_pct && Number(session.video1_max_pct) > 0) return 1;
-  } catch (error) {
-    console.warn('Could not determine lastVideoStep, defaulting to 1:', error.message);
-  }
-
-  return 1;
 }
 
 function videoProgressFromSession(session) {
@@ -3741,7 +3721,7 @@ module.exports = async function handler(req, res) {
     let decoded;
     try {
       decoded = jwt.verify(payload.token, JWT_SECRET, { algorithms: ['HS256'] });
-    } catch (error) {
+    } catch (_error) {
       return res.status(400).json({ error: 'Invalid resume token' });
     }
 
@@ -3794,7 +3774,7 @@ module.exports = async function handler(req, res) {
     let resumeRecord;
     try {
       resumeRecord = await resolveResumeRecordByKey(payload.key);
-    } catch (error) {
+    } catch (_error) {
       return res.status(400).json({ error: 'Invalid resume key' });
     }
 

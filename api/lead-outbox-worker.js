@@ -520,7 +520,7 @@ function buildBrandedEmailShell({ preheader, bodyHtml, footerHtml, brandName = '
 }
 
 function hasContactData(lead) {
-  return !!(
+  return Boolean(
     safeString(lead?.email, 180) ||
     safeString(lead?.email_normalized, 180) ||
     safeString(lead?.phone, 80) ||
@@ -634,7 +634,7 @@ async function sendPostmark(message) {
     body: JSON.stringify(message),
   });
   const text = await response.text();
-  let data = {};
+  let data;
   try {
     data = text ? JSON.parse(text) : {};
   } catch {
