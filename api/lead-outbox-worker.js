@@ -22,7 +22,8 @@ const BRIDGE_KEY = process.env.BRIDGE_KEY;
 const POSTMARK_SERVER_TOKEN = process.env.POSTMARK_SERVER_TOKEN;
 const POSTMARK_FROM = process.env.POSTMARK_FROM || 'Activecenter-Support <mail@mail.hl-support.biz>';
 const POSTMARK_MESSAGE_STREAM = process.env.POSTMARK_MESSAGE_STREAM || 'outbound';
-const HOT_LEAD_OUTBOX_EMAIL_ENABLED = process.env.HOT_LEAD_OUTBOX_EMAIL_ENABLED === '1';
+const HOT_LEAD_OUTBOX_EMAIL_ENABLED =
+  String(process.env.HOT_LEAD_OUTBOX_EMAIL_ENABLED || '').trim() === '1';
 
 const MYSQL_SYNC_TYPES = new Set(['mysql_initial_rank', 'mysql_rank_update']);
 const SUPPORTED_SYNC_TYPES = new Set([...MYSQL_SYNC_TYPES, 'coach_hot_lead_email']);
