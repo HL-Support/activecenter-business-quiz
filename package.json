@@ -5,6 +5,7 @@
   "scripts": {
     "build": "node build.js",
     "verify": "node scripts/verify.js",
+    "smoke:resume": "node scripts/smoke-resume-link.js",
     "guard:deploy": "node scripts/guard-production-deploy.js",
     "deploy:preview": "npm run build && npm run verify && npx vercel deploy --yes",
     "promote:prod": "npm run guard:deploy && npx vercel promote --yes",

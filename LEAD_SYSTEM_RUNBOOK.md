@@ -129,6 +129,32 @@ Expected behavior:
 4. A resume visit must not create a new anonymous `qz_...` row.
 5. If a resume link cannot be mapped to `lead_state`, the API returns `409 Resume contact not found`.
 
+Video nurture resume links have an additional fixed contract:
+
+1. The caller must use `/api/bridge` action `generate_resume_token`.
+2. The payload must include `resumeTarget: "videos"`.
+3. The returned `shortUrl` or `resumeUrl` must contain `target=videos`.
+4. `resolve_resume_key` and `resolve_resume_token` must return `resumeTarget: "videos"`.
+5. Rank-0 leads must resume at `lastVideoStep >= 1`, not on the result page.
+6. Mailers and n8n workflows must not build `/access/{leadHash}` links or hand-build resume URLs.
+
+Regression command before deploys or mailer rollouts:
+
+```bash
+npm run smoke:resume
+```
+
+Mautic resume-link audit on 2026-06-02:
+
+- 214/214 Business-Quiz contacts have `ac_last_video_access_url`.
+- 214/214 links contain `target=videos`.
+- 214/214 links use a valid short `?r=` resume key.
+- 0 old `/access/{leadHash}` links remain.
+- 0 invalid resume-key resolves remain.
+- 136 links resolve to `videos`.
+- 78 links resolve to `final`; every one is excluded from Video-Nurture by `completed_rank >= 3` or `cta_type`.
+- 0 `final` links remain for leads that are still Video-Nurture eligible.
+
 Latest reconciliation report path used during cutover:
 
 ```text
