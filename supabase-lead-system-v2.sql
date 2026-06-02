@@ -451,6 +451,21 @@ AS $$
 DECLARE
   v_id bigint;
 BEGIN
+  IF p_sync_type = 'coach_hot_lead_email' THEN
+    PERFORM pg_advisory_xact_lock(hashtext('coach_hot_lead_email:' || COALESCE(p_lead_hash, '')));
+
+    SELECT id INTO v_id
+    FROM public.lead_sync_outbox
+    WHERE lead_hash = p_lead_hash
+      AND sync_type = p_sync_type
+    ORDER BY created_at ASC
+    LIMIT 1;
+
+    IF v_id IS NOT NULL THEN
+      RETURN v_id;
+    END IF;
+  END IF;
+
   INSERT INTO public.lead_sync_outbox (lead_hash, sync_type, context_data)
   VALUES (p_lead_hash, p_sync_type, COALESCE(p_context_data, '{}'::jsonb))
   RETURNING id INTO v_id;

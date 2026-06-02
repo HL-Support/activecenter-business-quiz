@@ -676,7 +676,7 @@ function buildHotLeadEmail({ lead, coach, answers, job }) {
   );
   const rawProfile = [lead.profile_code, lead.profile_label].filter(Boolean).join(' ');
   const profileCode = normalizeProfileCode(rawProfile);
-  const profile = copy.profiles[profileCode] || safeString(lead.profile_label || lead.profile_code, 180) || '-';
+  const profile = copy.profiles[profileCode] || '-';
   const rawAspiration = lead.main_aspiration || lead.main_aspiration_label || '';
   const aspiration =
     copy.aspirations[normalizeAspirationKey(rawAspiration)] ||
@@ -808,6 +808,14 @@ async function sendHotLeadCoachEmail(job) {
       reason: 'rank_below_3',
       lead_hash: leadHash,
       completed_rank: safeInteger(lead.completed_rank),
+    };
+  }
+  if (!normalizeProfileCode([lead.profile_code, lead.profile_label].filter(Boolean).join(' '))) {
+    return {
+      success: true,
+      skipped: true,
+      reason: 'not_success_code_quiz_profile',
+      lead_hash: leadHash,
     };
   }
 

@@ -72,6 +72,61 @@ function normalizeAspiration(value) {
   return ['freedom', 'impact', 'security', 'growth'].includes(key) ? key : '';
 }
 
+const BUSINESS_PROFILE_MAP = {
+  a: { code: 'feuer', label: 'Der Macher' },
+  r: { code: 'feuer', label: 'Der Macher' },
+  'typ-a': { code: 'feuer', label: 'Der Macher' },
+  'type-a': { code: 'feuer', label: 'Der Macher' },
+  feuer: { code: 'feuer', label: 'Der Macher' },
+  macher: { code: 'feuer', label: 'Der Macher' },
+  'der-macher': { code: 'feuer', label: 'Der Macher' },
+  realizzatore: { code: 'feuer', label: 'Der Macher' },
+  'il-realizzatore': { code: 'feuer', label: 'Der Macher' },
+  doer: { code: 'feuer', label: 'Der Macher' },
+  b: { code: 'wind', label: 'Der Netzwerker' },
+  y: { code: 'wind', label: 'Der Netzwerker' },
+  'typ-b': { code: 'wind', label: 'Der Netzwerker' },
+  'type-b': { code: 'wind', label: 'Der Netzwerker' },
+  wind: { code: 'wind', label: 'Der Netzwerker' },
+  netzwerker: { code: 'wind', label: 'Der Netzwerker' },
+  'der-netzwerker': { code: 'wind', label: 'Der Netzwerker' },
+  connettore: { code: 'wind', label: 'Der Netzwerker' },
+  'il-connettore': { code: 'wind', label: 'Der Netzwerker' },
+  connector: { code: 'wind', label: 'Der Netzwerker' },
+  c: { code: 'wasser', label: 'Der Anker' },
+  g: { code: 'wasser', label: 'Der Anker' },
+  'typ-c': { code: 'wasser', label: 'Der Anker' },
+  'type-c': { code: 'wasser', label: 'Der Anker' },
+  wasser: { code: 'wasser', label: 'Der Anker' },
+  anker: { code: 'wasser', label: 'Der Anker' },
+  'der-anker': { code: 'wasser', label: 'Der Anker' },
+  ancora: { code: 'wasser', label: 'Der Anker' },
+  'l-ancora': { code: 'wasser', label: 'Der Anker' },
+  anchor: { code: 'wasser', label: 'Der Anker' },
+  d: { code: 'fels', label: 'Der Architekt' },
+  'typ-d': { code: 'fels', label: 'Der Architekt' },
+  'type-d': { code: 'fels', label: 'Der Architekt' },
+  fels: { code: 'fels', label: 'Der Architekt' },
+  architekt: { code: 'fels', label: 'Der Architekt' },
+  'der-architekt': { code: 'fels', label: 'Der Architekt' },
+  architetto: { code: 'fels', label: 'Der Architekt' },
+  'l-architetto': { code: 'fels', label: 'Der Architekt' },
+  architect: { code: 'fels', label: 'Der Architekt' },
+};
+
+function normalizeBusinessProfile(...values) {
+  for (const value of values) {
+    const key = safeString(value, 180)
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    if (key && BUSINESS_PROFILE_MAP[key]) return BUSINESS_PROFILE_MAP[key];
+  }
+  return null;
+}
+
 function localizedAspirationLabel(lang, aspiration, fallback) {
   const key = normalizeAspiration(aspiration);
   const labels = ASPIRATION_LABELS[normalizeLanguage(lang)] || ASPIRATION_LABELS.de;
@@ -173,9 +228,15 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload) {
 
   if (eventName === 'quiz_result') {
     const mainAspiration = normalizeAspiration(payload.main_aspiration || payload.quiz_aspiration);
+    const normalizedProfile = normalizeBusinessProfile(
+      payload.profile_code,
+      payload.quiz_profile,
+      payload.profile_label,
+      payload.quiz_profile_name
+    );
     await patchLeadState(leadHash, {
-      profile_code: safeString(payload.profile_code || payload.quiz_profile, 40) || null,
-      profile_label: safeString(payload.profile_label || payload.quiz_profile_name, 160) || null,
+      profile_code: normalizedProfile?.code || null,
+      profile_label: normalizedProfile?.label || null,
       main_aspiration: mainAspiration || null,
       main_aspiration_label: localizedAspirationLabel(
         lang,

@@ -669,6 +669,12 @@ async function persistContactLeadStateFromResumePayload(payload) {
     payload?.submittedAt || payload?.submitted_at || new Date().toISOString(),
     40
   );
+  const normalizedProfile = normalizeBusinessProfile(
+    payload?.profileCode,
+    payload?.profile_code,
+    payload?.profileLabel,
+    payload?.profile_label
+  );
   const memberId = safeString(payload?.memberId || payload?.member_id, 120) || null;
   const organisationId =
     safeString(
@@ -700,8 +706,8 @@ async function persistContactLeadStateFromResumePayload(payload) {
       email,
       email_normalized: email,
       form_submitted_at: submittedAt,
-      profile_code: safeString(payload?.profileCode || payload?.profile_code, 40) || null,
-      profile_label: safeString(payload?.profileLabel || payload?.profile_label, 160) || null,
+      profile_code: normalizedProfile?.code || null,
+      profile_label: normalizedProfile?.label || null,
       main_aspiration: safeString(payload?.mainAspiration || payload?.main_aspiration, 80) || null,
       main_aspiration_label:
         safeString(payload?.mainAspirationLabel || payload?.main_aspiration_label, 180) || null,
@@ -795,6 +801,12 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
     40
   );
   const profile = submissionPayload?.profile || {};
+  const normalizedProfile = normalizeBusinessProfile(
+    profile.code,
+    profile.name,
+    submissionPayload?.profile_code,
+    submissionPayload?.profile_label
+  );
   const lang = normalizeLanguage(hidden.lang, submissionPayload?.lang, webhookPayload?.form_response?.language);
   const finalLead = finalContext?.found ? finalContext : null;
   const finalEmail = safeString(finalLead?.email || email, 180)?.toLowerCase() || email;
@@ -835,8 +847,8 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
       email_hash: normalizedEmailHash(finalEmail),
       phone: safeString(finalLead?.phone || submissionPayload?.phone, 80) || null,
       form_submitted_at: submittedAt,
-      profile_code: safeString(profile.code || profile.animal || submissionPayload?.profile_code, 40) || null,
-      profile_label: safeString(profile.name || profile.animal || submissionPayload?.profile_label, 160) || null,
+      profile_code: normalizedProfile?.code || null,
+      profile_label: normalizedProfile?.label || null,
       main_aspiration: safeString(hidden.main_aspiration || submissionPayload?.main_aspiration, 80) || null,
       main_aspiration_label:
         safeString(hidden.main_aspiration_label || submissionPayload?.main_aspiration_label, 180) || null,
@@ -2638,6 +2650,61 @@ function normalizeAspiration(value) {
     .toLowerCase()
     .trim();
   return ['freedom', 'impact', 'security', 'growth'].includes(normalized) ? normalized : '';
+}
+
+const BUSINESS_PROFILE_MAP = {
+  a: { code: 'feuer', label: 'Der Macher' },
+  r: { code: 'feuer', label: 'Der Macher' },
+  'typ-a': { code: 'feuer', label: 'Der Macher' },
+  'type-a': { code: 'feuer', label: 'Der Macher' },
+  feuer: { code: 'feuer', label: 'Der Macher' },
+  macher: { code: 'feuer', label: 'Der Macher' },
+  'der-macher': { code: 'feuer', label: 'Der Macher' },
+  realizzatore: { code: 'feuer', label: 'Der Macher' },
+  'il-realizzatore': { code: 'feuer', label: 'Der Macher' },
+  doer: { code: 'feuer', label: 'Der Macher' },
+  b: { code: 'wind', label: 'Der Netzwerker' },
+  y: { code: 'wind', label: 'Der Netzwerker' },
+  'typ-b': { code: 'wind', label: 'Der Netzwerker' },
+  'type-b': { code: 'wind', label: 'Der Netzwerker' },
+  wind: { code: 'wind', label: 'Der Netzwerker' },
+  netzwerker: { code: 'wind', label: 'Der Netzwerker' },
+  'der-netzwerker': { code: 'wind', label: 'Der Netzwerker' },
+  connettore: { code: 'wind', label: 'Der Netzwerker' },
+  'il-connettore': { code: 'wind', label: 'Der Netzwerker' },
+  connector: { code: 'wind', label: 'Der Netzwerker' },
+  c: { code: 'wasser', label: 'Der Anker' },
+  g: { code: 'wasser', label: 'Der Anker' },
+  'typ-c': { code: 'wasser', label: 'Der Anker' },
+  'type-c': { code: 'wasser', label: 'Der Anker' },
+  wasser: { code: 'wasser', label: 'Der Anker' },
+  anker: { code: 'wasser', label: 'Der Anker' },
+  'der-anker': { code: 'wasser', label: 'Der Anker' },
+  ancora: { code: 'wasser', label: 'Der Anker' },
+  'l-ancora': { code: 'wasser', label: 'Der Anker' },
+  anchor: { code: 'wasser', label: 'Der Anker' },
+  d: { code: 'fels', label: 'Der Architekt' },
+  'typ-d': { code: 'fels', label: 'Der Architekt' },
+  'type-d': { code: 'fels', label: 'Der Architekt' },
+  fels: { code: 'fels', label: 'Der Architekt' },
+  architekt: { code: 'fels', label: 'Der Architekt' },
+  'der-architekt': { code: 'fels', label: 'Der Architekt' },
+  architetto: { code: 'fels', label: 'Der Architekt' },
+  'l-architetto': { code: 'fels', label: 'Der Architekt' },
+  architect: { code: 'fels', label: 'Der Architekt' },
+};
+
+function normalizeBusinessProfile(...values) {
+  for (const value of values) {
+    const key = String(value || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    if (key && BUSINESS_PROFILE_MAP[key]) return BUSINESS_PROFILE_MAP[key];
+  }
+  return null;
 }
 
 const BUSINESS_COPY = {
