@@ -29,21 +29,7 @@
     <script src="/translations.js"></script>
 </head>
 <body style="margin: 0; padding: 0;">
-    <div id="root">
-      <div class="app-loader" aria-live="polite" aria-busy="true">
-        <div class="app-loader__panel">
-          <img
-            class="app-loader__logo"
-            src="https://hl-support.biz/storage/images/cwemaillogo-1bcb4f.png"
-            alt="Activecenter"
-          >
-          <div class="app-loader__badge">Activecenter</div>
-          <div class="app-loader__title">Dein Zugang wird geladen</div>
-          <div class="app-loader__text">Wir bereiten deine Videos vor.</div>
-          <div class="app-loader__bar" aria-hidden="true"><span></span></div>
-        </div>
-      </div>
-    </div>
+    <div id="root"></div>
 
 
     <div id="legalModal"
@@ -162,6 +148,28 @@
       document.title = document.title
         .replace(/ActiveCenter/g, getOrganisationName())
         .replace(/Activecenter/g, getOrganisationName());
+
+      function showResumeLoaderIfNeeded() {
+        var params = new URLSearchParams(window.location.search || '');
+        if (!params.get('r') && !params.get('resume')) return;
+
+        var root = document.getElementById('root');
+        if (!root) return;
+
+        root.innerHTML = [
+          '<div class="app-loader" aria-live="polite" aria-busy="true">',
+            '<div class="app-loader__panel">',
+              '<img class="app-loader__logo" src="https://hl-support.biz/storage/images/cwemaillogo-1bcb4f.png" alt="Activecenter">',
+              '<div class="app-loader__badge">Activecenter</div>',
+              '<div class="app-loader__title">Dein Zugang wird geladen</div>',
+              '<div class="app-loader__text">Wir bereiten deine Videos vor.</div>',
+              '<div class="app-loader__bar" aria-hidden="true"><span></span></div>',
+            '</div>',
+          '</div>'
+        ].join('');
+      }
+
+      showResumeLoaderIfNeeded();
       // ── i18n Sprachenverwaltung ────────────────────────────────────
       function getCurrentSlugForLanguage() {
         var slug = (window.location.pathname || '').replace(/^\/+/, '').toLowerCase().split('/')[0] || 'default';
