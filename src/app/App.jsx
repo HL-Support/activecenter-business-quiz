@@ -1472,6 +1472,10 @@ function QuizFlow() {
             : 0
         );
         t('videos');
+      } else if (resumeTarget === 'final') {
+        setResumeStartPercent(0);
+        setResumeVideoStep(0);
+        t('final');
       } else {
         setResumeStartPercent(0);
         setResumeVideoStep(0);

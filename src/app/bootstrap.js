@@ -204,7 +204,10 @@ function applyResumePayload({
 
   localStorage.setItem('acResumeFromLink', 'true');
   localStorage.setItem('acResumeVideoStep', String(lastVideoStep || 1));
-  localStorage.setItem('acResumeTarget', resumeTarget === 'videos' ? 'videos' : 'result');
+  localStorage.setItem(
+    'acResumeTarget',
+    resumeTarget === 'videos' ? 'videos' : resumeTarget === 'final' ? 'final' : 'result'
+  );
   localStorage.setItem('acResumeStartPercent', String(resumeStartPercent || 0));
   if (profileCode) localStorage.setItem('acResumeProfileCode', String(profileCode));
   if (aspiration) localStorage.setItem('acResumeAspiration', String(aspiration));
