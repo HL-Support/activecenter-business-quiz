@@ -537,6 +537,36 @@ async function loadLeadFull(leadHash) {
   return Array.isArray(rows) ? rows[0] || null : null;
 }
 
+async function loadLeadFallbackContext(leadHash) {
+  const [trackingRows, quizRows] = await Promise.all([
+    supabaseJson(
+      `tracking_sessions?lead_hash=eq.${encodeURIComponent(leadHash)}` +
+        '&select=quiz_profile,quiz_profile_name,main_aspiration,main_aspiration_label,quiz_barrier,updated_at,last_event_at&order=updated_at.desc&limit=1'
+    ),
+    supabaseJson(
+      `quiz_sessions?hash=eq.${encodeURIComponent(leadHash)}` +
+        '&select=quiz_profile,quiz_profile_name,quiz_aspiration,quiz_barrier,updated_at&order=updated_at.desc&limit=1'
+    ),
+  ]);
+
+  const tracking = Array.isArray(trackingRows) ? trackingRows[0] || {} : {};
+  const quiz = Array.isArray(quizRows) ? quizRows[0] || {} : {};
+  return { tracking, quiz };
+}
+
+function mergeLeadFallbackContext(lead, fallback) {
+  const tracking = fallback?.tracking || {};
+  const quiz = fallback?.quiz || {};
+  return {
+    ...lead,
+    profile_code: lead.profile_code || quiz.quiz_profile || tracking.quiz_profile || null,
+    profile_label: lead.profile_label || quiz.quiz_profile_name || tracking.quiz_profile_name || null,
+    main_aspiration: lead.main_aspiration || tracking.main_aspiration || quiz.quiz_aspiration || null,
+    main_aspiration_label: lead.main_aspiration_label || tracking.main_aspiration_label || null,
+    initial_barrier: lead.initial_barrier || tracking.quiz_barrier || quiz.quiz_barrier || null,
+  };
+}
+
 async function loadLeadAnswers(leadHash) {
   const rows = await supabaseJson(
     `lead_answers_current?lead_hash=eq.${encodeURIComponent(leadHash)}` +
@@ -698,9 +728,11 @@ function buildHotLeadEmail({ lead, coach, answers, job }) {
     [copy.labels.email, email],
     [copy.labels.type, profile],
     [copy.labels.aspiration, aspiration],
-    [copy.labels.barrier, barrier],
     [copy.labels.completedAt, completedAt],
   ];
+  if (barrier && barrier !== '-') {
+    rows.splice(4, 0, [copy.labels.barrier, barrier]);
+  }
   const htmlRows = rows
     .map(([label, value]) => `<tr><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;font-weight:700;width:180px;">${escapeHtml(label)}</td><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;">${escapeHtml(value || '-')}</td></tr>`)
     .join('');
@@ -794,10 +826,11 @@ async function sendHotLeadCoachEmail(job) {
     return { success: true, skipped: true, reason: 'already_sent', lead_hash: leadHash };
   }
 
-  const lead = await loadLeadFull(leadHash);
+  let lead = await loadLeadFull(leadHash);
   if (!lead) {
     throw new Error(`lead_not_found:${leadHash}`);
   }
+  lead = mergeLeadFallbackContext(lead, await loadLeadFallbackContext(leadHash));
   if (!hasContactData(lead)) {
     return { success: true, skipped: true, reason: 'not_a_contact_lead', lead_hash: leadHash };
   }

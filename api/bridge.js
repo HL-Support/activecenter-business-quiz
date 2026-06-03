@@ -1426,6 +1426,7 @@ async function ensureLeadStateForCanonicalMirror(leadHash, payload, eventAt) {
         funnel_key: safeString(payload.funnel_key || payload.funnel || 'business', 80),
         lang: normalizeLanguage(payload.lang),
         country: safeString(payload.country, 5) || undefined,
+        initial_barrier: safeString(payload.initial_barrier || payload.quiz_barrier, 120) || undefined,
         first_seen_at: eventAt,
         last_seen_at: eventAt,
         last_event_at: eventAt,
@@ -1509,6 +1510,7 @@ async function mirrorLegacyTrackingToLeadSystemV2(payload) {
         email_normalized: email,
         email_hash: normalizedEmailHash(email),
         form_submitted_at: safeString(payload.submitted_at || payload.form_submitted_at || eventAt, 40),
+        initial_barrier: safeString(payload.initial_barrier || payload.quiz_barrier, 120) || undefined,
         lifecycle_stage: 'contact_known',
         lang,
         last_event_at: eventAt,
@@ -2554,9 +2556,11 @@ function buildAllVideosCompletedCoachEmail({ session, coach, payload }) {
     [copy.labels.email, email],
     [copy.labels.type, profileLabel],
     [copy.labels.aspiration, aspiration],
-    [copy.labels.barrier, barrier],
     [copy.labels.completedAt, completedAt],
   ];
+  if (barrier && barrier !== '-') {
+    rows.splice(4, 0, [copy.labels.barrier, barrier]);
+  }
   const htmlRows = rows
     .map(
       ([label, value]) =>
