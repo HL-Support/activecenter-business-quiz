@@ -29,7 +29,21 @@
     <script src="/translations.js"></script>
 </head>
 <body style="margin: 0; padding: 0;">
-    <div id="root"></div>
+    <div id="root">
+      <div class="app-loader" aria-live="polite" aria-busy="true">
+        <div class="app-loader__panel">
+          <img
+            class="app-loader__logo"
+            src="https://hl-support.biz/storage/images/cwemaillogo-1bcb4f.png"
+            alt="Activecenter"
+          >
+          <div class="app-loader__badge">Activecenter</div>
+          <div class="app-loader__title">Dein Zugang wird geladen</div>
+          <div class="app-loader__text">Wir bereiten deine Videos vor.</div>
+          <div class="app-loader__bar" aria-hidden="true"><span></span></div>
+        </div>
+      </div>
+    </div>
 
 
     <div id="legalModal"
@@ -57,6 +71,78 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DM Sans', system-ui, sans-serif; }
         p { margin: 0; }
+        .app-loader {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px 16px;
+          background:
+            radial-gradient(ellipse at 20% 15%, rgba(201,168,76,0.07) 0%, transparent 44%),
+            radial-gradient(ellipse at 80% 85%, rgba(74,100,200,0.07) 0%, transparent 44%),
+            #070B14;
+          color: #F5F0E8;
+          font-family: 'DM Sans', system-ui, sans-serif;
+        }
+        .app-loader__panel {
+          width: 100%;
+          max-width: 420px;
+          padding: 42px 28px;
+          text-align: center;
+          border: 1px solid rgba(201,168,76,0.14);
+          border-radius: 24px;
+          background: rgba(255,255,255,0.03);
+          box-shadow: 0 24px 70px rgba(0,0,0,0.28);
+          backdrop-filter: blur(20px);
+        }
+        .app-loader__logo {
+          display: block;
+          width: 168px;
+          max-width: 70%;
+          height: auto;
+          margin: 0 auto 30px;
+        }
+        .app-loader__badge {
+          margin-bottom: 14px;
+          color: #C9A84C;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 3.2px;
+          text-transform: uppercase;
+        }
+        .app-loader__title {
+          margin-bottom: 10px;
+          color: #F5F0E8;
+          font-family: Georgia, 'Times New Roman', serif;
+          font-size: clamp(30px, 7vw, 42px);
+          font-weight: 600;
+          line-height: 1.1;
+        }
+        .app-loader__text {
+          color: rgba(245,240,232,0.58);
+          font-size: 15px;
+          line-height: 1.6;
+        }
+        .app-loader__bar {
+          width: 160px;
+          height: 3px;
+          margin: 30px auto 0;
+          overflow: hidden;
+          border-radius: 999px;
+          background: rgba(201,168,76,0.12);
+        }
+        .app-loader__bar span {
+          display: block;
+          width: 42%;
+          height: 100%;
+          border-radius: inherit;
+          background: linear-gradient(90deg, transparent, #C9A84C, transparent);
+          animation: appLoaderSlide 1.15s ease-in-out infinite;
+        }
+        @keyframes appLoaderSlide {
+          0% { transform: translateX(-120%); }
+          100% { transform: translateX(260%); }
+        }
         #legalModal.hidden { display: none !important; }
         #legalModal.opacity-0 { opacity: 0 !important; }
         #legalModalContent.scale-95 { transform: scale(0.95) !important; }
