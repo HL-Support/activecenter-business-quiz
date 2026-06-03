@@ -39,6 +39,7 @@ const N8N_UPDATE_RESULT_URL = process.env.N8N_UPDATE_RESULT_URL;
 const N8N_UPDATE_RESULT_SECRET = String(process.env.N8N_UPDATE_RESULT_SECRET || '').trim();
 const BRAND_LOGO_URL = 'https://hl-support.biz/storage/images/cwemaillogo-1bcb4f.png';
 const BRAND_PRIVACY_URL = 'https://impressum.hl-support.biz/privacy.html';
+const COACH_INSIGHTS_BASE_URL = 'https://business-schulung.vercel.app/';
 const DEFAULT_COACH_LANGUAGE_OVERRIDES = { markus: 'de' };
 
 const TYPEFORM_TARGET = 'https://contacts.hl-support.biz/webhook/typeform';
@@ -2356,6 +2357,23 @@ function normalizeProfileCode(value) {
   return match ? match[1].toUpperCase() : '';
 }
 
+function normalizeProfileInsightSlug(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  const profileCode = normalizeProfileCode(value);
+  const byCode = {
+    A: 'feuer',
+    B: 'wind',
+    C: 'wasser',
+    D: 'fels',
+  };
+  if (byCode[profileCode]) return byCode[profileCode];
+  if (normalized.includes('feuer') || normalized.includes('macher') || normalized.includes('realizzatore')) return 'feuer';
+  if (normalized.includes('wind') || normalized.includes('netzwerker') || normalized.includes('connettore')) return 'wind';
+  if (normalized.includes('wasser') || normalized.includes('anker') || normalized.includes('ancora')) return 'wasser';
+  if (normalized.includes('fels') || normalized.includes('architekt') || normalized.includes('architetto')) return 'fels';
+  return '';
+}
+
 function normalizeAspirationKey(value) {
   const normalized = String(value || '').trim().toLowerCase();
   const map = {
@@ -2383,6 +2401,16 @@ function normalizeAspirationKey(value) {
     рост: 'growth',
   };
   return map[normalized] || '';
+}
+
+function buildCoachInsightsUrl(profileValue, aspirationValue) {
+  const params = [];
+  const profileSlug = normalizeProfileInsightSlug(profileValue);
+  const aspirationSlug = normalizeAspirationKey(aspirationValue);
+  if (profileSlug) params.push(`type=${encodeURIComponent(profileSlug)}`);
+  if (aspirationSlug) params.push(`goal=${encodeURIComponent(aspirationSlug)}`);
+  const query = params.join('&');
+  return query ? `${COACH_INSIGHTS_BASE_URL}?${query}` : COACH_INSIGHTS_BASE_URL;
 }
 
 function normalizeBarrierKey(value) {
@@ -2546,6 +2574,7 @@ function buildAllVideosCompletedCoachEmail({ session, coach, payload }) {
   const aspiration = copy.aspirations[normalizeAspirationKey(rawAspiration)] || rawAspiration || '-';
   const rawBarrier = session.quiz_barrier || payload.quiz_barrier || '';
   const barrier = copy.barriers[normalizeBarrierKey(rawBarrier)] || rawBarrier || '-';
+  const insightsUrl = buildCoachInsightsUrl(fallbackProfile || rawProfileCode, rawAspiration);
   const completedAt = formatLocalizedDateTime(payload.completed_at || nowIso(), lang);
   const slug = String(payload.berater_slug || payload.slug || session.berater_slug || '').toLowerCase().trim();
   const coachFirstName = coach.first_name || 'Markus';
@@ -2561,6 +2590,7 @@ function buildAllVideosCompletedCoachEmail({ session, coach, payload }) {
   if (barrier && barrier !== '-') {
     rows.splice(4, 0, [copy.labels.barrier, barrier]);
   }
+  const insightsLinkHtml = `<p style="margin:24px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;"><a href="${escapeHtml(insightsUrl)}" style="color:#212529;text-decoration:underline;font-weight:700;">Erfahre hier mehr zu deinem Kontakt</a></p>`;
   const htmlRows = rows
     .map(
       ([label, value]) =>
@@ -2575,6 +2605,7 @@ function buildAllVideosCompletedCoachEmail({ session, coach, payload }) {
     '<table style="width:100%;border-collapse:collapse;margin:0 0 8px 0;">',
     htmlRows,
     '</table>',
+    insightsLinkHtml,
   ].join('');
 
   return {
@@ -2594,6 +2625,8 @@ function buildAllVideosCompletedCoachEmail({ session, coach, payload }) {
       copy.intro,
       '',
       textRows,
+      '',
+      `Erfahre hier mehr zu deinem Kontakt: ${insightsUrl}`,
     ].join('\n'),
   };
 }
