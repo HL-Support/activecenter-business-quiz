@@ -7,6 +7,7 @@ import {
   validateSlug,
   getPreferredLang,
   setPreferredLang,
+  trackQuizAnalytics,
 } from '../lib/core.js';
 import { QuizPage, bindLegalModal } from './App.jsx';
 
@@ -216,6 +217,57 @@ function applyResumePayload({
   return true;
 }
 
+function cleanNurtureParam(value, maxLength = 80) {
+  return String(value || '')
+    .trim()
+    .replace(/[^a-zA-Z0-9_.:-]/g, '')
+    .slice(0, maxLength);
+}
+
+function getNurtureAttributionParams() {
+  const params = new URLSearchParams(window.location.search || '');
+  const phase = cleanNurtureParam(params.get('acn_phase'), 24).toUpperCase();
+  const emailId = cleanNurtureParam(params.get('acn_email'), 40);
+  if (!phase && !emailId) return null;
+
+  return {
+    phase,
+    emailId,
+    run: cleanNurtureParam(params.get('acn_run'), 80),
+    variant: cleanNurtureParam(params.get('acn_variant'), 120),
+  };
+}
+
+function trackNurtureResumeOpened(resolved) {
+  const attribution = getNurtureAttributionParams();
+  const leadHash = cleanNurtureParam(resolved?.leadHash, 120);
+  if (!attribution || !leadHash) return;
+
+  const eventId = [
+    'nurture_resume_opened',
+    leadHash,
+    attribution.phase || 'unknown',
+    attribution.emailId || 'unknown',
+  ].join('_');
+
+  trackQuizAnalytics('nurture_resume_opened', {
+    event_id: eventId,
+    event_at: new Date().toISOString(),
+    lead_hash: leadHash,
+    session_hash: resolved.sessionHash || '',
+    member_id: resolved.memberId || '',
+    ref_id: resolved.refId || resolved.memberId || '',
+    berater_slug: resolved.beraterSlug || getCurrentSlug(),
+    acn_phase: attribution.phase,
+    acn_email: attribution.emailId,
+    acn_run: attribution.run,
+    acn_variant: attribution.variant,
+    source: 'mautic',
+    resume_target: resolved.resumeTarget || 'result',
+    last_video_step: resolved.lastVideoStep || 1,
+  });
+}
+
 async function processResumeToken() {
   const params = new URLSearchParams(window.location.search);
   const resumeKey = params.get('r');
@@ -225,7 +277,9 @@ async function processResumeToken() {
   if (resumeKey) {
     const resolvedByKey = await resolveResumeKeyPayload(resumeKey, resumeTarget);
     if (resolvedByKey) {
-      return applyResumePayload(resolvedByKey);
+      const applied = applyResumePayload(resolvedByKey);
+      if (applied) trackNurtureResumeOpened(resolvedByKey);
+      return applied;
     }
   }
 
@@ -236,7 +290,9 @@ async function processResumeToken() {
     return false;
   }
 
-  return applyResumePayload(resolved);
+  const applied = applyResumePayload(resolved);
+  if (applied) trackNurtureResumeOpened(resolved);
+  return applied;
 }
 
 function bindPopstateGuard(initialSlug) {
