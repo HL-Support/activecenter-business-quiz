@@ -951,6 +951,7 @@ export function getProfiles() {
         security: t('profile_r_cta_security'),
         growth: t('profile_r_cta_growth'),
       },
+      finalCta: t('profile_r_final_cta'),
     },
     Y: {
       code: t('profile_y_code'),
@@ -979,6 +980,7 @@ export function getProfiles() {
         security: t('profile_y_cta_security'),
         growth: t('profile_y_cta_growth'),
       },
+      finalCta: t('profile_y_final_cta'),
     },
     G: {
       code: t('profile_g_code'),
@@ -1007,6 +1009,7 @@ export function getProfiles() {
         security: t('profile_g_cta_security'),
         growth: t('profile_g_cta_growth'),
       },
+      finalCta: t('profile_g_final_cta'),
     },
     B: {
       code: t('profile_b_code'),
@@ -1035,6 +1038,7 @@ export function getProfiles() {
         security: t('profile_b_cta_security'),
         growth: t('profile_b_cta_growth'),
       },
+      finalCta: t('profile_b_final_cta'),
     },
   };
 }

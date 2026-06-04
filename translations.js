@@ -40,6 +40,7 @@
       out['profile_' + key + '_cta_impact'] = profile.cta.impact;
       out['profile_' + key + '_cta_security'] = profile.cta.security;
       out['profile_' + key + '_cta_growth'] = profile.cta.growth;
+      out['profile_' + key + '_final_cta'] = profile.finalCta;
     });
 
     return out;
@@ -398,6 +399,8 @@
           growth:
             'Du brauchst keine Motivation von außen. Du brauchst ein Spielfeld, das groß genug für dich ist.',
         },
+        finalCta:
+          'Deine Stärke ist, ins Tun zu kommen. Der nächste Schritt ist deshalb nicht warten, sondern kurz prüfen, ob dieses System dir genug Tempo und Freiheit gibt.',
       },
       y: {
         code: 'Typ B',
@@ -432,6 +435,8 @@
           growth:
             'Dein größtes Potenzial entfaltet sich dort, wo Begeisterung auf ein klares System trifft.',
         },
+        finalCta:
+          'Deine Stärke ist, Menschen zu verbinden. Der nächste Schritt ist deshalb nicht sofort entscheiden, sondern schauen, ob dieses System zu deiner Art passt.',
       },
       g: {
         code: 'Typ C',
@@ -465,6 +470,8 @@
           growth:
             'Wenn du das richtige Umfeld hast, entwickelst du eine Tiefe, die andere selten erreichen.',
         },
+        finalCta:
+          'Deine Stärke ist, Vertrauen und Stabilität zu schaffen. Der nächste Schritt ist deshalb nicht Risiko, sondern ein ruhiges Gespräch, ob es wirklich Sinn macht.',
       },
       b: {
         code: 'Typ D',
@@ -497,6 +504,8 @@
           security: 'Wenn du etwas verstehst, kannst du es mit Ruhe und Präzision groß machen.',
           growth: 'Deine Stärke liegt darin, aus Möglichkeiten echte Systeme zu machen.',
         },
+        finalCta:
+          'Deine Stärke ist, Dinge durchzudenken. Der nächste Schritt ist deshalb nicht "einsteigen", sondern verstehen, ob es wirklich Sinn macht.',
       },
     },
   });
@@ -845,6 +854,8 @@
           growth:
             'Non ti serve motivazione esterna. Ti serve un campo da gioco abbastanza grande per te.',
         },
+        finalCta:
+          'La tua forza è entrare in azione. Il prossimo passo quindi non è aspettare, ma capire se questo sistema ti dà abbastanza ritmo e libertà.',
       },
       y: {
         code: 'Tipo B',
@@ -875,6 +886,8 @@
           security: "Quando l'ambiente è giusto, attrai persone e opportunità con naturalezza.",
           growth: 'Il tuo potenziale cresce davvero quando entusiasmo e sistema si incontrano.',
         },
+        finalCta:
+          'La tua forza è creare connessioni. Il prossimo passo quindi non è decidere subito, ma vedere se questo sistema si adatta al tuo modo di muoverti.',
       },
       g: {
         code: 'Tipo C',
@@ -906,6 +919,8 @@
           security: 'La tua forza sta nel costruire una fiducia che regga anche domani.',
           growth: "Con l'ambiente giusto sviluppi una profondità che pochi riescono a raggiungere.",
         },
+        finalCta:
+          'La tua forza è creare fiducia e stabilità. Il prossimo passo quindi non è rischiare, ma fare una conversazione calma per capire se ha davvero senso.',
       },
       b: {
         code: 'Tipo D',
@@ -937,6 +952,8 @@
           security: 'Quando capisci qualcosa, puoi farla crescere con calma e precisione.',
           growth: 'La tua forza sta nel trasformare possibilità in sistemi reali.',
         },
+        finalCta:
+          'La tua forza è ragionare a fondo. Il prossimo passo quindi non è "entrare", ma capire se ha davvero senso.',
       },
     },
   });
@@ -1283,6 +1300,8 @@
           growth:
             'You do not need outside motivation. You need a field big enough for your potential.',
         },
+        finalCta:
+          'Your strength is moving into action. So the next step is not waiting, but seeing whether this system gives you enough pace and freedom.',
       },
       y: {
         code: 'Type B',
@@ -1314,6 +1333,8 @@
             'When the environment is right, you naturally attract people and opportunities.',
           growth: 'Your real potential expands when enthusiasm meets structure.',
         },
+        finalCta:
+          'Your strength is connecting people. So the next step is not deciding immediately, but seeing whether this system fits the way you move.',
       },
       g: {
         code: 'Type C',
@@ -1345,6 +1366,8 @@
           security: 'Your strength is building trust that still holds tomorrow.',
           growth: 'With the right environment, you develop a depth that few people ever reach.',
         },
+        finalCta:
+          'Your strength is creating trust and stability. So the next step is not risk, but a calm conversation about whether it truly makes sense.',
       },
       b: {
         code: 'Type D',
@@ -1373,6 +1396,8 @@
           security: 'Once you understand something, you can scale it with calm and precision.',
           growth: 'Your strength lies in turning possibilities into real systems.',
         },
+        finalCta:
+          'Your strength is thinking things through. So the next step is not "joining", but understanding whether it truly makes sense.',
       },
     },
   });
@@ -1724,6 +1749,8 @@
           growth:
             "Tu n'as pas besoin de motivation externe. Tu as besoin d'un terrain de jeu assez grand pour toi.",
         },
+        finalCta:
+          "Ta force est de passer à l'action. Le prochain pas n'est donc pas d'attendre, mais de voir si ce système te donne assez de rythme et de liberté.",
       },
       y: {
         code: 'Type B',
@@ -1757,6 +1784,8 @@
             "Quand l'environnement est juste, tu attires naturellement les gens et les opportunités.",
           growth: "Ton vrai potentiel s'épanouit quand l'enthousiasme rencontre la structure.",
         },
+        finalCta:
+          "Ta force est de connecter les gens. Le prochain pas n'est donc pas de décider tout de suite, mais de voir si ce système correspond à ta façon d'avancer.",
       },
       g: {
         code: 'Type C',
@@ -1791,6 +1820,8 @@
           growth:
             'Avec le bon environnement, tu développes une profondeur que peu de gens atteignent jamais.',
         },
+        finalCta:
+          "Ta force est de créer confiance et stabilité. Le prochain pas n'est donc pas un risque, mais une conversation calme pour voir si cela a vraiment du sens.",
       },
       b: {
         code: 'Type D',
@@ -1823,6 +1854,8 @@
             "Une fois que tu comprends quelque chose, tu peux l'agrandir avec calme et précision.",
           growth: 'Ta force est de transformer des possibilités en vrais systèmes.',
         },
+        finalCta:
+          'Ta force est de réfléchir en profondeur. Le prochain pas n\'est donc pas de "commencer", mais de comprendre si cela a vraiment du sens.',
       },
     },
   });
@@ -2169,6 +2202,8 @@
           growth:
             'Тебе не нужна внешняя мотивация. Тебе нужно игровое поле, достаточно большое для тебя.',
         },
+        finalCta:
+          'Твоя сила в том, чтобы переходить к действию. Поэтому следующий шаг — не ждать, а понять, дает ли эта система тебе достаточно темпа и свободы.',
       },
       y: {
         code: 'Тип B',
@@ -2198,6 +2233,8 @@
           security: 'Когда среда правильная, ты естественно привлекаешь людей и возможности.',
           growth: 'Твой реальный потенциал раскрывается когда энтузиазм встречает структуру.',
         },
+        finalCta:
+          'Твоя сила в том, чтобы соединять людей. Поэтому следующий шаг — не решать сразу, а посмотреть, подходит ли эта система твоему стилю.',
       },
       g: {
         code: 'Тип C',
@@ -2231,6 +2268,8 @@
           growth:
             'С правильной средой ты развиваешь глубину, которую немногие когда-либо достигают.',
         },
+        finalCta:
+          'Твоя сила в том, чтобы создавать доверие и стабильность. Поэтому следующий шаг — не риск, а спокойный разговор о том, действительно ли это имеет смысл.',
       },
       b: {
         code: 'Тип D',
@@ -2262,6 +2301,8 @@
             'Когда ты что-то понимаешь, ты можешь масштабировать это со спокойствием и точностью.',
           growth: 'Твоя сила в том, чтобы превратить возможности в реальные системы.',
         },
+        finalCta:
+          'Твоя сила в том, чтобы глубоко все обдумывать. Поэтому следующий шаг — не "войти", а понять, действительно ли это имеет смысл.',
       },
     },
   });
