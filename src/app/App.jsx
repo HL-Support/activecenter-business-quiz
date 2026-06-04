@@ -273,7 +273,10 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
     resumeApplied = !0;
     const startSecond = Math.max(
       0,
-      Math.min(Math.floor((duration * resumeStartPercent) / 100), Math.max(0, Math.floor(duration - 3)))
+      Math.min(
+        Math.floor((duration * resumeStartPercent) / 100),
+        Math.max(0, Math.floor(duration - 3))
+      )
     );
     if (startSecond <= 0) return;
 
@@ -524,47 +527,46 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
             marginBottom: '18px',
           },
         },
-        ['optin_teaser_1', 'optin_teaser_2', 'optin_teaser_3', 'optin_teaser_4'].map(
-          (C, z) =>
+        ['optin_teaser_1', 'optin_teaser_2', 'optin_teaser_3', 'optin_teaser_4'].map((C, z) =>
+          React.createElement(
+            'div',
+            {
+              key: C,
+              style: {
+                background: 'rgba(255,255,255,0.025)',
+                border: `1px solid ${I}1F`,
+                borderRadius: '12px',
+                padding: '12px 13px',
+                textAlign: 'left',
+                minHeight: '56px',
+                opacity: 0.78,
+              },
+            },
             React.createElement(
               'div',
               {
-                key: C,
                 style: {
-                  background: 'rgba(255,255,255,0.025)',
-                  border: `1px solid ${I}1F`,
-                  borderRadius: '12px',
-                  padding: '12px 13px',
-                  textAlign: 'left',
-                  minHeight: '56px',
-                  opacity: 0.78,
+                  color: I,
+                  fontSize: '10px',
+                  letterSpacing: '2px',
+                  textTransform: 'uppercase',
+                  marginBottom: '5px',
                 },
               },
-              React.createElement(
-                'div',
-                {
-                  style: {
-                    color: I,
-                    fontSize: '10px',
-                    letterSpacing: '2px',
-                    textTransform: 'uppercase',
-                    marginBottom: '5px',
-                  },
+              String(z + 1).padStart(2, '0')
+            ),
+            React.createElement(
+              'p',
+              {
+                style: {
+                  color: 'rgba(245,240,232,0.68)',
+                  fontSize: '12.5px',
+                  lineHeight: 1.45,
                 },
-                String(z + 1).padStart(2, '0')
-              ),
-              React.createElement(
-                'p',
-                {
-                  style: {
-                    color: 'rgba(245,240,232,0.68)',
-                    fontSize: '12.5px',
-                    lineHeight: 1.45,
-                  },
-                },
-                a(C)
-              )
+              },
+              a(C)
             )
+          )
         )
       ),
       React.createElement(
@@ -703,9 +705,9 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
                   textTransform: 'uppercase',
                   display: 'block',
                   marginBottom: '7px',
+                },
               },
-            },
-            a('optin_label_email'),
+              a('optin_label_email'),
               ' '
             ),
             React.createElement('input', {
@@ -1270,7 +1272,16 @@ function FinalStep({ profile: e, visible: t, onRestart: n }) {
                   }),
                     l(!0));
                 },
-                style: Su({ width: '100%' }),
+                style: Su({
+                  width: '100%',
+                  background: 'rgba(245,240,232,0.045)',
+                  border: '1px solid rgba(245,240,232,0.24)',
+                  color: 'rgba(245,240,232,0.76)',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  padding: '15px 28px',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+                }),
               },
               a('final_btn_later')
             )

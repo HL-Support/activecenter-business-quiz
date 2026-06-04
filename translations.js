@@ -166,7 +166,8 @@
       video_btn_prev: '← Video nochmal ansehen',
       video_btn_final: 'Weiter zu Schritt 4 →',
       video_btn_locked: 'Weiter zum nächsten Schritt',
-      video_hint_locked: 'Schau das Video vollständig an – danach schaltet sich der nächste Schritt automatisch frei.',
+      video_hint_locked:
+        'Schau das Video vollständig an – danach schaltet sich der nächste Schritt automatisch frei.',
       video_hint_unlocked: 'Weiter freigeschaltet.',
       video_hint_recovery:
         'Wenn die Video-Erkennung hakt, kannst du das Video neu laden oder im Ausnahmefall manuell fortfahren.',
@@ -180,7 +181,7 @@
       final_badge: 'Du hast alle drei Videos gesehen',
       final_h2: 'Passt das zu dir?',
       final_body:
-        'Wenn du einfach mal unverbindlich schauen willst, ob das wirklich zu dir passt, schreib direkt. Kein Pitch, kein Druck. Nur ein ehrliches Gespräch.',
+        'Du musst jetzt nichts entscheiden. Aber wenn du neugierig bist, ob dein Profil, dein Ziel und dieses System zusammenpassen, dann klären wir das am besten persönlich. Kurz, ehrlich und ohne Druck.',
       final_profile_label: 'Dein Profil',
       final_btn_whatsapp: 'Ja, ich will mehr erfahren',
       final_btn_later: 'Ich melde mich selbst, wenn ich bereit bin',
@@ -613,7 +614,8 @@
       video_btn_prev: '← Rivedi il video',
       video_btn_final: 'Continua allo step 4 →',
       video_btn_locked: 'Continua allo step successivo',
-      video_hint_locked: 'Guarda il video fino alla fine – il passo successivo si sblocca automaticamente.',
+      video_hint_locked:
+        'Guarda il video fino alla fine – il passo successivo si sblocca automaticamente.',
       video_hint_unlocked: 'Ora puoi continuare.',
       video_hint_recovery:
         'Se il rilevamento del video si blocca, puoi ricaricare il video o, in via eccezionale, continuare manualmente.',
@@ -627,7 +629,7 @@
       final_badge: 'Hai visto tutti e tre i video',
       final_h2: 'Fa per te?',
       final_body:
-        'Se vuoi semplicemente capire senza impegno se questo può davvero essere adatto a te, scrivi direttamente. Nessun pitch, nessuna pressione. Solo una conversazione sincera.',
+        'Non devi decidere nulla adesso. Ma se sei curioso di capire se il tuo profilo, il tuo obiettivo e questo sistema possono funzionare insieme, chiariscilo in modo personale. Breve, sincero e senza pressione.',
       final_profile_label: 'Il tuo profilo',
       final_btn_whatsapp: 'Sì, voglio saperne di più',
       final_btn_later: 'Ti scriverò io quando sarò pronto',
@@ -1052,7 +1054,8 @@
       video_btn_prev: '← Watch the video again',
       video_btn_final: 'Continue to step 4 →',
       video_btn_locked: 'Continue to the next step',
-      video_hint_locked: 'Watch the video all the way through – the next step unlocks automatically once you are done.',
+      video_hint_locked:
+        'Watch the video all the way through – the next step unlocks automatically once you are done.',
       video_hint_unlocked: 'You can continue now.',
       video_hint_recovery:
         'If video detection gets stuck, you can reload the video or continue manually as an exception.',
@@ -1066,7 +1069,7 @@
       final_badge: 'You watched all three videos',
       final_h2: 'Does this fit you?',
       final_body:
-        'If you simply want to explore without pressure whether this could really fit you, just write directly. No pitch, no pressure. Just an honest conversation.',
+        'You do not have to decide anything right now. But if you are curious whether your profile, your goal and this system fit together, the best next step is a short personal conversation. Honest, clear and without pressure.',
       final_profile_label: 'Your profile',
       final_btn_whatsapp: 'Yes, I want to learn more',
       final_btn_later: 'I will reach out when I am ready',
@@ -1503,7 +1506,7 @@
       final_badge: 'Tu as regardé toutes les trois vidéos',
       final_h2: "Est-ce que c'est pour toi?",
       final_body:
-        'Si tu veux simplement explorer sans engagement si ça pourrait vraiment te convenir, écris simplement. Pas de pitch, pas de pression. Juste une vraie conversation.',
+        "Tu n'as rien à décider maintenant. Mais si tu es curieux de voir si ton profil, ton objectif et ce système peuvent aller ensemble, le mieux est d'en parler personnellement. Court, honnête et sans pression.",
       final_profile_label: 'Ton profil',
       final_btn_whatsapp: "Oui, j'en veux plus",
       final_btn_later: 'Je te contacterai quand je suis prêt',
@@ -1949,7 +1952,7 @@
       final_badge: 'Ты посмотрел все три видео',
       final_h2: 'Подходит ли это тебе?',
       final_body:
-        'Если ты просто хочешь изучить без обязательств, подойдет ли это тебе, просто напиши. Нет pitch, нет давления. Только честный разговор.',
+        'Тебе не нужно ничего решать прямо сейчас. Но если тебе интересно, подходят ли друг другу твой профиль, твоя цель и эта система, лучше всего коротко обсудить это лично. Честно, понятно и без давления.',
       final_profile_label: 'Твой профиль',
       final_btn_whatsapp: 'Да, я хочу больше узнать',
       final_btn_later: 'Я напишу когда буду готов',
