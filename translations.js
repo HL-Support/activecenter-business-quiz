@@ -179,7 +179,7 @@
       video_error_unlock: 'Manuell fortfahren',
 
       final_badge: 'Du hast alle drei Videos gesehen',
-      final_h2: 'Passt das zu dir?',
+      final_h2: 'Dein nächster Schritt ist klein - aber wichtig.',
       final_body:
         'Du musst jetzt nichts entscheiden. Aber wenn du neugierig bist, ob dein Profil, dein Ziel und dieses System zusammenpassen, dann klären wir das am besten persönlich. Kurz, ehrlich und ohne Druck.',
       final_profile_label: 'Dein Profil',
@@ -627,7 +627,7 @@
       video_error_unlock: 'Continua manualmente',
 
       final_badge: 'Hai visto tutti e tre i video',
-      final_h2: 'Fa per te?',
+      final_h2: 'Il tuo prossimo passo è piccolo, ma importante.',
       final_body:
         'Non devi decidere nulla adesso. Ma se sei curioso di capire se il tuo profilo, il tuo obiettivo e questo sistema possono funzionare insieme, chiariscilo in modo personale. Breve, sincero e senza pressione.',
       final_profile_label: 'Il tuo profilo',
@@ -1067,7 +1067,7 @@
       video_error_unlock: 'Continue manually',
 
       final_badge: 'You watched all three videos',
-      final_h2: 'Does this fit you?',
+      final_h2: 'Your next step is small, but important.',
       final_body:
         'You do not have to decide anything right now. But if you are curious whether your profile, your goal and this system fit together, the best next step is a short personal conversation. Honest, clear and without pressure.',
       final_profile_label: 'Your profile',
@@ -1504,7 +1504,7 @@
       video_error_unlock: 'Continuer manuellement',
 
       final_badge: 'Tu as regardé toutes les trois vidéos',
-      final_h2: "Est-ce que c'est pour toi?",
+      final_h2: 'Ton prochain pas est petit, mais important.',
       final_body:
         "Tu n'as rien à décider maintenant. Mais si tu es curieux de voir si ton profil, ton objectif et ce système peuvent aller ensemble, le mieux est d'en parler personnellement. Court, honnête et sans pression.",
       final_profile_label: 'Ton profil',
@@ -1950,7 +1950,7 @@
       video_error_unlock: 'Продолжить вручную',
 
       final_badge: 'Ты посмотрел все три видео',
-      final_h2: 'Подходит ли это тебе?',
+      final_h2: 'Твой следующий шаг небольшой, но важный.',
       final_body:
         'Тебе не нужно ничего решать прямо сейчас. Но если тебе интересно, подходят ли друг другу твой профиль, твоя цель и эта система, лучше всего коротко обсудить это лично. Честно, понятно и без давления.',
       final_profile_label: 'Твой профиль',
