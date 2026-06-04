@@ -1222,7 +1222,7 @@ function FinalStep({ profile: e, visible: t, onRestart: n }) {
                     fontStyle: 'italic',
                   },
                 },
-                e.cta
+                e.finalCta || e.cta
               )
             ),
           React.createElement(
