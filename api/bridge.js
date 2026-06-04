@@ -1126,6 +1126,7 @@ async function sendMetaCAPILead({
   fbc,
   fbp,
   eventSourceUrl,
+  timeoutMs = 2500,
 }) {
   const META_PIXEL_ID = process.env.META_PIXEL_ID;
   const META_CAPI_TOKEN = process.env.META_CAPI_TOKEN;
@@ -1166,10 +1167,25 @@ async function sendMetaCAPILead({
     payload.test_event_code = process.env.META_CAPI_TEST_CODE;
   }
 
-  const response = await fetch(
-    `https://graph.facebook.com/v21.0/${META_PIXEL_ID}/events?access_token=${META_CAPI_TOKEN}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
-  );
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeout =
+    controller && Number.isFinite(Number(timeoutMs)) && Number(timeoutMs) > 0
+      ? setTimeout(() => controller.abort(), Number(timeoutMs))
+      : null;
+  let response;
+  try {
+    response = await fetch(
+      `https://graph.facebook.com/v21.0/${META_PIXEL_ID}/events?access_token=${META_CAPI_TOKEN}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller ? controller.signal : undefined,
+      }
+    );
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
   if (!response.ok) {
     const text = await response.text().catch(() => '');
     console.warn(`Meta CAPI responded ${response.status}: ${text.slice(0, 200)}`);
@@ -3600,7 +3616,7 @@ module.exports = async function handler(req, res) {
         ...webhookHidden,
         ...submissionPayload,
       };
-      sendMetaCAPILead({
+      await sendMetaCAPILead({
         email: capiEmail,
         firstName: capiFirstName,
         clientIp: forwardedFor,
