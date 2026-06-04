@@ -739,7 +739,8 @@ function normalizeCoach(rawCoach, slug) {
   };
 }
 
-export async function initializeQuizEnvironment() {
+export async function initializeQuizEnvironment(options = {}) {
+  const { deferLeadSystem = false } = options || {};
   const slug = getCurrentSlug();
   storage.removeItem(LEGACY_QUIZ_HASH_KEY);
   storage.removeItem(`${LEGACY_QUIZ_HASH_PREFIX}${slug}`);
@@ -768,23 +769,35 @@ export async function initializeQuizEnvironment() {
   getTrackingSessionHash(coach.slug || slug, coach.member_id || '');
   getActiveLeadRun(coach.slug || slug, coach.member_id || '');
 
-  try {
-    await initializeLeadSystemV2(coach, coach.slug || slug);
-  } catch (error) {
-    writeLeadSystemState(coach.slug || slug, {
-      enabled: false,
-      error: error?.message || 'lead_system_init_failed',
-      checkedAt: isoNow(),
+  async function initializeLeadSystemAndTrackPageView() {
+    try {
+      await initializeLeadSystemV2(coach, coach.slug || slug);
+    } catch (error) {
+      writeLeadSystemState(coach.slug || slug, {
+        enabled: false,
+        error: error?.message || 'lead_system_init_failed',
+        checkedAt: isoNow(),
+      });
+      console.warn('Lead system v2 init failed:', error);
+    }
+
+    trackQuizAnalytics('page_view', {
+      visited_at: isoNow(),
+      country: getCurrentCountry(),
+      device_type: getCurrentDeviceType(),
+      lang: getPreferredLang(),
     });
-    console.warn('Lead system v2 init failed:', error);
   }
 
-  trackQuizAnalytics('page_view', {
-    visited_at: isoNow(),
-    country: getCurrentCountry(),
-    device_type: getCurrentDeviceType(),
-    lang: getPreferredLang(),
-  });
+  if (deferLeadSystem) {
+    setTimeout(() => {
+      initializeLeadSystemAndTrackPageView().catch((error) => {
+        console.warn('Deferred lead system init failed:', error);
+      });
+    }, 0);
+  } else {
+    await initializeLeadSystemAndTrackPageView();
+  }
 
   return { coach, reason: null, slug };
 }

@@ -389,9 +389,9 @@ function renderMissingCoachPage() {
 export async function bootstrapQuiz() {
   const initialSlug = getCurrentSlug();
 
-  await processResumeToken();
+  const isResume = await processResumeToken();
 
-  const initialization = await initializeQuizEnvironment();
+  const initialization = await initializeQuizEnvironment({ deferLeadSystem: !isResume });
   const coach = initialization?.coach || null;
 
   if (!coach) {
