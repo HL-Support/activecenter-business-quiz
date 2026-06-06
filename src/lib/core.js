@@ -1110,8 +1110,15 @@ export async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
 
 export const videoProgressStore = {
   KEY_PREFIX: 'acVideoProgress_',
+  key(slug) {
+    const normalizedSlug = String(slug || getCurrentSlug() || 'default').toLowerCase();
+    const memberId = String(storage.getItem('acMemberId') || '');
+    const leadRun = getActiveLeadRun(normalizedSlug, memberId);
+    const leadScope = leadRun?.lead_hash || leadRun?.client_seed || 'anonymous';
+    return `${this.KEY_PREFIX}${normalizedSlug}_${leadScope}`;
+  },
   setVideoCompleted(slug, videoStep) {
-    const key = this.KEY_PREFIX + slug;
+    const key = this.key(slug);
     try {
       const data = JSON.parse(storage.getItem(key) || '{}');
       data[videoStep] = true;
@@ -1121,7 +1128,7 @@ export const videoProgressStore = {
     }
   },
   isVideoCompleted(slug, videoStep) {
-    const key = this.KEY_PREFIX + slug;
+    const key = this.key(slug);
     try {
       return JSON.parse(storage.getItem(key) || '{}')[videoStep] === true;
     } catch {
@@ -1129,7 +1136,9 @@ export const videoProgressStore = {
     }
   },
   clear(slug) {
-    storage.setItem(this.KEY_PREFIX + slug, '{}');
+    const normalizedSlug = String(slug || getCurrentSlug() || 'default').toLowerCase();
+    storage.setItem(this.KEY_PREFIX + normalizedSlug, '{}');
+    storage.setItem(this.key(normalizedSlug), '{}');
   },
 };
 
