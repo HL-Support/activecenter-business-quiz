@@ -1420,22 +1420,6 @@ async function supabaseRpc(functionName, body = {}) {
   return response ? response.json() : null;
 }
 
-async function hasLeadCompletedAllVideos(leadHash) {
-  if (!isLeadHash(leadHash)) return false;
-  const rows = await supabaseJson(
-    `lead_video_progress?lead_hash=eq.${encodeURIComponent(leadHash)}&select=video_step,max_unique_watched_percent,completed_at`
-  );
-
-  if (!Array.isArray(rows)) return false;
-  return [1, 2, 3].every((step) =>
-    rows.some(
-      (row) =>
-        safeInteger(row.video_step) === step &&
-        (numericPercent(row.max_unique_watched_percent) >= 95 || Boolean(row.completed_at))
-    )
-  );
-}
-
 async function ensureLeadStateForCanonicalMirror(leadHash, payload, eventAt) {
   if (!isLeadHash(leadHash)) return;
 
@@ -1582,13 +1566,6 @@ async function mirrorLegacyTrackingToLeadSystemV2(payload) {
   }
 
   if (eventName === 'cta_clicked') {
-    const completedAllVideos = await hasLeadCompletedAllVideos(leadHash);
-    if (!completedAllVideos) {
-      await patchByEquals('lead_state', 'lead_hash', leadHash, { last_event_at: eventAt });
-      console.warn('Canonical lead CTA ignored because videos are incomplete', { leadHash });
-      return { mirrored: true, eventName, skipped_cta_state: true };
-    }
-
     await patchByEquals(
       'lead_state',
       'lead_hash',

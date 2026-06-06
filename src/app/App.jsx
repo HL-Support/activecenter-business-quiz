@@ -1033,24 +1033,6 @@ function VideoStep({
                   }),
                 },
                 a('video_error_reload')
-              ),
-              React.createElement(
-                'button',
-                {
-                  onClick: () => {
-                    (J('manual_unlock'),
-                      h(!0),
-                      ld.setVideoCompleted(V, t),
-                      k('unlocked'),
-                      f('manual_unlock'),
-                      i && i(t, 'manual_unlock'));
-                  },
-                  style: Su({
-                    color: 'rgba(245,240,232,0.78)',
-                    borderColor: 'rgba(255,255,255,0.22)',
-                  }),
-                },
-                a('video_error_unlock')
               )
             )
           ),

@@ -195,21 +195,6 @@ async function patchLeadState(leadHash, patch) {
   });
 }
 
-async function hasCompletedAllVideos(leadHash) {
-  const rows = await supabaseRequest(
-    `lead_video_progress?lead_hash=eq.${encodeURIComponent(leadHash)}&select=video_step,max_unique_watched_percent,completed_at`
-  ).then((response) => response.json());
-
-  if (!Array.isArray(rows)) return false;
-  return [1, 2, 3].every((step) =>
-    rows.some(
-      (row) =>
-        safeInteger(row.video_step) === step &&
-        (safeNumber(row.max_unique_watched_percent) >= 95 || Boolean(row.completed_at))
-    )
-  );
-}
-
 async function enqueueSync(leadHash, syncType, contextData) {
   await supabaseRpc('enqueue_lead_sync', {
     p_lead_hash: leadHash,
@@ -329,13 +314,6 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload) {
   }
 
   if (eventName === 'cta_clicked') {
-    const completedAllVideos = await hasCompletedAllVideos(leadHash);
-    if (!completedAllVideos) {
-      await patchLeadState(leadHash, { last_event_at: eventAt });
-      console.warn('CTA click ignored because videos are incomplete', { leadHash });
-      return;
-    }
-
     await patchLeadState(leadHash, {
       cta_type: safeString(payload.cta_type, 80) || null,
       cta_clicked_at: safeString(payload.cta_clicked_at || eventAt, 40),
