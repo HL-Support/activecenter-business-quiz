@@ -623,6 +623,17 @@ async function loadLeadStateByHash(leadHash, depth = 0) {
   return row;
 }
 
+function hasPointsResultContactContext(context = {}, leadState = {}) {
+  return Boolean(
+    safeString(context.email, 180) ||
+    normalizePersonName(context.firstName, 120) ||
+    safeString(context.memberId, 80) ||
+    safeString(leadState.email, 180) ||
+    safeString(leadState.email_normalized, 180) ||
+    safeString(leadState.form_submitted_at, 80)
+  );
+}
+
 function requestedResumeTarget(value) {
   const target = safeString(value, 32).toLowerCase();
   return target === 'videos' ? 'videos' : '';
@@ -3460,6 +3471,17 @@ module.exports = async function handler(req, res) {
         payload,
       }).catch((err) => console.warn('sendPointsResultAlertEmail failed:', err.message));
       return res.status(422).json({ success: false, error: 'lead_hash_unresolvable' });
+    }
+
+    const pointsLeadState = await loadLeadStateByHash(context.leadHash).catch(() => ({}));
+    if (isLeadHash(context.leadHash) && !hasPointsResultContactContext(context, pointsLeadState)) {
+      return res.status(200).json({
+        success: true,
+        skipped: true,
+        reason: 'not_a_contact_lead',
+        lead_hash: context.leadHash,
+        session_hash: context.sessionHash || null,
+      });
     }
 
     const totalVideos = Math.max(1, safeInteger(payload.total_videos) || 3);
