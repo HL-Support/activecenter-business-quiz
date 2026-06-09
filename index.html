@@ -178,13 +178,13 @@
 
       var currentLang = (function() {
         var stored = localStorage.getItem('preferredLang:' + getCurrentSlugForLanguage());
-        if (stored && ['de','it','fr','ru','en'].includes(stored)) return stored;
+        if (stored && ['de','it','fr','ru','en','hu'].includes(stored)) return stored;
         var browser = (navigator.language || 'de').split('-')[0].toLowerCase();
-        return ['it','fr','ru','en'].includes(browser) ? browser : 'de';
+        return ['it','fr','ru','en','hu'].includes(browser) ? browser : 'de';
       })();
 
       function setLang(lang) {
-        if (['de','it','fr','ru','en'].includes(lang)) {
+        if (['de','it','fr','ru','en','hu'].includes(lang)) {
           localStorage.setItem('preferredLang:' + getCurrentSlugForLanguage(), lang);
           window.location.reload();
         }
@@ -196,8 +196,9 @@
         var langFR = document.getElementById('langFR');
         var langRU = document.getElementById('langRU');
         var langEN = document.getElementById('langEN');
+        var langHU = document.getElementById('langHU');
 
-        [langDE, langIT, langFR, langRU, langEN].forEach(function(el) {
+        [langDE, langIT, langFR, langRU, langEN, langHU].forEach(function(el) {
           if (el) el.classList.remove('active');
         });
 
@@ -206,6 +207,7 @@
         if (currentLang === 'fr' && langFR) langFR.classList.add('active');
         if (currentLang === 'ru' && langRU) langRU.classList.add('active');
         if (currentLang === 'en' && langEN) langEN.classList.add('active');
+        if (currentLang === 'hu' && langHU) langHU.classList.add('active');
       }
 
       updateLanguageSwitcher();

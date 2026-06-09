@@ -54,13 +54,13 @@ function verifyTranslations() {
   vm.runInContext(source, context);
 
   const translations = context.window.TRANSLATIONS || {};
-  const langs = ['de', 'it', 'fr', 'ru', 'en'];
+  const langs = ['de', 'it', 'fr', 'ru', 'en', 'hu'];
   const baseKeys = Object.keys(translations.de || {});
 
   assert(baseKeys.length > 0, 'translations.js: German base translation set is empty');
   assert(
     langs.every((lang) => Object.prototype.hasOwnProperty.call(translations, lang)),
-    'translations.js: expected de/it/fr/ru/en language sets'
+    'translations.js: expected de/it/fr/ru/en/hu language sets'
   );
 
   for (const lang of langs) {
@@ -89,11 +89,11 @@ function verifyVideoConfig() {
   vm.runInContext(source, context);
 
   const config = context.window.AC_VIDEO_CONFIG || {};
-  const langs = ['de', 'it', 'fr', 'ru', 'en'];
+  const langs = ['de', 'it', 'fr', 'ru', 'en', 'hu'];
 
   assert(
     langs.every((lang) => Object.prototype.hasOwnProperty.call(config, lang)),
-    'video-config.js: expected de/it/fr/ru/en language sets'
+    'video-config.js: expected de/it/fr/ru/en/hu language sets'
   );
 
   for (const lang of langs) {
@@ -134,10 +134,11 @@ function verifyBuildOutput() {
 
 function verifyLanguageShell() {
   const html = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
-  assert(html.includes("['de','it','fr','ru','en']"), 'index.html must support de/it/fr/ru/en');
+  assert(html.includes("['de','it','fr','ru','en','hu']"), 'index.html must support de/it/fr/ru/en/hu');
   assert(html.includes("getElementById('langFR')"), 'index.html must render FR switcher logic');
   assert(html.includes("getElementById('langRU')"), 'index.html must render RU switcher logic');
   assert(html.includes("getElementById('langEN')"), 'index.html must render EN switcher logic');
+  assert(html.includes("getElementById('langHU')"), 'index.html must render HU switcher logic');
 }
 
 function verifyHashFlow() {
@@ -190,6 +191,7 @@ function verifyHashFlow() {
   );
   assert(app.includes("e('fr', 'FR')"), 'App.jsx must expose the FR language switcher');
   assert(app.includes("e('ru', 'RU')"), 'App.jsx must expose the RU language switcher');
+  assert(app.includes("e('hu', 'HU')"), 'App.jsx must expose the HU language switcher');
   assert(
     apiBridge.includes('buildBusinessTypeformPayload'),
     'api/bridge.js must keep the local Typeform adapter builder'

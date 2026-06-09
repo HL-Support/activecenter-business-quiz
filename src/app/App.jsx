@@ -1345,7 +1345,13 @@ function LanguageSwitcher() {
       { style: { color: 'rgba(245,240,232,0.18)', fontSize: '10px' } },
       '-'
     ),
-    e('en', 'EN')
+    e('en', 'EN'),
+    React.createElement(
+      'span',
+      { style: { color: 'rgba(245,240,232,0.18)', fontSize: '10px' } },
+      '-'
+    ),
+    e('hu', 'HU')
   );
 }
 function QuickWhatsAppLink() {

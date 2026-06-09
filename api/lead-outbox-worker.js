@@ -97,6 +97,12 @@ function rankLabel(rank, lang = 'de') {
       '2/3 информационных видео просмотрено полностью',
       'Все 3 информационных видео просмотрены полностью',
     ],
+    hu: [
+      'Még nincs teljesen megnézett információs videó',
+      '1/3 információs videó teljesen megnézve',
+      '2/3 információs videó teljesen megnézve',
+      'Mind a 3 információs videó teljesen megnézve',
+    ],
   };
 
   return (labels[normalizedLang] || labels.de)[normalizedRank];
@@ -303,16 +309,55 @@ const HOT_LEAD_EMAIL_I18N = {
       opportunity: 'правильная возможность',
     },
   },
+  hu: {
+    subject: (name) => `Forró érdeklődő: ${name} megnézte mind a 3 videót`,
+    preheader: 'Egy kontakt teljesen végignézte mind a 3 információs videót.',
+    title: (slug) => `Forró érdeklődő innen: business.activecenter.info/${slug || ''}`,
+    greeting: (name) => `Szia ${name},`,
+    intro:
+      'egy kontakt teljesen végignézte mind a 3 információs videót. Ez erős érdeklődést mutat, és jó pillanat egy személyes üzenetre.',
+    insightsLinkLabel: 'Itt tudhatsz meg többet a kontaktodról',
+    labels: {
+      name: 'Név',
+      email: 'E-mail',
+      type: 'Típus',
+      aspiration: 'Cél',
+      barrier: 'Mi tartja most vissza',
+      completedAt: 'Befejezve',
+    },
+    footerReason:
+      'Ezt az értesítést automatikusan hoztuk létre, mert egy kvíz-kontakt teljesen végignézte mind a 3 információs videót.',
+    privacyLabel: 'Impresszum és adatvédelem',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; Minden jog fenntartva',
+    profiles: {
+      A: 'A típus A Cselekvő',
+      B: 'B típus A Kapcsolatteremtő',
+      C: 'C típus A Támasz',
+      D: 'D típus Az Építő',
+    },
+    aspirations: {
+      freedom: 'Szabadság',
+      impact: 'Hatás',
+      security: 'Biztonság',
+      growth: 'Növekedés',
+    },
+    barriers: {
+      vehicle: 'egy működő rendszer',
+      community: 'a megfelelő környezet',
+      confidence: 'egy biztonságos első lépés',
+      opportunity: 'a megfelelő lehetőség',
+    },
+  },
 };
 
 function normalizeProfileCode(value) {
   const normalized = String(value || '').trim().toLowerCase();
   const letter = normalized.match(/\b([abcd])\b/i);
   if (letter) return letter[1].toUpperCase();
-  if (normalized.includes('feuer') || normalized.includes('macher') || normalized.includes('realizzatore') || normalized.includes('doer')) return 'A';
-  if (normalized.includes('wind') || normalized.includes('netzwerker') || normalized.includes('connettore') || normalized.includes('connector')) return 'B';
-  if (normalized.includes('wasser') || normalized.includes('anker') || normalized.includes('ancora') || normalized.includes('anchor')) return 'C';
-  if (normalized.includes('fels') || normalized.includes('architekt') || normalized.includes('architetto') || normalized.includes('architect')) return 'D';
+  if (normalized.includes('feuer') || normalized.includes('macher') || normalized.includes('realizzatore') || normalized.includes('doer') || normalized.includes('cselekvő') || normalized.includes('cselekvo')) return 'A';
+  if (normalized.includes('wind') || normalized.includes('netzwerker') || normalized.includes('connettore') || normalized.includes('connector') || normalized.includes('kapcsolatteremtő') || normalized.includes('kapcsolatteremto')) return 'B';
+  if (normalized.includes('wasser') || normalized.includes('anker') || normalized.includes('ancora') || normalized.includes('anchor') || normalized.includes('támasz') || normalized.includes('tamasz')) return 'C';
+  if (normalized.includes('fels') || normalized.includes('architekt') || normalized.includes('architetto') || normalized.includes('architect') || normalized.includes('építő') || normalized.includes('epito')) return 'D';
   return '';
 }
 
@@ -327,10 +372,10 @@ function normalizeProfileInsightSlug(value) {
   if (byCode[profileCode]) return byCode[profileCode];
 
   const normalized = String(value || '').trim().toLowerCase();
-  if (normalized.includes('feuer') || normalized.includes('macher') || normalized.includes('realizzatore')) return 'feuer';
-  if (normalized.includes('wind') || normalized.includes('netzwerker') || normalized.includes('connettore')) return 'wind';
-  if (normalized.includes('wasser') || normalized.includes('anker') || normalized.includes('ancora')) return 'wasser';
-  if (normalized.includes('fels') || normalized.includes('architekt') || normalized.includes('architetto')) return 'fels';
+  if (normalized.includes('feuer') || normalized.includes('macher') || normalized.includes('realizzatore') || normalized.includes('cselekvő') || normalized.includes('cselekvo')) return 'feuer';
+  if (normalized.includes('wind') || normalized.includes('netzwerker') || normalized.includes('connettore') || normalized.includes('kapcsolatteremtő') || normalized.includes('kapcsolatteremto')) return 'wind';
+  if (normalized.includes('wasser') || normalized.includes('anker') || normalized.includes('ancora') || normalized.includes('támasz') || normalized.includes('tamasz')) return 'wasser';
+  if (normalized.includes('fels') || normalized.includes('architekt') || normalized.includes('architetto') || normalized.includes('építő') || normalized.includes('epito')) return 'fels';
   return '';
 }
 
@@ -344,21 +389,29 @@ function normalizeAspirationKey(value) {
     liberte: 'freedom',
     liberté: 'freedom',
     свобода: 'freedom',
+    szabadság: 'freedom',
+    szabadsag: 'freedom',
     impact: 'impact',
     wirkung: 'impact',
     impatto: 'impact',
     влияние: 'impact',
+    hatás: 'impact',
+    hatas: 'impact',
     security: 'security',
     sicherheit: 'security',
     sicurezza: 'security',
     securite: 'security',
     sécurité: 'security',
     безопасность: 'security',
+    biztonság: 'security',
+    biztonsag: 'security',
     growth: 'growth',
     wachstum: 'growth',
     crescita: 'growth',
     croissance: 'growth',
     рост: 'growth',
+    növekedés: 'growth',
+    novekedes: 'growth',
   };
   return map[normalized] || '';
 }
@@ -380,7 +433,8 @@ function normalizeBarrierKey(value) {
     normalized.includes('system') ||
     normalized.includes('sistema') ||
     normalized.includes('système') ||
-    normalized.includes('система')
+    normalized.includes('система') ||
+    normalized.includes('rendszer')
   ) {
     return 'vehicle';
   }
@@ -389,7 +443,9 @@ function normalizeBarrierKey(value) {
     normalized.includes('umfeld') ||
     normalized.includes('ambiente') ||
     normalized.includes('environnement') ||
-    normalized.includes('сред')
+    normalized.includes('сред') ||
+    normalized.includes('környezet') ||
+    normalized.includes('kornyezet')
   ) {
     return 'community';
   }
@@ -401,7 +457,11 @@ function normalizeBarrierKey(value) {
     normalized.includes('schritt') ||
     normalized.includes('passo') ||
     normalized.includes('pas ') ||
-    normalized.includes('шаг')
+    normalized.includes('шаг') ||
+    normalized.includes('biztonság') ||
+    normalized.includes('biztonsag') ||
+    normalized.includes('lépés') ||
+    normalized.includes('lepes')
   ) {
     return 'confidence';
   }
@@ -409,7 +469,9 @@ function normalizeBarrierKey(value) {
     normalized === 'opportunity' ||
     normalized.includes('möglichkeit') ||
     normalized.includes('opportun') ||
-    normalized.includes('возмож')
+    normalized.includes('возмож') ||
+    normalized.includes('lehetőség') ||
+    normalized.includes('lehetoseg')
   ) {
     return 'opportunity';
   }
@@ -431,7 +493,7 @@ function formatLocalizedDateTime(value, lang) {
   const parts = Object.fromEntries(formatter.formatToParts(date).map((part) => [part.type, part.value]));
   if (lang === 'it' || lang === 'fr') return `${parts.day}/${parts.month}/${parts.year} - ${parts.hour}:${parts.minute}`;
   if (lang === 'en') return `${parts.month}/${parts.day}/${parts.year} - ${parts.hour}:${parts.minute}`;
-  if (lang === 'ru') return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute}`;
+  if (lang === 'ru' || lang === 'hu') return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute}`;
   return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute} Uhr`;
 }
 
@@ -451,6 +513,7 @@ function detectCoachLanguage(coach, lead, job) {
       US: 'en',
       CA: 'en',
       AU: 'en',
+      HU: 'hu',
     }[country] || '';
   const candidates = [
     coach?.preferred_newsletter_language,
@@ -464,7 +527,7 @@ function detectCoachLanguage(coach, lead, job) {
   ];
   for (const value of candidates) {
     const lang = String(value || '').trim().toLowerCase().slice(0, 2);
-    if (['de', 'it', 'en', 'fr', 'ru'].includes(lang)) return lang;
+    if (['de', 'it', 'en', 'fr', 'ru', 'hu'].includes(lang)) return lang;
   }
   return normalizeLanguage('de');
 }
@@ -763,7 +826,8 @@ function buildHotLeadEmail({ lead, coach, answers, job }) {
   if (barrier && barrier !== '-') {
     rows.splice(4, 0, [copy.labels.barrier, barrier]);
   }
-  const insightsLinkHtml = `<p style="margin:24px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;"><a href="${escapeHtml(insightsUrl)}" style="color:#212529;text-decoration:underline;font-weight:700;">Erfahre hier mehr zu deinem Kontakt</a></p>`;
+  const insightsLabel = copy.insightsLinkLabel || 'Erfahre hier mehr zu deinem Kontakt';
+  const insightsLinkHtml = `<p style="margin:24px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;"><a href="${escapeHtml(insightsUrl)}" style="color:#212529;text-decoration:underline;font-weight:700;">${escapeHtml(insightsLabel)}</a></p>`;
   const htmlRows = rows
     .map(([label, value]) => `<tr><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;font-weight:700;width:180px;">${escapeHtml(label)}</td><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;">${escapeHtml(value || '-')}</td></tr>`)
     .join('');
@@ -792,7 +856,7 @@ function buildHotLeadEmail({ lead, coach, answers, job }) {
     '',
     textRows,
     '',
-    `Erfahre hier mehr zu deinem Kontakt: ${insightsUrl}`,
+    `${insightsLabel}: ${insightsUrl}`,
     '',
     'Quiz-Antworten:',
     answerSummary(answers),

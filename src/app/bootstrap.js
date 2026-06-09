@@ -37,6 +37,11 @@ const MISSING_COACH_COPY = {
     title: 'К сожалению, ничего не найдено',
     body: 'Эта ссылка неполная или больше не действительна. Попроси своего контактного человека прислать правильную ссылку.',
   },
+  hu: {
+    badge: 'Oops',
+    title: 'Sajnos nem találtunk semmit',
+    body: 'Ez a link hiányos vagy már nem érvényes. Kérlek, kérd el a helyes linket attól, akitől kaptad.',
+  },
 };
 
 function renderApp() {
@@ -323,7 +328,7 @@ function renderMissingCoachPage() {
         <div style="width:100%;max-width:520px;">
 
           <div style="display:flex;justify-content:center;gap:8px;margin-bottom:48px;flex-wrap:wrap;">
-            ${['de', 'it', 'en', 'fr', 'ru'].map(function (code) {
+            ${['de', 'it', 'en', 'fr', 'ru', 'hu'].map(function (code) {
               const active = code === lang;
               return `<button data-lang="${code}" style="
                 border:1px solid ${active ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.1)'};

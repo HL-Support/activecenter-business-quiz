@@ -73,7 +73,7 @@ function hashEmail(email) {
 function normalizeLang(...values) {
   for (const value of values) {
     const lang = safeString(value, 10).toLowerCase().slice(0, 2);
-    if (['de', 'it', 'en', 'fr', 'ru'].includes(lang)) return lang;
+    if (['de', 'it', 'en', 'fr', 'ru', 'hu'].includes(lang)) return lang;
   }
   return 'de';
 }
