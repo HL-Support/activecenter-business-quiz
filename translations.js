@@ -2307,11 +2307,470 @@
     },
   });
 
+  const hu = buildTranslations({
+    static: {
+      intro_badge: 'Sikerkód elemzés · 4 perc',
+      intro_h1_line1: 'Milyen sikertípus',
+      intro_h1_line2: 'van benned valójában?',
+      intro_body:
+        '6 őszinte kérdés. Meglepően tiszta kép arról, hogyan működsz, és milyen lehetőségek illenek a személyiségedhez.',
+      intro_type_1: 'Tűz',
+      intro_type_2: 'Szél',
+      intro_type_3: 'Víz',
+      intro_type_4: 'Szikla',
+      intro_cta: 'Felfedezem a kódomat →',
+      intro_disclaimer: 'Nincs értékesítési beszélgetés. E-mail sem kell hozzá.',
+      intro_legal_link: 'Impresszum és adatvédelem',
+
+      analyzing_badge: 'Kiértékelés',
+      analyzing_h2: 'Készül a profilod...',
+      analyzing_step_1: 'Elemezzük a személyiséged mintáit...',
+      analyzing_step_2: 'Felismerjük az erősségeidet és a belső hajtóerőidet...',
+      analyzing_step_3: 'Kiszámoljuk, milyen üzleti környezet illik hozzád...',
+      analyzing_step_4: 'Összeállítjuk a személyes profilodat...',
+      analyzing_step_5: 'Mindjárt kész...',
+
+      quiz_phase: 'Fázis',
+      quiz_question_label: 'Kérdés',
+      quiz_btn_next: 'Tovább →',
+      quiz_btn_submit: 'Kiértékelés indítása →',
+
+      result_badge: 'A te sikerkódod',
+      result_element_label: 'Elem',
+      result_strengths_heading: 'A legnagyobb erősségeid',
+      result_shadow_heading: 'A vakfoltod',
+      result_cta_btn: 'Igen, szeretnék többet megtudni →',
+      result_restart_btn: 'Kvíz újraindítása',
+      result_snapshot_heading: 'A kiértékelésed röviden',
+      result_snapshot_type_label: 'A sikertípusod',
+      result_snapshot_energy_label: 'A legerősebb energiád',
+      result_snapshot_blocker_label: 'A belső akadályod',
+      result_snapshot_access_label: 'A következő hozzáférésed',
+      result_snapshot_energy_freedom: 'Szabadság önálló döntéseken keresztül',
+      result_snapshot_energy_impact: 'Hatás valódi kapcsolatokon keresztül',
+      result_snapshot_energy_security: 'Biztonság tiszta lépéseken keresztül',
+      result_snapshot_energy_growth: 'Növekedés egy tanulható rendszeren keresztül',
+      result_snapshot_blocker_fallback: 'a következő tiszta lépésed',
+      result_snapshot_access_text: '3 rövid videó, a típusodhoz igazítva',
+      result_video_access_note:
+        'A hozzáférésed megnyílt. A következő lépésben megmutatjuk, melyik rendszer illik a típusodhoz és a célodhoz.',
+
+      barrier_vehicle: 'egy működő rendszer',
+      barrier_community: 'a megfelelő környezet',
+      barrier_confidence: 'egy biztonságos első lépés',
+      barrier_opportunity: 'a hozzád illő lehetőség',
+
+      asp_tag_freedom: 'Szabadság',
+      asp_tag_impact: 'Hatás',
+      asp_tag_security: 'Biztonság',
+      asp_tag_growth: 'Növekedés',
+
+      aspconf_badge: 'A fókuszod',
+      aspconf_freedom_label: 'A szabadság a fő hajtóerőd',
+      aspconf_freedom_desc:
+        'Te szeretnéd eldönteni, mikor, hogyan és kivel dolgozol. Ezért olyan modellre van szükséged, amely nem teremt új függőségeket.',
+      aspconf_impact_label: 'A hatás a fő hajtóerőd',
+      aspconf_impact_desc:
+        'Neked nem csak a pénzről szól. Érezni akarod, hogy amit csinálsz, valóban megmozdít valamit más emberekben.',
+      aspconf_security_label: 'A biztonság a fő hajtóerőd',
+      aspconf_security_desc:
+        'Nem keresel felesleges izgalmat. Valódi esélyt szeretnél, de tiszta és stabil alappal.',
+      aspconf_growth_label: 'A növekedés a fő hajtóerőd',
+      aspconf_growth_desc:
+        'Nem akarsz egy helyben állni. Olyan környezetet keresel, ahol fejlődhetsz és valódi készségeket építhetsz.',
+      aspconf_btn: 'Tovább →',
+      aspconf_footnote: 'A válaszaid sokkal személyesebbé teszik az eredményt.',
+
+      optin_badge: 'Kiértékelés kész',
+      optin_h2_line1: 'A sikerkódod',
+      optin_h2_line2: 'elkészült.',
+      optin_body:
+        'A válaszaidban egy tiszta minta látszik. Mindjárt meglátod, milyen sikertípus vagy, mi hajt belülről, és melyik következő lépés illik hozzád a legjobban.',
+      optin_teaser_1: 'A sikertípusod',
+      optin_teaser_2: 'A legerősebb energiád',
+      optin_teaser_3: 'A belső akadályod',
+      optin_teaser_4: 'Hozzáférés a 3 videóhoz',
+      optin_form_badge: 'Utolsó lépés',
+      optin_form_heading: 'Nyisd meg a kiértékelésed',
+      optin_form_subheading: 'Az összefoglalót e-mailben is megkapod.',
+      optin_label_firstname: 'Keresztnév',
+      optin_placeholder_firstname: 'A keresztneved',
+      optin_label_email: 'E-mail cím',
+      optin_placeholder_email: 'te@email.com',
+      optin_btn_submit: 'Mutasd a kiértékelésem →',
+      optin_btn_loading: 'Küldés...',
+      optin_btn_validating: 'E-mail ellenőrzése...',
+      optin_email_error_format: 'Kérlek, adj meg egy érvényes e-mail címet.',
+      optin_email_error_invalid:
+        'Úgy tűnik, ez az e-mail cím nem kézbesíthető. Kérlek, ellenőrizd röviden.',
+      optin_submit_error:
+        'Most nem tudtuk biztosan hozzárendelni a kapcsolattartódat. Kérlek, töltsd újra az oldalt, és próbáld meg még egyszer.',
+      optin_privacy: 'Nincs spam. Megígérjük.',
+
+      video_1_title: '1. rész: Bevezetés',
+      video_1_sub: 'A következő percekben megtudod, miről szól ez valójában.',
+      video_2_title: '2. rész: Így működik',
+      video_2_sub:
+        'Teljes magyarázat arról, hogyan épül fel a modell, és miben más, mint a többi.',
+      video_3_title: '3. rész: Valódi tapasztalatok',
+      video_3_sub:
+        'Emberek, akik hozzád hasonlóan indultak: mit éltek meg, és mi változott az életükben.',
+      video_counter: 'Videó',
+      video_next_label: 'Következő',
+      video_btn_next: 'Tovább a lépéshez',
+      video_btn_prev: '← Videó újranézése',
+      video_btn_final: 'Tovább a 4. lépéshez →',
+      video_btn_locked: 'Tovább a következő lépéshez',
+      video_hint_locked:
+        'Nézd végig a videót – utána automatikusan megnyílik a következő lépés.',
+      video_hint_unlocked: 'A folytatás megnyílt.',
+      video_hint_recovery:
+        'Ha a videó felismerése elakad, töltsd újra a videót, vagy kivételes esetben lépj tovább kézzel.',
+      video_error_title: 'A videót technikailag nem sikerült tisztán felismerni.',
+      video_error_body:
+        'Normál esetben a következő lépés a videó végén automatikusan megnyílik. Ha ez most nem működik, töltsd újra a videót, vagy használd a kézi továbblépést.',
+      video_error_detail: 'Technikai megjegyzés',
+      video_error_reload: 'Videó újratöltése',
+      video_error_unlock: 'Továbblépés kézzel',
+
+      final_badge: 'Mindhárom videót megnézted',
+      final_h2: 'A következő lépés kicsi, de fontos.',
+      final_body:
+        'Most nem kell döntened. De ha kíváncsi vagy, hogy a profilod, a célod és ez a rendszer passzol-e egymáshoz, ezt a legjobb személyesen tisztázni. Röviden, őszintén, nyomás nélkül.',
+      final_profile_label: 'A profilod',
+      final_btn_whatsapp: 'Igen, szeretnék többet megtudni',
+      final_btn_later: 'Majd jelentkezem, ha készen állok',
+      final_footnote: 'Közvetlenül WhatsAppon kapcsolunk össze. Nincs várakozás, nincs űrlap.',
+      final_contact_prompt: 'Kérdésed van? Írj neki:',
+      quicklink_whatsapp_prefix: 'Szia ',
+      quicklink_whatsapp_suffix: ', lenne egy kérdésem.',
+      final_whatsapp_prefill:
+        'Szia! Most töltöttem ki a Sikerkód kvízt, és szeretnék többet megtudni erről a lehetőségről.',
+      final_closed_h2: 'Minden rendben. Nincs nyomás.',
+      final_closed_body: 'Ha később kíváncsi leszel, tudod, hol találsz minket.',
+      final_closed_restart: 'Kvíz megismétlése',
+      result_barrier_intro: 'Te magad mondtad: most ez hiányzik – „',
+      result_barrier_outro: '”. Pontosan erre van megoldásunk.',
+
+      legal_modal_title: 'Impresszum és adatvédelem',
+      webhook_title: 'HU - Sikerkód kvíz',
+    },
+    questions: [
+      {
+        phase: 'Személyiség',
+        text: 'Mi az, ami reggel igazán felkelt az ágyból?',
+        sub: 'Légy őszinte. Ne azt válaszd, amit mondani kellene, hanem ami tényleg igaz rád.',
+        options: [
+          {
+            key: 'r',
+            label: 'Célok és haladás',
+            desc: 'Van előttem egy cél, és látni akarom, hogy haladok felé.',
+          },
+          {
+            key: 'y',
+            label: 'Emberek és találkozások',
+            desc: 'Várom az embereket, akikkel ma találkozom vagy beszélek.',
+          },
+          {
+            key: 'g',
+            label: 'Struktúra és nyugalom',
+            desc: 'Tudom, mi vár rám, és ez nyugalmat és energiát ad.',
+          },
+          {
+            key: 'b',
+            label: 'Mélység és kihívás',
+            desc: 'Van egy feladat, ami valóban érdekel és kihívást jelent.',
+          },
+        ],
+      },
+      {
+        phase: 'Személyiség',
+        text: 'Egy csoportban általában te vagy...',
+        sub: 'Gondolj valódi helyzetekre. Csapatban, családban vagy baráti körben.',
+        options: [
+          {
+            key: 'r',
+            label: 'Az irányt mutató ember',
+            desc: 'Aki átlátja a helyzetet, és megmutatja az irányt.',
+          },
+          {
+            key: 'y',
+            label: 'A hangulatfelelős',
+            desc: 'Aki jó energiát hoz, és másokat is magával ragad.',
+          },
+          {
+            key: 'g',
+            label: 'A nyugalom központja',
+            desc: 'Aki figyel, meghallgat, és gondoskodik róla, hogy mindenki jól érezze magát.',
+          },
+          {
+            key: 'b',
+            label: 'A csendes megfigyelő',
+            desc: 'Aki először elemez a háttérben, és csak utána szólal meg.',
+          },
+        ],
+      },
+      {
+        phase: 'Személyiség',
+        text: 'Mi tud igazán kihozni a sodrodból?',
+        sub: 'A legnagyobb frusztrációd sokat elárul arról, mi fontos neked mélyen.',
+        options: [
+          {
+            key: 'r',
+            label: 'Akadályok és bizonytalankodás',
+            desc: 'Amikor valami nem halad, mert valaki nem tud vagy nem akar dönteni.',
+          },
+          {
+            key: 'y',
+            label: 'Rossz energia',
+            desc: 'Amikor a hangulat leesik, és a negatív energia mindent megmérgez.',
+          },
+          {
+            key: 'b',
+            label: 'Elkerülhető hibák',
+            desc: 'Amikor olyan hibák történnek, amelyeknek egyszerűen nem kellett volna megtörténniük.',
+          },
+          {
+            key: 'g',
+            label: 'Értelmetlen folyamatok',
+            desc: 'Amikor olyasmit kellene csinálnom, aminek számomra nincs értelme.',
+          },
+        ],
+      },
+      {
+        phase: 'Élet és célok',
+        text: 'Mi a legfontosabb számodra a munkádban?',
+        sub: 'Ha csak egy dolgot választhatnál, mi az, ami semmiképp sem hiányozhat?',
+        options: [
+          {
+            key: 'freedom',
+            label: 'Szabadság',
+            desc: 'Én döntöm el, mikor, hogyan és hol dolgozom, engedélykérés nélkül.',
+          },
+          {
+            key: 'impact',
+            label: 'Hatás',
+            desc: 'Érezni akarom, hogy a munkám valóban változást hoz más emberek életében.',
+          },
+          {
+            key: 'security',
+            label: 'Biztonság',
+            desc: 'Stabil, megbízható jövedelmet szeretnék, amire hónapról hónapra számíthatok.',
+          },
+          {
+            key: 'growth',
+            label: 'Növekedés',
+            desc: 'Minden nap egy kicsit jobbá válni, és új képességeket építeni.',
+          },
+        ],
+      },
+      {
+        phase: 'Élet és célok',
+        text: 'Hogyan nézne ki az ideális életed 3 év múlva?',
+        sub: 'Csukd be egy pillanatra a szemed. Mit látsz igazán?',
+        options: [
+          {
+            key: 'freedom',
+            label: 'Anyagilag szabadon',
+            desc: 'Én döntök az időmről és a jövedelmemről. Nincs főnök, nincs plafon.',
+          },
+          {
+            key: 'impact',
+            label: 'Értelem és élmények',
+            desc: 'Embereknek segítek, megélem a világot, és közben olyat teszek, aminek értelme van.',
+          },
+          {
+            key: 'security',
+            label: 'Nyugalom és család',
+            desc: 'Nincs pénzügyi stressz, van időm a fontos emberekre, és stabil az életem.',
+          },
+          {
+            key: 'growth',
+            label: 'Szakértelem és rendszer',
+            desc: 'Elismert vagyok a területemen, és van egy rendszerem, amely nélkülem is működik.',
+          },
+        ],
+      },
+      {
+        phase: 'Élet és célok',
+        text: 'Mi tart vissza VALÓJÁBAN attól, hogy már ma ezt az életet éld?',
+        sub: 'Itt az őszinteség többet segít, mint a jól hangzó válasz.',
+        options: [
+          {
+            key: 'vehicle',
+            label: 'Hiányzik a rendszer',
+            desc: 'Megvan bennem az akarat, de még nincs működő rendszer, amely odavisz.',
+          },
+          {
+            key: 'community',
+            label: 'Hiányzik a környezet',
+            desc: 'Hiányoznak mellőlem azok az emberek, akik naponta húznak és támogatnak.',
+          },
+          {
+            key: 'confidence',
+            label: 'Hiányzik a biztonság',
+            desc: 'Bizonytalan vagyok, és tiszta, alacsony kockázatú első lépésre van szükségem.',
+          },
+          {
+            key: 'opportunity',
+            label: 'Hiányzik a lehetőség',
+            desc: 'Még nem találtam meg azt a lehetőséget, amely igazán illik hozzám és az életemhez.',
+          },
+        ],
+      },
+    ],
+    profiles: {
+      r: {
+        code: 'A típus',
+        name: 'A Cselekvő',
+        animal: 'Tűz',
+        tagline: 'Arra születtél, hogy irányt mutass, ne arra, hogy csak kövess másokat.',
+        shadow:
+          'Néha türelmetlennek tűnhetsz mások szemében, de ez valójában erő, amely megfelelő irányt keres.',
+        strengths: [
+          'Gyors és tiszta döntések',
+          'Következetes út az ötlettől a megvalósításig',
+          'Természetes vezetői erő',
+          'Önálló, belülről hajtott működés',
+        ],
+        fit: {
+          freedom:
+            'Neked nem egy 9-től 5-ig tartó keret kell. Olyan rendszerre van szükséged, amely olyan gyorsan skálázódik, ahogy te gondolkodsz. Nincs főnök. Nincs plafon. A te szabályaid.',
+          impact:
+            'Ha hatást akarsz, olyan modell kell, ahol az energiád valóban megmozdít másokat, nem pedig végtelen megbeszélésekben vész el.',
+          security:
+            'Akkor is szükséged van stabil alapra, ha erősen haladsz előre. Egy jó rendszer pontosan ezt adja meg.',
+          growth:
+            'Ott fejlődsz a legerősebben, ahol felelősséget vállalhatsz, vezethetsz és eredményeket láthatsz.',
+        },
+        cta: {
+          freedom:
+            'Már tudod, mit akarsz. A kérdés csak az: megvan hozzá a megfelelő eszközöd?',
+          impact:
+            'Az energiád képes embereket magával vinni. Csak az számít, jó környezetben használod-e.',
+          security:
+            'Nem kell kicsire venned magad a biztonságért. Csak a megfelelő modellre van szükséged.',
+          growth:
+            'Neked nem külső motiváció kell. Olyan pálya kell, amely elég nagy hozzád.',
+        },
+        finalCta:
+          'Az erősséged az, hogy cselekszel. A következő lépés ezért nem a várakozás, hanem annak rövid tisztázása, hogy ez a rendszer ad-e neked elég tempót és szabadságot.',
+      },
+      y: {
+        code: 'B típus',
+        name: 'A Kapcsolatteremtő',
+        animal: 'Szél',
+        tagline: 'Az energiád ragadós, és pontosan ez a természetes előnyöd.',
+        shadow:
+          'Néha egyik ötlettől a másikig ugrasz, de ez nem hiba. Csak megfelelő keretre van szükséged.',
+        strengths: [
+          'Ragadós lelkesedés',
+          'Gyors bizalomépítés',
+          'Kapcsolódást teremtő jelenlét minden csapatban',
+          'Pozitív, magával ragadó kisugárzás',
+        ],
+        fit: {
+          freedom:
+            'Nem merev struktúrákban kell ragadnod. Olyan környezet kell, ahol emberekkel és energiával együtt növekedhetsz.',
+          impact:
+            'Ha hatást akarsz, ott vagy a legerősebb, ahol a valódi kapcsolatok többet számítanak, mint a rideg folyamatok.',
+          security:
+            'A biztonság neked nem csak pénz. Olyan környezet is, amely megtart, és emberek, akik veled mennek.',
+          growth:
+            'Ott fejlődsz a legjobban, ahol új embereket, új tereket és új lehetőségeket élhetsz meg.',
+        },
+        cta: {
+          freedom:
+            'Neked nem eladnod kell. Elég, ha önmagad vagy. Egy kapcsolatokra épülő üzlet a természetes tereped.',
+          impact:
+            'A legerősebb csapatok nem tökéletes stratégiából születnek, hanem olyan emberekből, mint te.',
+          security:
+            'Ha a környezet jó, könnyedén vonzod az embereket és a lehetőségeket.',
+          growth:
+            'A valódi potenciálod akkor nyílik ki, amikor a lelkesedés tiszta rendszerrel találkozik.',
+        },
+        finalCta:
+          'Az erősséged az, hogy embereket kapcsolsz össze. A következő lépés ezért nem az azonnali döntés, hanem annak megnézése, hogy ez a rendszer illik-e hozzád.',
+      },
+      g: {
+        code: 'C típus',
+        name: 'A Támasz',
+        animal: 'Víz',
+        tagline: 'Te vagy az a stabil pont, amelyre mások építeni tudnak. Ez ritkább, mint gondolnád.',
+        shadow:
+          'Hajlamos vagy a saját igényeidet hátrébb tenni, pedig a te jólléted az alapja minden másnak.',
+        strengths: [
+          'Megbízhatóság és következetesség',
+          'Mély, tartós bizalom',
+          'Nyugalom nehéz helyzetekben',
+          'Kiegyensúlyozott, békét teremtő működés',
+        ],
+        fit: {
+          freedom:
+            'Neked nem reflektorfény kell. Stabilitásra és valódi szabadságra van szükséged, káosz nélkül.',
+          impact:
+            'Nem hangerővel változtatsz meg embereket, hanem következetességgel, bizalommal és valódi jelenléttel.',
+          security:
+            'Számodra egy stabil, megbízható modell fontosabb, mint a hangos ígéretek. Pont ott bontakozik ki az erőd.',
+          growth:
+            'Nem nyomás alatt nősz, hanem biztonságban, tisztaságban és egy olyan környezetben, amely bízik benned.',
+        },
+        cta: {
+          freedom:
+            'Neked nincs szükséged show-ra. Olyan modell kell, amely illik az életedhez, és közben levegőt hagy.',
+          impact:
+            'A hosszú távon erős csapatokat olyan emberek tartják össze, mint te.',
+          security: 'Az erőd abban van, hogy olyan bizalmat építesz, amely holnap is tart.',
+          growth:
+            'Ha megvan a megfelelő környezet, olyan mélységet építesz, amelyet mások ritkán érnek el.',
+        },
+        finalCta:
+          'Az erősséged a bizalom és a stabilitás. A következő lépés ezért nem kockázat, hanem egy nyugodt beszélgetés arról, hogy ennek valóban van-e értelme számodra.',
+      },
+      b: {
+        code: 'D típus',
+        name: 'Az Építő',
+        animal: 'Szikla',
+        tagline: 'Olyan mintákat látsz meg, amelyeket mások teljesen elnéznek.',
+        shadow:
+          'Néha túl sokáig elemzel, de a pontosságod nem akadály, hanem az egyik legnagyobb erősséged.',
+        strengths: [
+          'Átgondolt és megalapozott döntések',
+          'Rendszerszemlélet előrelátással',
+          'Következetes optimalizálás pontossággal',
+          'Belső motiváció és önállóság',
+        ],
+        fit: {
+          freedom:
+            'Neked nem káosz és üres ígéretek kellenek. Olyan rendszerre van szükséged, amelyet megértesz és hosszú távon fejleszthetsz.',
+          impact:
+            'A hatásod ott kezdődik, ahol mások csak a felszínt látják, te pedig valódi struktúrát viszel bele.',
+          security:
+            'Számodra a biztonság tisztaságból, logikából és egy érthetően működő modellből születik.',
+          growth:
+            'Akkor fejlődsz a legtöbbet, ha átláthatsz, javíthatsz és mesteri szintre vihetsz egy rendszert.',
+        },
+        cta: {
+          freedom:
+            'Neked nem kapkodás kell. Olyan eszköz kell, amelynek van tartalma, és kiállja a gondolkodásod próbáját.',
+          impact:
+            'A legjobb üzleti struktúrákat olyan emberek hozzák létre és finomítják, mint te.',
+          security:
+            'Ha valamit megértesz, nyugodtan és pontosan tudod naggyá tenni.',
+          growth: 'Az erőd abban van, hogy a lehetőségekből valódi rendszereket építesz.',
+        },
+        finalCta:
+          'Az erősséged az, hogy végiggondolod a dolgokat. A következő lépés ezért nem az, hogy „belevágj”, hanem hogy megértsd, valóban van-e értelme.',
+      },
+    },
+  });
+
   window.TRANSLATIONS = {
     de: de,
     it: it,
     fr: fr,
     ru: ru,
     en: en,
+    hu: hu,
   };
 })();

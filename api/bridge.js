@@ -113,7 +113,7 @@ function normalizeLanguage(...values) {
       .trim()
       .toLowerCase()
       .slice(0, 2);
-    if (['de', 'it', 'en', 'fr', 'ru'].includes(lang)) return lang;
+    if (['de', 'it', 'en', 'fr', 'ru', 'hu'].includes(lang)) return lang;
   }
   return 'de';
 }
@@ -1990,6 +1990,12 @@ function buildPointsResultLabel(completedCount, totalVideos, lang) {
       some: (value) => `Информационное видео ${value} из ${total} просмотрено полностью`,
       all: `Все ${total} информационных видео просмотрены полностью`,
     },
+    hu: {
+      none: 'Még egy információs videó sincs teljesen megnézve',
+      one: 'Az 1. információs videó teljesen megnézve',
+      some: (value) => `${value}/${total} információs videó teljesen megnézve`,
+      all: `Mind a(z) ${total} információs videó teljesen megnézve`,
+    },
   };
   const labels = copy[language] || copy.de;
   if (count <= 0) return labels.none;
@@ -2333,6 +2339,45 @@ const HOT_LEAD_EMAIL_I18N = {
       opportunity: 'правильная возможность',
     },
   },
+  hu: {
+    subject: (name) => `Forró érdeklődő: ${name} megnézte mind a 3 videót`,
+    preheader: 'Egy kontakt teljesen végignézte mind a 3 információs videót.',
+    title: (slug) => `Forró érdeklődő innen: business.activecenter.info/${slug || ''}`,
+    greeting: (name) => `Szia ${name},`,
+    intro:
+      'egy kontakt teljesen végignézte mind a 3 információs videót. Ez erős érdeklődést mutat, és jó pillanat egy személyes üzenetre.',
+    insightsLinkLabel: 'Itt tudhatsz meg többet a kontaktodról',
+    labels: {
+      name: 'Név',
+      email: 'E-mail',
+      type: 'Típus',
+      aspiration: 'Cél',
+      barrier: 'Mi tartja most vissza',
+      completedAt: 'Befejezve',
+    },
+    footerReason:
+      'Ezt az értesítést automatikusan hoztuk létre, mert egy kvíz-kontakt teljesen végignézte mind a 3 információs videót.',
+    privacyLabel: 'Impresszum és adatvédelem',
+    copyrightLabel: '&copy; HL-Support Ltd. &middot; Minden jog fenntartva',
+    profiles: {
+      A: 'A típus A Cselekvő',
+      B: 'B típus A Kapcsolatteremtő',
+      C: 'C típus A Támasz',
+      D: 'D típus Az Építő',
+    },
+    aspirations: {
+      freedom: 'Szabadság',
+      impact: 'Hatás',
+      security: 'Biztonság',
+      growth: 'Növekedés',
+    },
+    barriers: {
+      vehicle: 'egy működő rendszer',
+      community: 'a megfelelő környezet',
+      confidence: 'egy biztonságos első lépés',
+      opportunity: 'a megfelelő lehetőség',
+    },
+  },
 };
 
 function detectCoachLanguage(coach, session, payload) {
@@ -2362,6 +2407,7 @@ function detectCoachLanguage(coach, session, payload) {
       US: 'en',
       CA: 'en',
       AU: 'en',
+      HU: 'hu',
     }[country] || '';
   return normalizeLanguage(
     coach?.preferred_newsletter_language,
@@ -2394,10 +2440,34 @@ function normalizeProfileInsightSlug(value) {
     D: 'fels',
   };
   if (byCode[profileCode]) return byCode[profileCode];
-  if (normalized.includes('feuer') || normalized.includes('macher') || normalized.includes('realizzatore')) return 'feuer';
-  if (normalized.includes('wind') || normalized.includes('netzwerker') || normalized.includes('connettore')) return 'wind';
-  if (normalized.includes('wasser') || normalized.includes('anker') || normalized.includes('ancora')) return 'wasser';
-  if (normalized.includes('fels') || normalized.includes('architekt') || normalized.includes('architetto')) return 'fels';
+  if (
+    normalized.includes('feuer') ||
+    normalized.includes('macher') ||
+    normalized.includes('realizzatore') ||
+    normalized.includes('cselekvő') ||
+    normalized.includes('cselekvo')
+  ) return 'feuer';
+  if (
+    normalized.includes('wind') ||
+    normalized.includes('netzwerker') ||
+    normalized.includes('connettore') ||
+    normalized.includes('kapcsolatteremtő') ||
+    normalized.includes('kapcsolatteremto')
+  ) return 'wind';
+  if (
+    normalized.includes('wasser') ||
+    normalized.includes('anker') ||
+    normalized.includes('ancora') ||
+    normalized.includes('támasz') ||
+    normalized.includes('tamasz')
+  ) return 'wasser';
+  if (
+    normalized.includes('fels') ||
+    normalized.includes('architekt') ||
+    normalized.includes('architetto') ||
+    normalized.includes('építő') ||
+    normalized.includes('epito')
+  ) return 'fels';
   return '';
 }
 
@@ -2411,21 +2481,29 @@ function normalizeAspirationKey(value) {
     liberté: 'freedom',
     liberte: 'freedom',
     свобода: 'freedom',
+    szabadság: 'freedom',
+    szabadsag: 'freedom',
     impact: 'impact',
     wirkung: 'impact',
     impatto: 'impact',
     влияние: 'impact',
+    hatás: 'impact',
+    hatas: 'impact',
     security: 'security',
     sicherheit: 'security',
     sicurezza: 'security',
     sécurité: 'security',
     securite: 'security',
     безопасность: 'security',
+    biztonság: 'security',
+    biztonsag: 'security',
     growth: 'growth',
     wachstum: 'growth',
     crescita: 'growth',
     croissance: 'growth',
     рост: 'growth',
+    növekedés: 'growth',
+    novekedes: 'growth',
   };
   return map[normalized] || '';
 }
@@ -2447,7 +2525,8 @@ function normalizeBarrierKey(value) {
     normalized.includes('system') ||
     normalized.includes('sistema') ||
     normalized.includes('système') ||
-    normalized.includes('система')
+    normalized.includes('система') ||
+    normalized.includes('rendszer')
   ) {
     return 'vehicle';
   }
@@ -2456,7 +2535,9 @@ function normalizeBarrierKey(value) {
     normalized.includes('umfeld') ||
     normalized.includes('ambiente') ||
     normalized.includes('environnement') ||
-    normalized.includes('сред')
+    normalized.includes('сред') ||
+    normalized.includes('környezet') ||
+    normalized.includes('kornyezet')
   ) {
     return 'community';
   }
@@ -2465,7 +2546,11 @@ function normalizeBarrierKey(value) {
     normalized.includes('schritt') ||
     normalized.includes('passo') ||
     normalized.includes('pas ') ||
-    normalized.includes('шаг')
+    normalized.includes('шаг') ||
+    normalized.includes('biztonság') ||
+    normalized.includes('biztonsag') ||
+    normalized.includes('lépés') ||
+    normalized.includes('lepes')
   ) {
     return 'confidence';
   }
@@ -2474,7 +2559,9 @@ function normalizeBarrierKey(value) {
     normalized.includes('möglichkeit') ||
     normalized.includes('opportun') ||
     normalized.includes('opportunité') ||
-    normalized.includes('возмож')
+    normalized.includes('возмож') ||
+    normalized.includes('lehetőség') ||
+    normalized.includes('lehetoseg')
   ) {
     return 'opportunity';
   }
@@ -2500,7 +2587,7 @@ function formatLocalizedDateTime(value, lang) {
   if (lang === 'en') {
     return `${parts.month}/${parts.day}/${parts.year} - ${parts.hour}:${parts.minute}`;
   }
-  if (lang === 'ru') {
+  if (lang === 'ru' || lang === 'hu') {
     return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute}`;
   }
   return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute} Uhr`;
@@ -2617,7 +2704,8 @@ function buildAllVideosCompletedCoachEmail({ session, coach, payload }) {
   if (barrier && barrier !== '-') {
     rows.splice(4, 0, [copy.labels.barrier, barrier]);
   }
-  const insightsLinkHtml = `<p style="margin:24px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;"><a href="${escapeHtml(insightsUrl)}" style="color:#212529;text-decoration:underline;font-weight:700;">Erfahre hier mehr zu deinem Kontakt</a></p>`;
+  const insightsLabel = copy.insightsLinkLabel || 'Erfahre hier mehr zu deinem Kontakt';
+  const insightsLinkHtml = `<p style="margin:24px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#2d2d2d;"><a href="${escapeHtml(insightsUrl)}" style="color:#212529;text-decoration:underline;font-weight:700;">${escapeHtml(insightsLabel)}</a></p>`;
   const htmlRows = rows
     .map(
       ([label, value]) =>
@@ -2653,7 +2741,7 @@ function buildAllVideosCompletedCoachEmail({ session, coach, payload }) {
       '',
       textRows,
       '',
-      `Erfahre hier mehr zu deinem Kontakt: ${insightsUrl}`,
+      `${insightsLabel}: ${insightsUrl}`,
     ].join('\n'),
   };
 }
@@ -2712,7 +2800,7 @@ function normalizeLang(lang) {
   const value = String(lang || '')
     .toLowerCase()
     .trim();
-  return ['de', 'it', 'en', 'fr', 'ru'].includes(value) ? value : 'de';
+  return ['de', 'it', 'en', 'fr', 'ru', 'hu'].includes(value) ? value : 'de';
 }
 
 function normalizeAspiration(value) {
@@ -2733,6 +2821,8 @@ const BUSINESS_PROFILE_MAP = {
   realizzatore: { code: 'feuer', label: 'Der Macher' },
   'il-realizzatore': { code: 'feuer', label: 'Der Macher' },
   doer: { code: 'feuer', label: 'Der Macher' },
+  cselekvo: { code: 'feuer', label: 'Der Macher' },
+  'a-cselekvo': { code: 'feuer', label: 'Der Macher' },
   b: { code: 'wind', label: 'Der Netzwerker' },
   y: { code: 'wind', label: 'Der Netzwerker' },
   'typ-b': { code: 'wind', label: 'Der Netzwerker' },
@@ -2743,6 +2833,8 @@ const BUSINESS_PROFILE_MAP = {
   connettore: { code: 'wind', label: 'Der Netzwerker' },
   'il-connettore': { code: 'wind', label: 'Der Netzwerker' },
   connector: { code: 'wind', label: 'Der Netzwerker' },
+  kapcsolatteremto: { code: 'wind', label: 'Der Netzwerker' },
+  'a-kapcsolatteremto': { code: 'wind', label: 'Der Netzwerker' },
   c: { code: 'wasser', label: 'Der Anker' },
   g: { code: 'wasser', label: 'Der Anker' },
   'typ-c': { code: 'wasser', label: 'Der Anker' },
@@ -2753,6 +2845,8 @@ const BUSINESS_PROFILE_MAP = {
   ancora: { code: 'wasser', label: 'Der Anker' },
   'l-ancora': { code: 'wasser', label: 'Der Anker' },
   anchor: { code: 'wasser', label: 'Der Anker' },
+  tamasz: { code: 'wasser', label: 'Der Anker' },
+  'a-tamasz': { code: 'wasser', label: 'Der Anker' },
   d: { code: 'fels', label: 'Der Architekt' },
   'typ-d': { code: 'fels', label: 'Der Architekt' },
   'type-d': { code: 'fels', label: 'Der Architekt' },
@@ -2762,6 +2856,8 @@ const BUSINESS_PROFILE_MAP = {
   architetto: { code: 'fels', label: 'Der Architekt' },
   'l-architetto': { code: 'fels', label: 'Der Architekt' },
   architect: { code: 'fels', label: 'Der Architekt' },
+  epito: { code: 'fels', label: 'Der Architekt' },
+  'az-epito': { code: 'fels', label: 'Der Architekt' },
 };
 
 function normalizeBusinessProfile(...values) {
@@ -2902,6 +2998,45 @@ const BUSINESS_COPY = {
       ],
     ],
   },
+  hu: {
+    webhook_title: 'HU - Sikerkód kvíz',
+    result_badge: 'A te sikerkódod',
+    main_aspiration_title: 'A fő célod',
+    first_name_title: 'Keresztnév',
+    email_title: 'E-mail cím',
+    aspirations: {
+      freedom: 'Szabadság',
+      impact: 'Hatás',
+      security: 'Biztonság',
+      growth: 'Növekedés',
+    },
+    questions: [
+      [
+        'Mi az, ami reggel igazán felkelt az ágyból?',
+        ['Célok és haladás', 'Emberek és találkozások', 'Struktúra és nyugalom', 'Mélység és kihívás'],
+      ],
+      [
+        'Egy csoportban általában te vagy...',
+        ['Az irányt mutató ember', 'A hangulatfelelős', 'A nyugalom központja', 'A csendes megfigyelő'],
+      ],
+      [
+        'Mi tud igazán kihozni a sodrodból?',
+        ['Akadályok és bizonytalankodás', 'Rossz energia', 'Értelmetlen folyamatok', 'Elkerülhető hibák'],
+      ],
+      [
+        'Mi a legfontosabb számodra a munkádban?',
+        ['Szabadság', 'Hatás', 'Biztonság', 'Növekedés'],
+      ],
+      [
+        'Hogyan nézne ki az ideális életed 3 év múlva?',
+        ['Anyagilag szabadon', 'Értelem és élmények', 'Nyugalom és család', 'Szakértelem és rendszer'],
+      ],
+      [
+        'Mi tart vissza VALÓJÁBAN attól, hogy már ma ezt az életet éld?',
+        ['Hiányzik a rendszer', 'Hiányzik a környezet', 'Hiányzik a biztonság', 'Hiányzik a lehetőség'],
+      ],
+    ],
+  },
 };
 
 const BUSINESS_ASPIRATION_LABELS = {
@@ -2910,6 +3045,7 @@ const BUSINESS_ASPIRATION_LABELS = {
   en: { freedom: 'Freedom', impact: 'Impact', security: 'Security', growth: 'Growth' },
   fr: { freedom: 'Liberté', impact: 'Impact', security: 'Sécurité', growth: 'Croissance' },
   ru: { freedom: 'Свобода', impact: 'Влияние', security: 'Стабильность', growth: 'Рост' },
+  hu: { freedom: 'Szabadság', impact: 'Hatás', security: 'Biztonság', growth: 'Növekedés' },
 };
 
 const BUSINESS_SCHEMA = {

@@ -71,7 +71,7 @@ Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
 - `api/bridge.js` baut daraus das Typeform-aehnliche Payload und proxyt es ueber die zentrale PHP-Bridge (`https://ac-reconnect.com/db-bridge.php`) an `https://contacts.hl-support.biz/webhook/typeform`.
 - Dieser lokale Builder ist absichtlich produktionskritisch: Er verhindert, dass das Quiz kaputtgeht, wenn die zentrale Bridge auf `ac-reconnect.com` noch nicht auf dem neuesten Adapterstand ist.
 - Neben Vorname und E-Mail werden weiterhin das Ergebnisprofil, das berechnete Hauptziel (`main_aspiration` / `main_aspiration_label`) sowie alle 6 Quizfragen mit der jeweils gewaehlten Antwort in `form_response.definition.fields` und `form_response.answers` mitgesendet.
-- Die uebermittelte Webhook-Sprache muss aus der aktiven Quizsprache (`preferredLang`) kommen, nicht nur aus `navigator.language`, damit manuell umgeschaltete DE/IT/FR/RU/EN-Varianten auch im gespeicherten `form_response` die richtigen Frage- und Antworttexte erzeugen.
+- Die uebermittelte Webhook-Sprache muss aus der aktiven Quizsprache (`preferredLang`) kommen, nicht nur aus `navigator.language`, damit manuell umgeschaltete DE/IT/FR/RU/EN/HU-Varianten auch im gespeicherten `form_response` die richtigen Frage- und Antworttexte erzeugen.
 - Es gibt keinen zweiten n8n-Ergebniswebhook mehr. Profil, Hauptziel, Fragen, Antworten, Name und E-Mail werden ausschliesslich im Typeform-kompatiblen Hauptpayload an HL-Support/Global-SCE uebergeben.
 
 ## Bridge-Ablauf

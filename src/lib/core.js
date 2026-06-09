@@ -150,12 +150,12 @@ export function getPreferredLang() {
   const slug =
     window.location.pathname.replace(/^\/+/, '').toLowerCase().split('/')[0] || 'default';
   const preferred = storage.getItem(`preferredLang:${slug}`);
-  if (preferred && ['de', 'it', 'fr', 'ru', 'en'].includes(preferred)) {
+  if (preferred && ['de', 'it', 'fr', 'ru', 'en', 'hu'].includes(preferred)) {
     return preferred;
   }
 
   const browserLang = String((navigator.language || 'de').split('-')[0] || 'de').toLowerCase();
-  return ['it', 'fr', 'ru', 'en'].includes(browserLang) ? browserLang : 'de';
+  return ['it', 'fr', 'ru', 'en', 'hu'].includes(browserLang) ? browserLang : 'de';
 }
 
 export function t(key) {
@@ -168,7 +168,7 @@ export function t(key) {
 }
 
 export function setPreferredLang(lang) {
-  if (!['de', 'it', 'fr', 'ru', 'en'].includes(lang)) {
+  if (!['de', 'it', 'fr', 'ru', 'en', 'hu'].includes(lang)) {
     return;
   }
 

@@ -24,7 +24,7 @@ function safeInteger(value, fallback = 0) {
 
 function normalizeLanguage(value) {
   const lang = safeString(value, 10).toLowerCase().slice(0, 2);
-  return ['de', 'it', 'en', 'fr', 'ru'].includes(lang) ? lang : 'de';
+  return ['de', 'it', 'en', 'fr', 'ru', 'hu'].includes(lang) ? lang : 'de';
 }
 
 function normalizeEmail(email) {
