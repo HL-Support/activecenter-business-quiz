@@ -134,7 +134,10 @@ function verifyBuildOutput() {
 
 function verifyLanguageShell() {
   const html = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
-  assert(html.includes("['de','it','fr','ru','en','hu']"), 'index.html must support de/it/fr/ru/en/hu');
+  assert(
+    html.includes("['de','it','fr','ru','en','hu']"),
+    'index.html must support de/it/fr/ru/en/hu'
+  );
   assert(html.includes("getElementById('langFR')"), 'index.html must render FR switcher logic');
   assert(html.includes("getElementById('langRU')"), 'index.html must render RU switcher logic');
   assert(html.includes("getElementById('langEN')"), 'index.html must render EN switcher logic');
@@ -146,8 +149,14 @@ function verifyHashFlow() {
   const app = fs.readFileSync(path.join(projectRoot, 'src', 'app', 'App.jsx'), 'utf8');
   const apiBridge = fs.readFileSync(path.join(projectRoot, 'api', 'bridge.js'), 'utf8');
   const leadTrack = fs.readFileSync(path.join(projectRoot, 'api', 'lead-track.js'), 'utf8');
-  const leadWorker = fs.readFileSync(path.join(projectRoot, 'api', 'lead-outbox-worker.js'), 'utf8');
-  const leadHealth = fs.readFileSync(path.join(projectRoot, 'api', 'lead-system-health.js'), 'utf8');
+  const leadWorker = fs.readFileSync(
+    path.join(projectRoot, 'api', 'lead-outbox-worker.js'),
+    'utf8'
+  );
+  const leadHealth = fs.readFileSync(
+    path.join(projectRoot, 'api', 'lead-system-health.js'),
+    'utf8'
+  );
   const leadInit = fs.readFileSync(path.join(projectRoot, 'api', 'lead-init.js'), 'utf8');
   const leadSql = fs.readFileSync(path.join(projectRoot, 'supabase-lead-system-v2.sql'), 'utf8');
   const tracker = fs.readFileSync(path.join(projectRoot, 'ac-track.js'), 'utf8');
@@ -226,6 +235,12 @@ function verifyHashFlow() {
       leadHealth.includes('sendAlertEmail') &&
       leadHealth.includes('lead_system_health_last_alert'),
     'lead system health endpoint must monitor outbox failures and dedupe alerts'
+  );
+  assert(
+    !leadHealth.includes('count=exact') &&
+      leadHealth.includes('sampleCount') &&
+      leadHealth.includes('recent_events_1h_available'),
+    'lead system health endpoint must avoid exact full-table counts'
   );
   assert(
     leadSql.includes('WITH (security_invoker = true)') &&
