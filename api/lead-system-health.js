@@ -12,7 +12,8 @@ const {
 
 const WORKER_SECRET = process.env.LEAD_OUTBOX_WORKER_SECRET || process.env.BRIDGE_KEY;
 const POSTMARK_SERVER_TOKEN = process.env.POSTMARK_SERVER_TOKEN;
-const POSTMARK_FROM = process.env.POSTMARK_FROM || 'Activecenter-Support <mail@mail.hl-support.biz>';
+const POSTMARK_FROM =
+  process.env.POSTMARK_FROM || 'Activecenter-Support <mail@mail.hl-support.biz>';
 const POSTMARK_MESSAGE_STREAM = process.env.POSTMARK_MESSAGE_STREAM || 'outbound';
 const ALERT_EMAIL = process.env.IDENTITY_ALERT_EMAIL || 'markus@global-sce.com';
 
@@ -48,16 +49,14 @@ function authorize(req) {
   }
 }
 
-async function countRows(path) {
-  const response = await supabaseRequest(path, {
-    headers: {
-      Prefer: 'count=exact',
-      Range: '0-0',
-    },
-  });
-  const contentRange = response.headers.get('content-range') || '';
-  const match = contentRange.match(/\/(\d+)$/);
-  return match ? Number(match[1]) : 0;
+async function sampleCount(path, limit = 25) {
+  const separator = path.includes('?') ? '&' : '?';
+  const rows = await supabaseJson(`${path}${separator}limit=${limit + 1}`);
+  return Array.isArray(rows) ? Math.min(rows.length, limit) : 0;
+}
+
+async function hasRows(path) {
+  return (await sampleCount(path, 1)) > 0;
 }
 
 async function getConfig(key) {
@@ -155,26 +154,30 @@ async function collectHealth() {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
   const counts = {
-    lead_state: await countRows('lead_state?select=lead_hash'),
-    lead_video_progress: await countRows('lead_video_progress?select=lead_hash'),
-    lead_events: await countRows('lead_events?select=event_uid'),
-    outbox_pending: await countRows('lead_sync_outbox?status=eq.pending&select=id'),
-    outbox_failed_old: await countRows(
+    lead_state_available: (await hasRows('lead_state?select=lead_hash')) ? 1 : 0,
+    lead_video_progress_available: (await hasRows('lead_video_progress?select=lead_hash')) ? 1 : 0,
+    lead_events_available: (await hasRows('lead_events?select=event_uid')) ? 1 : 0,
+    outbox_pending: await sampleCount('lead_sync_outbox?status=eq.pending&select=id'),
+    outbox_failed_old: await sampleCount(
       `lead_sync_outbox?status=eq.failed&updated_at=lt.${encodeURIComponent(tenMinutesAgo)}&select=id`
     ),
-    outbox_processing_stale: await countRows(
+    outbox_processing_stale: await sampleCount(
       `lead_sync_outbox?status=eq.processing&locked_at=lt.${encodeURIComponent(tenMinutesAgo)}&select=id`
     ),
-    outbox_dead: await countRows('lead_sync_outbox?status=eq.dead&select=id'),
-    migration_unresolved_open: await countRows(
+    outbox_dead: await sampleCount('lead_sync_outbox?status=eq.dead&select=id'),
+    migration_unresolved_open: await sampleCount(
       'lead_migration_unresolved?resolved_at=is.null&select=id'
     ),
-    recent_leads_1h: await countRows(
+    recent_leads_1h_available: (await hasRows(
       `lead_state?created_at=gte.${encodeURIComponent(oneHourAgo)}&select=lead_hash`
-    ),
-    recent_events_1h: await countRows(
+    ))
+      ? 1
+      : 0,
+    recent_events_1h_available: (await hasRows(
       `lead_events?created_at=gte.${encodeURIComponent(oneHourAgo)}&select=event_uid`
-    ),
+    ))
+      ? 1
+      : 0,
   };
 
   const issues = [];
