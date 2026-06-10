@@ -2397,12 +2397,12 @@
       optin_placeholder_firstname: 'A keresztneved',
       optin_label_email: 'E-mail cím',
       optin_placeholder_email: 'te@email.com',
-      optin_btn_submit: 'Mutasd a kiértékelésem →',
+      optin_btn_submit: 'Mutasd meg a kiértékelésemet →',
       optin_btn_loading: 'Küldés...',
       optin_btn_validating: 'E-mail ellenőrzése...',
       optin_email_error_format: 'Kérlek, adj meg egy érvényes e-mail címet.',
       optin_email_error_invalid:
-        'Úgy tűnik, ez az e-mail cím nem kézbesíthető. Kérlek, ellenőrizd röviden.',
+        'Úgy tűnik, ez az e-mail cím nem kézbesíthető. Kérlek, nézd át még egyszer.',
       optin_submit_error:
         'Most nem tudtuk biztosan hozzárendelni a kapcsolattartódat. Kérlek, töltsd újra az oldalt, és próbáld meg még egyszer.',
       optin_privacy: 'Nincs spam. Megígérjük.',
@@ -2417,7 +2417,7 @@
         'Emberek, akik hozzád hasonlóan indultak: mit éltek meg, és mi változott az életükben.',
       video_counter: 'Videó',
       video_next_label: 'Következő',
-      video_btn_next: 'Tovább a lépéshez',
+      video_btn_next: 'Tovább a {n}. lépéshez',
       video_btn_prev: '← Videó újranézése',
       video_btn_final: 'Tovább a 4. lépéshez →',
       video_btn_locked: 'Tovább a következő lépéshez',
