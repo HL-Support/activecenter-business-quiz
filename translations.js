@@ -2660,7 +2660,7 @@
         code: 'B típus',
         name: 'A Kapcsolatteremtő',
         animal: 'Szél',
-        tagline: 'Az energiád ragadós, és pontosan ez a természetes előnyöd.',
+        tagline: 'Az energiád ragadós, és pontosan ez a verhetetlen előnyöd.',
         shadow:
           'Néha egyik ötlettől a másikig ugrasz, de ez nem hiba. Csak megfelelő keretre van szükséged.',
         strengths: [
