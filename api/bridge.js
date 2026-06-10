@@ -1994,7 +1994,7 @@ function buildPointsResultLabel(completedCount, totalVideos, lang) {
       none: 'Még egy információs videó sincs teljesen megnézve',
       one: 'Az 1. információs videó teljesen megnézve',
       some: (value) => `${value}/${total} információs videó teljesen megnézve`,
-      all: `Mind a(z) ${total} információs videó teljesen megnézve`,
+      all: `Mind a ${total} információs videó teljesen megnézve`,
     },
   };
   const labels = copy[language] || copy.de;
@@ -2345,7 +2345,7 @@ const HOT_LEAD_EMAIL_I18N = {
     title: (slug) => `Forró érdeklődő innen: business.activecenter.info/${slug || ''}`,
     greeting: (name) => `Szia ${name},`,
     intro:
-      'egy kontakt teljesen végignézte mind a 3 információs videót. Ez erős érdeklődést mutat, és jó pillanat egy személyes üzenetre.',
+      'valaki teljesen végignézte mind a 3 információs videót. Ez erős érdeklődést mutat, és jó pillanat egy személyes üzenetre.',
     insightsLinkLabel: 'Itt tudhatsz meg többet a kontaktodról',
     labels: {
       name: 'Név',
@@ -2356,14 +2356,14 @@ const HOT_LEAD_EMAIL_I18N = {
       completedAt: 'Befejezve',
     },
     footerReason:
-      'Ezt az értesítést automatikusan hoztuk létre, mert egy kvíz-kontakt teljesen végignézte mind a 3 információs videót.',
+      'Ezt az értesítést automatikusan hoztuk létre, mert egy kvízkitöltő teljesen végignézte mind a 3 információs videót.',
     privacyLabel: 'Impresszum és adatvédelem',
     copyrightLabel: '&copy; HL-Support Ltd. &middot; Minden jog fenntartva',
     profiles: {
-      A: 'A típus A Cselekvő',
-      B: 'B típus A Kapcsolatteremtő',
-      C: 'C típus A Támasz',
-      D: 'D típus Az Építő',
+      A: 'A Cselekvő (A típus)',
+      B: 'A Kapcsolatteremtő (B típus)',
+      C: 'A Támasz (C típus)',
+      D: 'Az Építő (D típus)',
     },
     aspirations: {
       freedom: 'Szabadság',

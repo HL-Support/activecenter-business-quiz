@@ -1057,7 +1057,11 @@ function VideoStep({
                 cursor: y ? 'pointer' : 'not-allowed',
               },
             },
-            d ? a('video_btn_final') : `${a('video_btn_next')} ${t + 1} →`
+            d
+              ? a('video_btn_final')
+              : a('video_btn_next').includes('{n}')
+                ? `${a('video_btn_next').replace('{n}', t + 1)} →`
+                : `${a('video_btn_next')} ${t + 1} →`
           ),
           t > 1 && React.createElement('button', { onClick: o, style: Su() }, a('video_btn_prev'))
         ),
