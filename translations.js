@@ -65,7 +65,6 @@
       intro_type_3: 'Wasser',
       intro_type_4: 'Fels',
       intro_cta: 'Meinen Code entdecken →',
-      intro_disclaimer: 'Kein Verkaufsgespräch. Keine E-Mail erforderlich.',
       intro_legal_link: 'Impressum & Datenschutz',
 
       analyzing_badge: 'Auswertung',
@@ -522,7 +521,6 @@
       intro_type_3: 'Acqua',
       intro_type_4: 'Roccia',
       intro_cta: 'Scopri il mio codice →',
-      intro_disclaimer: 'Nessuna vendita. Nessuna e-mail necessaria.',
       intro_legal_link: 'Note legali e privacy',
 
       analyzing_badge: 'Analisi',
@@ -970,7 +968,6 @@
       intro_type_3: 'Water',
       intro_type_4: 'Stone',
       intro_cta: 'Discover my code →',
-      intro_disclaimer: 'No sales call. No email required.',
       intro_legal_link: 'Legal notice & privacy',
 
       analyzing_badge: 'Analysis',
@@ -1414,7 +1411,6 @@
       intro_type_3: 'Eau',
       intro_type_4: 'Pierre',
       intro_cta: 'Découvre mon code →',
-      intro_disclaimer: "Pas de discours de vente. Pas d'e-mail requise.",
       intro_legal_link: 'Mentions légales & confidentialité',
 
       analyzing_badge: 'Analyse',
@@ -1872,7 +1868,6 @@
       intro_type_3: 'Вода',
       intro_type_4: 'Камень',
       intro_cta: 'Открой мой код →',
-      intro_disclaimer: 'Нет торгового разговора. Не требуется e-mail.',
       intro_legal_link: 'Правовая информация и конфиденциальность',
 
       analyzing_badge: 'Анализ',
@@ -2319,7 +2314,6 @@
       intro_type_3: 'Víz',
       intro_type_4: 'Szikla',
       intro_cta: 'Felfedezem a kódomat →',
-      intro_disclaimer: 'Nincs értékesítési beszélgetés. E-mail sem kell hozzá.',
       intro_legal_link: 'Impresszum és adatvédelem',
 
       analyzing_badge: 'Kiértékelés',
