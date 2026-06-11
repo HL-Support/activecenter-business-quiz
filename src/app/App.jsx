@@ -1648,6 +1648,17 @@ function QuizFlow() {
           a('intro_cta')
         ),
         React.createElement(
+          'p',
+          {
+            style: {
+              color: 'rgba(245,240,232,0.42)',
+              fontSize: '12px',
+              marginTop: '14px',
+            },
+          },
+          a('intro_disclaimer')
+        ),
+        React.createElement(
           'div',
           {
             style: {
