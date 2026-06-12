@@ -61,6 +61,7 @@ function decodeResumePayload(token) {
     const decoded = JSON.parse(atob(String(token || '').split('.')[1] || ''));
     const sessionHash = decoded.sessionHash;
     const email = decoded.email;
+    const lang = decoded.lang || '';
     const lastVideoStep = decoded.lastVideoStep || 1;
     const resumeTarget = decoded.resumeTarget || 'result';
     const resumeStartPercent = decoded.resumeStartPercent || 0;
@@ -72,6 +73,7 @@ function decodeResumePayload(token) {
     return {
       sessionHash,
       email,
+      lang,
       lastVideoStep,
       resumeTarget,
       resumeStartPercent,
@@ -109,6 +111,7 @@ async function resolveResumePayload(token, target = '') {
       sessionHash: data.sessionHash,
       leadHash: data.leadHash || '',
       email: data.email,
+      lang: data.lang || '',
       firstName: data.firstName || '',
       memberId: data.memberId || '',
       refId: data.refId || '',
@@ -150,6 +153,7 @@ async function resolveResumeKeyPayload(key, target = '') {
       sessionHash: data.sessionHash,
       leadHash: data.leadHash || '',
       email: data.email || '',
+      lang: data.lang || '',
       firstName: data.firstName || '',
       memberId: data.memberId || '',
       refId: data.refId || '',
@@ -170,6 +174,7 @@ async function resolveResumeKeyPayload(key, target = '') {
 function applyResumePayload({
   sessionHash,
   email,
+  lang,
   leadHash,
   firstName,
   memberId,
@@ -181,6 +186,11 @@ function applyResumePayload({
   aspiration,
   barrier,
 }) {
+  const normalizedLang = String(lang || '').trim().toLowerCase().slice(0, 2);
+  if (['de', 'it', 'fr', 'ru', 'en', 'hu'].includes(normalizedLang)) {
+    localStorage.setItem(`preferredLang:${beraterSlug || getCurrentSlug()}`, normalizedLang);
+  }
+
   localStorage.setItem(
     'acQuizTrackingSession_v1',
     JSON.stringify({
