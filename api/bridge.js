@@ -3888,6 +3888,10 @@ module.exports = async function handler(req, res) {
         sessionHash: payload.sessionHash,
         email: payload.email,
         leadHash: contactLead.leadHash,
+        lang:
+          contactLead.leadState?.lang || payload.lang || payload.language
+            ? normalizeLanguage(contactLead.leadState?.lang, payload.lang, payload.language)
+            : '',
         context: payload.context || 'quiz',
         lastVideoStep: resumeState.lastVideoStep,
         resumeTarget: resumeState.resumeTarget,
@@ -3908,6 +3912,10 @@ module.exports = async function handler(req, res) {
       success: true,
       token,
       leadHash: contactLead.leadHash,
+      lang:
+        contactLead.leadState?.lang || payload.lang || payload.language
+          ? normalizeLanguage(contactLead.leadState?.lang, payload.lang, payload.language)
+          : '',
       lastVideoStep: resumeState.lastVideoStep,
       resumeTarget: resumeState.resumeTarget,
       resumeStartPercent: resumeState.resumeStartPercent,
@@ -3963,6 +3971,7 @@ module.exports = async function handler(req, res) {
       sessionHash,
       leadHash: contactLead.leadHash,
       email,
+      lang: leadState.lang || decoded.lang ? normalizeLanguage(leadState.lang, decoded.lang) : '',
       firstName: safeString(leadState.first_name, 120) || '',
       memberId: safeString(leadState.member_id, 120) || '',
       refId: safeString(leadState.ref_id || leadState.member_id, 120) || '',
@@ -4026,6 +4035,7 @@ module.exports = async function handler(req, res) {
       sessionHash,
       leadHash: contactLead.leadHash,
       email,
+      lang: leadState.lang ? normalizeLanguage(leadState.lang) : '',
       firstName: safeString(leadState.first_name, 120) || '',
       memberId: safeString(leadState.member_id, 120) || '',
       refId: safeString(leadState.ref_id || leadState.member_id, 120) || '',
