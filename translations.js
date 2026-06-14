@@ -171,10 +171,10 @@
         'Schau das Video vollständig an – danach schaltet sich der nächste Schritt automatisch frei.',
       video_hint_unlocked: 'Weiter freigeschaltet.',
       video_hint_recovery:
-        'Wenn die Video-Erkennung hakt, kannst du das Video neu laden oder im Ausnahmefall manuell fortfahren.',
+        'Wenn die Video-Erkennung hakt, lade das Video neu und schau ab der letzten Stelle weiter.',
       video_error_title: 'Das Video konnte technisch nicht sauber erkannt werden.',
       video_error_body:
-        'Normalerweise schaltet sich der nächste Schritt am Ende des Videos automatisch frei. Wenn das gerade nicht klappt, lade das Video neu oder nutze den manuellen Fallback.',
+        'Normalerweise schaltet sich der nächste Schritt am Ende des Videos automatisch frei. Wenn das gerade nicht klappt, lade das Video neu und schau ab der letzten Stelle weiter.',
       video_error_detail: 'Technischer Hinweis',
       video_error_reload: 'Video neu laden',
       video_error_unlock: 'Manuell fortfahren',
@@ -627,10 +627,10 @@
         'Guarda il video fino alla fine – il passo successivo si sblocca automaticamente.',
       video_hint_unlocked: 'Ora puoi continuare.',
       video_hint_recovery:
-        'Se il rilevamento del video si blocca, puoi ricaricare il video o, in via eccezionale, continuare manualmente.',
+        "Se il rilevamento del video si blocca, ricarica il video e continua dall'ultimo punto.",
       video_error_title: "Il video non e' stato rilevato correttamente per un problema tecnico.",
       video_error_body:
-        'Di norma il passaggio successivo si sblocca automaticamente al termine del video. Se non dovesse succedere, ricarica il video oppure usa il fallback manuale.',
+        "Di norma il passaggio successivo si sblocca automaticamente al termine del video. Se non dovesse succedere, ricarica il video e continua dall'ultimo punto.",
       video_error_detail: 'Dettaglio tecnico',
       video_error_reload: 'Ricarica video',
       video_error_unlock: 'Continua manualmente',
@@ -1075,10 +1075,10 @@
         'Watch the video all the way through – the next step unlocks automatically once you are done.',
       video_hint_unlocked: 'You can continue now.',
       video_hint_recovery:
-        'If video detection gets stuck, you can reload the video or continue manually as an exception.',
+        'If video detection gets stuck, reload the video and continue from the last clear point.',
       video_error_title: 'The video could not be detected properly due to a technical issue.',
       video_error_body:
-        'Normally the next step unlocks automatically at the end of the video. If that does not happen, reload the video or use the manual fallback.',
+        'Normally the next step unlocks automatically at the end of the video. If that does not happen, reload the video and continue from the last clear point.',
       video_error_detail: 'Technical detail',
       video_error_reload: 'Reload video',
       video_error_unlock: 'Continue manually',
@@ -1519,11 +1519,11 @@
         "Regarde la vidéo jusqu'au bout – l'étape suivante se débloque automatiquement.",
       video_hint_unlocked: 'Tu peux maintenant continuer.',
       video_hint_recovery:
-        'Si la détection vidéo se bloque, tu peux recharger la vidéo ou continuer manuellement en dernier recours.',
+        'Si la détection vidéo se bloque, recharge la vidéo et continue depuis le dernier point reconnu.',
       video_error_title:
         "La vidéo n'a pas pu être détectée correctement en raison d'un problème technique.",
       video_error_body:
-        "Normalement l'étape suivante se débloque automatiquement à la fin de la vidéo. Si ce n'est pas le cas, recharge la vidéo ou utilise le fallback manuel.",
+        "Normalement l'étape suivante se débloque automatiquement à la fin de la vidéo. Si ce n'est pas le cas, recharge la vidéo et continue depuis le dernier point reconnu.",
       video_error_detail: 'Détail technique',
       video_error_reload: 'Recharger la vidéo',
       video_error_unlock: 'Continuer manuellement',
@@ -1974,10 +1974,10 @@
       video_hint_locked: 'Досмотри видео до конца – следующий шаг откроется автоматически.',
       video_hint_unlocked: 'Теперь ты можешь продолжить.',
       video_hint_recovery:
-        'Если обнаружение видео зависает, ты можешь перезагрузить видео или в крайнем случае продолжить вручную.',
+        'Если распознавание видео зависает, перезагрузи видео и продолжи с последнего корректно распознанного места.',
       video_error_title: 'Видео не удалось правильно обнаружить из-за технической проблемы.',
       video_error_body:
-        'Как правило, следующий шаг открывается автоматически в конце видео. Если этого не происходит, перезагрузи видео или воспользуйся ручным переходом.',
+        'Как правило, следующий шаг открывается автоматически в конце видео. Если этого не происходит, перезагрузи видео и продолжи с последнего корректно распознанного места.',
       video_error_detail: 'Технические детали',
       video_error_reload: 'Перезагрузить видео',
       video_error_unlock: 'Продолжить вручную',
@@ -2425,10 +2425,10 @@
         'Nézd végig a videót – utána automatikusan megnyílik a következő lépés.',
       video_hint_unlocked: 'A folytatás megnyílt.',
       video_hint_recovery:
-        'Ha a videó felismerése elakad, töltsd újra a videót, vagy kivételes esetben lépj tovább kézzel.',
+        'Ha a videó felismerése elakad, töltsd újra a videót, és folytasd az utolsó biztos ponttól.',
       video_error_title: 'A videót technikailag nem sikerült tisztán felismerni.',
       video_error_body:
-        'Normál esetben a következő lépés a videó végén automatikusan megnyílik. Ha ez most nem működik, töltsd újra a videót, vagy használd a kézi továbblépést.',
+        'Normál esetben a következő lépés a videó végén automatikusan megnyílik. Ha ez most nem működik, töltsd újra a videót, és folytasd az utolsó biztos ponttól.',
       video_error_detail: 'Technikai megjegyzés',
       video_error_reload: 'Videó újratöltése',
       video_error_unlock: 'Továbblépés kézzel',
