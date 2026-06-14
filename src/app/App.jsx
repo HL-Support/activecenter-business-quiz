@@ -158,6 +158,7 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
     maxPlayheadPercent = 0,
     maxAllowedSecond = 0,
     seekCount = 0,
+    programmaticSeekUntil = 0,
     readyTimeout = null,
     progressTimeout = null,
     durationTimeout = null,
@@ -185,6 +186,15 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
       video_issue_context: context || '',
       video_issue_at: new Date().toISOString(),
     });
+  }
+
+  function setPlayerTime(player, second, issue) {
+    try {
+      programmaticSeekUntil = Date.now() + 1200;
+      player.setCurrentTime(second);
+    } catch {
+      trackHealth(issue || 'set_time_failed', String(second));
+    }
   }
 
   function compactRanges() {
@@ -290,11 +300,7 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
       resume_start_percent: resumeStartPercent,
       resume_start_second: startSecond,
     });
-    try {
-      player.setCurrentTime(startSecond);
-    } catch {
-      trackHealth('resume_seek_failed', String(startSecond));
-    }
+    setPlayerTime(player, startSecond, 'resume_seek_failed');
   }
 
   function seekBack(player, attemptedSecond) {
@@ -305,11 +311,7 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
       allowed_second: Math.floor(allowed),
       seek_count: seekCount,
     });
-    try {
-      player.setCurrentTime(allowed);
-    } catch {
-      trackHealth('seekback_failed', String(allowed));
-    }
+    setPlayerTime(player, allowed, 'seekback_failed');
     lastSecond = allowed;
   }
 
@@ -341,6 +343,10 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
 
     player.on('seeked', function (data) {
       const current = data && typeof data.seconds === 'number' ? data.seconds : lastSecond;
+      if (Date.now() < programmaticSeekUntil) {
+        lastSecond = Math.min(current, maxAllowedSecond || current);
+        return;
+      }
       if (duration > 0 && current > maxAllowedSecond + 1) seekBack(player, current);
     });
 
@@ -371,9 +377,19 @@ function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
     player.on('ended', function () {
       if (destroyed) return;
       markWatched(lastSecond, duration || lastSecond);
-      const completedPayload = buildProgressPayload('playerjs_ended', 100);
-      track('video_completed', completedPayload);
-      if (options.onCompleted) options.onCompleted(videoStep, completedPayload);
+      const percent = uniqueWatchedPercent(),
+        completedPayload = buildProgressPayload('playerjs_ended', 100);
+      if (percent >= 95) {
+        track('video_completed', completedPayload);
+        if (options.onCompleted) options.onCompleted(videoStep, completedPayload);
+      } else {
+        track('video_ended_low_watch', {
+          ...completedPayload,
+          video_issue: 'ended_before_unique_watch_threshold',
+          required_unique_watched_percent: 95,
+        });
+        setStatus('stalled', 'ended_before_unique_watch_threshold');
+      }
       emitProgress('playerjs_ended', !0);
       if (uniqueWatchedPercent() >= 95) unlock('ended');
     });

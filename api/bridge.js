@@ -1048,6 +1048,10 @@ async function writeTrackingEvent(payload) {
       const videoStep = safeInteger(payload.video_step);
       if (videoStep) {
         const videoKey = `${identity.sessionHash}::${videoStep}`;
+        const videoUniquePercent = safeTrackingInteger(payload, [
+          'unique_watched_percent',
+          'progress_percent',
+        ]);
         await insertIgnoringDuplicates(
           'tracking_video_progress',
           'session_video_key',
@@ -1070,17 +1074,15 @@ async function writeTrackingEvent(payload) {
             video_id: safeTrackingString(payload, 'video_id', 120),
             duration_seconds: safeTrackingInteger(payload, 'duration_seconds'),
             unique_watched_seconds: safeTrackingInteger(payload, 'unique_watched_seconds'),
-            unique_watched_percent: safeTrackingInteger(payload, [
-              'unique_watched_percent',
-              'progress_percent',
-            ]),
+            unique_watched_percent: videoUniquePercent,
             max_playhead_percent: safeTrackingInteger(payload, 'max_playhead_percent'),
             seek_count: safeTrackingInteger(payload, 'seek_count'),
             watched_ranges: hasTrackingValue(payload.watched_ranges)
               ? payload.watched_ranges
               : undefined,
             unlocked_at: eventName === 'video_unlocked' ? eventAt : undefined,
-            completed_at: eventName === 'video_completed' ? eventAt : undefined,
+            completed_at:
+              eventName === 'video_completed' && videoUniquePercent >= 95 ? eventAt : undefined,
             last_update_at: eventAt,
             updated_at: nowIso(),
           })
@@ -1557,8 +1559,8 @@ async function mirrorLegacyTrackingToLeadSystemV2(payload) {
       p_lead_hash: leadHash,
       p_video_step: videoStep,
       p_video_id: safeString(payload.video_id, 120) || null,
-      p_unique_watched_percent: eventName === 'video_completed' ? Math.max(progressPercent, 100) : progressPercent,
-      p_playhead_percent: eventName === 'video_completed' ? Math.max(playheadPercent, 100) : playheadPercent,
+      p_unique_watched_percent: progressPercent,
+      p_playhead_percent: playheadPercent,
       p_unique_watched_seconds: safeInteger(payload.unique_watched_seconds) || 0,
       p_event_at: eventAt,
       p_lang: lang,
