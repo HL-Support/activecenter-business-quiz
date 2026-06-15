@@ -31,6 +31,19 @@ function normalizeEmail(email) {
   return safeString(email, 180).toLowerCase();
 }
 
+function normalizeMetaAttributionFallback(attribution = {}) {
+  const next = { ...(attribution || {}) };
+  const fbclid = safeString(next.fbclid, 500);
+  const utmMedium = safeString(next.utm_medium, 120);
+  if (fbclid && !utmMedium) {
+    next.utm_medium = 'paid_social';
+    if (!safeString(next.utm_source, 120)) {
+      next.utm_source = 'meta';
+    }
+  }
+  return next;
+}
+
 function hashEmail(email) {
   const normalized = normalizeEmail(email);
   if (!normalized) return '';
@@ -222,6 +235,7 @@ module.exports = {
   isUuid,
   normalizeEmail,
   normalizeLanguage,
+  normalizeMetaAttributionFallback,
   nowIso,
   readCookie,
   safeInteger,

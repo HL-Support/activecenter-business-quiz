@@ -124,6 +124,11 @@ function getLeadAttribution() {
     ),
   };
 
+  if (next.fbclid && !next.utm_medium) {
+    next.utm_medium = 'paid_social';
+    if (!next.utm_source) next.utm_source = 'meta';
+  }
+
   if (
     next.utm_source ||
     next.utm_medium ||

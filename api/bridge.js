@@ -97,6 +97,19 @@ function safeTrackingString(record, keys, maxLength = 255) {
   return value === undefined ? undefined : safeString(value, maxLength);
 }
 
+function normalizeMetaAttributionFallback(attribution = {}) {
+  const next = { ...(attribution || {}) };
+  const fbclid = safeString(next.fbclid, 500);
+  const utmMedium = safeString(next.utm_medium, 120);
+  if (fbclid && !utmMedium) {
+    next.utm_medium = 'paid_social';
+    if (!safeString(next.utm_source, 120)) {
+      next.utm_source = 'meta';
+    }
+  }
+  return next;
+}
+
 function safeTrackingPersonName(record, keys, maxLength = 120) {
   const value = firstTrackingValue(record, Array.isArray(keys) ? keys : [keys]);
   return value === undefined ? undefined : normalizePersonName(value, maxLength);
@@ -807,11 +820,11 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
   const refId =
     safeString(finalLead?.ref_id || hidden.ref_id || hidden.member_id || submissionPayload?.ref_id, 120) ||
     memberId;
-  const attribution = {
+  const attribution = normalizeMetaAttributionFallback({
     ...(submissionPayload?.attribution || {}),
     ...hidden,
     ...submissionPayload,
-  };
+  });
 
   await supabaseRequest('lead_state?on_conflict=lead_hash', {
     method: 'POST',
@@ -1530,6 +1543,16 @@ async function mirrorLegacyTrackingToLeadSystemV2(payload) {
 
   if (eventName === 'form_submitted') {
     const email = safeString(payload.email || payload.form_email, 180)?.toLowerCase() || null;
+    const attribution = normalizeMetaAttributionFallback({
+      utm_source: safeString(payload.utm_source, 120) || null,
+      utm_medium: safeString(payload.utm_medium, 120) || null,
+      utm_campaign: safeString(payload.utm_campaign, 180) || null,
+      utm_content: safeString(payload.utm_content, 180) || null,
+      fbclid: safeString(payload.fbclid, 500) || null,
+      fbc: safeString(payload.fbc, 500) || null,
+      fbp: safeString(payload.fbp, 120) || null,
+      event_source_url: safeString(payload.event_source_url, 1000) || null,
+    });
     await patchByEquals(
       'lead_state',
       'lead_hash',
@@ -1541,6 +1564,14 @@ async function mirrorLegacyTrackingToLeadSystemV2(payload) {
         email_hash: normalizedEmailHash(email),
         form_submitted_at: safeString(payload.submitted_at || payload.form_submitted_at || eventAt, 40),
         initial_barrier: safeString(payload.initial_barrier || payload.quiz_barrier, 120) || undefined,
+        utm_source: attribution.utm_source || undefined,
+        utm_medium: attribution.utm_medium || undefined,
+        utm_campaign: attribution.utm_campaign || undefined,
+        utm_content: attribution.utm_content || undefined,
+        fbclid: attribution.fbclid || undefined,
+        fbc: attribution.fbc || undefined,
+        fbp: attribution.fbp || undefined,
+        event_source_url: attribution.event_source_url || undefined,
         lifecycle_stage: 'contact_known',
         lang,
         last_event_at: eventAt,

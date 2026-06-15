@@ -4,6 +4,7 @@ const {
   handleOptions,
   isLeadHash,
   isUuid,
+  normalizeMetaAttributionFallback,
   readCookie,
   safeString,
   sendJson,
@@ -50,7 +51,7 @@ module.exports = async function handler(req, res) {
       const existingRow = Array.isArray(existingRows) ? existingRows[0] : null;
       const existingLeadHash = existingRow?.lead_hash || '';
       if (isLeadHash(existingLeadHash)) {
-        const incomingUtm = {
+        const incomingUtm = normalizeMetaAttributionFallback({
           utm_source: safeString(body.utm_source, 120) || null,
           utm_medium: safeString(body.utm_medium, 120) || null,
           utm_campaign: safeString(body.utm_campaign, 120) || null,
@@ -59,7 +60,7 @@ module.exports = async function handler(req, res) {
           fbc: safeString(body.fbc, 500) || null,
           fbp: safeString(body.fbp, 120) || null,
           event_source_url: safeString(body.event_source_url, 1000) || null,
-        };
+        });
         const utmPatch = {};
         for (const [key, value] of Object.entries(incomingUtm)) {
           if (value && !existingRow[key]) utmPatch[key] = value;
@@ -88,6 +89,17 @@ module.exports = async function handler(req, res) {
 
     const generatedLeadHash = isLeadHash(requestedLeadHash) ? requestedLeadHash : generateLeadHash();
 
+    const attribution = normalizeMetaAttributionFallback({
+      utm_source: safeString(body.utm_source, 120) || null,
+      utm_medium: safeString(body.utm_medium, 120) || null,
+      utm_campaign: safeString(body.utm_campaign, 120) || null,
+      utm_content: safeString(body.utm_content, 180) || null,
+      fbclid: safeString(body.fbclid, 500) || null,
+      fbc: safeString(body.fbc, 500) || null,
+      fbp: safeString(body.fbp, 120) || null,
+      event_source_url: safeString(body.event_source_url, 1000) || null,
+    });
+
     const rows = await supabaseRpc('init_lead', {
       p_client_seed: clientSeed,
       p_lead_hash: generatedLeadHash,
@@ -102,14 +114,14 @@ module.exports = async function handler(req, res) {
       p_funnel_key: safeString(body.funnel_key || body.funnel || 'business', 80),
       p_lang: safeString(body.lang, 10) || null,
       p_country: safeString(body.country, 5) || null,
-      p_utm_source: safeString(body.utm_source, 120) || null,
-      p_utm_medium: safeString(body.utm_medium, 120) || null,
-      p_utm_campaign: safeString(body.utm_campaign, 120) || null,
-      p_utm_content: safeString(body.utm_content, 180) || null,
-      p_fbclid: safeString(body.fbclid, 500) || null,
-      p_fbc: safeString(body.fbc, 500) || null,
-      p_fbp: safeString(body.fbp, 120) || null,
-      p_event_source_url: safeString(body.event_source_url, 1000) || null,
+      p_utm_source: attribution.utm_source || null,
+      p_utm_medium: attribution.utm_medium || null,
+      p_utm_campaign: attribution.utm_campaign || null,
+      p_utm_content: attribution.utm_content || null,
+      p_fbclid: attribution.fbclid || null,
+      p_fbc: attribution.fbc || null,
+      p_fbp: attribution.fbp || null,
+      p_event_source_url: attribution.event_source_url || null,
     });
 
     const leadHash = Array.isArray(rows) ? rows[0]?.lead_hash : rows?.lead_hash;
