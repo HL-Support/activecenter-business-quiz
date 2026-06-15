@@ -661,6 +661,78 @@ function sendLeadTrackEvent(eventName, payload = {}) {
   }).catch(() => undefined);
 }
 
+function metaQualityFromTrackEvent(eventName, payload = {}) {
+  const normalizedName = normalizeEventNameForLeadSystem(eventName);
+  if (normalizedName === 'video_completed' || normalizedName === 'video_unlocked') {
+    const step = Number(payload.video_step || 0);
+    if (step === 1) {
+      return {
+        customEvent: 'BusinessQuizVideo1Completed',
+        standardEvent: 'ViewContent',
+        contentName: 'Business Quiz Video 1 Completed',
+        value: 1,
+      };
+    }
+    if (step === 2) {
+      return {
+        customEvent: 'BusinessQuizVideo2Completed',
+        standardEvent: 'ViewContent',
+        contentName: 'Business Quiz Video 2 Completed',
+        value: 3,
+      };
+    }
+    if (step === 3) {
+      return {
+        customEvent: 'BusinessQuizHotLead',
+        standardEvent: 'CompleteRegistration',
+        contentName: 'Business Quiz Hot Lead',
+        value: 10,
+      };
+    }
+  }
+
+  if (normalizedName === 'cta_clicked') {
+    const ctaType = String(payload.cta_type || '').trim().toLowerCase();
+    if (ctaType && !['spaeter', 'later', 'not_now', 'nicht_interessiert', 'no'].includes(ctaType)) {
+      return {
+        customEvent: 'BusinessQuizFinalCTA',
+        standardEvent: 'Contact',
+        contentName: 'Business Quiz Final CTA',
+        value: 20,
+      };
+    }
+  }
+
+  return null;
+}
+
+function sendMetaBrowserQualityEvent(eventName, payload = {}, leadHash = '') {
+  if (typeof window === 'undefined' || typeof window.fbq !== 'function') return;
+  const quality = metaQualityFromTrackEvent(eventName, payload, leadHash);
+  if (!quality) return;
+
+  const data = {
+    content_name: quality.contentName,
+    content_category: 'Business Opportunity',
+    funnel: 'business_leads_quiz',
+    quality_signal: quality.customEvent,
+    video_step: payload.video_step || undefined,
+    value: quality.value,
+    currency: 'EUR',
+  };
+
+  try {
+    window.fbq('trackCustom', quality.customEvent, data, {
+      eventID: `${leadHash}_${quality.customEvent}`,
+    });
+    window.fbq('track', quality.standardEvent, data, {
+      eventID: `${leadHash}_${quality.customEvent}_${quality.standardEvent}`,
+    });
+  } catch {
+    // Meta tracking must never interrupt the quiz flow.
+  }
+}
+
 export function getCoachFromStorage() {
   try {
     return JSON.parse(storage.getItem('acCoach') || 'null');
@@ -1062,6 +1134,9 @@ export function trackQuizAnalytics(eventName, payload = {}) {
   const slug = String(
     storage.getItem('acBeraterSlug') || (getCoachFromStorage() || {}).slug || getCurrentSlug() || 'default'
   );
+  const memberId = String(storage.getItem('acMemberId') || '');
+  const leadRun = getActiveLeadRun(slug, memberId);
+  sendMetaBrowserQualityEvent(eventName, payload, leadRun.lead_hash);
   if (isNewLeadWriterActive(slug)) {
     sendLeadTrackEvent(eventName, payload);
     return;
@@ -1070,12 +1145,11 @@ export function trackQuizAnalytics(eventName, payload = {}) {
   // Dynamically import trackEvent from ac-track.js to use EventBatcher
   // This ensures events are batched, deduplicated with event_id, and persisted to localStorage
   import('../ac-track.js').then(({ trackEvent }) => {
-    const memberId = String(storage.getItem('acMemberId') || '');
     const isResume = storage.getItem('acSessionIsResume') === 'true';
 
     // Build enriched payload with all tracking context
     const enrichedPayload = {
-      lead_hash: getActiveLeadRun(slug, memberId).lead_hash,
+      lead_hash: leadRun.lead_hash,
       visitor_id: getTrackingVisitorId(),
       is_internal_traffic: isInternalTraffic(),
       is_resume: isResume,

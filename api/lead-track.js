@@ -281,15 +281,15 @@ async function sendMetaQualityEvent({ req, leadHash, eventName, eventAt, payload
       fbp: lead.fbp,
       eventSourceUrl: lead.event_source_url,
     };
-    await sendMetaCAPIEvent({
+    const sends = [sendMetaCAPIEvent({
       ...metaContext,
       eventName,
       eventId: `${leadHash}_${eventName}`,
       customData: baseCustomData,
-    });
+    })];
     const standardEvent = metaStandardEventForQuality(eventName);
     if (standardEvent) {
-      await sendMetaCAPIEvent({
+      sends.push(sendMetaCAPIEvent({
         ...metaContext,
         eventName: standardEvent.eventName,
         eventId: `${leadHash}_${eventName}_${standardEvent.eventName}`,
@@ -299,8 +299,9 @@ async function sendMetaQualityEvent({ req, leadHash, eventName, eventAt, payload
           value: standardEvent.value,
           currency: 'EUR',
         },
-      });
+      }));
     }
+    await Promise.all(sends);
   } catch (error) {
     console.warn(`Meta CAPI quality event ${eventName} failed (non-critical):`, error.message);
   }
