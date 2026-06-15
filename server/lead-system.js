@@ -50,6 +50,111 @@ function hashEmail(email) {
   return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 
+function hashMetaValue(value) {
+  const normalized = safeString(value, 500).toLowerCase();
+  if (!normalized) return '';
+  return crypto.createHash('sha256').update(normalized).digest('hex');
+}
+
+function isoToUnixSeconds(value) {
+  const time = Date.parse(value);
+  if (!Number.isFinite(time)) return Math.floor(Date.now() / 1000);
+  return Math.floor(time / 1000);
+}
+
+async function sendMetaCAPIEvent({
+  eventName,
+  email,
+  firstName,
+  leadHash,
+  clientIp,
+  userAgent,
+  eventId,
+  eventAt,
+  fbc,
+  fbp,
+  eventSourceUrl,
+  customData,
+  timeoutMs = 2500,
+}) {
+  const META_PIXEL_ID = process.env.META_PIXEL_ID;
+  const META_CAPI_TOKEN = process.env.META_CAPI_TOKEN;
+  const normalizedEventName = safeString(eventName, 80);
+  if (!META_PIXEL_ID || !META_CAPI_TOKEN || !normalizedEventName) return { skipped: true };
+
+  const userData = {};
+  const emailHash = hashEmail(email);
+  if (emailHash) userData.em = [emailHash];
+
+  const firstNameHash = hashMetaValue(firstName);
+  if (firstNameHash) userData.fn = [firstNameHash];
+
+  const externalIdHash = hashMetaValue(leadHash);
+  if (externalIdHash) userData.external_id = [externalIdHash];
+
+  const metaFbc = safeString(fbc, 500);
+  const metaFbp = safeString(fbp, 120);
+  if (metaFbc) userData.fbc = metaFbc;
+  if (metaFbp) userData.fbp = metaFbp;
+
+  const ip = safeString(clientIp, 120);
+  const ua = safeString(userAgent, 500);
+  if (ip) userData.client_ip_address = ip;
+  if (ua) userData.client_user_agent = ua;
+
+  if (!Object.keys(userData).length) return { skipped: true };
+  const cleanCustomData = Object.fromEntries(
+    Object.entries(customData || {}).filter(([, value]) => value !== undefined && value !== null && value !== '')
+  );
+
+  const payload = {
+    data: [
+      {
+        event_name: normalizedEventName,
+        event_time: isoToUnixSeconds(eventAt),
+        event_id: safeString(eventId, 160) || `capi_${normalizedEventName}_${Date.now()}`,
+        action_source: 'website',
+        event_source_url: safeString(eventSourceUrl, 1000) || 'https://business.activecenter.info/markus',
+        user_data: userData,
+        custom_data: {
+          content_name: 'Erfolgscode Quiz',
+          content_category: 'Business Opportunity',
+          ...cleanCustomData,
+        },
+      },
+    ],
+  };
+  if (process.env.META_CAPI_TEST_CODE) {
+    payload.test_event_code = process.env.META_CAPI_TEST_CODE;
+  }
+
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeout =
+    controller && Number.isFinite(Number(timeoutMs)) && Number(timeoutMs) > 0
+      ? setTimeout(() => controller.abort(), Number(timeoutMs))
+      : null;
+
+  try {
+    const response = await fetch(
+      `https://graph.facebook.com/v21.0/${META_PIXEL_ID}/events?access_token=${META_CAPI_TOKEN}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller ? controller.signal : undefined,
+      }
+    );
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      console.warn(`Meta CAPI ${normalizedEventName} responded ${response.status}: ${text.slice(0, 200)}`);
+      return { ok: false, status: response.status };
+    }
+    return { ok: true, status: response.status };
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
+
 function isUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     String(value || '')
@@ -241,6 +346,7 @@ module.exports = {
   safeInteger,
   safeNumber,
   safeString,
+  sendMetaCAPIEvent,
   sendJson,
   setLeadCookie,
   shouldUseNewWriter,
