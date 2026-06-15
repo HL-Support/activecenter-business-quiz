@@ -6,6 +6,7 @@ const {
   isLeadHash,
   normalizeEmail,
   normalizeLanguage,
+  normalizeMetaAttributionFallback,
   nowIso,
   safeInteger,
   safeNumber,
@@ -251,13 +252,7 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload) {
   }
 
   if (eventName === 'form_submitted') {
-    await patchLeadState(leadHash, {
-      first_name: normalizePersonName(payload.first_name || payload.form_first_name, 120) || null,
-      email: safeString(payload.email || payload.form_email, 180) || null,
-      email_normalized: normalizeEmail(payload.email || payload.form_email) || null,
-      email_hash: hashEmail(payload.email || payload.form_email) || null,
-      phone: safeString(payload.phone, 80) || null,
-      form_submitted_at: safeString(payload.submitted_at || payload.form_submitted_at || eventAt, 40),
+    const attribution = normalizeMetaAttributionFallback({
       utm_source: safeString(payload.utm_source, 120) || null,
       utm_medium: safeString(payload.utm_medium, 120) || null,
       utm_campaign: safeString(payload.utm_campaign, 180) || null,
@@ -266,6 +261,22 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload) {
       fbc: safeString(payload.fbc, 500) || null,
       fbp: safeString(payload.fbp, 120) || null,
       event_source_url: safeString(payload.event_source_url, 1000) || null,
+    });
+    await patchLeadState(leadHash, {
+      first_name: normalizePersonName(payload.first_name || payload.form_first_name, 120) || null,
+      email: safeString(payload.email || payload.form_email, 180) || null,
+      email_normalized: normalizeEmail(payload.email || payload.form_email) || null,
+      email_hash: hashEmail(payload.email || payload.form_email) || null,
+      phone: safeString(payload.phone, 80) || null,
+      form_submitted_at: safeString(payload.submitted_at || payload.form_submitted_at || eventAt, 40),
+      utm_source: attribution.utm_source || null,
+      utm_medium: attribution.utm_medium || null,
+      utm_campaign: attribution.utm_campaign || null,
+      utm_content: attribution.utm_content || null,
+      fbclid: attribution.fbclid || null,
+      fbc: attribution.fbc || null,
+      fbp: attribution.fbp || null,
+      event_source_url: attribution.event_source_url || null,
       lifecycle_stage: 'contact_known',
       lang,
       last_event_at: eventAt,
