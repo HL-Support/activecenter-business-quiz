@@ -11,8 +11,10 @@ const {
   safeInteger,
   safeNumber,
   safeString,
+  sendMetaCAPIEvent,
   sendJson,
   shouldUseNewWriter,
+  supabaseJson,
   supabaseRequest,
   supabaseRpc,
 } = require('../server/lead-system');
@@ -204,7 +206,73 @@ async function enqueueSync(leadHash, syncType, contextData) {
   });
 }
 
-async function handleSideEffects(leadHash, eventName, eventAt, payload) {
+function clientIpFromRequest(req) {
+  const forwarded = safeString(req?.headers?.['x-forwarded-for'], 500);
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return safeString(req?.socket?.remoteAddress, 120);
+}
+
+function metaQualityEventNameForRank(rank) {
+  if (rank === 1) return 'BusinessQuizVideo1Completed';
+  if (rank === 2) return 'BusinessQuizVideo2Completed';
+  if (rank >= 3) return 'BusinessQuizHotLead';
+  return '';
+}
+
+function isPositiveFinalCta(payload) {
+  const ctaType = safeString(payload.cta_type, 80).toLowerCase();
+  return ctaType && !['spaeter', 'later', 'not_now', 'nicht_interessiert', 'no'].includes(ctaType);
+}
+
+async function loadLeadStateForMeta(leadHash) {
+  const rows = await supabaseJson(
+    `lead_state?lead_hash=eq.${encodeURIComponent(leadHash)}&select=lead_hash,first_name,email,email_normalized,profile_code,profile_label,main_aspiration,main_aspiration_label,utm_source,utm_medium,utm_campaign,utm_content,fbclid,fbc,fbp,event_source_url,lang&limit=1`
+  );
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+async function sendMetaQualityEvent({ req, leadHash, eventName, eventAt, payload, completedRank, videoStep }) {
+  if (!eventName) return;
+  try {
+    const lead = await loadLeadStateForMeta(leadHash);
+    if (!lead) return;
+    await sendMetaCAPIEvent({
+      eventName,
+      email: lead.email_normalized || lead.email,
+      firstName: lead.first_name,
+      leadHash,
+      clientIp: clientIpFromRequest(req),
+      userAgent: safeString(req?.headers?.['user-agent'], 500),
+      eventId: `${leadHash}_${eventName}`,
+      eventAt,
+      fbc: lead.fbc,
+      fbp: lead.fbp,
+      eventSourceUrl: lead.event_source_url,
+      customData: {
+        funnel: 'business_leads_quiz',
+        source_app: 'business_leads_quiz',
+        quality_signal: eventName,
+        video_step: videoStep || null,
+        completed_rank: completedRank || null,
+        profile_code: lead.profile_code || null,
+        profile_label: lead.profile_label || null,
+        main_aspiration: lead.main_aspiration || null,
+        main_aspiration_label: lead.main_aspiration_label || null,
+        lang: lead.lang || null,
+        utm_source: lead.utm_source || null,
+        utm_medium: lead.utm_medium || null,
+        utm_campaign: lead.utm_campaign || null,
+        utm_content: lead.utm_content || null,
+        fbclid_present: lead.fbclid ? '1' : '0',
+        cta_type: safeString(payload.cta_type, 80) || null,
+      },
+    });
+  } catch (error) {
+    console.warn(`Meta CAPI quality event ${eventName} failed (non-critical):`, error.message);
+  }
+}
+
+async function handleSideEffects(leadHash, eventName, eventAt, payload, req) {
   const lang = normalizeLanguage(payload.lang);
 
   if (eventName === 'quiz_answer') {
@@ -307,10 +375,22 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload) {
       p_lang: lang,
     });
     const rankResult = Array.isArray(rankRows) ? rankRows[0] : rankRows;
-    if (rankResult?.rank_changed === true && safeInteger(rankResult.completed_rank) >= 3) {
+    const completedRank = safeInteger(rankResult?.completed_rank);
+    if (rankResult?.rank_changed === true && completedRank > 0) {
+      await sendMetaQualityEvent({
+        req,
+        leadHash,
+        eventName: metaQualityEventNameForRank(completedRank),
+        eventAt,
+        payload,
+        completedRank,
+        videoStep: safeInteger(payload.video_step),
+      });
+    }
+    if (rankResult?.rank_changed === true && completedRank >= 3) {
       await enqueueSync(leadHash, 'coach_hot_lead_email', {
         lang,
-        rank: safeInteger(rankResult.completed_rank),
+        rank: completedRank,
         reason: 'all_videos_completed',
         event_at: eventAt,
         video_step: safeInteger(payload.video_step),
@@ -331,6 +411,17 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload) {
       lifecycle_stage: 'cta_clicked',
       last_event_at: eventAt,
     });
+    if (isPositiveFinalCta(payload)) {
+      await sendMetaQualityEvent({
+        req,
+        leadHash,
+        eventName: 'BusinessQuizFinalCTA',
+        eventAt,
+        payload,
+        completedRank: null,
+        videoStep: null,
+      });
+    }
     return;
   }
 
@@ -370,7 +461,7 @@ module.exports = async function handler(req, res) {
 
     const eventAt = eventAtOf(payload);
     await insertLeadEvent({ leadHash, eventName, eventAt, payload: { ...payload, lead_hash: leadHash } });
-    await handleSideEffects(leadHash, eventName, eventAt, payload);
+    await handleSideEffects(leadHash, eventName, eventAt, payload, req);
 
     return sendJson(res, 200, {
       success: true,
