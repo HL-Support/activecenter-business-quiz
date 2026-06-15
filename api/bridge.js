@@ -1226,6 +1226,22 @@ function metaQualityEventNameForRank(rank) {
   return '';
 }
 
+function metaStandardEventForQuality(eventName) {
+  if (eventName === 'BusinessQuizVideo1Completed') {
+    return { eventName: 'ViewContent', contentName: 'Business Quiz Video 1 Completed', value: 1 };
+  }
+  if (eventName === 'BusinessQuizVideo2Completed') {
+    return { eventName: 'ViewContent', contentName: 'Business Quiz Video 2 Completed', value: 3 };
+  }
+  if (eventName === 'BusinessQuizHotLead') {
+    return { eventName: 'CompleteRegistration', contentName: 'Business Quiz Hot Lead', value: 10 };
+  }
+  if (eventName === 'BusinessQuizFinalCTA') {
+    return { eventName: 'Contact', contentName: 'Business Quiz Final CTA', value: 20 };
+  }
+  return null;
+}
+
 function isPositiveFinalCtaType(value) {
   const ctaType = String(value || '').trim().toLowerCase();
   return ctaType && !['spaeter', 'later', 'not_now', 'nicht_interessiert', 'no'].includes(ctaType);
@@ -1250,37 +1266,55 @@ async function sendMetaCAPIQualityEventForLead({
   try {
     const lead = await loadLeadStateForMetaCAPI(leadHash);
     if (!lead) return;
-    await sendMetaCAPIEvent({
-      eventName,
+    const baseCustomData = {
+      funnel: 'business_leads_quiz',
+      source_app: 'business_leads_quiz',
+      quality_signal: eventName,
+      video_step: videoStep || null,
+      completed_rank: completedRank || null,
+      profile_code: lead.profile_code || null,
+      profile_label: lead.profile_label || null,
+      main_aspiration: lead.main_aspiration || null,
+      main_aspiration_label: lead.main_aspiration_label || null,
+      lang: lead.lang || null,
+      utm_source: lead.utm_source || null,
+      utm_medium: lead.utm_medium || null,
+      utm_campaign: lead.utm_campaign || null,
+      utm_content: lead.utm_content || null,
+      fbclid_present: lead.fbclid ? '1' : '0',
+      cta_type: safeTrackingString(payload, 'cta_type', 80) || null,
+    };
+    const metaContext = {
       email: lead.email_normalized || lead.email,
       firstName: lead.first_name,
       leadHash,
       clientIp: safeTrackingString(payload, ['client_ip', 'ip', 'remote_addr'], 120),
       userAgent: safeTrackingString(payload, ['user_agent', 'client_user_agent'], 500),
-      eventId: `${leadHash}_${eventName}`,
       eventAt,
       fbc: lead.fbc,
       fbp: lead.fbp,
       eventSourceUrl: lead.event_source_url,
-      customData: {
-        funnel: 'business_leads_quiz',
-        source_app: 'business_leads_quiz',
-        quality_signal: eventName,
-        video_step: videoStep || null,
-        completed_rank: completedRank || null,
-        profile_code: lead.profile_code || null,
-        profile_label: lead.profile_label || null,
-        main_aspiration: lead.main_aspiration || null,
-        main_aspiration_label: lead.main_aspiration_label || null,
-        lang: lead.lang || null,
-        utm_source: lead.utm_source || null,
-        utm_medium: lead.utm_medium || null,
-        utm_campaign: lead.utm_campaign || null,
-        utm_content: lead.utm_content || null,
-        fbclid_present: lead.fbclid ? '1' : '0',
-        cta_type: safeTrackingString(payload, 'cta_type', 80) || null,
-      },
+    };
+    await sendMetaCAPIEvent({
+      ...metaContext,
+      eventName,
+      eventId: `${leadHash}_${eventName}`,
+      customData: baseCustomData,
     });
+    const standardEvent = metaStandardEventForQuality(eventName);
+    if (standardEvent) {
+      await sendMetaCAPIEvent({
+        ...metaContext,
+        eventName: standardEvent.eventName,
+        eventId: `${leadHash}_${eventName}_${standardEvent.eventName}`,
+        customData: {
+          ...baseCustomData,
+          content_name: standardEvent.contentName,
+          value: standardEvent.value,
+          currency: 'EUR',
+        },
+      });
+    }
   } catch (error) {
     console.warn(`Meta CAPI quality event ${eventName} failed (non-critical):`, error.message);
   }
