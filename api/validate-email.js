@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   try {
     if (!ZEROBOUNCE_API_KEY) {
       return res.status(200).json({
-        valid: false,
+        valid: true,
         reason: 'missing_api_key',
         status: 'unknown',
         sub_status: '',
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     if (!zeroBounceResponse.ok) {
       console.error('ZeroBounce API error:', zeroBounceResponse.status);
       return res.status(200).json({
-        valid: false,
+        valid: true,
         reason: 'api_error',
         status: 'unknown',
         sub_status: '',
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Email validation error:', error.message);
     return res.status(200).json({
-      valid: false,
+      valid: true,
       reason: 'api_error',
       status: 'unknown',
       sub_status: '',
