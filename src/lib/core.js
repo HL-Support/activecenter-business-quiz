@@ -71,6 +71,12 @@ export const storage = {
   },
 };
 
+export function deriveQuizBarrier(selectedAnswers) {
+  if (!Array.isArray(selectedAnswers)) return '';
+  const barrierAnswer = selectedAnswers.find((answer) => answer && answer.barrier);
+  return barrierAnswer?.barrier || selectedAnswers[5]?.barrier || '';
+}
+
 function parseStoredJson(key) {
   try {
     return JSON.parse(storage.getItem(key) || 'null') || {};
@@ -1316,6 +1322,7 @@ export async function forwardQuizSubmission(
   const submittedAt = isoNow();
   const mainAspiration = normalizeAspiration(aspiration);
   const mainAspirationLabel = getAspirationLabel(mainAspiration);
+  const initialBarrier = deriveQuizBarrier(selectedAnswers);
   const leadSystemV2Enabled = isNewLeadWriterActive(slug);
   const attribution = getLeadAttribution();
   const metaEventId = `capi_${hash}`;
@@ -1439,7 +1446,7 @@ export async function forwardQuizSubmission(
             profile_label: profile?.name || profile?.animal || '',
             main_aspiration: mainAspiration,
             main_aspiration_label: mainAspirationLabel,
-            initial_barrier: selectedAnswers?.[5]?.barrier || '',
+            initial_barrier: initialBarrier,
             member_id: memberId,
             ref_id: memberId,
             berater_slug: slug,

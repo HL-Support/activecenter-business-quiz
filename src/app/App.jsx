@@ -25,6 +25,7 @@ import {
   resetLeadRun as resetRun,
   getActiveLeadRun,
   isLeadSystemV2Active,
+  deriveQuizBarrier,
 } from '../lib/core.js';
 
 const VIDEO_FULL_COMPLETION_KEY_PREFIX = 'acVideoFullCompletion_';
@@ -453,7 +454,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
           vorname: C,
           email: z,
           typ: e?.animal || '',
-          barriere: t[5]?.barrier || '',
+          barriere: deriveQuizBarrier(t),
           aspiration: r,
           berater: n,
         });
@@ -1431,6 +1432,7 @@ function QuizFlow() {
     [c, m] = React.useState(1),
     [resumeStartPercent, setResumeStartPercent] = React.useState(0),
     [resumeVideoStep, setResumeVideoStep] = React.useState(0),
+    answerLockRef = React.useRef(false),
     videoSteps = React.useMemo(() => Ap(), []),
     questions = React.useMemo(() => jp(), []),
     profiles = React.useMemo(() => Bp(), []),
@@ -1515,11 +1517,12 @@ function QuizFlow() {
   const v = (L) => {
       (d(!1),
         setTimeout(() => {
-          (L(), d(!0));
+          (L(), (answerLockRef.current = false), d(!0));
         }, 350));
     },
     C = () => {
-      if (!i) return;
+      if (!i || !s || answerLockRef.current) return;
+      answerLockRef.current = true;
       Dt('question_answered', {
         step_index: n + 1,
         question_index: n + 1,
@@ -1569,7 +1572,7 @@ function QuizFlow() {
                     quiz_aspiration: je,
                     main_aspiration: je,
                     main_aspiration_label: getAspirationLabel(je),
-                    quiz_barrier: L[5]?.barrier || '',
+                    quiz_barrier: deriveQuizBarrier(L),
                     quiz_completed_at: new Date().toISOString(),
                   }),
                   v(() => t('optin')));
@@ -1800,7 +1803,7 @@ function QuizFlow() {
       )
     );
   if (e === 'result' && g) {
-    const L = l[5],
+    const L = { barrier: deriveQuizBarrier(l) },
       j = {
         vehicle: a('barrier_vehicle'),
         community: a('barrier_community'),
