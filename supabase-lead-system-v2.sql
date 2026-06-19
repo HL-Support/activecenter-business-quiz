@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.lead_state (
   ref_id                text,
   ref_type              text CHECK (ref_type IN ('member','referral_code','campaign','unknown')) DEFAULT 'member',
   berater_slug          text,
-  organisation_id       int,
+  organisation_id       text,
 
   source_app            text,
   funnel_key            text,
@@ -28,6 +28,15 @@ CREATE TABLE IF NOT EXISTS public.lead_state (
   utm_source            text,
   utm_medium            text,
   utm_campaign          text,
+  utm_content           text,
+  utm_campaign_id       text,
+  utm_adset_id          text,
+  utm_ad_id             text,
+  utm_term              text,
+  fbclid                text,
+  fbc                   text,
+  fbp                   text,
+  event_source_url      text,
 
   first_seen_at         timestamptz DEFAULT now(),
   last_seen_at          timestamptz DEFAULT now(),
@@ -62,6 +71,18 @@ CREATE TABLE IF NOT EXISTS public.lead_state (
   created_at            timestamptz DEFAULT now(),
   updated_at            timestamptz DEFAULT now()
 );
+
+ALTER TABLE public.lead_state
+  ALTER COLUMN organisation_id TYPE text USING organisation_id::text,
+  ADD COLUMN IF NOT EXISTS utm_content text,
+  ADD COLUMN IF NOT EXISTS utm_campaign_id text,
+  ADD COLUMN IF NOT EXISTS utm_adset_id text,
+  ADD COLUMN IF NOT EXISTS utm_ad_id text,
+  ADD COLUMN IF NOT EXISTS utm_term text,
+  ADD COLUMN IF NOT EXISTS fbclid text,
+  ADD COLUMN IF NOT EXISTS fbc text,
+  ADD COLUMN IF NOT EXISTS fbp text,
+  ADD COLUMN IF NOT EXISTS event_source_url text;
 
 CREATE TABLE IF NOT EXISTS public.lead_video_progress (
   lead_hash                   text REFERENCES public.lead_state(lead_hash) ON DELETE CASCADE,
@@ -194,6 +215,8 @@ CREATE TABLE IF NOT EXISTS public.lead_access_permissions (
 CREATE INDEX IF NOT EXISTS idx_ls_member_created ON public.lead_state(member_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ls_ref_created ON public.lead_state(ref_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ls_organisation_created ON public.lead_state(organisation_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ls_utm_ad_id_created ON public.lead_state(utm_ad_id, form_submitted_at DESC) WHERE utm_ad_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ls_utm_content_created ON public.lead_state(utm_content, form_submitted_at DESC) WHERE utm_content IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_ls_email_hash ON public.lead_state(email_hash);
 CREATE INDEX IF NOT EXISTS idx_ls_email_norm ON public.lead_state(email_normalized);
 CREATE INDEX IF NOT EXISTS idx_ls_last_event ON public.lead_state(last_event_at DESC);
@@ -299,6 +322,7 @@ CREATE OR REPLACE FUNCTION public.init_lead(
   p_client_seed uuid,
   p_lead_hash text DEFAULT NULL,
   p_member_id text DEFAULT NULL,
+  p_organisation_id text DEFAULT NULL,
   p_ref_id text DEFAULT NULL,
   p_ref_type text DEFAULT NULL,
   p_berater_slug text DEFAULT NULL,
@@ -308,7 +332,16 @@ CREATE OR REPLACE FUNCTION public.init_lead(
   p_country text DEFAULT NULL,
   p_utm_source text DEFAULT NULL,
   p_utm_medium text DEFAULT NULL,
-  p_utm_campaign text DEFAULT NULL
+  p_utm_campaign text DEFAULT NULL,
+  p_utm_content text DEFAULT NULL,
+  p_fbclid text DEFAULT NULL,
+  p_fbc text DEFAULT NULL,
+  p_fbp text DEFAULT NULL,
+  p_event_source_url text DEFAULT NULL,
+  p_utm_campaign_id text DEFAULT NULL,
+  p_utm_adset_id text DEFAULT NULL,
+  p_utm_ad_id text DEFAULT NULL,
+  p_utm_term text DEFAULT NULL
 )
 RETURNS TABLE (lead_hash text)
 LANGUAGE plpgsql
@@ -332,6 +365,7 @@ BEGIN
     client_seed,
     lead_hash,
     member_id,
+    organisation_id,
     ref_id,
     ref_type,
     berater_slug,
@@ -342,6 +376,15 @@ BEGIN
     utm_source,
     utm_medium,
     utm_campaign,
+    utm_content,
+    utm_campaign_id,
+    utm_adset_id,
+    utm_ad_id,
+    utm_term,
+    fbclid,
+    fbc,
+    fbp,
+    event_source_url,
     first_seen_at,
     last_seen_at
   )
@@ -349,6 +392,7 @@ BEGIN
     p_client_seed,
     v_lead_hash,
     NULLIF(p_member_id, ''),
+    NULLIF(p_organisation_id, ''),
     v_ref_id,
     v_ref_type,
     NULLIF(p_berater_slug, ''),
@@ -359,12 +403,22 @@ BEGIN
     NULLIF(p_utm_source, ''),
     NULLIF(p_utm_medium, ''),
     NULLIF(p_utm_campaign, ''),
+    NULLIF(p_utm_content, ''),
+    NULLIF(p_utm_campaign_id, ''),
+    NULLIF(p_utm_adset_id, ''),
+    NULLIF(p_utm_ad_id, ''),
+    NULLIF(p_utm_term, ''),
+    NULLIF(p_fbclid, ''),
+    NULLIF(p_fbc, ''),
+    NULLIF(p_fbp, ''),
+    NULLIF(p_event_source_url, ''),
     now(),
     now()
   )
   ON CONFLICT (client_seed) DO UPDATE SET
     last_seen_at = now(),
     member_id = COALESCE(public.lead_state.member_id, EXCLUDED.member_id),
+    organisation_id = COALESCE(public.lead_state.organisation_id, EXCLUDED.organisation_id),
     ref_id = COALESCE(public.lead_state.ref_id, EXCLUDED.ref_id),
     ref_type = COALESCE(public.lead_state.ref_type, EXCLUDED.ref_type),
     berater_slug = COALESCE(public.lead_state.berater_slug, EXCLUDED.berater_slug),
@@ -375,6 +429,15 @@ BEGIN
     utm_source = COALESCE(public.lead_state.utm_source, EXCLUDED.utm_source),
     utm_medium = COALESCE(public.lead_state.utm_medium, EXCLUDED.utm_medium),
     utm_campaign = COALESCE(public.lead_state.utm_campaign, EXCLUDED.utm_campaign),
+    utm_content = COALESCE(public.lead_state.utm_content, EXCLUDED.utm_content),
+    utm_campaign_id = COALESCE(public.lead_state.utm_campaign_id, EXCLUDED.utm_campaign_id),
+    utm_adset_id = COALESCE(public.lead_state.utm_adset_id, EXCLUDED.utm_adset_id),
+    utm_ad_id = COALESCE(public.lead_state.utm_ad_id, EXCLUDED.utm_ad_id),
+    utm_term = COALESCE(public.lead_state.utm_term, EXCLUDED.utm_term),
+    fbclid = COALESCE(public.lead_state.fbclid, EXCLUDED.fbclid),
+    fbc = COALESCE(public.lead_state.fbc, EXCLUDED.fbc),
+    fbp = COALESCE(public.lead_state.fbp, EXCLUDED.fbp),
+    event_source_url = COALESCE(public.lead_state.event_source_url, EXCLUDED.event_source_url),
     updated_at = now()
   RETURNING public.lead_state.lead_hash;
 END;
@@ -779,7 +842,7 @@ CREATE POLICY lap_admin_select ON public.lead_access_permissions
   FOR SELECT TO authenticated
   USING (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
 
-REVOKE ALL ON FUNCTION public.init_lead(uuid,text,text,text,text,text,text,text,text,text,text,text,text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.init_lead(uuid,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.upsert_answer_current(text,text,int,text,text,text,text,jsonb,text,timestamptz) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.enqueue_lead_sync(text,text,jsonb) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.upsert_video_progress_monotonic(text,int,text,numeric,numeric,int,timestamptz,text) FROM PUBLIC;
@@ -787,7 +850,7 @@ REVOKE ALL ON FUNCTION public.claim_outbox_jobs(text,int) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.mark_outbox_done(bigint,text,jsonb) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.mark_outbox_failed(bigint,text,text,jsonb) FROM PUBLIC;
 
-GRANT EXECUTE ON FUNCTION public.init_lead(uuid,text,text,text,text,text,text,text,text,text,text,text,text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.init_lead(uuid,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.upsert_answer_current(text,text,int,text,text,text,text,jsonb,text,timestamptz) TO service_role;
 GRANT EXECUTE ON FUNCTION public.enqueue_lead_sync(text,text,jsonb) TO service_role;
 GRANT EXECUTE ON FUNCTION public.upsert_video_progress_monotonic(text,int,text,numeric,numeric,int,timestamptz,text) TO service_role;
@@ -797,10 +860,10 @@ GRANT EXECUTE ON FUNCTION public.mark_outbox_failed(bigint,text,text,jsonb) TO s
 
 INSERT INTO public.app_config (key, value)
 VALUES
-  ('new_lead_writer_enabled', 'false'::jsonb),
-  ('new_lead_writer_percent', '0'::jsonb),
-  ('legacy_writer_enabled', 'true'::jsonb),
-  ('outbox_worker_enabled', 'false'::jsonb)
+  ('new_lead_writer_enabled', 'true'::jsonb),
+  ('new_lead_writer_percent', '100'::jsonb),
+  ('legacy_writer_enabled', 'false'::jsonb),
+  ('outbox_worker_enabled', 'true'::jsonb)
 ON CONFLICT (key) DO NOTHING;
 
 COMMIT;

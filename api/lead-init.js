@@ -46,7 +46,7 @@ module.exports = async function handler(req, res) {
 
     if (isLeadHash(requestedLeadHash)) {
       const existingRows = await supabaseJson(
-        `lead_state?lead_hash=eq.${encodeURIComponent(requestedLeadHash)}&select=lead_hash,utm_source,utm_medium,utm_campaign,utm_content,fbclid,fbc,fbp,event_source_url&limit=1`
+        `lead_state?lead_hash=eq.${encodeURIComponent(requestedLeadHash)}&select=lead_hash,utm_source,utm_medium,utm_campaign,utm_content,utm_campaign_id,utm_adset_id,utm_ad_id,utm_term,fbclid,fbc,fbp,event_source_url&limit=1`
       );
       const existingRow = Array.isArray(existingRows) ? existingRows[0] : null;
       const existingLeadHash = existingRow?.lead_hash || '';
@@ -56,6 +56,10 @@ module.exports = async function handler(req, res) {
           utm_medium: safeString(body.utm_medium, 120) || null,
           utm_campaign: safeString(body.utm_campaign, 120) || null,
           utm_content: safeString(body.utm_content, 180) || null,
+          utm_campaign_id: safeString(body.utm_campaign_id, 80) || null,
+          utm_adset_id: safeString(body.utm_adset_id, 80) || null,
+          utm_ad_id: safeString(body.utm_ad_id, 80) || null,
+          utm_term: safeString(body.utm_term, 180) || null,
           fbclid: safeString(body.fbclid, 500) || null,
           fbc: safeString(body.fbc, 500) || null,
           fbp: safeString(body.fbp, 120) || null,
@@ -94,6 +98,10 @@ module.exports = async function handler(req, res) {
       utm_medium: safeString(body.utm_medium, 120) || null,
       utm_campaign: safeString(body.utm_campaign, 120) || null,
       utm_content: safeString(body.utm_content, 180) || null,
+      utm_campaign_id: safeString(body.utm_campaign_id, 80) || null,
+      utm_adset_id: safeString(body.utm_adset_id, 80) || null,
+      utm_ad_id: safeString(body.utm_ad_id, 80) || null,
+      utm_term: safeString(body.utm_term, 180) || null,
       fbclid: safeString(body.fbclid, 500) || null,
       fbc: safeString(body.fbc, 500) || null,
       fbp: safeString(body.fbp, 120) || null,
@@ -118,6 +126,10 @@ module.exports = async function handler(req, res) {
       p_utm_medium: attribution.utm_medium || null,
       p_utm_campaign: attribution.utm_campaign || null,
       p_utm_content: attribution.utm_content || null,
+      p_utm_campaign_id: attribution.utm_campaign_id || null,
+      p_utm_adset_id: attribution.utm_adset_id || null,
+      p_utm_ad_id: attribution.utm_ad_id || null,
+      p_utm_term: attribution.utm_term || null,
       p_fbclid: attribution.fbclid || null,
       p_fbc: attribution.fbc || null,
       p_fbp: attribution.fbp || null,

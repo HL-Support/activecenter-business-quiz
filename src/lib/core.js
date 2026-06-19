@@ -112,6 +112,10 @@ function getLeadAttribution() {
     params.has('utm_medium') ||
     params.has('utm_campaign') ||
     params.has('utm_content') ||
+    params.has('utm_campaign_id') ||
+    params.has('utm_adset_id') ||
+    params.has('utm_ad_id') ||
+    params.has('utm_term') ||
     params.has('fbclid');
   const fbclid = safeAttributionValue(params.get('fbclid') || stored.fbclid, 500);
   const cookieFbc = safeAttributionValue(getCookieValue('_fbc'), 500);
@@ -121,6 +125,10 @@ function getLeadAttribution() {
     utm_medium: safeAttributionValue(params.get('utm_medium') || stored.utm_medium, 120),
     utm_campaign: safeAttributionValue(params.get('utm_campaign') || stored.utm_campaign, 180),
     utm_content: safeAttributionValue(params.get('utm_content') || stored.utm_content, 180),
+    utm_campaign_id: safeAttributionValue(params.get('utm_campaign_id') || stored.utm_campaign_id, 80),
+    utm_adset_id: safeAttributionValue(params.get('utm_adset_id') || stored.utm_adset_id, 80),
+    utm_ad_id: safeAttributionValue(params.get('utm_ad_id') || stored.utm_ad_id, 80),
+    utm_term: safeAttributionValue(params.get('utm_term') || stored.utm_term, 180),
     fbclid,
     fbc: cookieFbc || safeAttributionValue(stored.fbc, 500) || buildFbcValue(fbclid),
     fbp: cookieFbp || safeAttributionValue(stored.fbp, 120),
@@ -140,6 +148,10 @@ function getLeadAttribution() {
     next.utm_medium ||
     next.utm_campaign ||
     next.utm_content ||
+    next.utm_campaign_id ||
+    next.utm_adset_id ||
+    next.utm_ad_id ||
+    next.utm_term ||
     next.fbclid ||
     next.fbc ||
     next.fbp ||
@@ -608,6 +620,10 @@ async function initializeLeadSystemV2(coach, slug) {
       utm_medium: attribution.utm_medium,
       utm_campaign: attribution.utm_campaign,
       utm_content: attribution.utm_content,
+      utm_campaign_id: attribution.utm_campaign_id,
+      utm_adset_id: attribution.utm_adset_id,
+      utm_ad_id: attribution.utm_ad_id,
+      utm_term: attribution.utm_term,
       fbclid: attribution.fbclid,
       fbc: attribution.fbc,
       fbp: attribution.fbp,
@@ -1371,6 +1387,10 @@ export async function forwardQuizSubmission(
           utm_medium: attribution.utm_medium,
           utm_campaign: attribution.utm_campaign,
           utm_content: attribution.utm_content,
+          utm_campaign_id: attribution.utm_campaign_id,
+          utm_adset_id: attribution.utm_adset_id,
+          utm_ad_id: attribution.utm_ad_id,
+          utm_term: attribution.utm_term,
           fbclid: attribution.fbclid,
           fbc: attribution.fbc,
           fbp: attribution.fbp,
@@ -1393,6 +1413,10 @@ export async function forwardQuizSubmission(
             utm_medium: attribution.utm_medium,
             utm_campaign: attribution.utm_campaign,
             utm_content: attribution.utm_content,
+            utm_campaign_id: attribution.utm_campaign_id,
+            utm_adset_id: attribution.utm_adset_id,
+            utm_ad_id: attribution.utm_ad_id,
+            utm_term: attribution.utm_term,
             fbclid: attribution.fbclid,
             fbc: attribution.fbc,
             fbp: attribution.fbp,
@@ -1455,6 +1479,10 @@ export async function forwardQuizSubmission(
             utm_medium: attribution.utm_medium,
             utm_campaign: attribution.utm_campaign,
             utm_content: attribution.utm_content,
+            utm_campaign_id: attribution.utm_campaign_id,
+            utm_adset_id: attribution.utm_adset_id,
+            utm_ad_id: attribution.utm_ad_id,
+            utm_term: attribution.utm_term,
             fbclid: attribution.fbclid,
             fbc: attribution.fbc,
             fbp: attribution.fbp,

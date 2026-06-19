@@ -795,6 +795,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
 }
 function VideoStep({
   profile: e,
+  aspiration = 'freedom',
   videoStep: t,
   videos: n,
   visible: r,
@@ -816,6 +817,11 @@ function VideoStep({
     T = `video-frame-${t}-${c}`,
     V = React.useMemo(() => le.getItem('acBeraterSlug') || 'default', []),
     M = s.filter((w) => w > t),
+    z = a('video_personal_line')
+      .replace('{profile}', e?.name || '')
+      .replace('{aspiration}', a(`asp_tag_${aspiration || 'freedom'}`)),
+    H = a(`video_transition_${t}`),
+    K = a(`video_extra_${t}`),
     J = function (w) {
       const L = {
         video_step: t,
@@ -907,6 +913,32 @@ function VideoStep({
           { style: { ...dt(26, { fontWeight: '600', marginBottom: '18px' }) } },
           u.sub
         ),
+        t === 1 &&
+          React.createElement(
+            'p',
+            {
+              style: {
+                color: 'rgba(245,240,232,0.66)',
+                fontSize: '13.5px',
+                lineHeight: 1.6,
+                marginBottom: '18px',
+              },
+            },
+            z
+          ),
+        K !== `video_extra_${t}` &&
+          React.createElement(
+            'p',
+            {
+              style: {
+                color: 'rgba(245,240,232,0.66)',
+                fontSize: '13.5px',
+                lineHeight: 1.6,
+                marginBottom: '18px',
+              },
+            },
+            K
+          ),
         React.createElement(
           'div',
           {
@@ -975,6 +1007,21 @@ function VideoStep({
                 )
               )
             )
+          ),
+        y &&
+          H !== `video_transition_${t}` &&
+          React.createElement(
+            'p',
+            {
+              style: {
+                color: g,
+                fontSize: '13.5px',
+                lineHeight: 1.6,
+                marginBottom: '18px',
+                fontWeight: '600',
+              },
+            },
+            H
           ),
         (S === 'error' || S === 'stalled') &&
           !y &&
@@ -1076,9 +1123,11 @@ function VideoStep({
             },
             d
               ? a('video_btn_final')
-              : a('video_btn_next').includes('{n}')
-                ? `${a('video_btn_next').replace('{n}', t + 1)} →`
-                : `${a('video_btn_next')} ${t + 1} →`
+              : a(`video_btn_next_${t + 1}`) !== `video_btn_next_${t + 1}`
+                ? a(`video_btn_next_${t + 1}`)
+                : a('video_btn_next').includes('{n}')
+                  ? `${a('video_btn_next').replace('{n}', t + 1)} →`
+                  : `${a('video_btn_next')} ${t + 1} →`
           ),
           t > 1 && React.createElement('button', { onClick: o, style: Su() }, a('video_btn_prev'))
         ),
@@ -2325,6 +2374,7 @@ function QuizFlow() {
   if (e === 'videos')
     return React.createElement(VideoStep, {
       profile: g,
+      aspiration: h,
       videoStep: c,
       videos: videoSteps,
       resumeStartPercent: c === resumeVideoStep ? resumeStartPercent : 0,
