@@ -242,7 +242,7 @@ function isPositiveFinalCta(payload) {
 
 async function loadLeadStateForMeta(leadHash) {
   const rows = await supabaseJson(
-    `lead_state?lead_hash=eq.${encodeURIComponent(leadHash)}&select=lead_hash,first_name,email,email_normalized,profile_code,profile_label,main_aspiration,main_aspiration_label,utm_source,utm_medium,utm_campaign,utm_content,fbclid,fbc,fbp,event_source_url,lang&limit=1`
+    `lead_state?lead_hash=eq.${encodeURIComponent(leadHash)}&select=lead_hash,first_name,email,email_normalized,profile_code,profile_label,main_aspiration,main_aspiration_label,utm_source,utm_medium,utm_campaign,utm_content,utm_campaign_id,utm_adset_id,utm_ad_id,utm_term,fbclid,fbc,fbp,event_source_url,lang&limit=1`
   );
   return Array.isArray(rows) ? rows[0] || null : null;
 }
@@ -267,6 +267,10 @@ async function sendMetaQualityEvent({ req, leadHash, eventName, eventAt, payload
       utm_medium: lead.utm_medium || null,
       utm_campaign: lead.utm_campaign || null,
       utm_content: lead.utm_content || null,
+      utm_campaign_id: lead.utm_campaign_id || null,
+      utm_adset_id: lead.utm_adset_id || null,
+      utm_ad_id: lead.utm_ad_id || null,
+      utm_term: lead.utm_term || null,
       fbclid_present: lead.fbclid ? '1' : '0',
       cta_type: safeString(payload.cta_type, 80) || null,
     };
@@ -360,6 +364,10 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload, req) {
       utm_medium: safeString(payload.utm_medium, 120) || null,
       utm_campaign: safeString(payload.utm_campaign, 180) || null,
       utm_content: safeString(payload.utm_content, 180) || null,
+      utm_campaign_id: safeString(payload.utm_campaign_id, 80) || null,
+      utm_adset_id: safeString(payload.utm_adset_id, 80) || null,
+      utm_ad_id: safeString(payload.utm_ad_id, 80) || null,
+      utm_term: safeString(payload.utm_term, 180) || null,
       fbclid: safeString(payload.fbclid, 500) || null,
       fbc: safeString(payload.fbc, 500) || null,
       fbp: safeString(payload.fbp, 120) || null,
@@ -376,6 +384,10 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload, req) {
       utm_medium: attribution.utm_medium || null,
       utm_campaign: attribution.utm_campaign || null,
       utm_content: attribution.utm_content || null,
+      utm_campaign_id: attribution.utm_campaign_id || null,
+      utm_adset_id: attribution.utm_adset_id || null,
+      utm_ad_id: attribution.utm_ad_id || null,
+      utm_term: attribution.utm_term || null,
       fbclid: attribution.fbclid || null,
       fbc: attribution.fbc || null,
       fbp: attribution.fbp || null,
