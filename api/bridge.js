@@ -4055,17 +4055,15 @@ module.exports = async function handler(req, res) {
       targetOverride
     );
     let resumeSession = null;
-    if (requestedSessionHash) {
-      try {
-        resumeSession = await ensureResumeSessionRecord({
-          sessionHash: requestedSessionHash,
-          email: safeString(payload.email, 255),
-          leadHash: contactLead.leadHash,
-          context: safeString(payload.context || 'quiz', 80),
-        });
-      } catch (error) {
-        console.warn('Could not create short resume key, falling back to JWT link:', error.message);
-      }
+    try {
+      resumeSession = await ensureResumeSessionRecord({
+        sessionHash: requestedSessionHash,
+        email: safeString(payload.email, 255),
+        leadHash: contactLead.leadHash,
+        context: safeString(payload.context || 'quiz', 80),
+      });
+    } catch (error) {
+      console.warn('Could not create short resume key, falling back to JWT link:', error.message);
     }
 
     const token = jwt.sign(
