@@ -894,10 +894,34 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
 }
 
 async function ensureResumeSessionRecord({ sessionHash, email, leadHash, context }) {
-  if (!sessionHash) return null;
+  if (!sessionHash && !isLeadHash(leadHash)) return null;
+
+  const normalizedSessionHash = sessionHash || `resume_${leadHash}`;
+
+  if (!sessionHash && isLeadHash(leadHash)) {
+    const existingLeadResponse = await supabaseRequest(
+      `tracking_sessions?lead_hash=eq.${encodeURIComponent(leadHash)}&select=id,session_hash,lead_hash,form_email&order=updated_at.desc&limit=1`
+    );
+    const existingLeadRows = await existingLeadResponse?.json?.();
+    if (Array.isArray(existingLeadRows) && existingLeadRows[0]?.id) {
+      const existing = existingLeadRows[0];
+      if (!existing.form_email && email) {
+        await patchByEquals(
+          'tracking_sessions',
+          'id',
+          String(existing.id),
+          compactObject({
+            form_email: email || undefined,
+            updated_at: nowIso(),
+          })
+        );
+      }
+      return existing;
+    }
+  }
 
   const existingResponse = await supabaseRequest(
-    `tracking_sessions?session_hash=eq.${encodeURIComponent(sessionHash)}&select=id,session_hash,lead_hash,form_email&limit=1`
+    `tracking_sessions?session_hash=eq.${encodeURIComponent(normalizedSessionHash)}&select=id,session_hash,lead_hash,form_email&limit=1`
   );
   const existingRows = await existingResponse?.json?.();
   if (Array.isArray(existingRows) && existingRows[0]?.id) {
@@ -906,7 +930,7 @@ async function ensureResumeSessionRecord({ sessionHash, email, leadHash, context
       await patchByEquals(
         'tracking_sessions',
         'session_hash',
-        sessionHash,
+        normalizedSessionHash,
         compactObject({
           form_email: email || undefined,
           lead_hash: leadHash || undefined,
@@ -924,7 +948,7 @@ async function ensureResumeSessionRecord({ sessionHash, email, leadHash, context
       Prefer: 'resolution=merge-duplicates,return=representation',
     },
     body: JSON.stringify({
-      session_hash: sessionHash,
+      session_hash: normalizedSessionHash,
       lead_hash: leadHash || null,
       source_app: 'business_leads_quiz',
       funnel: context || 'quiz',
