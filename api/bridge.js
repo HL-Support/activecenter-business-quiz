@@ -4004,14 +4004,16 @@ module.exports = async function handler(req, res) {
       console.error('ERROR: JWT_SECRET environment variable is not set');
       return res.status(500).json({ error: 'Server configuration error' });
     }
-    if (!payload || !payload.sessionHash || !payload.email) {
-      return res.status(400).json({ error: 'Missing sessionHash or email' });
+    const requestedSessionHash = safeString(payload?.sessionHash || payload?.session_hash, 96);
+    const requestedLeadHash = safeString(payload?.leadHash || payload?.lead_hash, 96);
+    if (!payload || !payload.email || (!requestedSessionHash && !isLeadHash(requestedLeadHash))) {
+      return res.status(400).json({ error: 'Missing resume contact context' });
     }
 
     const contactLead = await resolveContactLeadForResume({
-      sessionHash: safeString(payload.sessionHash, 96),
+      sessionHash: requestedSessionHash,
       email: safeString(payload.email, 255),
-      leadHash: safeString(payload.leadHash || payload.lead_hash, 96),
+      leadHash: requestedLeadHash,
       fallbackContact: payload.contact || null,
     });
     if (!contactLead.leadHash) {
@@ -4023,26 +4025,28 @@ module.exports = async function handler(req, res) {
     );
     const resumeState = resumeStateForRequestedTarget(
       await loadResumeState({
-        sessionHash: safeString(payload.sessionHash, 96),
+        sessionHash: requestedSessionHash,
         leadHash: contactLead.leadHash,
       }),
       targetOverride
     );
     let resumeSession = null;
-    try {
-      resumeSession = await ensureResumeSessionRecord({
-        sessionHash: payload.sessionHash,
-        email: safeString(payload.email, 255),
-        leadHash: contactLead.leadHash,
-        context: safeString(payload.context || 'quiz', 80),
-      });
-    } catch (error) {
-      console.warn('Could not create short resume key, falling back to JWT link:', error.message);
+    if (requestedSessionHash) {
+      try {
+        resumeSession = await ensureResumeSessionRecord({
+          sessionHash: requestedSessionHash,
+          email: safeString(payload.email, 255),
+          leadHash: contactLead.leadHash,
+          context: safeString(payload.context || 'quiz', 80),
+        });
+      } catch (error) {
+        console.warn('Could not create short resume key, falling back to JWT link:', error.message);
+      }
     }
 
     const token = jwt.sign(
       {
-        sessionHash: payload.sessionHash,
+        sessionHash: requestedSessionHash,
         email: payload.email,
         leadHash: contactLead.leadHash,
         lang:
@@ -4103,16 +4107,17 @@ module.exports = async function handler(req, res) {
 
     const sessionHash = safeString(decoded.sessionHash, 96);
     const email = safeString(decoded.email, 255);
+    const decodedLeadHash = safeString(decoded.leadHash || decoded.lead_hash, 96);
     const context = safeString(decoded.context || 'quiz', 32) || 'quiz';
 
-    if (!sessionHash || !email) {
+    if (!email || (!sessionHash && !isLeadHash(decodedLeadHash))) {
       return res.status(400).json({ error: 'Resume token missing required fields' });
     }
 
     const contactLead = await resolveContactLeadForResume({
       sessionHash,
       email,
-      leadHash: safeString(decoded.leadHash || decoded.lead_hash, 96),
+      leadHash: decodedLeadHash,
     });
     if (!contactLead.leadHash) {
       return res.status(409).json({ error: 'Resume contact not found' });
