@@ -682,6 +682,16 @@ async function callN8nUpdateResult(job) {
   }
 
   const lead = await loadLeadFull(leadHash);
+  if (safeString(lead?.lifecycle_stage, 80).toLowerCase() === 'merged_duplicate') {
+    return {
+      success: true,
+      updated: false,
+      skipped: true,
+      reason: 'merged_duplicate_no_mysql_sync',
+      lead_hash: leadHash,
+    };
+  }
+
   if (!hasContactData(lead)) {
     return {
       success: true,
