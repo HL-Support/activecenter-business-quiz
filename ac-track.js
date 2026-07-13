@@ -1,3 +1,5 @@
+import { recordAttributionShadow } from './src/lib/attribution-shadow.js';
+
 (function () {
   const BRIDGE_URL = '/api/bridge';
   const TRACKING_SCHEMA_VERSION = 'ac_tracking_v1';
@@ -365,6 +367,13 @@
       utm_content: stored.utm_content || params.get('utm_content') || '',
       referrer: stored.referrer || document.referrer || '',
     };
+    recordAttributionShadow({
+      source: 'page-tracker',
+      search: window.location.search || '',
+      stored,
+      canonical: next,
+      currentUrl: window.location.href,
+    });
     writeLocalStorage(ATTRIBUTION_KEY, JSON.stringify(next));
     return next;
   }

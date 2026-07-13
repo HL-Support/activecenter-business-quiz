@@ -31,6 +31,12 @@ jobs:
             npm install
           fi
 
+      - name: Contract and behavior tests
+        run: npm test
+
+      - name: Lint
+        run: npm run lint
+
       - name: Build
         run: npm run build
 
@@ -39,3 +45,6 @@ jobs:
 
       - name: Resume smoke
         run: npm run smoke:resume
+
+      - name: Read-only production smoke
+        run: npm run smoke:readonly
