@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
+    "test": "node --test scripts/tests/*.test.js",
     "verify": "node scripts/verify.js",
     "smoke:resume": "node scripts/smoke-resume-link.js",
+    "smoke:readonly": "node scripts/smoke-readonly.js",
     "guard:deploy": "node scripts/guard-production-deploy.js",
     "deploy:preview": "npm run build && npm run verify && npx vercel deploy --yes",
     "promote:prod": "npm run guard:deploy && npx vercel promote --yes",

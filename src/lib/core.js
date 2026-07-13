@@ -1,3 +1,5 @@
+import { recordAttributionShadow } from './attribution-shadow.js';
+
 const MAUTIC_BASE_URL = 'https://mautic.hl-support.biz';
 const TRACKING_SESSION_KEY = 'acQuizTrackingSession_v1';
 const TRACKING_COOKIE = 'acTrackingHash';
@@ -142,6 +144,14 @@ function getLeadAttribution() {
     next.utm_medium = 'paid_social';
     if (!next.utm_source) next.utm_source = 'meta';
   }
+
+  recordAttributionShadow({
+    source: 'lead-submission',
+    search: window.location.search || '',
+    stored,
+    canonical: next,
+    currentUrl: window.location.href,
+  });
 
   if (
     next.utm_source ||

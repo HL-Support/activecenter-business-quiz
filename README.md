@@ -143,3 +143,7 @@ Do not deploy directly with `npx vercel deploy --prod`. Production should only b
 - `api/validate-email.js`: E-Mail-Validierung
 - `supabase-schema.sql`: SQL fuer alte `quiz_sessions` plus neue `tracking_*` Tabellen
 - `vercel.json`: `dist`-Output und Slug-Rewrite
+# Betriebsdokumentation
+
+- Bridge-Vertraege: `docs/BRIDGE_CONTRACTS.md`
+- Abhaengigkeitskarte: `docs/DEPENDENCY_MAP.md`

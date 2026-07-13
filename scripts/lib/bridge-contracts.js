@@ -1,0 +1,86 @@
+module.exports = Object.freeze({
+  track_event: {
+    callers: ['ac-track.js'],
+    required: ['session_hash or hash'],
+    success: ['success', 'session_hash'],
+    sideEffect: 'Writes an analytics event.',
+  },
+  lookup_subdomain: {
+    callers: ['src/lib/core.js'],
+    required: ['subdomain'],
+    success: ['found or coach data'],
+    sideEffect: 'Read-only proxy to the central bridge.',
+  },
+  write_analytics: {
+    callers: ['scripts/smoke-resume-link.js'],
+    required: ['payload.hash'],
+    success: ['success', 'hash'],
+    sideEffect: 'Writes one analytics record.',
+  },
+  write_analytics_batch: {
+    callers: ['src/ac-track.js'],
+    required: ['payload.events[]'],
+    success: ['success', 'processed', 'failed', 'total'],
+    sideEffect: 'Writes analytics records in bounded batches.',
+  },
+  notify_all_videos_completed: {
+    callers: ['src/app/App.jsx'],
+    required: ['payload.completed_steps'],
+    success: ['success', 'email_sent or skipped_direct_email'],
+    sideEffect: 'Queues the canonical coach notification after all three videos.',
+  },
+  update_points_result: {
+    callers: ['src/lib/core.js', 'src/app/App.jsx'],
+    required: ['payload'],
+    success: ['success'],
+    sideEffect: 'Updates the Typeform-compatible result and mirrors completed videos.',
+  },
+  forward_typeform_adapter: {
+    callers: ['src/lib/core.js'],
+    required: ['adapter_key', 'payload', 'target'],
+    success: ['adapter_key', 'payload'],
+    sideEffect: 'Persists the opt-in, forwards it and sends server-side conversion signals.',
+  },
+  forward_webhook: {
+    callers: ['api/bridge.js'],
+    required: ['payload', 'target'],
+    success: ['upstream response'],
+    sideEffect: 'Forwards a validated webhook to the only allowed target.',
+  },
+  generate_resume_token: {
+    callers: ['n8n workflow RqKSRTgFv8mv04H2', 'scripts/smoke-resume-link.js'],
+    required: ['payload.email', 'payload.sessionHash or payload.leadHash'],
+    success: ['success', 'token', 'leadHash', 'resumeTarget', 'resumeUrl'],
+    sideEffect: 'Creates or reuses a short resume record.',
+  },
+  resolve_resume_token: {
+    callers: ['src/app/bootstrap.js'],
+    required: ['payload.token'],
+    success: ['success', 'sessionHash', 'leadHash', 'email', 'resumeTarget'],
+    sideEffect: 'Read-only resume resolution.',
+  },
+  resolve_resume_key: {
+    callers: ['src/app/bootstrap.js', 'scripts/smoke-resume-link.js'],
+    required: ['payload.key'],
+    success: ['success', 'sessionHash', 'leadHash', 'resumeTarget'],
+    sideEffect: 'Read-only short-link resolution.',
+  },
+  get_funnel_metrics: {
+    callers: ['external analytics clients'],
+    required: ['payload.berater_slug or payload.slug'],
+    success: ['success', 'data'],
+    sideEffect: 'Read-only metrics query.',
+  },
+  get_resume_metrics: {
+    callers: ['external analytics clients'],
+    required: ['payload.berater_slug or payload.slug'],
+    success: ['success', 'data'],
+    sideEffect: 'Read-only metrics query.',
+  },
+  get_completion_metrics: {
+    callers: ['external analytics clients'],
+    required: ['payload.berater_slug or payload.slug'],
+    success: ['success', 'data'],
+    sideEffect: 'Read-only metrics query.',
+  },
+});
