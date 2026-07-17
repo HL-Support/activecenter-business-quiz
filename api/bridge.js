@@ -345,6 +345,54 @@ async function readMysqlTable(table, where, limit = 1) {
   return Array.isArray(data.data) ? data.data : [];
 }
 
+async function resolveConsultantLookup(subdomain, forwardedFor, userAgent) {
+  const direct = await proxyToBridge(
+    { action: 'lookup_subdomain', subdomain },
+    forwardedFor,
+    userAgent
+  );
+  if (direct.status === 200 && direct.data?.found) {
+    const memberId = safeString(direct.data.member_id || direct.data.herbalife_id, 80);
+    const refId = safeString(direct.data.ref_id || memberId, 80);
+    return {
+      status: 200,
+      data: {
+        ...direct.data,
+        source: direct.data.source || 'user',
+        member_id: memberId,
+        ref_id: refId,
+        match: String(direct.data.match ?? (memberId && memberId === refId ? '1' : '0')),
+      },
+    };
+  }
+  if (direct.status >= 500) return direct;
+
+  const contact = (await readMysqlTable('contacts', { id: subdomain }, 1))[0] || null;
+  const coachId = safeString(contact?.coach_id, 80);
+  if (!contact || !coachId) return { status: 200, data: { found: false } };
+
+  const coach = (await readMysqlTable('users', { id: coachId }, 1))[0] || null;
+  const memberId = safeString(coach?.herbalife_id, 80);
+  const refId = safeString(contact.id, 80);
+  if (!coach || !memberId || !refId) return { status: 200, data: { found: false } };
+
+  return {
+    status: 200,
+    data: {
+      found: true,
+      source: 'contact',
+      member_id: memberId,
+      herbalife_id: memberId,
+      ref_id: refId,
+      match: memberId === refId ? '1' : '0',
+      id: coach.id,
+      first_name: coach.first_name || null,
+      last_name: coach.last_name || null,
+      full_name: coach.full_name || [coach.first_name, coach.last_name].filter(Boolean).join(' '),
+    },
+  };
+}
+
 function numberOrNull(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
@@ -3570,12 +3618,13 @@ module.exports = async function handler(req, res) {
 
   if (action === 'lookup_subdomain') {
     const normalizedSubdomain = String(subdomain || 'default').trim().toLowerCase();
-    const result = await proxyToBridge(
-      { action: 'lookup_subdomain', subdomain: normalizedSubdomain },
-      forwardedFor,
-      userAgent
-    );
-    return res.status(result.status).json(result.data);
+    try {
+      const result = await resolveConsultantLookup(normalizedSubdomain, forwardedFor, userAgent);
+      return res.status(result.status).json(result.data);
+    } catch (error) {
+      console.error('lookup_subdomain fallback failed:', error.message);
+      return res.status(502).json({ error: 'Consultant lookup failed' });
+    }
   }
 
   if (action === 'write_analytics') {
