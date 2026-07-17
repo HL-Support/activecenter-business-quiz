@@ -5,6 +5,8 @@ const path = require('node:path');
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'contract-test-secret-contract-test-secret';
 process.env.SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'contract-test-service-key';
+process.env.BRIDGE_KEY = process.env.BRIDGE_KEY || 'contract-test-bridge-key';
+process.env.HBA_READ_BRIDGE_URL = process.env.HBA_READ_BRIDGE_URL || 'https://bridge.test/read';
 
 const contracts = require('../lib/bridge-contracts.js');
 const handler = require('../../api/bridge.js');
@@ -102,4 +104,43 @@ test('incomplete video completion is a safe no-send response', async () => {
     email_sent: false,
     reason: 'not_all_videos_completed',
   });
+});
+
+test('lookup_subdomain falls back from a contact id to its coach Herbalife id', async () => {
+  const originalFetch = global.fetch;
+  const calls = [];
+  global.fetch = async (_url, options) => {
+    const body = JSON.parse(options.body);
+    calls.push(body);
+    if (body.action === 'lookup_subdomain') {
+      return new Response(JSON.stringify({ found: false }), { status: 200 });
+    }
+    if (body.action === 'read_table' && body.table === 'contacts') {
+      return new Response(JSON.stringify({ ok: true, data: [{ id: 4677, coach_id: 42 }] }), { status: 200 });
+    }
+    if (body.action === 'read_table' && body.table === 'users') {
+      return new Response(JSON.stringify({ ok: true, data: [{ id: 42, herbalife_id: '25851739', first_name: 'Markus' }] }), { status: 200 });
+    }
+    throw new Error(`Unexpected bridge request: ${JSON.stringify(body)}`);
+  };
+
+  try {
+    const response = await invoke({ action: 'lookup_subdomain', subdomain: '4677' });
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.body, {
+      found: true,
+      source: 'contact',
+      member_id: '25851739',
+      herbalife_id: '25851739',
+      ref_id: '4677',
+      match: '0',
+      id: 42,
+      first_name: 'Markus',
+      last_name: null,
+      full_name: 'Markus',
+    });
+    assert.equal(calls.length, 3);
+  } finally {
+    global.fetch = originalFetch;
+  }
 });
