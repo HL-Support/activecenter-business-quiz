@@ -107,19 +107,19 @@ test('incomplete video completion is a safe no-send response', async () => {
 });
 
 test('lookup_subdomain falls back from a contact id to its coach Herbalife id', async () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
   const calls = [];
-  global.fetch = async (_url, options) => {
+  globalThis.fetch = async (_url, options) => {
     const body = JSON.parse(options.body);
     calls.push(body);
     if (body.action === 'lookup_subdomain') {
-      return new Response(JSON.stringify({ found: false }), { status: 200 });
+      return new globalThis.Response(JSON.stringify({ found: false }), { status: 200 });
     }
     if (body.action === 'read_table' && body.table === 'contacts') {
-      return new Response(JSON.stringify({ ok: true, data: [{ id: 4677, coach_id: 42 }] }), { status: 200 });
+      return new globalThis.Response(JSON.stringify({ ok: true, data: [{ id: 4677, coach_id: 42 }] }), { status: 200 });
     }
     if (body.action === 'read_table' && body.table === 'users') {
-      return new Response(JSON.stringify({ ok: true, data: [{ id: 42, herbalife_id: '25851739', first_name: 'Markus' }] }), { status: 200 });
+      return new globalThis.Response(JSON.stringify({ ok: true, data: [{ id: 42, herbalife_id: '25851739', first_name: 'Markus' }] }), { status: 200 });
     }
     throw new Error(`Unexpected bridge request: ${JSON.stringify(body)}`);
   };
@@ -141,6 +141,6 @@ test('lookup_subdomain falls back from a contact id to its coach Herbalife id', 
     });
     assert.equal(calls.length, 3);
   } finally {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   }
 });
