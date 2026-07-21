@@ -7,8 +7,8 @@ const crypto = require('crypto');
 const projectRoot = path.resolve(__dirname, '..');
 const env = loadEnvFile(path.join(projectRoot, '.env.prod'));
 
-const SUPABASE_URL =
-  process.env.SUPABASE_URL || env.SUPABASE_URL || 'https://xlpiisbozpgmemxhtivj.supabase.co';
+// Kein Fallback auf eine feste Projekt-URL (Markus, 21.07.2026) - siehe api/bridge.js.
+const SUPABASE_URL = String(process.env.SUPABASE_URL || env.SUPABASE_URL || '').trim();
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_KEY;
 const MYSQL_WEBHOOK =
   process.env.TYPEFORM_SURVEY_SYNC_URL ||
