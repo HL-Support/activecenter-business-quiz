@@ -5,7 +5,10 @@
  * Call once: curl https://quiz.activecenter.info/api/init-quiz-db
  */
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xlpiisbozpgmemxhtivj.supabase.co';
+// Kein Fallback auf eine feste Projekt-URL (Markus, 21.07.2026): Ein stiller Fallback wuerde
+// nach einem Wechsel des Supabase-Projekts weiter in die ALTE Datenbank schreiben, ohne dass
+// irgendwo ein Fehler auftaucht. Fehlt die Variable, greifen die vorhandenen Schutzabfragen.
+const SUPABASE_URL = String(process.env.SUPABASE_URL || '').trim();
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
 export default async function handler(req, res) {
