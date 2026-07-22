@@ -18,5 +18,7 @@ scripts/PHASE1-FINAL-CORRECT.sql
 scripts/phase1-migration.py
 output/
 supabase/.temp/
+__pycache__/
+*.py[cod]
 
 .env*.local
