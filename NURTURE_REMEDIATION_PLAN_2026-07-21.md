@@ -330,3 +330,7 @@ Vor einem Ausbau braucht es eine eigene Freigabe. Zuerst muss der Acht-Phasen-Pf
 - Abschließender Backfill-Dry-Run: null offene Kandidaten.
 
 Offen bleibt nur der kontrollierte Abbau des berechtigten Rückstands über die regulären Läufe. Das Limit darf erst nach mehreren weiterhin exakt abgeglichenen Läufen entfernt werden.
+
+### Cap-Erhöhung
+
+Nach erfolgreicher 1:1-Verifikation wurde der Recovery-Cap am 22.07.2026 auf ausdrückliche Freigabe von 5 auf 20 validierte zweite Erinnerungen je Phase und Lauf erhöht. Die Erhöhung gilt für alle weiterhin berechtigten Kontakte unabhängig vom Alter der ersten Erinnerung. DNC, CTA, Teststatus, Sprache, Kontakt, Template, Coach-Daten, Mautic-Sent-Phase und Resume-Link werden weiterhin vor der Zählung geprüft.

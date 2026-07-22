@@ -175,3 +175,9 @@ Der erste reguläre Lauf mit dieser Korrektur, n8n-Ausführung `294634`, endete 
 Alle 21 Mautic-Sends hatten Fehlerflag `0`. Supabase enthielt anschließend genau 21 neue eindeutige `nurture_sent`-Ereignisse mit identischer Phasenverteilung. Der abschließende Backfill-Dry-Run fand bei 984 vorhandenen Events und 338 geprüften Mautic-Zeilen keinen offenen Kandidaten.
 
 Die zweite Welle funktioniert damit wieder kontrolliert. Die Aufarbeitung des verbleibenden berechtigten Rückstands erfolgt weiterhin gedrosselt über die regulären Zwei-Stunden-Läufe.
+
+### Freigegebene Beschleunigung am 22.07.2026
+
+Nach dem erfolgreichen 5er-Verifikationslauf wurde das Limit auf ausdrückliche Freigabe auf maximal 20 tatsächlich validierte A3/B2/C2/D2 je Phase und Lauf erhöht. Es gilt bewusst kein Altersfilter. Alle fachlichen Ausschlüsse und Dedupe-Regeln bleiben unverändert vor dem Cap aktiv.
+
+Aktive Workflow-Version: `9c4ec7a1-2bc1-4cdb-911f-4ff8979c954b`. Der vorherige Stand liegt unter `/root/n8n/backups/RqKSRTgFv8mv04H2-before-cap-20-20260722T122304+0200.json`; SHA-256: `29fccaa1b76cb271f85e857ce9653789a0aefeaa1a28219b3f30fe43513f2cdb`.
