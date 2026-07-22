@@ -128,3 +128,15 @@ Update documentation and save final project memory after production verification
 - Pre-change backup: `/root/n8n/backups/RqKSRTgFv8mv04H2-before-cap-20-20260722T122304+0200.json`.
 - Backup SHA-256: `29fccaa1b76cb271f85e857ce9653789a0aefeaa1a28219b3f30fe43513f2cdb`.
 - Structural readback: workflow active, one cap node, threshold 20, cap connection and DNC/dedupe/language/resume guards present.
+
+## DNS resilience follow-up
+
+- Failed execution: `294884`, node `Supabase - Get Resume Session`, transient DNS resolution error.
+- Partial result before failure: 20 A3 and 18 B2 Mautic sends, all failure flag `0`.
+- Event-only recovery: 38 missing `nurture_sent` records inserted; repeat dry run returned zero candidates.
+- Logger branch now executes before `Split In Batches`, preserving each successful send before the next contact starts.
+- Resume-session request now retries three times with a 2,000 ms delay and still fails loudly after exhaustion.
+- Active workflow version: `4190c93b-1730-4a84-b616-5b7f6ea4b959`.
+- Pre-change backup: `/root/n8n/backups/RqKSRTgFv8mv04H2-before-dns-resilience-20260722T144516+0200.json`.
+- Backup SHA-256: `61f32ce082a7e8d2b0b4e325b903d88149c262549673bc3591a01b873ebc2bd7`.
+- Remaining pre-guard backlog after recovery: A3 130, B2 68, C2 14, D2 6.

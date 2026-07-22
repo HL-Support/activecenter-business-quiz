@@ -334,3 +334,5 @@ Offen bleibt nur der kontrollierte Abbau des berechtigten Rückstands über die 
 ### Cap-Erhöhung
 
 Nach erfolgreicher 1:1-Verifikation wurde der Recovery-Cap am 22.07.2026 auf ausdrückliche Freigabe von 5 auf 20 validierte zweite Erinnerungen je Phase und Lauf erhöht. Die Erhöhung gilt für alle weiterhin berechtigten Kontakte unabhängig vom Alter der ersten Erinnerung. DNC, CTA, Teststatus, Sprache, Kontakt, Template, Coach-Daten, Mautic-Sent-Phase und Resume-Link werden weiterhin vor der Zählung geprüft.
+
+Nach dem transienten DNS-Abbruch in Ausführung `294884` wurde zusätzlich die Erfolgsprotokollierung vor den nächsten Schleifendurchlauf verschoben und der Resume-Session-Aufruf mit drei Versuchen im Abstand von zwei Sekunden abgesichert. 38 bereits versendete, aber noch nicht protokollierte Mails wurden konfliktfrei aus Mautic rekonstruiert. Damit kann ein später Fehler keine früheren Send-Erfolge des Laufs mehr vom Logger abschneiden.

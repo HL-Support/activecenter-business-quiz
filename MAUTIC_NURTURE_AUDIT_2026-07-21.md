@@ -181,3 +181,13 @@ Die zweite Welle funktioniert damit wieder kontrolliert. Die Aufarbeitung des ve
 Nach dem erfolgreichen 5er-Verifikationslauf wurde das Limit auf ausdrückliche Freigabe auf maximal 20 tatsächlich validierte A3/B2/C2/D2 je Phase und Lauf erhöht. Es gilt bewusst kein Altersfilter. Alle fachlichen Ausschlüsse und Dedupe-Regeln bleiben unverändert vor dem Cap aktiv.
 
 Aktive Workflow-Version: `9c4ec7a1-2bc1-4cdb-911f-4ff8979c954b`. Der vorherige Stand liegt unter `/root/n8n/backups/RqKSRTgFv8mv04H2-before-cap-20-20260722T122304+0200.json`; SHA-256: `29fccaa1b76cb271f85e857ce9653789a0aefeaa1a28219b3f30fe43513f2cdb`.
+
+### DNS-Teilabbruch und Logger-Härtung
+
+Der erste Cap-20-Lauf `294884` wurde nach 38 erfolgreichen Mautic-Sends durch einen transienten DNS-Fehler bei `Supabase - Get Resume Session` beendet. Bis dahin waren 20 A3 und 18 B2 erfolgreich versendet und in Mautics Sent-Phase gespeichert, der nachgelagerte Supabase-Erfolgslogger war wegen der bisherigen Branch-Reihenfolge jedoch noch nicht ausgeführt worden.
+
+Die exakt 38 fehlenden Events wurden anhand von Mautics `email_stats` idempotent rekonstruiert. Der Kontrolllauf zeigte anschließend 1.022 vorhandene Events und null offene Kandidaten.
+
+Für die dauerhafte Härtung läuft `Supabase - Log Sent` nun unmittelbar nach jedem erfolgreichen Send und vor dem nächsten Schleifendurchlauf. `Supabase - Get Resume Session` versucht transiente Fehler bis zu dreimal mit 2.000 Millisekunden Abstand. Nach drei Fehlschlägen bleibt der Workflow absichtlich hart fehlerhaft und alarmiert weiterhin.
+
+Aktive Workflow-Version: `4190c93b-1730-4a84-b616-5b7f6ea4b959`. Backup vor der Härtung: `/root/n8n/backups/RqKSRTgFv8mv04H2-before-dns-resilience-20260722T144516+0200.json`, SHA-256 `61f32ce082a7e8d2b0b4e325b903d88149c262549673bc3591a01b873ebc2bd7`.
