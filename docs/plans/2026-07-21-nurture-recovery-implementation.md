@@ -119,3 +119,12 @@ Update documentation and save final project memory after production verification
 - Reconciliation: 21 Mautic sends, 21 unique Supabase events; A3/B2/C2/D2 exactly five each plus one D1.
 - Backfill regression suite: five tests passed.
 - Final production dry run: zero candidates.
+
+## Approved catch-up acceleration
+
+- User-approved scope: all still-eligible overdue contacts, without a freshness cutoff.
+- Recovery cap raised from 5 to 20 validated second reminders per phase and execution.
+- Active workflow version: `9c4ec7a1-2bc1-4cdb-911f-4ff8979c954b`.
+- Pre-change backup: `/root/n8n/backups/RqKSRTgFv8mv04H2-before-cap-20-20260722T122304+0200.json`.
+- Backup SHA-256: `29fccaa1b76cb271f85e857ce9653789a0aefeaa1a28219b3f30fe43513f2cdb`.
+- Structural readback: workflow active, one cap node, threshold 20, cap connection and DNC/dedupe/language/resume guards present.
