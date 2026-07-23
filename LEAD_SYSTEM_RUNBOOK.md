@@ -62,9 +62,14 @@ Body: {"notify":true}
 Healthy means:
 
 - new writer is enabled at 100%
+- legacy writer is disabled
 - outbox worker is enabled
-- no pending/dead/stale outbox jobs
-- unresolved migration count is visible
+- no pending jobs that have been due for more than 10 minutes
+- no dead, old failed, or stale processing Outbox jobs
+- deferred/quarantined pending jobs are reported separately and do not block health
+- unresolved migration count is exact up to the safety cap and explicitly marked as capped above it
+- configuration and metric read failures are reported as availability failures, never as fallback flag values
+- every dependency read has a bounded timeout so the endpoint responds before the 30-second n8n timeout
 
 The n8n Health Monitor runs every 5 minutes and sends a deduped Postmark alert on unhealthy status.
 
