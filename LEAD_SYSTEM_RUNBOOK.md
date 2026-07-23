@@ -71,7 +71,7 @@ Healthy means:
 - configuration and metric read failures are reported as availability failures, never as fallback flag values
 - every dependency read has a bounded timeout so the endpoint responds before the 30-second n8n timeout
 
-The n8n Health Monitor runs every 5 minutes and sends a deduped Postmark alert on unhealthy status.
+The n8n Health Monitor runs every 15 minutes (reduced from 5 on 2026-07-23 — each run fires ~13 Supabase reads; 5-minute cadence was the top steady load on the shared Nano instance) and sends a deduped Postmark alert on unhealthy status.
 
 ## Dead Job Handling
 
