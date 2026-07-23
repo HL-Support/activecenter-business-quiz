@@ -112,3 +112,31 @@ test('canonical quiz submission reuses one in-flight promise', () => {
   assert.match(source, /if \(quizSubmissionInFlight\) return quizSubmissionInFlight;/);
   assert.match(source, /if \(quizSubmissionInFlight === submission\) quizSubmissionInFlight = null;/);
 });
+
+test('parallel quiz submissions start only one adapter request', async () => {
+  const core = loadCore();
+  core.storage.setItem('acMemberId', '123456');
+  let adapterRequests = 0;
+  let resolveAdapter;
+  const adapterResponse = new Promise((resolve) => {
+    resolveAdapter = resolve;
+  });
+  globalThis.fetch = async (url, options = {}) => {
+    const body = options.body ? JSON.parse(options.body) : {};
+    if (url === '/api/bridge' && body.action === 'forward_typeform_adapter') {
+      adapterRequests += 1;
+      return adapterResponse;
+    }
+    return { ok: true, json: async () => ({ success: true }) };
+  };
+
+  const first = core.forwardQuizSubmission('Sandra', 'sandra@example.com', [], null);
+  const second = core.forwardQuizSubmission('Sandra', 'sandra@example.com', [], null);
+
+  assert.strictEqual(second, first);
+  assert.equal(adapterRequests, 1);
+
+  resolveAdapter({ ok: true, json: async () => ({ success: true }) });
+  const [firstResult, secondResult] = await Promise.all([first, second]);
+  assert.deepEqual(secondResult, firstResult);
+});
