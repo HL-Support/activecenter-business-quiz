@@ -231,6 +231,13 @@ CREATE INDEX IF NOT EXISTS idx_le_ref_time ON public.lead_events(ref_id, event_a
 CREATE INDEX IF NOT EXISTS idx_le_name_time ON public.lead_events(event_name, event_at DESC);
 CREATE INDEX IF NOT EXISTS idx_le_video_time ON public.lead_events(video_step, event_at DESC);
 CREATE INDEX IF NOT EXISTS idx_le_question_time ON public.lead_events(question_ref, event_at DESC);
+CREATE INDEX IF NOT EXISTS idx_le_organisation_time ON public.lead_events(organisation_id, event_at DESC);
+-- Nachversioniert 23.07.2026: Diese beiden existierten nur in der Live-DB (im Juli direkt
+-- angelegt, vermutlich via Advisor). Ohne den created_at-Index kostet die Stunden-Abfrage
+-- des Health-Monitors 715 ms statt 0,1 ms — ein Schema-Neuaufbau ohne ihn wuerde die
+-- Last-Warnung von damals wiederbeleben.
+CREATE INDEX IF NOT EXISTS idx_lead_events_created_at_event_uid ON public.lead_events(created_at DESC, event_uid);
+CREATE INDEX IF NOT EXISTS idx_lead_events_event_at_desc ON public.lead_events(event_at DESC);
 CREATE INDEX IF NOT EXISTS idx_lmu_reason ON public.lead_migration_unresolved(reason, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_lmu_session ON public.lead_migration_unresolved(session_hash);
 
