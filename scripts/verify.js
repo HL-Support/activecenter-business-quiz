@@ -238,9 +238,10 @@ function verifyHashFlow() {
   );
   assert(
     !leadHealth.includes('count=exact') &&
-      leadHealth.includes('sampleCount') &&
+      leadHealth.includes('boundedCount') &&
+      leadHealth.includes('count_caps') &&
       leadHealth.includes('recent_events_1h_available'),
-    'lead system health endpoint must avoid exact full-table counts'
+    'lead system health endpoint must use disclosed bounded counts instead of exact full-table counts'
   );
   assert(
     leadSql.includes('WITH (security_invoker = true)') &&

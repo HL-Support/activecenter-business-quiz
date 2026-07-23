@@ -2,7 +2,6 @@ const crypto = require('crypto');
 const { Buffer } = require('buffer');
 
 const {
-  getLeadFlags,
   handleOptions,
   safeString,
   sendJson,
@@ -16,6 +15,12 @@ const POSTMARK_FROM =
   process.env.POSTMARK_FROM || 'Activecenter-Support <mail@mail.hl-support.biz>';
 const POSTMARK_MESSAGE_STREAM = process.env.POSTMARK_MESSAGE_STREAM || 'outbound';
 const ALERT_EMAIL = process.env.IDENTITY_ALERT_EMAIL || 'markus@global-sce.com';
+const FLAG_KEYS = [
+  'new_lead_writer_enabled',
+  'new_lead_writer_percent',
+  'legacy_writer_enabled',
+  'outbox_worker_enabled',
+];
 
 function getHeader(req, name) {
   const wanted = name.toLowerCase();
@@ -49,37 +54,124 @@ function authorize(req) {
   }
 }
 
-async function sampleCount(path, limit = 25) {
-  const separator = path.includes('?') ? '&' : '?';
-  const rows = await supabaseJson(`${path}${separator}limit=${limit + 1}`);
-  return Array.isArray(rows) ? Math.min(rows.length, limit) : 0;
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-async function hasRows(path) {
-  return (await sampleCount(path, 1)) > 0;
+async function withRetry(operation, attempts = 3, timeoutMs = 2000) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await operation(controller.signal);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) await wait(150 * attempt);
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+  throw lastError;
+}
+
+function parseBooleanFlag(value, key) {
+  if (value === true || value === 1 || value === '1' || value === 'true') return true;
+  if (value === false || value === 0 || value === '0' || value === 'false') return false;
+  throw new Error(`invalid_app_config_value:${key}`);
+}
+
+function parsePercentFlag(value) {
+  const percent = Number(value);
+  if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+    throw new Error('invalid_app_config_value:new_lead_writer_percent');
+  }
+  return Math.floor(percent);
+}
+
+async function getLeadFlagsStrict(readConfig = supabaseJson) {
+  const rows = await withRetry((signal) =>
+    readConfig(
+      `app_config?key=in.(${FLAG_KEYS.join(',')})&select=key,value,updated_at,updated_by`,
+      { signal }
+    )
+  );
+  const values = new Map((Array.isArray(rows) ? rows : []).map((row) => [row.key, row.value]));
+  const missing = FLAG_KEYS.filter((key) => !values.has(key));
+  if (missing.length > 0) {
+    throw new Error(`missing_app_config_keys:${missing.join(',')}`);
+  }
+  return {
+    new_lead_writer_enabled: parseBooleanFlag(
+      values.get('new_lead_writer_enabled'),
+      'new_lead_writer_enabled'
+    ),
+    new_lead_writer_percent: parsePercentFlag(values.get('new_lead_writer_percent')),
+    legacy_writer_enabled: parseBooleanFlag(
+      values.get('legacy_writer_enabled'),
+      'legacy_writer_enabled'
+    ),
+    outbox_worker_enabled: parseBooleanFlag(
+      values.get('outbox_worker_enabled'),
+      'outbox_worker_enabled'
+    ),
+  };
+}
+
+async function boundedCount(path, limit = 100, read = supabaseJson) {
+  const separator = path.includes('?') ? '&' : '?';
+  const rows = await withRetry(
+    (signal) => read(`${path}${separator}limit=${limit + 1}`, { signal }),
+    2
+  );
+  if (!Array.isArray(rows)) throw new Error('supabase_count_response_invalid');
+  return {
+    value: Math.min(rows.length, limit),
+    capped: rows.length > limit,
+  };
+}
+
+async function probe(path) {
+  await withRetry(
+    (signal) => supabaseRequest(path, { method: 'GET', signal }),
+    2
+  );
+  return 1;
 }
 
 async function getConfig(key) {
-  const rows = await supabaseJson(
-    `app_config?key=eq.${encodeURIComponent(key)}&select=value,updated_at&limit=1`
+  const rows = await withRetry(
+    (signal) =>
+      supabaseJson(
+        `app_config?key=eq.${encodeURIComponent(key)}&select=value,updated_at&limit=1`,
+        { signal }
+      ),
+    1,
+    3000
   );
   return Array.isArray(rows) ? rows[0] || null : null;
 }
 
 async function upsertConfig(key, value) {
-  await supabaseRequest(`app_config?on_conflict=key`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Prefer: 'resolution=merge-duplicates,return=minimal',
-    },
-    body: JSON.stringify({
-      key,
-      value,
-      updated_at: new Date().toISOString(),
-      updated_by: 'lead-system-health',
-    }),
-  });
+  await withRetry(
+    (signal) =>
+      supabaseRequest(`app_config?on_conflict=key`, {
+        method: 'POST',
+        signal,
+        headers: {
+          'Content-Type': 'application/json',
+          Prefer: 'resolution=merge-duplicates,return=minimal',
+        },
+        body: JSON.stringify({
+          key,
+          value,
+          updated_at: new Date().toISOString(),
+          updated_by: 'lead-system-health',
+        }),
+      }),
+    1,
+    3000
+  );
 }
 
 function alertSignature(issues) {
@@ -111,31 +203,39 @@ async function sendAlertEmail(health) {
     ...health.issues.map((issue) => `- ${issue.code}: ${issue.message}`),
     '',
     'Counts:',
-    ...Object.entries(health.counts).map(([key, value]) => `- ${key}: ${value}`),
+    ...Object.entries(health.counts).map(
+      ([key, value]) => `- ${key}: ${value}${health.count_caps?.[key] ? '+' : ''}`
+    ),
   ];
 
-  const response = await fetch('https://api.postmarkapp.com/email', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'X-Postmark-Server-Token': POSTMARK_SERVER_TOKEN,
-    },
-    body: JSON.stringify({
-      From: POSTMARK_FROM,
-      To: ALERT_EMAIL,
-      Subject: `Lead-System-Health Problem (${health.issues.map((issue) => issue.code).join(', ')})`,
-      TextBody: lines.join('\n'),
-      HtmlBody: `<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;">${lines
-        .join('\n')
-        .replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char])}</pre>`,
-      MessageStream: POSTMARK_MESSAGE_STREAM,
-      Metadata: {
-        alert_type: 'lead_system_health',
-        issue_count: String(health.issues.length),
-      },
-    }),
-  });
+  const response = await withRetry(
+    (signal) =>
+      fetch('https://api.postmarkapp.com/email', {
+        method: 'POST',
+        signal,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Postmark-Server-Token': POSTMARK_SERVER_TOKEN,
+        },
+        body: JSON.stringify({
+          From: POSTMARK_FROM,
+          To: ALERT_EMAIL,
+          Subject: `Lead-System-Health Problem (${health.issues.map((issue) => issue.code).join(', ')})`,
+          TextBody: lines.join('\n'),
+          HtmlBody: `<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;">${lines
+            .join('\n')
+            .replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char])}</pre>`,
+          MessageStream: POSTMARK_MESSAGE_STREAM,
+          Metadata: {
+            alert_type: 'lead_system_health',
+            issue_count: String(health.issues.length),
+          },
+        }),
+      }),
+    1,
+    5000
+  );
 
   const text = await response.text();
   let data;
@@ -149,45 +249,103 @@ async function sendAlertEmail(health) {
 }
 
 async function collectHealth() {
-  const flags = await getLeadFlags();
-  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-
-  const counts = {
-    lead_state_available: (await hasRows('lead_state?select=lead_hash')) ? 1 : 0,
-    lead_video_progress_available: (await hasRows('lead_video_progress?select=lead_hash')) ? 1 : 0,
-    lead_events_available: (await hasRows('lead_events?select=event_uid')) ? 1 : 0,
-    outbox_pending: await sampleCount('lead_sync_outbox?status=eq.pending&select=id'),
-    outbox_failed_old: await sampleCount(
-      `lead_sync_outbox?status=eq.failed&updated_at=lt.${encodeURIComponent(tenMinutesAgo)}&select=id`
-    ),
-    outbox_processing_stale: await sampleCount(
-      `lead_sync_outbox?status=eq.processing&locked_at=lt.${encodeURIComponent(tenMinutesAgo)}&select=id`
-    ),
-    outbox_dead: await sampleCount('lead_sync_outbox?status=eq.dead&select=id'),
-    migration_unresolved_open: await sampleCount(
-      'lead_migration_unresolved?resolved_at=is.null&select=id'
-    ),
-    recent_leads_1h_available: (await hasRows(
-      `lead_state?created_at=gte.${encodeURIComponent(oneHourAgo)}&select=lead_hash`
-    ))
-      ? 1
-      : 0,
-    recent_events_1h_available: (await hasRows(
-      `lead_events?created_at=gte.${encodeURIComponent(oneHourAgo)}&select=event_uid`
-    ))
-      ? 1
-      : 0,
-  };
-
+  const now = Date.now();
+  const nowIso = new Date(now).toISOString();
+  const tenMinutesAgo = new Date(now - 10 * 60 * 1000).toISOString();
+  const oneHourAgo = new Date(now - 60 * 60 * 1000).toISOString();
+  let flags = null;
   const issues = [];
-  if (!flags.new_lead_writer_enabled || flags.new_lead_writer_percent !== 100) {
+  try {
+    flags = await getLeadFlagsStrict();
+  } catch (error) {
+    issues.push({
+      code: 'config_read_failed',
+      message: `live app_config could not be read after retries: ${safeString(error.message, 300)}`,
+    });
+  }
+
+  const metrics = {
+    lead_state_available: () => probe('lead_state?select=lead_hash&limit=1'),
+    lead_video_progress_available: () =>
+      probe('lead_video_progress?select=lead_hash&limit=1'),
+    lead_events_available: () => probe('lead_events?select=event_uid&limit=1'),
+    outbox_pending: () => boundedCount('lead_sync_outbox?status=eq.pending&select=id'),
+    outbox_pending_ready: () =>
+      boundedCount(
+        `lead_sync_outbox?status=eq.pending&next_attempt_at=lte.${encodeURIComponent(nowIso)}&select=id`
+      ),
+    outbox_pending_overdue: () =>
+      boundedCount(
+        `lead_sync_outbox?status=eq.pending&next_attempt_at=lt.${encodeURIComponent(tenMinutesAgo)}&select=id`
+      ),
+    outbox_pending_deferred: () =>
+      boundedCount(
+        `lead_sync_outbox?status=eq.pending&next_attempt_at=gt.${encodeURIComponent(nowIso)}&select=id`
+      ),
+    outbox_failed_old: () =>
+      boundedCount(
+        `lead_sync_outbox?status=eq.failed&updated_at=lt.${encodeURIComponent(tenMinutesAgo)}&select=id`
+      ),
+    outbox_processing_stale: () =>
+      boundedCount(
+        `lead_sync_outbox?status=eq.processing&locked_at=lt.${encodeURIComponent(tenMinutesAgo)}&select=id`
+      ),
+    outbox_dead: () => boundedCount('lead_sync_outbox?status=eq.dead&select=id'),
+    migration_unresolved_open: () =>
+      boundedCount('lead_migration_unresolved?resolved_at=is.null&select=id'),
+    recent_leads_1h: () =>
+      boundedCount(
+        `lead_state?created_at=gte.${encodeURIComponent(oneHourAgo)}&select=lead_hash`
+      ),
+    recent_events_1h: () =>
+      boundedCount(
+        `lead_events?created_at=gte.${encodeURIComponent(oneHourAgo)}&select=event_uid`
+      ),
+  };
+  const metricEntries = Object.entries(metrics);
+  const metricResults = await Promise.allSettled(metricEntries.map(([, read]) => read()));
+  const counts = {};
+  const countCaps = {};
+  const metricErrors = [];
+  metricResults.forEach((result, index) => {
+    const key = metricEntries[index][0];
+    if (result.status === 'fulfilled') {
+      if (result.value && typeof result.value === 'object' && 'value' in result.value) {
+        counts[key] = result.value.value;
+        countCaps[key] = result.value.capped;
+      } else {
+        counts[key] = result.value;
+      }
+    } else {
+      counts[key] = null;
+      metricErrors.push({
+        metric: key,
+        message: safeString(result.reason?.message, 300) || 'unknown_read_error',
+      });
+    }
+  });
+  counts.recent_leads_1h_available =
+    counts.recent_leads_1h === null ? null : counts.recent_leads_1h > 0 ? 1 : 0;
+  counts.recent_events_1h_available =
+    counts.recent_events_1h === null ? null : counts.recent_events_1h > 0 ? 1 : 0;
+
+  if (metricErrors.length > 0) {
+    issues.push({
+      code: 'health_metrics_unavailable',
+      count: metricErrors.length,
+      message: `${metricErrors.length} health metrics could not be read after retries`,
+    });
+  }
+  if (flags && (!flags.new_lead_writer_enabled || flags.new_lead_writer_percent !== 100)) {
     issues.push({
       code: 'new_writer_not_full',
       message: `new writer flags are ${JSON.stringify(flags)}`,
     });
   }
-  if (!flags.outbox_worker_enabled) {
+  if (flags?.legacy_writer_enabled) {
+    issues.push({ code: 'legacy_writer_enabled', message: 'legacy writer flag is enabled' });
+  }
+  if (flags && !flags.outbox_worker_enabled) {
     issues.push({ code: 'outbox_worker_disabled', message: 'outbox worker flag is disabled' });
   }
   if (counts.outbox_dead > 0) {
@@ -211,12 +369,21 @@ async function collectHealth() {
       message: `${counts.outbox_failed_old} failed jobs are older than 10 minutes`,
     });
   }
+  if (counts.outbox_pending_overdue > 0) {
+    issues.push({
+      code: 'outbox_pending_overdue',
+      count: counts.outbox_pending_overdue,
+      message: `${counts.outbox_pending_overdue} pending jobs are due for more than 10 minutes`,
+    });
+  }
 
   return {
     ok: issues.length === 0,
     checked_at: new Date().toISOString(),
     flags,
     counts,
+    count_caps: countCaps,
+    metric_errors: metricErrors,
     issues,
   };
 }
@@ -237,17 +404,27 @@ module.exports = async function handler(req, res) {
 
     if (!health.ok && wantsNotify) {
       const signature = alertSignature(health.issues);
-      const previous = await getConfig('lead_system_health_last_alert');
+      let previous = null;
+      try {
+        previous = await getConfig('lead_system_health_last_alert');
+      } catch (error) {
+        health.alert_state_read_error = safeString(error.message, 300);
+      }
       if (shouldNotify(previous, signature)) {
         const alert = await sendAlertEmail(health);
-        await upsertConfig('lead_system_health_last_alert', {
-          signature,
-          sent_at: new Date().toISOString(),
-          ok: alert.ok,
-          status: alert.status || null,
-          skipped: alert.skipped || false,
-          reason: alert.reason || null,
-        });
+        try {
+          await upsertConfig('lead_system_health_last_alert', {
+            signature,
+            sent_at: new Date().toISOString(),
+            ok: alert.ok,
+            status: alert.status || null,
+            skipped: alert.skipped || false,
+            reason: alert.reason || null,
+          });
+        } catch (error) {
+          alert.state_persisted = false;
+          alert.state_persist_error = safeString(error.message, 300);
+        }
         health.alert = alert;
       } else {
         health.alert = { ok: true, skipped: true, reason: 'deduped_recent_alert' };
@@ -265,4 +442,10 @@ module.exports = async function handler(req, res) {
       message: error.message,
     });
   }
+};
+
+module.exports._test = {
+  boundedCount,
+  getLeadFlagsStrict,
+  withRetry,
 };
