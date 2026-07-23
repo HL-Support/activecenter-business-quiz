@@ -85,3 +85,30 @@ test('video unlock source keeps the 95 percent unique-watch threshold', () => {
   assert.match(source, /required_unique_watched_percent: 95/);
   assert.doesNotMatch(source, /percent >= 75\) unlock/);
 });
+
+test('opt-in submission acquires a synchronous lock before starting network work', () => {
+  const source = require('node:fs').readFileSync(
+    path.resolve(__dirname, '../../src/app/App.jsx'),
+    'utf8'
+  );
+  const guardPosition = source.indexOf('if (submitLock.current || g) return;');
+  const lockPosition = source.indexOf('submitLock.current = !0;', guardPosition);
+  const mauticPosition = source.indexOf('await Hp({', guardPosition);
+  const releasePosition = source.indexOf('submitLock.current = !1;', guardPosition);
+
+  assert.ok(guardPosition >= 0);
+  assert.ok(lockPosition > guardPosition);
+  assert.ok(mauticPosition > lockPosition);
+  assert.ok(releasePosition > mauticPosition);
+});
+
+test('canonical quiz submission reuses one in-flight promise', () => {
+  const source = require('node:fs').readFileSync(
+    path.resolve(__dirname, '../../src/lib/core.js'),
+    'utf8'
+  );
+
+  assert.match(source, /let quizSubmissionInFlight = null;/);
+  assert.match(source, /if \(quizSubmissionInFlight\) return quizSubmissionInFlight;/);
+  assert.match(source, /if \(quizSubmissionInFlight === submission\) quizSubmissionInFlight = null;/);
+});

@@ -428,6 +428,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
     [s, d] = React.useState(''),
     [g, y] = React.useState(!1),
     [S, k] = React.useState(''),
+    submitLock = React.useRef(!1),
     I = e?.accentColor || '#C9A84C',
     f = s.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/),
     c = i.trim().length > 0 && f && !S,
@@ -436,11 +437,12 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
       if (S) k('');
     },
     v = async () => {
-      if (g) return;
+      if (submitLock.current || g) return;
       if (!i.trim() || !s.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
         k(a('optin_email_error_format'));
         return;
       }
+      submitLock.current = !0;
       y(!0);
       const C = i.trim(),
         z = s.trim();
@@ -493,6 +495,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
         o();
       } catch (error) {
         console.warn('Quiz submission failed:', error?.message || error);
+        submitLock.current = !1;
         y(!1);
         k(a('optin_submit_error'));
       }
