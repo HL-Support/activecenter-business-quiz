@@ -191,3 +191,16 @@ Die exakt 38 fehlenden Events wurden anhand von Mautics `email_stats` idempotent
 Für die dauerhafte Härtung läuft `Supabase - Log Sent` nun unmittelbar nach jedem erfolgreichen Send und vor dem nächsten Schleifendurchlauf. `Supabase - Get Resume Session` versucht transiente Fehler bis zu dreimal mit 2.000 Millisekunden Abstand. Nach drei Fehlschlägen bleibt der Workflow absichtlich hart fehlerhaft und alarmiert weiterhin.
 
 Aktive Workflow-Version: `4190c93b-1730-4a84-b616-5b7f6ea4b959`. Backup vor der Härtung: `/root/n8n/backups/RqKSRTgFv8mv04H2-before-dns-resilience-20260722T144516+0200.json`, SHA-256 `61f32ce082a7e8d2b0b4e325b903d88149c262549673bc3591a01b873ebc2bd7`.
+
+### Datenreparatur und kanonischer Fallback am 23.07.2026
+
+Die nach der Recovery verbliebenen Ausnahmen wurden einzeln gegen Supabase, MySQL, Mautic und die n8n-Ausführungsdaten geprüft.
+
+- Fünf echte Kontakte fehlten vollständig in Mautic. Sie wurden ohne Löschung aus dem kanonischen Supabase-Zustand angelegt, dem deutschen Business-Quiz-Segment zugeordnet und ihre neuen Mautic-IDs in `lead_state` zurückgeschrieben.
+- Eine der fünf Adressen endete fehlerhaft mit einem Punkt. Der Punkt wurde in `lead_state` und der zugehörigen `tracking_sessions`-Kopie entfernt, bevor der Mautic-Kontakt angelegt wurde.
+- Bei fünf bestehenden Mautic-Kontakten fehlte nur das für die Nurture-Variante benötigte Profil- oder Barrierefeld. Die Werte waren in Supabase vollständig vorhanden und wurden gezielt nach Mautic übernommen.
+- Vier weitere Datensätze hatten weder Quiz- noch Videoereignisse und keinen MySQL-Survey. Ihre einzigen Events waren wiederholte historische `nurture_skipped`-Logs. Sie wurden als unvollständige Teil-/Importdatensätze klassifiziert und nicht mit erfundenen Quizwerten versendet.
+
+Der aktive Nurture-Workflow liest für die Variantenwahl weiterhin zuerst die Mautic-Felder. Nur wenn Sprache, Profil, Ziel oder Barriere dort leer sind, darf er jetzt auf die kanonischen Werte des ausgewählten Supabase-Leads zurückgreifen. Kontaktpflicht, DNC/Abmeldung, `ac_nurture_stopped`, bereits versendete Phasen, Coach-Daten, Template-Mapping, Resume-Link-Prüfung und Versand-Cap bleiben unverändert vorgeschaltet beziehungsweise aktiv.
+
+Aktive Workflow-Version: `7dfb95e3-1fab-4683-8513-17bc13f18dca`. Backup vor dem Fallback: `/root/n8n/backups/RqKSRTgFv8mv04H2-before-supabase-fallback-20260723.json`.
