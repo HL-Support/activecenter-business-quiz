@@ -1309,7 +1309,7 @@ export function getAspirationLabel(aspiration) {
   return t(`asp_tag_${normalizeAspiration(aspiration)}`);
 }
 
-export async function forwardQuizSubmission(
+async function performQuizSubmission(
   firstName,
   email,
   selectedAnswers,
@@ -1513,6 +1513,31 @@ export async function forwardQuizSubmission(
       markLeadRun(slug, leadRun, 'active');
       return { success: false, error: error && error.message ? error.message : 'network_error' };
     });
+}
+
+let quizSubmissionInFlight = null;
+
+export function forwardQuizSubmission(
+  firstName,
+  email,
+  selectedAnswers,
+  profile,
+  aspiration = 'freedom'
+) {
+  if (quizSubmissionInFlight) return quizSubmissionInFlight;
+
+  const submission = performQuizSubmission(
+    firstName,
+    email,
+    selectedAnswers,
+    profile,
+    aspiration
+  );
+  quizSubmissionInFlight = submission;
+  submission.finally(() => {
+    if (quizSubmissionInFlight === submission) quizSubmissionInFlight = null;
+  });
+  return submission;
 }
 
 export const pageLayout = {

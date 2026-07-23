@@ -85,3 +85,58 @@ test('video unlock source keeps the 95 percent unique-watch threshold', () => {
   assert.match(source, /required_unique_watched_percent: 95/);
   assert.doesNotMatch(source, /percent >= 75\) unlock/);
 });
+
+test('opt-in submission acquires a synchronous lock before starting network work', () => {
+  const source = require('node:fs').readFileSync(
+    path.resolve(__dirname, '../../src/app/App.jsx'),
+    'utf8'
+  );
+  const guardPosition = source.indexOf('if (submitLock.current || g) return;');
+  const lockPosition = source.indexOf('submitLock.current = !0;', guardPosition);
+  const mauticPosition = source.indexOf('await Hp({', guardPosition);
+  const releasePosition = source.indexOf('submitLock.current = !1;', guardPosition);
+
+  assert.ok(guardPosition >= 0);
+  assert.ok(lockPosition > guardPosition);
+  assert.ok(mauticPosition > lockPosition);
+  assert.ok(releasePosition > mauticPosition);
+});
+
+test('canonical quiz submission reuses one in-flight promise', () => {
+  const source = require('node:fs').readFileSync(
+    path.resolve(__dirname, '../../src/lib/core.js'),
+    'utf8'
+  );
+
+  assert.match(source, /let quizSubmissionInFlight = null;/);
+  assert.match(source, /if \(quizSubmissionInFlight\) return quizSubmissionInFlight;/);
+  assert.match(source, /if \(quizSubmissionInFlight === submission\) quizSubmissionInFlight = null;/);
+});
+
+test('parallel quiz submissions start only one adapter request', async () => {
+  const core = loadCore();
+  core.storage.setItem('acMemberId', '123456');
+  let adapterRequests = 0;
+  let resolveAdapter;
+  const adapterResponse = new Promise((resolve) => {
+    resolveAdapter = resolve;
+  });
+  globalThis.fetch = async (url, options = {}) => {
+    const body = options.body ? JSON.parse(options.body) : {};
+    if (url === '/api/bridge' && body.action === 'forward_typeform_adapter') {
+      adapterRequests += 1;
+      return adapterResponse;
+    }
+    return { ok: true, json: async () => ({ success: true }) };
+  };
+
+  const first = core.forwardQuizSubmission('Sandra', 'sandra@example.com', [], null);
+  const second = core.forwardQuizSubmission('Sandra', 'sandra@example.com', [], null);
+
+  assert.strictEqual(second, first);
+  assert.equal(adapterRequests, 1);
+
+  resolveAdapter({ ok: true, json: async () => ({ success: true }) });
+  const [firstResult, secondResult] = await Promise.all([first, second]);
+  assert.deepEqual(secondResult, firstResult);
+});
