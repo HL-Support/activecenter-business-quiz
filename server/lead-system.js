@@ -277,7 +277,17 @@ async function readConfigValue(key, fallback) {
   return fallback;
 }
 
+// Flags sind manuelle Migrationsschalter und ändern sich selten — wurden aber bei JEDEM
+// Event frisch gelesen: 4 app_config-Reads pro Aufruf, ~670.000 Reads seit April (Platz 3
+// der DB-Statistik). 45 s Cache pro warmer Instanz: Ein Flag-Flip greift binnen einer
+// Minute überall; der Health-Monitor liest bewusst weiter LIVE (eigener Pfad, kein Cache).
+const LEAD_FLAGS_TTL_MS = 45_000;
+let leadFlagsCache = { at: 0, flags: null };
+
 async function getLeadFlags() {
+  if (leadFlagsCache.flags && Date.now() - leadFlagsCache.at < LEAD_FLAGS_TTL_MS) {
+    return leadFlagsCache.flags;
+  }
   const [
     newWriterEnabled,
     newWriterPercent,
@@ -293,12 +303,14 @@ async function getLeadFlags() {
     readConfigValue('outbox_worker_enabled', process.env.OUTBOX_WORKER_ENABLED ?? false),
   ]);
 
-  return {
+  const flags = {
     new_lead_writer_enabled: parseBoolean(newWriterEnabled, false),
     new_lead_writer_percent: parsePercent(newWriterPercent, 0),
     legacy_writer_enabled: parseBoolean(legacyWriterEnabled, true),
     outbox_worker_enabled: parseBoolean(outboxWorkerEnabled, false),
   };
+  leadFlagsCache = { at: Date.now(), flags };
+  return flags;
 }
 
 function shouldUseNewWriter(flags, identifier) {
