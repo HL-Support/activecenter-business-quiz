@@ -2,8 +2,11 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const {
+  alertSignature,
   boundedCount,
   getLeadFlagsStrict,
+  settleWithConcurrency,
+  shouldNotify,
   withRetry,
 } = require('../../api/lead-system-health')._test;
 
@@ -66,4 +69,43 @@ test('bounded counts stay exact below the cap and disclose truncation above it',
 
   assert.deepEqual(forty, { value: 40, capped: false });
   assert.deepEqual(overCap, { value: 100, capped: true });
+});
+
+test('connectivity alert signatures stay stable when only the failed metric count changes', () => {
+  const oneFailure = alertSignature([
+    { code: 'health_metrics_unavailable', count: 1 },
+  ]);
+  const thirteenFailures = alertSignature([
+    { code: 'health_metrics_unavailable', count: 13 },
+  ]);
+
+  assert.equal(oneFailure, thirteenFailures);
+});
+
+test('same incident is reminded only after four hours', () => {
+  const signature = 'same-incident';
+  const sentAt = '2026-07-24T08:00:00.000Z';
+  const previous = { value: { signature, sent_at: sentAt } };
+
+  assert.equal(shouldNotify(previous, signature, Date.parse('2026-07-24T11:59:59.000Z')), false);
+  assert.equal(shouldNotify(previous, signature, Date.parse('2026-07-24T12:00:01.000Z')), true);
+});
+
+test('health metric reads respect the configured concurrency bound', async () => {
+  let running = 0;
+  let maxRunning = 0;
+  const entries = Array.from({ length: 8 }, (_, index) => index);
+  const results = await settleWithConcurrency(entries, 3, async (value) => {
+    running += 1;
+    maxRunning = Math.max(maxRunning, running);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    running -= 1;
+    return value * 2;
+  });
+
+  assert.equal(maxRunning, 3);
+  assert.deepEqual(
+    results.map((result) => result.value),
+    entries.map((value) => value * 2)
+  );
 });

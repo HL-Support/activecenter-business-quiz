@@ -5,27 +5,43 @@ const email = process.env.RESUME_SMOKE_EMAIL || 'preview-smoke@example.com';
 const slug = process.env.RESUME_SMOKE_SLUG || 'markus';
 const memberId = process.env.RESUME_SMOKE_MEMBER_ID || '24';
 const organisationId = process.env.RESUME_SMOKE_ORGANISATION_ID || '2';
+const TRANSIENT_HTTP_STATUSES = new Set([502, 503, 504]);
 
-async function postBridge(payload) {
-  const response = await fetch(`${baseUrl}/api/bridge`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
 
-  const text = await response.text();
-  let data;
-  try {
-    data = text ? JSON.parse(text) : {};
-  } catch {
-    data = { raw: text };
+async function postBridge(payload, attempts = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(`${baseUrl}/api/bridge`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await response.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { raw: text };
+      }
+
+      if (response.ok) return data;
+      const error = new Error(`Bridge HTTP ${response.status}: ${JSON.stringify(data)}`);
+      if (!TRANSIENT_HTTP_STATUSES.has(response.status) || attempt === attempts) throw error;
+      lastError = error;
+    } catch (error) {
+      lastError = error;
+      const statusMatch = String(error.message || '').match(/^Bridge HTTP (\d+):/);
+      if (statusMatch && !TRANSIENT_HTTP_STATUSES.has(Number(statusMatch[1]))) throw error;
+      if (attempt === attempts) throw error;
+    }
+    await wait(1000 * attempt);
   }
-
-  if (!response.ok) {
-    throw new Error(`Bridge HTTP ${response.status}: ${JSON.stringify(data)}`);
-  }
-
-  return data;
+  throw lastError;
 }
 
 async function main() {
