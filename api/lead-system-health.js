@@ -15,6 +15,14 @@ const POSTMARK_FROM =
   process.env.POSTMARK_FROM || 'Activecenter-Support <mail@mail.hl-support.biz>';
 const POSTMARK_MESSAGE_STREAM = process.env.POSTMARK_MESSAGE_STREAM || 'outbound';
 const ALERT_EMAIL = process.env.IDENTITY_ALERT_EMAIL || 'markus@global-sce.com';
+const HEALTH_READ_TIMEOUT_MS = 5000;
+const HEALTH_METRIC_CONCURRENCY = 3;
+const HEALTH_ALERT_REMINDER_MS = 4 * 60 * 60 * 1000;
+const CRITICAL_AVAILABILITY_METRICS = new Set([
+  'lead_state_available',
+  'lead_video_progress_available',
+  'lead_events_available',
+]);
 const FLAG_KEYS = [
   'new_lead_writer_enabled',
   'new_lead_writer_percent',
@@ -58,7 +66,7 @@ function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-async function withRetry(operation, attempts = 3, timeoutMs = 2000) {
+async function withRetry(operation, attempts = 3, timeoutMs = HEALTH_READ_TIMEOUT_MS) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     const controller = new AbortController();
@@ -67,7 +75,7 @@ async function withRetry(operation, attempts = 3, timeoutMs = 2000) {
       return await operation(controller.signal);
     } catch (error) {
       lastError = error;
-      if (attempt < attempts) await wait(150 * attempt);
+      if (attempt < attempts) await wait(250 * 2 ** (attempt - 1));
     } finally {
       clearTimeout(timeout);
     }
@@ -122,7 +130,7 @@ async function boundedCount(path, limit = 100, read = supabaseJson) {
   const separator = path.includes('?') ? '&' : '?';
   const rows = await withRetry(
     (signal) => read(`${path}${separator}limit=${limit + 1}`, { signal }),
-    2
+    3
   );
   if (!Array.isArray(rows)) throw new Error('supabase_count_response_invalid');
   return {
@@ -134,9 +142,30 @@ async function boundedCount(path, limit = 100, read = supabaseJson) {
 async function probe(path) {
   await withRetry(
     (signal) => supabaseRequest(path, { method: 'GET', signal }),
-    2
+    3
   );
   return 1;
+}
+
+async function settleWithConcurrency(entries, concurrency, operation) {
+  const results = new Array(entries.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < entries.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      try {
+        results[index] = { status: 'fulfilled', value: await operation(entries[index], index) };
+      } catch (reason) {
+        results[index] = { status: 'rejected', reason };
+      }
+    }
+  }
+
+  const workerCount = Math.max(1, Math.min(Number(concurrency) || 1, entries.length));
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  return results;
 }
 
 async function getConfig(key) {
@@ -177,7 +206,16 @@ async function upsertConfig(key, value) {
 function alertSignature(issues) {
   return crypto
     .createHash('sha256')
-    .update(issues.map((issue) => `${issue.code}:${issue.count ?? ''}`).join('|'))
+    .update(
+      issues
+        .map((issue) => {
+          if (issue.code === 'config_read_failed' || issue.code === 'health_metrics_unavailable') {
+            return issue.code;
+          }
+          return `${issue.code}:${issue.count ?? ''}`;
+        })
+        .join('|')
+    )
     .digest('hex');
 }
 
@@ -185,7 +223,7 @@ function shouldNotify(previous, signature, now = Date.now()) {
   if (!previous?.value) return true;
   if (previous.value.signature !== signature) return true;
   const lastSentAt = Date.parse(previous.value.sent_at || '');
-  return !Number.isFinite(lastSentAt) || now - lastSentAt > 30 * 60 * 1000;
+  return !Number.isFinite(lastSentAt) || now - lastSentAt > HEALTH_ALERT_REMINDER_MS;
 }
 
 async function sendAlertEmail(health) {
@@ -255,6 +293,7 @@ async function collectHealth() {
   const oneHourAgo = new Date(now - 60 * 60 * 1000).toISOString();
   let flags = null;
   const issues = [];
+  const warnings = [];
   try {
     flags = await getLeadFlagsStrict();
   } catch (error) {
@@ -303,7 +342,11 @@ async function collectHealth() {
       ),
   };
   const metricEntries = Object.entries(metrics);
-  const metricResults = await Promise.allSettled(metricEntries.map(([, read]) => read()));
+  const metricResults = await settleWithConcurrency(
+    metricEntries,
+    HEALTH_METRIC_CONCURRENCY,
+    ([, read]) => read()
+  );
   const counts = {};
   const countCaps = {};
   const metricErrors = [];
@@ -329,11 +372,20 @@ async function collectHealth() {
   counts.recent_events_1h_available =
     counts.recent_events_1h === null ? null : counts.recent_events_1h > 0 ? 1 : 0;
 
-  if (metricErrors.length > 0) {
+  const criticalMetricErrors = metricErrors.filter(({ metric }) =>
+    CRITICAL_AVAILABILITY_METRICS.has(metric)
+  );
+  if (metricErrors.length >= 3 || criticalMetricErrors.length > 0) {
     issues.push({
       code: 'health_metrics_unavailable',
       count: metricErrors.length,
       message: `${metricErrors.length} health metrics could not be read after retries`,
+    });
+  } else if (metricErrors.length > 0) {
+    warnings.push({
+      code: 'health_metric_transiently_unavailable',
+      count: metricErrors.length,
+      message: `${metricErrors.length} non-critical health metric could not be read after retries`,
     });
   }
   if (flags && (!flags.new_lead_writer_enabled || flags.new_lead_writer_percent !== 100)) {
@@ -384,6 +436,7 @@ async function collectHealth() {
     counts,
     count_caps: countCaps,
     metric_errors: metricErrors,
+    warnings,
     issues,
   };
 }
@@ -445,7 +498,10 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports._test = {
+  alertSignature,
   boundedCount,
   getLeadFlagsStrict,
+  settleWithConcurrency,
+  shouldNotify,
   withRetry,
 };

@@ -204,3 +204,21 @@ Die nach der Recovery verbliebenen Ausnahmen wurden einzeln gegen Supabase, MySQ
 Der aktive Nurture-Workflow liest für die Variantenwahl weiterhin zuerst die Mautic-Felder. Nur wenn Sprache, Profil, Ziel oder Barriere dort leer sind, darf er jetzt auf die kanonischen Werte des ausgewählten Supabase-Leads zurückgreifen. Kontaktpflicht, DNC/Abmeldung, `ac_nurture_stopped`, bereits versendete Phasen, Coach-Daten, Template-Mapping, Resume-Link-Prüfung und Versand-Cap bleiben unverändert vorgeschaltet beziehungsweise aktiv.
 
 Aktive Workflow-Version: `7dfb95e3-1fab-4683-8513-17bc13f18dca`. Backup vor dem Fallback: `/root/n8n/backups/RqKSRTgFv8mv04H2-before-supabase-fallback-20260723.json`.
+
+### Health-Monitor-Härtung am 24.07.2026
+
+Mehrere neue Health-Meldungen waren keine getrennten Systemdefekte. Einzelne der 13 parallel gestarteten Supabase-Messungen überschritten das bisherige Zwei-Sekunden-Limit. Zusätzlich enthielt die Incident-Signatur die schwankende Anzahl fehlgeschlagener Messungen. Derselbe Erreichbarkeitsfehler wurde dadurch bei einem Wechsel von 1 auf 13 und zurück auf 1 als jeweils neuer Vorfall behandelt.
+
+Der Health-Endpunkt wurde deshalb wie folgt gehärtet:
+
+- fünf Sekunden statt zwei Sekunden Lesezeit pro Versuch,
+- drei Versuche auch für Probes und begrenzte Counts,
+- exponentieller Retry-Abstand,
+- höchstens drei parallele Supabase-Messungen statt eines 13er-Bursts,
+- stabile Incident-Signatur für Konfigurations- und Mess-Erreichbarkeitsfehler,
+- vier Stunden Erinnerungsabstand für denselben unveränderten Vorfall,
+- ein einzelner ausgefallener nichtkritischer Messwert wird als Warnung ausgewiesen, nicht als Systemausfall.
+
+Die drei kanonischen Verfügbarkeitsprobes für `lead_state`, `lead_video_progress` und `lead_events` bleiben kritisch. Mehrere gleichzeitig fehlende Messwerte bleiben ebenfalls ein echter Health-Fehler. Der n8n-Monitor behandelt den bereits durch den Endpunkt gemeldeten HTTP-503-Zustand künftig als reguläre Ausgabe, damit nicht zusätzlich eine generische n8n-Fehlermail für denselben Vorfall entsteht.
+
+Der produktive Resume-Smoke wurde ebenfalls gegen nachgewiesene, vorübergehende Vercel-Gateway-Timeouts gehärtet. Ausschließlich Netzwerkfehler sowie HTTP 502, 503 und 504 werden bis zu zweimal wiederholt. Fachliche 4xx-Antworten und dauerhaft fehlschlagende Aufrufe bleiben harte CI-Fehler.
