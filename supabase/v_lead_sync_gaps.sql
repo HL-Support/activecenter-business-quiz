@@ -6,7 +6,8 @@
 -- gelaufen: Mautic, Lead-Mail, Coach-Mail. Verloren ging nichts.
 --
 -- Was fehlt, ist die VERKNUEPFUNG: beide Systeme fuehren dieselbe Einsendung unter
--- unterschiedlichen qz_-Hashes. Dadurch greift  nicht (matchedRows 0),
+-- unterschiedlichen qz_-Hashes. Dadurch greift der n8n-Workflow >>Update Result by hash<<
+-- nicht (matchedRows 0),
 -- und lead_state.mysql_survey_id bleibt leer. Fachlich harmlos, technisch unsauber — und es macht
 -- jede spaetere Zuordnung ueber den Hash unzuverlaessig.
 --
