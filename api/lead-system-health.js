@@ -330,6 +330,13 @@ async function collectHealth() {
         `lead_sync_outbox?status=eq.processing&locked_at=lt.${encodeURIComponent(tenMinutesAgo)}&select=id`
       ),
     outbox_dead: () => boundedCount('lead_sync_outbox?status=eq.dead&select=id'),
+    // Drei-Wege-Abgleich (Markus, 27.07.2026): Bis hierher pruefte diese Seite AUSSCHLIESSLICH
+    // Supabase-interne Zustaende. Ein Lead, fuer den nie ein Outbox-Eintrag entstand, war damit
+    // per Konstruktion unsichtbar — es gibt keine Zeile, die haengen koennte. Genau so fehlten 16
+    // Einsendungen zwischen 18.05. und 24.07.2026 in MySQL, ohne dass es auffiel.
+    // Die Sicht v_lead_sync_gaps nimmt Migrationsaltbestand und Testleads aus und fragt zusaetzlich
+    // die Outbox, weil mysql_survey_id nicht zuverlaessig zurueckgeschrieben wird.
+    sync_gap_mysql: () => boundedCount('v_lead_sync_gaps?select=lead_hash'),
     migration_unresolved_open: () =>
       boundedCount('lead_migration_unresolved?resolved_at=is.null&select=id'),
     recent_leads_1h: () =>
