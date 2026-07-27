@@ -330,11 +330,6 @@ async function collectHealth() {
         `lead_sync_outbox?status=eq.processing&locked_at=lt.${encodeURIComponent(tenMinutesAgo)}&select=id`
       ),
     outbox_dead: () => boundedCount('lead_sync_outbox?status=eq.dead&select=id'),
-    // Hash-Verknuepfung Supabase <-> MySQL (Markus, 27.07.2026). NICHT als Verlustmeldung lesen:
-    // am 27.07. gegen MySQL geprueft — Kontakt, Umfragezeile und Verarbeitungsauftrag sind
-    // vorhanden, nur unter einem anderen qz_-Hash. Die Kennzahl zeigt eine unsaubere Zuordnung,
-    // keinen fehlenden Lead. Ein echter Drei-Wege-Abgleich braucht die Bridge und fehlt weiterhin.
-    lead_hash_link_missing: () => boundedCount('v_lead_sync_gaps?select=lead_hash'),
     migration_unresolved_open: () =>
       boundedCount('lead_migration_unresolved?resolved_at=is.null&select=id'),
     recent_leads_1h: () =>
