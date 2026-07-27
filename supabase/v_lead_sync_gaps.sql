@@ -1,16 +1,18 @@
--- Drei-Wege-Abgleich: Supabase ↔ MySQL ↔ Mautic (Markus, 27.07.2026)
+-- Hash-Verknuepfung Supabase <-> MySQL (Markus, 27.07.2026)
 --
--- Ein Kontakt soll überall liegen. Bisher prüfte `lead-system-health.js` ausschliesslich
--- Supabase-interne Zustände (Tabellenverfügbarkeit, Outbox-Stände, Migrationsreste). Ein Lead,
--- für den NIE ein Outbox-Eintrag entstand, war dort per Konstruktion unsichtbar — es gibt keine
--- Zeile, die hängen könnte. Genau so sind 17 Einsendungen zwischen 18.05. und 24.07.2026 nie in
--- `typeform_surveys` angekommen, ohne dass es irgendwo aufgefallen wäre.
+-- 🔴 WAS DIESE SICHT NICHT IST: eine Verlustmeldung. Am 27.07. gegen MySQL nachgeprueft — alle
+-- 16 Faelle HABEN dort einen Kontakt, eine Zeile in typeform_surveys (oft samt points_result),
+-- einen Verarbeitungsauftrag in lead_processing_jobs und sind damit durch den Post Processor
+-- gelaufen: Mautic, Lead-Mail, Coach-Mail. Verloren ging nichts.
 --
--- Die Sicht macht daraus eine zählbare Kennzahl. Bewusst konservativ:
---   * `mysql_survey_id` allein taugt NICHT als Merkmal — sie wird nicht immer zurückgeschrieben
---     (54 Leads mit erfolgreichem Sync haben keine). Deshalb zusätzlich die Outbox befragen.
---   * Migrationsaltbestand (`migration_source`) bleibt aussen vor, den gab es in MySQL nie.
---   * Als Test markierte Leads bleiben aussen vor.
+-- Was fehlt, ist die VERKNUEPFUNG: beide Systeme fuehren dieselbe Einsendung unter
+-- unterschiedlichen qz_-Hashes. Dadurch greift  nicht (matchedRows 0),
+-- und lead_state.mysql_survey_id bleibt leer. Fachlich harmlos, technisch unsauber — und es macht
+-- jede spaetere Zuordnung ueber den Hash unzuverlaessig.
+--
+-- Ein echter Drei-Wege-Abgleich (existiert der Lead in MySQL und in Mautic?) ist von Supabase aus
+-- NICHT moeglich — er braucht die Bridge und gehoert deshalb in lead-system-health.js, nicht in
+-- eine Sicht. Diese hier beantwortet nur: fehlt die Hash-Verknuepfung?
 create or replace view public.v_lead_sync_gaps
 with (security_invoker = true) as
 select
@@ -42,7 +44,7 @@ where s.form_submitted_at is not null
        and o.status = 'done');
 
 comment on view public.v_lead_sync_gaps is
-  'Leads mit abgeschicktem Formular, die in MySQL (typeform_surveys) fehlen. Die Spalte fehlt_in_mautic ist NUR informativ: das Zurueckschreiben der Mautic-ID wurde ab Juni 2026 eingestellt, sie taugt derzeit nicht als Lueckenmerkmal. Grundlage der Health-Kennzahl sync_gap_mysql. Migrationsaltbestand und Testleads sind ausgenommen.';
+  'Leads, deren Supabase-Hash in MySQL nicht wiederzufinden ist (keine mysql_survey_id, kein erfolgreicher mysql_initial_rank). KEIN Datenverlust — am 27.07.2026 gegen MySQL geprueft: Kontakt, Umfragezeile und Verarbeitungsauftrag sind vorhanden, nur unter einem anderen qz_-Hash. Migrationsaltbestand und Testleads sind ausgenommen.';
 
 revoke all on public.v_lead_sync_gaps from anon, authenticated;
 grant select on public.v_lead_sync_gaps to service_role;
