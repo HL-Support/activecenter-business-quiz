@@ -17,34 +17,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: pnpm install --frozen-lockfile
 
       - name: Contract and behavior tests
-        run: npm test
+        run: pnpm test
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       - name: Verify
-        run: npm run verify
+        run: pnpm run verify
 
       - name: Resume smoke
-        run: npm run smoke:resume
+        run: pnpm run smoke:resume
 
       - name: Read-only production smoke
-        run: npm run smoke:readonly
+        run: pnpm run smoke:readonly
