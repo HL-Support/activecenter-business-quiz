@@ -179,7 +179,60 @@ The production E2E must verify:
 7. `v_lead_state_full.completed_rank` and MySQL `points_result` agree for contact leads.
 8. no open Outbox jobs remain.
 
-## Name Normalization Incident 2026-05-14
+## Collation Incident 2026-08-20 (points_result Updates fehlgeschlagen)
+
+Am 20.08.2026 um 05:18 UTC hat die Laravel-Migration
+`2026_08_20_050000_convert_typeform_tables_to_utf8mb4` (Contact-Manager-App,
+DB `prod_contacts_activesupport` auf dem Forge-DB-Server 10.0.1.3) die Tabellen
+`typeform_surveys` und `typeform_survey_correcteds` auf `utf8mb4_unicode_ci`
+konvertiert. Der n8n-Workflow `Update "Result" by hash` (7Xg6NsE5H3UWgSNc)
+nutzt `CONVERT(0x... USING utf8mb4)`-Ausdruecke; deren Collation folgt der
+Server-Default `utf8mb4_0900_ai_ci`. Jeder Vergleich (`LIKE`, `=`) gegen die
+Spalte brach danach mit `ERROR 1267 Illegal mix of collations` ab — der Fehler
+ist parse-time und trifft damit jede Query, auch bei NULL-Rows.
+
+Symptom: Bridge-Alert `n8n_update_failed` mit `n8n Status: 200` und leerer
+Response `{}` — die n8n-Execution stirbt vor dem Respond-Node, n8n antwortet
+200 ohne Body. Outbox-Jobs (`lead_sync_outbox`) liefen in denselben Fehler.
+
+Fix (deployed 20.08.2026, versionId 60ce0f41): Alle CONVERT-Ausdruecke tragen
+jetzt explizit `COLLATE utf8mb4_unicode_ci` (8 Stellen im UPDATE-Query, 1x in
+`Code - Normalize Points Result` / `sqlUtf8Expr`). Explizite Collation gewinnt
+gegen jede implizite Spalten-Collation — der Workflow ist damit unabhaengig
+davon, welche utf8mb4-Collation die Tabelle hat.
+Pre-Fix-Backup: `n8n/backups/7Xg6NsE5H3UWgSNc-before-collate-fix-2026-08-20.json`.
+
+Lehren:
+
+1. Collation-Migrationen der Contact-Manager-App treffen auch n8n-Workflows,
+   die dieselben Tabellen lesen/schreiben — nach jeder DB-Migration die
+   n8n-Executions der Quiz-Workflows pruefen.
+2. Manuelle Webhook-Replays mit Umlauten nie direkt aus der Windows-Shell
+   senden (`curl -d '...ä...'` zerstoert UTF-8) — Payload per Node als
+   UTF-8-Datei schreiben und mit `--data-binary @file` senden, danach Bytes
+   per `HEX(points_result)` verifizieren.
+
+Systemcheck nach dem Incident (20.08.2026, alle 84 n8n-Workflows + DB):
+
+- Nur `Update "Result" by hash` nutzte CONVERT-Hex; alle anderen MySQL-Nodes
+  arbeiten mit String-Literalen (collation-sicher, Coercibility COERCIBLE).
+- Alle Cross-Table-JOINs der Quiz-/Typebot-Workflows (typeform_surveys,
+  contacts, users, funnel_tracking) wurden read-only gegen die Live-DB
+  validiert — die Migration machte sie konsistenter (beidseitig
+  utf8mb4_unicode_ci statt utf8mb3/utf8mb4-Autokonversion).
+- Laravel-App gesund: failed_jobs=0, Inserts/Updates laufen normal weiter,
+  Post Processor und Nightly Sync fehlerfrei nach der Migration.
+- `prod_analytics.landing_page_events` war als einzige Tabelle
+  `utf8mb4_0900_ai_ci` (ohne explizite Collation angelegt, Server-Default
+  geerbt). Am 20.08.2026 auf `utf8mb4_unicode_ci` konvertiert (Backup:
+  `/home/forge/backups/2026-08-20/landing_page_events_before_collate_fix.sql`).
+  Die Tabelle wird nur von der Landingpage activecenter.info via
+  `ac-reconnect.com/db-bridge.php` (Action `track_event`, Prepared
+  Statements) beschrieben — nicht vom Business Leads Quiz, dessen
+  `track_event` geht ueber die eigene Vercel-API nach Supabase. Damit sind
+  alle utf8mb4-Tabellen im System einheitlich `unicode_ci`.
+
+# Name Normalization Incident 2026-05-14
 
 The active n8n workflow `AC - Lead Post Processor - Business Leads Quiz`
 contained a bad regex after an API/JSON patch: `\s` had become plain `s` in
