@@ -1,0 +1,2132 @@
+{
+  "startedAt": "2026-08-23T18:43:47.782Z",
+  "baseUrl": "https://business.activecenter.info",
+  "slug": "markus",
+  "email": "markus@global-sce.com",
+  "playbackRate": 5,
+  "api": [
+    {
+      "t": "2026-08-23T18:43:48.967Z",
+      "url": "/api/bridge",
+      "status": 200,
+      "req": "{\"action\":\"lookup_subdomain\",\"subdomain\":\"markus\"}",
+      "res": "{\"found\":true,\"source\":\"user\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"match\":\"1\",\"id\":4677,\"first_name\":\"Markus\",\"last_name\":\"Oberhofer\",\"full_name\":\"Markus Oberhofer\",\"email\":\"info@global-sce.com\",\"phone\":\"+41 76 286 02 17\",\"herbalife_id\":\"25851739\",\"organisation_id\":2,\"marketing_status\":\"Millionaire Team 7,5K\",\"marketing_level_id\":\"10\",\"level_name\":\"Millionaire Team 7,5K\",\"level_id\":\"10\",\"preferred_newsletter_language\":\"de\",\"avatar_150\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-150.jpg\",\"avatar_300\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-300.jpg\",\"avatar_600\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-600.jpg\",\"image\":\"161953387560882033a2e1f.jpeg\",\"instagram\":\"markus24fit\",\"facebook\":\"markus.oberhofer.9\",\"organisation_name\":\"Activecenter\",\"address\":{\"street\":\"Steineggstrasse 42\",\"postal\":8852,\"place\":\"Altendorf\",\"country\":\"IT\"}}"
+    },
+    {
+      "t": "2026-08-23T18:43:49.886Z",
+      "url": "/api/lead/init",
+      "status": 200,
+      "req": "{\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"ref_type\":\"member\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"country\":\"DE\",\"utm_source\":\"\",\"utm_medium\":\"\",\"utm_campaign\":\"\",\"utm_content\":\"\",\"utm_campaign_id\":\"\",\"utm_adset_id\":\"\",\"utm_ad_id\":\"\",\"utm_term\":\"\",\"fbclid\":\"\",\"fbc\":\"\",\"fbp\":\"fb.1.1787510628669.89263502637558288\",\"event_source_url\":\"https://business.activecenter.info/markus?test=1\"}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"flags\":{\"new_lead_writer_enabled\":true,\"new_lead_writer_percent\":100,\"legacy_writer_enabled\":false,\"outbox_worker_enabled\":true}}"
+    },
+    {
+      "t": "2026-08-23T18:43:50.782Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"page_view\",\"payload\":{\"visited_at\":\"2026-08-23T18:43:49.885Z\",\"country\":\"DE\",\"device_type\":\"desktop\",\"lang\":\"de\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"event_at\":\"2026-08-23T18:43:49.885Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:43:52.578Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"quiz_started\",\"payload\":{\"quiz_started_at\":\"2026-08-23T18:43:51.973Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:43:51.973Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:43:53.249Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"question_viewed\",\"payload\":{\"step_index\":1,\"question_index\":1,\"question_key\":1,\"question_phase\":1,\"question_viewed_at\":\"2026-08-23T18:43:52.332Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:43:52.332Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:43:54.514Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"quiz_answer\",\"payload\":{\"step_index\":1,\"question_index\":1,\"question_key\":1,\"question_phase\":1,\"answer_label\":\"Ziele & Fortschritt\",\"answer_type\":\"R\",\"answer_aspiration\":\"\",\"answer_barrier\":\"\",\"answered_at\":\"2026-08-23T18:43:53.896Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:43:53.896Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:43:55.100Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"question_viewed\",\"payload\":{\"step_index\":2,\"question_index\":2,\"question_key\":2,\"question_phase\":1,\"question_viewed_at\":\"2026-08-23T18:43:54.251Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:43:54.251Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:43:56.118Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"quiz_answer\",\"payload\":{\"step_index\":2,\"question_index\":2,\"question_key\":2,\"question_phase\":1,\"answer_label\":\"Der Richtungsgeber\",\"answer_type\":\"R\",\"answer_aspiration\":\"\",\"answer_barrier\":\"\",\"answered_at\":\"2026-08-23T18:43:55.521Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:43:55.521Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:43:56.433Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"question_viewed\",\"payload\":{\"step_index\":3,\"question_index\":3,\"question_key\":3,\"question_phase\":1,\"question_viewed_at\":\"2026-08-23T18:43:55.876Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:43:55.876Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:43:57.800Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"quiz_answer\",\"payload\":{\"step_index\":3,\"question_index\":3,\"question_key\":3,\"question_phase\":1,\"answer_label\":\"Blockaden & Zögerer\",\"answer_type\":\"R\",\"answer_aspiration\":\"\",\"answer_barrier\":\"\",\"answered_at\":\"2026-08-23T18:43:57.140Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:43:57.140Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:43:58.134Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"question_viewed\",\"payload\":{\"step_index\":4,\"question_index\":4,\"question_key\":4,\"question_phase\":2,\"question_viewed_at\":\"2026-08-23T18:43:57.498Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:43:57.498Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:43:59.622Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"quiz_answer\",\"payload\":{\"step_index\":4,\"question_index\":4,\"question_key\":4,\"question_phase\":2,\"answer_label\":\"Freiheit\",\"answer_type\":\"\",\"answer_aspiration\":\"freedom\",\"answer_barrier\":\"\",\"answered_at\":\"2026-08-23T18:43:58.765Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:43:58.765Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:01.300Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"aspiration_confirmed\",\"payload\":{\"quiz_aspiration\":\"freedom\",\"main_aspiration\":\"freedom\",\"main_aspiration_label\":\"Freiheit\",\"aspiration_confirmed_at\":\"2026-08-23T18:44:00.738Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:00.739Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:01.375Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"question_viewed\",\"payload\":{\"step_index\":5,\"question_index\":5,\"question_key\":5,\"question_phase\":2,\"question_viewed_at\":\"2026-08-23T18:44:00.740Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:00.740Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:02.579Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"quiz_answer\",\"payload\":{\"step_index\":5,\"question_index\":5,\"question_key\":5,\"question_phase\":2,\"answer_label\":\"Finanziell frei\",\"answer_type\":\"\",\"answer_aspiration\":\"freedom\",\"answer_barrier\":\"\",\"answered_at\":\"2026-08-23T18:44:02.007Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:02.007Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:02.813Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"question_viewed\",\"payload\":{\"step_index\":6,\"question_index\":6,\"question_key\":6,\"question_phase\":2,\"question_viewed_at\":\"2026-08-23T18:44:02.360Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:02.360Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:04.209Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"quiz_answer\",\"payload\":{\"step_index\":6,\"question_index\":6,\"question_key\":6,\"question_phase\":2,\"answer_label\":\"Fehlendes System\",\"answer_type\":\"\",\"answer_aspiration\":\"\",\"answer_barrier\":\"vehicle\",\"answered_at\":\"2026-08-23T18:44:03.637Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:03.637Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:08.048Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"quiz_result\",\"payload\":{\"quiz_profile\":\"R\",\"quiz_profile_name\":\"Der Macher\",\"quiz_aspiration\":\"freedom\",\"main_aspiration\":\"freedom\",\"main_aspiration_label\":\"Freiheit\",\"quiz_barrier\":\"vehicle\",\"quiz_completed_at\":\"2026-08-23T18:44:07.600Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:07.600Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:08.507Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"optin_viewed\",\"payload\":{\"quiz_profile\":\"Typ A\",\"quiz_profile_name\":\"Der Macher\",\"quiz_aspiration\":\"freedom\",\"main_aspiration\":\"freedom\",\"main_aspiration_label\":\"Freiheit\",\"optin_viewed_at\":\"2026-08-23T18:44:07.964Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:07.964Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:10.030Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"form_submit\",\"payload\":{\"form_first_name\":\"Markus\",\"form_email\":\"markus@global-sce.com\",\"form_submitted_at\":\"2026-08-23T18:44:09.570Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:09.570Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:12.809Z",
+      "url": "/api/bridge",
+      "status": 200,
+      "req": "{\"action\":\"forward_typeform_adapter\",\"adapter_key\":\"business_leads_quiz_v1\",\"payload\":{\"first_name\":\"Markus\",\"email\":\"markus@global-sce.com\",\"event_id\":\"EVTA20BC92E8DE24A9FB23221469E0CB265\",\"token\":\"tf0935d1a973fa4a0882b61e0e78abe329\",\"selected_answers\":[{\"label\":\"Ziele & Fortschritt\",\"desc\":\"Ich habe ein Ziel vor Augen und will sehen, wie ich vorankomme.\",\"type\":\"R\"},{\"label\":\"Der Richtungsgeber\",\"desc\":\"Derjenige, der den Überblick hat und die Richtung vorgibt.\",\"type\":\"R\"},{\"label\":\"Blockaden & Zögerer\",\"desc\":\"Wenn Dinge nicht vorankommen, weil jemand nicht entscheiden kann oder will.\",\"type\":\"R\"},{\"label\":\"Freiheit\",\"desc\":\"Selbst bestimmen, wann, wie und wo ich arbeite, ohne Erlaubnis zu brauchen.\",\"aspiration\":\"freedom\"},{\"label\":\"Finanziell frei\",\"desc\":\"Ich entscheide selbst über meine Zeit und mein Einkommen. Kein Chef, kein Limit.\",\"aspiration\":\"freedom\"},{\"label\":\"Fehlendes System\",\"desc\":\"Ich habe den Willen, aber noch kein funktionierendes System, das mich dorthin bringt.\",\"barrier\":\"vehicle\"}],\"profile\":{\"code\":\"Typ A\",\"name\":\"Der Macher\",\"emoji\":\"🔥\",\"animal\":\"Feuer\",\"tagline\":\"Du bist geboren, um zu führen und nicht um zu folgen.\",\"accentColor\":\"#FF6B6B\",\"accentSoft\":\"rgba(255,107,107,0.1)\",\"strengths\":[\"Schnelle, klare Entscheidungskraft\",\"Konsequenter Weg von der Idee zur Umsetzung\",\"Natürliche Führungsstärke\",\"Selbstgetrieben und unabhängig\"],\"shadow\":\"Manchmal wirkt deine Energie auf andere ungeduldig, aber das ist nur Antrieb, der ein Ventil sucht.\",\"fitMap\":{\"freedom\":\"Du brauchst kein 9-to-5. Du brauchst ein System, das so schnell skaliert wie du denkst. Kein Chef. Kein Deckel. Deine Regeln.\",\"impact\":\"Wenn du Wirkung willst, brauchst du ein Modell, in dem deine Energie andere wirklich bewegt und nicht in endlosen Meetings verpufft.\",\"security\":\"Auch wenn du stark nach vorne gehst, willst du ein Fundament, das trägt. Ein starkes System gibt dir genau diese Basis.\",\"growth\":\"Du entwickelst dich am stärksten dort, wo du Verantwortung übernehmen, führen und Ergebnisse sehen kannst.\"},\"ctaMap\":{\"freedom\":\"Du weißt bereits, was du willst. Die Frage ist nur noch: Hast du das richtige Vehikel dafür?\",\"impact\":\"Deine Energie kann Menschen mitziehen. Entscheidend ist nur, ob du sie im richtigen Umfeld einsetzt.\",\"security\":\"Du musst dich nicht klein machen, um Sicherheit zu bekommen. Du brauchst nur das richtige Modell.\",\"growth\":\"Du brauchst keine Motivation von außen. Du brauchst ein Spielfeld, das groß genug für dich ist.\"},\"finalCta\":\"De",
+      "res": "{\"forwarded\":true,\"log_id\":\"wh_6a8b3f7a4c18e1.85848931\",\"target\":\"https://contacts.hl-support.biz/webhook/typeform\",\"target_status\":200,\"target_response\":\"\",\"curl_error\":null,\"adapter_key\":\"business_leads_quiz_v1\",\"lead_system_v2_persisted\":{\"persisted\":true,\"leadHash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"final_mysql_sync\":{\"found\":true,\"mysql_survey_id\":42869,\"mysql_contact_id\":3683967,\"mysql_coach_id\":4677,\"organisation_id\":2}},\"payload\":{\"event_id\":\"EVTA20BC92E8DE24A9FB23221469E0CB265\",\"event_type\":\"form_response\",\"form_response\":{\"form_id\":\"hC2yTcU8\",\"token\":\"tf0935d1a973fa4a0882b61e0e78abe329\",\"response_url\":\"https://admin.typeform.com/form/hC2yTcU8/results?responseId=tf0935d1a973fa4a0882b61e0e78abe329#responses\",\"landed_at\":\"2026-08-23T18:44:09.833Z\",\"submitted_at\":\"2026-08-23T18:44:09.833Z\",\"hidden\":{\"c\":\"DE\",\"hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"session_hash\":\"ac_f21e2440974246d1b6ac20d0c0df870d\",\"tracking_hash\":\"ac_f21e2440974246d1b6ac20d0c0df870d\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"lead_system_v2_enabled\":\"1\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"schema_version\":\"ac_tracking_v1\",\"main_aspiration\":\"freedom\",\"main_aspiration_label\":\"Freiheit\",\"utm_source\":\"\",\"utm_medium\":\"\",\"utm_campaign\":\"\",\"utm_content\":\"\",\"utm_campaign_id\":\"\",\"utm_adset_id\":\"\",\"utm_ad_id\":\"\",\"utm_term\":\"\",\"fbclid\":\"\",\"fbc\":\"\",\"fbp\":\"fb.1.1787510628669.89263502637558288\",\"event_source_url\":\"https://business.activecenter.info/markus?test=1\",\"lang\":\"de\",\"berater_slug\":\"markus\",\"slug\":\"markus\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"survey_id\":\"12\"},\"calculated\":{\"score\":0},\"variables\":[{\"key\":\"contact_country\",\"type\":\"text\",\"text\":\"DE\"},{\"key\":\"score\",\"type\":\"number\",\"number\":0},{\"key\":\"noemail\",\"type\":\"number\",\"number\":1},{\"key\":\"main_aspiration\",\"type\":\"text\",\"text\":\"freedom\"},{\"key\":\"main_aspiration_label\",\"type\":\"text\",\"text\":\"Freiheit\"}],\"definition\":{\"id\":\"hC2yTcU8\",\"title\":\"DE - Erfolgscode Quiz\",\"fields\":[{\"id\":\"Vn4xYk2LmQ8p\",\"ref\":\"lead_profile_result\",\"type\":\"short_text\",\"title\":\"Dein Erfolgscode\",\"properties\":{}},{\"id\":\"Z2vy6Tx0Bg4D\",\"ref\":\"lead_main_aspiration\",\"type\":\"short_text\",\"title\":\"Dein Hauptziel\",\"properties\":{}},{\"id\":\"R4nq8Lp2Ty6V\",\"ref\":\"lead_q1_drive\",\"type\":\"multiple_choice\",\"title\":\"Was treibt dich morgens wirklich aus dem Bett?\",\"properties\":{},\"choices\":[{\"id\":\"A1rK7pLm2Xq9\",\"ref\":\"lead_q1_opt_1\",\"label\":\"Ziele & Fortschritt\"},{\"id\":\"B2sL8qMn3Yr0\",\"ref\":\"lead_q1_opt_2\",\"label\":\"Menschen & Begegnungen\"},{\"id\":\"C3tM9rNo4Zs1\",\"ref\":\"lead_q1_opt_3\",\"label\":\"Struktur & Ruhe\"},{\"id\":\"D4uN0sOp5At2\",\"ref\":\"lead_q1_opt_4\",\"label\":\"Tiefe & Herausforderung\"}]},{\"id\":\"S5or9Mq3Uz7W\",\"ref\":\"lead_q2_group\",\"type\":\"multiple_choice\",\"title\":\"In einer Gruppe bist du meistens...\",\"properties\":{},\"choices\":[{\"id\":\"E5vO1tPq6Bu3\",\"ref\":\"lead_q2_opt_1\",\"label\":\"Der Richtungsgeber\"},{\"id\":\"F6wP2uQr7Cv4\",\"ref\":\"lead_q2_opt_2\",\"label\":\"Der Stimmungsmacher\"},{\"id\":\"G7xQ3vRs8"
+    },
+    {
+      "t": "2026-08-23T18:44:13.375Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"form_submitted\",\"payload\":{\"first_name\":\"Markus\",\"email\":\"markus@global-sce.com\",\"form_first_name\":\"Markus\",\"form_email\":\"markus@global-sce.com\",\"form_submitted_at\":\"2026-08-23T18:44:09.833Z\",\"submitted_at\":\"2026-08-23T18:44:09.833Z\",\"profile_code\":\"Typ A\",\"profile_label\":\"Der Macher\",\"main_aspiration\":\"freedom\",\"main_aspiration_label\":\"Freiheit\",\"initial_barrier\":\"vehicle\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"lang\":\"de\",\"utm_source\":\"\",\"utm_medium\":\"\",\"utm_campaign\":\"\",\"utm_content\":\"\",\"utm_campaign_id\":\"\",\"utm_adset_id\":\"\",\"utm_ad_id\":\"\",\"utm_term\":\"\",\"fbclid\":\"\",\"fbc\":\"\",\"fbp\":\"fb.1.1787510628669.89263502637558288\",\"event_source_url\":\"https://business.activecenter.info/markus?test=1\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"event_at\":\"2026-08-23T18:44:09.833Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:14.040Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"result_cta_click\",\"payload\":{\"quiz_profile\":\"Typ A\",\"quiz_profile_name\":\"Der Macher\",\"quiz_aspiration\":\"freedom\",\"main_aspiration\":\"freedom\",\"main_aspiration_label\":\"Freiheit\",\"result_cta_clicked_at\":\"2026-08-23T18:44:13.552Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:13.552Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:14.407Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_viewed\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video_viewed_at\":\"2026-08-23T18:44:13.922Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:13.922Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:15.276Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_started\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video_started_at\":\"2026-08-23T18:44:14.820Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:14.820Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:19.745Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":10,\"video1_max_pct\":5,\"video1_unique_watched_pct\":5,\"video1_max_playhead_pct\":5,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:19.243Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":10,\"unique_watched_percent\":5,\"max_playhead_percent\":5,\"seek_count\":0,\"progress_percent\":5,\"watched_ranges\":[[0,10]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:19.243Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:21.662Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":20,\"video1_max_pct\":10,\"video1_unique_watched_pct\":10,\"video1_max_playhead_pct\":9,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:21.102Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":20,\"unique_watched_percent\":10,\"max_playhead_percent\":9,\"seek_count\":0,\"progress_percent\":10,\"watched_ranges\":[[0,20]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:21.102Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:23.683Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":30,\"video1_max_pct\":15,\"video1_unique_watched_pct\":15,\"video1_max_playhead_pct\":15,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:23.227Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":30,\"unique_watched_percent\":15,\"max_playhead_percent\":15,\"seek_count\":0,\"progress_percent\":15,\"watched_ranges\":[[0,30]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:23.227Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:25.743Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":40,\"video1_max_pct\":20,\"video1_unique_watched_pct\":20,\"video1_max_playhead_pct\":19,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:25.095Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":40,\"unique_watched_percent\":20,\"max_playhead_percent\":19,\"seek_count\":0,\"progress_percent\":20,\"watched_ranges\":[[0,40]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:25.096Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:27.754Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":50,\"video1_max_pct\":25,\"video1_unique_watched_pct\":25,\"video1_max_playhead_pct\":25,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:27.211Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":50,\"unique_watched_percent\":25,\"max_playhead_percent\":25,\"seek_count\":0,\"progress_percent\":25,\"watched_ranges\":[[0,50]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:27.211Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:29.533Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":60,\"video1_max_pct\":30,\"video1_unique_watched_pct\":30,\"video1_max_playhead_pct\":30,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:29.070Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":60,\"unique_watched_percent\":30,\"max_playhead_percent\":30,\"seek_count\":0,\"progress_percent\":30,\"watched_ranges\":[[0,60]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:29.070Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:31.427Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":69,\"video1_max_pct\":35,\"video1_unique_watched_pct\":35,\"video1_max_playhead_pct\":34,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:30.934Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":69,\"unique_watched_percent\":35,\"max_playhead_percent\":34,\"seek_count\":0,\"progress_percent\":35,\"watched_ranges\":[[0,69]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:30.935Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:33.616Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":80,\"video1_max_pct\":40,\"video1_unique_watched_pct\":40,\"video1_max_playhead_pct\":40,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:33.057Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":80,\"unique_watched_percent\":40,\"max_playhead_percent\":40,\"seek_count\":0,\"progress_percent\":40,\"watched_ranges\":[[0,80]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:33.057Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:35.374Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":89,\"video1_max_pct\":45,\"video1_unique_watched_pct\":45,\"video1_max_playhead_pct\":44,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:34.913Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":89,\"unique_watched_percent\":45,\"max_playhead_percent\":44,\"seek_count\":0,\"progress_percent\":45,\"watched_ranges\":[[0,89]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:34.914Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:37.997Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":99,\"video1_max_pct\":50,\"video1_unique_watched_pct\":50,\"video1_max_playhead_pct\":50,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:37.041Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":99,\"unique_watched_percent\":50,\"max_playhead_percent\":50,\"seek_count\":0,\"progress_percent\":50,\"watched_ranges\":[[0,99]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:37.041Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:39.380Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":109,\"video1_max_pct\":55,\"video1_unique_watched_pct\":55,\"video1_max_playhead_pct\":55,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:38.900Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":109,\"unique_watched_percent\":55,\"max_playhead_percent\":55,\"seek_count\":0,\"progress_percent\":55,\"watched_ranges\":[[0,109]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:38.900Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:41.221Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":118,\"video1_max_pct\":60,\"video1_unique_watched_pct\":60,\"video1_max_playhead_pct\":59,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:40.758Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":118,\"unique_watched_percent\":60,\"max_playhead_percent\":59,\"seek_count\":0,\"progress_percent\":60,\"watched_ranges\":[[0,118]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:40.758Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:43.358Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":129,\"video1_max_pct\":65,\"video1_unique_watched_pct\":65,\"video1_max_playhead_pct\":65,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:42.884Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":129,\"unique_watched_percent\":65,\"max_playhead_percent\":65,\"seek_count\":0,\"progress_percent\":65,\"watched_ranges\":[[0,129]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:42.884Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:45.300Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":138,\"video1_max_pct\":70,\"video1_unique_watched_pct\":70,\"video1_max_playhead_pct\":70,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:44.749Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":138,\"unique_watched_percent\":70,\"max_playhead_percent\":70,\"seek_count\":0,\"progress_percent\":70,\"watched_ranges\":[[0,138]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:44.749Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:47.332Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":149,\"video1_max_pct\":75,\"video1_unique_watched_pct\":75,\"video1_max_playhead_pct\":75,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:46.867Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":149,\"unique_watched_percent\":75,\"max_playhead_percent\":75,\"seek_count\":0,\"progress_percent\":75,\"watched_ranges\":[[0,149]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:46.868Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:49.200Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":158,\"video1_max_pct\":80,\"video1_unique_watched_pct\":80,\"video1_max_playhead_pct\":80,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:48.734Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":158,\"unique_watched_percent\":80,\"max_playhead_percent\":80,\"seek_count\":0,\"progress_percent\":80,\"watched_ranges\":[[0,158]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:48.734Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:51.100Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":167,\"video1_max_pct\":85,\"video1_unique_watched_pct\":85,\"video1_max_playhead_pct\":84,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:50.595Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":167,\"unique_watched_percent\":85,\"max_playhead_percent\":84,\"seek_count\":0,\"progress_percent\":85,\"watched_ranges\":[[0,167]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:50.595Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:53.188Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":178,\"video1_max_pct\":90,\"video1_unique_watched_pct\":90,\"video1_max_playhead_pct\":90,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:52.712Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":178,\"unique_watched_percent\":90,\"max_playhead_percent\":90,\"seek_count\":0,\"progress_percent\":90,\"watched_ranges\":[[0,178]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:52.712Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:55.239Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":187,\"video1_max_pct\":95,\"video1_unique_watched_pct\":95,\"video1_max_playhead_pct\":95,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:54.574Z\",\"video1_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":196,\"unique_watched_seconds\":187,\"unique_watched_percent\":95,\"max_playhead_percent\":95,\"seek_count\":0,\"progress_percent\":95,\"watched_ranges\":[[0,187]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:54.574Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:55.588Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_unlocked\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video1_watched_sec\":187,\"video1_max_pct\":95,\"video1_unique_watched_pct\":95,\"video1_max_playhead_pct\":95,\"video1_seek_count\":0,\"video1_last_update\":\"2026-08-23T18:44:54.574Z\",\"video1_tracking_method\":\"unique_watch_95\",\"duration_seconds\":196,\"unique_watched_seconds\":187,\"unique_watched_percent\":95,\"max_playhead_percent\":95,\"seek_count\":0,\"progress_percent\":95,\"watched_ranges\":[[0,187]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:54.584Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:55.824Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_viewed\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"video_viewed_at\":\"2026-08-23T18:44:55.343Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:55.343Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:56.211Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_continue_click\",\"payload\":{\"video_step\":1,\"video_id\":\"88b6efb5-c382-4ca6-8935-60bf72bbc47f\",\"next_step\":2,\"video_continue_clicked_at\":\"2026-08-23T18:44:55.342Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:55.342Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:56.615Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_viewed\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video_viewed_at\":\"2026-08-23T18:44:55.694Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:55.694Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:44:56.816Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_started\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video_started_at\":\"2026-08-23T18:44:56.154Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:44:56.154Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:45:05.138Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":29,\"video2_max_pct\":5,\"video2_unique_watched_pct\":5,\"video2_max_playhead_pct\":5,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:45:04.634Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":29,\"unique_watched_percent\":5,\"max_playhead_percent\":5,\"seek_count\":0,\"progress_percent\":5,\"watched_ranges\":[[0,29]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:45:04.634Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:45:10.719Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":57,\"video2_max_pct\":10,\"video2_unique_watched_pct\":10,\"video2_max_playhead_pct\":10,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:45:10.217Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":57,\"unique_watched_percent\":10,\"max_playhead_percent\":10,\"seek_count\":0,\"progress_percent\":10,\"watched_ranges\":[[0,57]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:45:10.217Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:45:16.492Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":84,\"video2_max_pct\":15,\"video2_unique_watched_pct\":15,\"video2_max_playhead_pct\":15,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:45:15.790Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":84,\"unique_watched_percent\":15,\"max_playhead_percent\":15,\"seek_count\":0,\"progress_percent\":15,\"watched_ranges\":[[0,84]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:45:15.790Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:45:21.981Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":112,\"video2_max_pct\":20,\"video2_unique_watched_pct\":20,\"video2_max_playhead_pct\":20,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:45:21.375Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":112,\"unique_watched_percent\":20,\"max_playhead_percent\":20,\"seek_count\":0,\"progress_percent\":20,\"watched_ranges\":[[0,112]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:45:21.375Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:45:27.460Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":140,\"video2_max_pct\":25,\"video2_unique_watched_pct\":25,\"video2_max_playhead_pct\":25,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:45:26.950Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":140,\"unique_watched_percent\":25,\"max_playhead_percent\":25,\"seek_count\":0,\"progress_percent\":25,\"watched_ranges\":[[0,140]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:45:26.950Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:45:33.089Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":168,\"video2_max_pct\":30,\"video2_unique_watched_pct\":30,\"video2_max_playhead_pct\":30,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:45:32.533Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":168,\"unique_watched_percent\":30,\"max_playhead_percent\":30,\"seek_count\":0,\"progress_percent\":30,\"watched_ranges\":[[0,168]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:45:32.533Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:45:38.613Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":196,\"video2_max_pct\":35,\"video2_unique_watched_pct\":35,\"video2_max_playhead_pct\":35,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:45:38.104Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":196,\"unique_watched_percent\":35,\"max_playhead_percent\":35,\"seek_count\":0,\"progress_percent\":35,\"watched_ranges\":[[0,196]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:45:38.105Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:45:44.823Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":224,\"video2_max_pct\":40,\"video2_unique_watched_pct\":40,\"video2_max_playhead_pct\":40,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:45:43.682Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":224,\"unique_watched_percent\":40,\"max_playhead_percent\":40,\"seek_count\":0,\"progress_percent\":40,\"watched_ranges\":[[0,224]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:45:43.683Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:45:49.784Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":252,\"video2_max_pct\":45,\"video2_unique_watched_pct\":45,\"video2_max_playhead_pct\":45,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:45:49.260Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":252,\"unique_watched_percent\":45,\"max_playhead_percent\":45,\"seek_count\":0,\"progress_percent\":45,\"watched_ranges\":[[0,252]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:45:49.260Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:45:55.383Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":280,\"video2_max_pct\":50,\"video2_unique_watched_pct\":50,\"video2_max_playhead_pct\":50,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:45:54.850Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":280,\"unique_watched_percent\":50,\"max_playhead_percent\":50,\"seek_count\":0,\"progress_percent\":50,\"watched_ranges\":[[0,280]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:45:54.851Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:01.019Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":307,\"video2_max_pct\":55,\"video2_unique_watched_pct\":55,\"video2_max_playhead_pct\":55,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:46:00.416Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":307,\"unique_watched_percent\":55,\"max_playhead_percent\":55,\"seek_count\":0,\"progress_percent\":55,\"watched_ranges\":[[0,307]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:00.416Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:06.474Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":335,\"video2_max_pct\":60,\"video2_unique_watched_pct\":60,\"video2_max_playhead_pct\":60,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:46:05.994Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":335,\"unique_watched_percent\":60,\"max_playhead_percent\":60,\"seek_count\":0,\"progress_percent\":60,\"watched_ranges\":[[0,335]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:05.994Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:12.075Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":363,\"video2_max_pct\":65,\"video2_unique_watched_pct\":65,\"video2_max_playhead_pct\":65,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:46:11.573Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":363,\"unique_watched_percent\":65,\"max_playhead_percent\":65,\"seek_count\":0,\"progress_percent\":65,\"watched_ranges\":[[0,363]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:11.573Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:17.666Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":391,\"video2_max_pct\":70,\"video2_unique_watched_pct\":70,\"video2_max_playhead_pct\":70,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:46:17.151Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":391,\"unique_watched_percent\":70,\"max_playhead_percent\":70,\"seek_count\":0,\"progress_percent\":70,\"watched_ranges\":[[0,391]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:17.151Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:23.332Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":419,\"video2_max_pct\":75,\"video2_unique_watched_pct\":75,\"video2_max_playhead_pct\":75,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:46:22.730Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":419,\"unique_watched_percent\":75,\"max_playhead_percent\":75,\"seek_count\":0,\"progress_percent\":75,\"watched_ranges\":[[0,419]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:22.730Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:28.815Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":447,\"video2_max_pct\":80,\"video2_unique_watched_pct\":80,\"video2_max_playhead_pct\":80,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:46:28.307Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":447,\"unique_watched_percent\":80,\"max_playhead_percent\":80,\"seek_count\":0,\"progress_percent\":80,\"watched_ranges\":[[0,447]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:28.307Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:34.721Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":475,\"video2_max_pct\":85,\"video2_unique_watched_pct\":85,\"video2_max_playhead_pct\":85,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:46:33.886Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":475,\"unique_watched_percent\":85,\"max_playhead_percent\":85,\"seek_count\":0,\"progress_percent\":85,\"watched_ranges\":[[0,475]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:33.886Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:40.044Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":503,\"video2_max_pct\":90,\"video2_unique_watched_pct\":90,\"video2_max_playhead_pct\":90,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:46:39.465Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":503,\"unique_watched_percent\":90,\"max_playhead_percent\":90,\"seek_count\":0,\"progress_percent\":90,\"watched_ranges\":[[0,503]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:39.466Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:45.773Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":531,\"video2_max_pct\":95,\"video2_unique_watched_pct\":95,\"video2_max_playhead_pct\":95,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:46:45.041Z\",\"video2_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":557,\"unique_watched_seconds\":531,\"unique_watched_percent\":95,\"max_playhead_percent\":95,\"seek_count\":0,\"progress_percent\":95,\"watched_ranges\":[[0,531]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:45.041Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:45.956Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_unlocked\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video2_watched_sec\":531,\"video2_max_pct\":95,\"video2_unique_watched_pct\":95,\"video2_max_playhead_pct\":95,\"video2_seek_count\":0,\"video2_last_update\":\"2026-08-23T18:46:45.042Z\",\"video2_tracking_method\":\"unique_watch_95\",\"duration_seconds\":557,\"unique_watched_seconds\":531,\"unique_watched_percent\":95,\"max_playhead_percent\":95,\"seek_count\":0,\"progress_percent\":95,\"watched_ranges\":[[0,531]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:45.051Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:47.980Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_continue_click\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"next_step\":3,\"video_continue_clicked_at\":\"2026-08-23T18:46:47.523Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:47.523Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:47.986Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_viewed\",\"payload\":{\"video_step\":2,\"video_id\":\"069f507f-4fdb-4e40-a10f-5a3669cc3ca9\",\"video_viewed_at\":\"2026-08-23T18:46:47.524Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:47.524Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:48.798Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_started\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video_started_at\":\"2026-08-23T18:46:48.337Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:48.337Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:49.146Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_viewed\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video_viewed_at\":\"2026-08-23T18:46:47.875Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:47.875Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:54.362Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":14,\"video3_max_pct\":5,\"video3_unique_watched_pct\":5,\"video3_max_playhead_pct\":5,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:46:53.860Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":14,\"unique_watched_percent\":5,\"max_playhead_percent\":5,\"seek_count\":0,\"progress_percent\":5,\"watched_ranges\":[[0,14]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:53.860Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:57.031Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":27,\"video3_max_pct\":10,\"video3_unique_watched_pct\":10,\"video3_max_playhead_pct\":9,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:46:56.528Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":27,\"unique_watched_percent\":10,\"max_playhead_percent\":9,\"seek_count\":0,\"progress_percent\":10,\"watched_ranges\":[[0,27]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:56.528Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:46:59.931Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":42,\"video3_max_pct\":15,\"video3_unique_watched_pct\":15,\"video3_max_playhead_pct\":15,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:46:59.449Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":42,\"unique_watched_percent\":15,\"max_playhead_percent\":15,\"seek_count\":0,\"progress_percent\":15,\"watched_ranges\":[[0,42]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:46:59.449Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:02.387Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":54,\"video3_max_pct\":20,\"video3_unique_watched_pct\":20,\"video3_max_playhead_pct\":19,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:01.840Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":54,\"unique_watched_percent\":20,\"max_playhead_percent\":19,\"seek_count\":0,\"progress_percent\":20,\"watched_ranges\":[[0,54]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:01.840Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:05.234Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":68,\"video3_max_pct\":25,\"video3_unique_watched_pct\":25,\"video3_max_playhead_pct\":25,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:04.762Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":68,\"unique_watched_percent\":25,\"max_playhead_percent\":25,\"seek_count\":0,\"progress_percent\":25,\"watched_ranges\":[[0,68]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:04.762Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:07.911Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":82,\"video3_max_pct\":30,\"video3_unique_watched_pct\":30,\"video3_max_playhead_pct\":30,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:07.418Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":82,\"unique_watched_percent\":30,\"max_playhead_percent\":30,\"seek_count\":0,\"progress_percent\":30,\"watched_ranges\":[[0,82]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:07.418Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:10.331Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":94,\"video3_max_pct\":35,\"video3_unique_watched_pct\":35,\"video3_max_playhead_pct\":34,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:09.808Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":94,\"unique_watched_percent\":35,\"max_playhead_percent\":34,\"seek_count\":0,\"progress_percent\":35,\"watched_ranges\":[[0,94]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:09.809Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:13.228Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":108,\"video3_max_pct\":40,\"video3_unique_watched_pct\":40,\"video3_max_playhead_pct\":40,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:12.731Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":108,\"unique_watched_percent\":40,\"max_playhead_percent\":40,\"seek_count\":0,\"progress_percent\":40,\"watched_ranges\":[[0,108]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:12.731Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:15.857Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":122,\"video3_max_pct\":45,\"video3_unique_watched_pct\":45,\"video3_max_playhead_pct\":45,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:15.386Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":122,\"unique_watched_percent\":45,\"max_playhead_percent\":45,\"seek_count\":0,\"progress_percent\":45,\"watched_ranges\":[[0,122]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:15.387Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:18.522Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":135,\"video3_max_pct\":50,\"video3_unique_watched_pct\":50,\"video3_max_playhead_pct\":50,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:18.043Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":135,\"unique_watched_percent\":50,\"max_playhead_percent\":50,\"seek_count\":0,\"progress_percent\":50,\"watched_ranges\":[[0,135]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:18.043Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:21.312Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":148,\"video3_max_pct\":55,\"video3_unique_watched_pct\":55,\"video3_max_playhead_pct\":55,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:20.699Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":148,\"unique_watched_percent\":55,\"max_playhead_percent\":55,\"seek_count\":0,\"progress_percent\":55,\"watched_ranges\":[[0,148]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:20.699Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:23.839Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":161,\"video3_max_pct\":60,\"video3_unique_watched_pct\":60,\"video3_max_playhead_pct\":59,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:23.355Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":161,\"unique_watched_percent\":60,\"max_playhead_percent\":59,\"seek_count\":0,\"progress_percent\":60,\"watched_ranges\":[[0,161]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:23.356Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:26.496Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":175,\"video3_max_pct\":65,\"video3_unique_watched_pct\":65,\"video3_max_playhead_pct\":64,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:26.013Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":175,\"unique_watched_percent\":65,\"max_playhead_percent\":64,\"seek_count\":0,\"progress_percent\":65,\"watched_ranges\":[[0,175]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:26.013Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:29.228Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":188,\"video3_max_pct\":70,\"video3_unique_watched_pct\":70,\"video3_max_playhead_pct\":69,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:28.668Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":188,\"unique_watched_percent\":70,\"max_playhead_percent\":69,\"seek_count\":0,\"progress_percent\":70,\"watched_ranges\":[[0,188]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:28.668Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:32.056Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":203,\"video3_max_pct\":75,\"video3_unique_watched_pct\":75,\"video3_max_playhead_pct\":75,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:31.589Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":203,\"unique_watched_percent\":75,\"max_playhead_percent\":75,\"seek_count\":0,\"progress_percent\":75,\"watched_ranges\":[[0,203]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:31.590Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:34.785Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":216,\"video3_max_pct\":80,\"video3_unique_watched_pct\":80,\"video3_max_playhead_pct\":80,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:34.247Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":216,\"unique_watched_percent\":80,\"max_playhead_percent\":80,\"seek_count\":0,\"progress_percent\":80,\"watched_ranges\":[[0,216]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:34.248Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:37.113Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":228,\"video3_max_pct\":85,\"video3_unique_watched_pct\":85,\"video3_max_playhead_pct\":84,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:36.637Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":228,\"unique_watched_percent\":85,\"max_playhead_percent\":84,\"seek_count\":0,\"progress_percent\":85,\"watched_ranges\":[[0,228]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:36.637Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:40.108Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":242,\"video3_max_pct\":90,\"video3_unique_watched_pct\":90,\"video3_max_playhead_pct\":90,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:39.559Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":242,\"unique_watched_percent\":90,\"max_playhead_percent\":90,\"seek_count\":0,\"progress_percent\":90,\"watched_ranges\":[[0,242]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:39.559Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:42.877Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_progress\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":256,\"video3_max_pct\":95,\"video3_unique_watched_pct\":95,\"video3_max_playhead_pct\":95,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:42.215Z\",\"video3_tracking_method\":\"playerjs_unique_watch\",\"duration_seconds\":268,\"unique_watched_seconds\":256,\"unique_watched_percent\":95,\"max_playhead_percent\":95,\"seek_count\":0,\"progress_percent\":95,\"watched_ranges\":[[0,256]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:42.215Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:42.978Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_unlocked\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video3_watched_sec\":256,\"video3_max_pct\":95,\"video3_unique_watched_pct\":95,\"video3_max_playhead_pct\":95,\"video3_seek_count\":0,\"video3_last_update\":\"2026-08-23T18:47:42.215Z\",\"video3_tracking_method\":\"unique_watch_95\",\"duration_seconds\":268,\"unique_watched_seconds\":256,\"unique_watched_percent\":95,\"max_playhead_percent\":95,\"seek_count\":0,\"progress_percent\":95,\"watched_ranges\":[[0,256]],\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:42.225Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:44.893Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_continue_click\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"next_step\":\"final\",\"video_continue_clicked_at\":\"2026-08-23T18:47:44.405Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:44.406Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:44.956Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"video_viewed\",\"payload\":{\"video_step\":3,\"video_id\":\"8f497dc5-85b2-4e66-a54a-3356fb0d44e6\",\"video_viewed_at\":\"2026-08-23T18:47:44.407Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:44.407Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:45.328Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"final_viewed\",\"payload\":{\"quiz_profile\":\"Typ A\",\"quiz_profile_name\":\"Der Macher\",\"final_viewed_at\":\"2026-08-23T18:47:44.761Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:44.761Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    },
+    {
+      "t": "2026-08-23T18:47:46.596Z",
+      "url": "/api/lead-track",
+      "status": 200,
+      "req": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"event_name\":\"cta_clicked\",\"payload\":{\"cta_type\":\"whatsapp\",\"cta_clicked_at\":\"2026-08-23T18:47:45.982Z\",\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-23T18:47:45.985Z\",\"is_internal_traffic\":true,\"is_resume\":false}}",
+      "res": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\"}"
+    }
+  ],
+  "consoleIssues": [
+    {
+      "t": "2026-08-23T18:44:09.833Z",
+      "type": "error",
+      "text": "Access to fetch at 'https://mautic.hl-support.biz/api/contacts/new' from origin 'https://business.activecenter.info' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+    },
+    {
+      "t": "2026-08-23T18:44:09.833Z",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "t": "2026-08-23T18:44:15.773Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=va&latency=193 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:16.399Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ams&latency=60 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:17.965Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=hi&latency=243 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:19.098Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=isr&latency=161 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:20.101Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:20.214Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=den&latency=162 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:22.033Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=syd&latency=311 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:23.321Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=tx&latency=180 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:24.647Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=hou&latency=163 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:24.893Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:25.289Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=hu&latency=32 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:26.470Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ca&latency=146 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:27.824Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ct&latency=208 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:28.827Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=az&latency=118 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:29.816Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cy&latency=95 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:29.953Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:30.701Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ie&latency=62 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:32.624Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=kr&latency=336 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:34.031Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=sg&latency=204 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:34.905Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:35.324Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=in&latency=196 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:37.473Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=auc&latency=328 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:37.934Z",
+      "type": "requestfailed",
+      "text": "https://edgezone-ph.bunnyinfra.net/500b.jpg?s=1787510677909 :: net::ERR_NAME_NOT_RESOLVED"
+    },
+    {
+      "t": "2026-08-23T18:44:37.934Z",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED"
+    },
+    {
+      "t": "2026-08-23T18:44:38.873Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ru&latency=80 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:39.952Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:40.390Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pe&latency=276 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:41.101Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=rs&latency=37 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:41.796Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=at&latency=31 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:43.141Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ae&latency=195 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:44.649Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ke&latency=239 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:44.918Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:45.506Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=am&latency=82 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:46.700Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=clt&latency=143 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:47.892Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pk&latency=157 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:48.608Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cz&latency=38 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:49.401Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ms&latency=62 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:49.981Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:50.811Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cr&latency=204 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:51.733Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=is&latency=84 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:52.616Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=tr&latency=67 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:54.277Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ar&latency=278 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:54.909Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:55.674Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=la&latency=205 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:57.389Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=lap&latency=289 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:44:58.476Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=iq&latency=122 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:00.674Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=th&latency=380 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:01.333Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:01.471Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=clt&latency=164 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:02.341Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=fr&latency=109 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:03.220Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ba&latency=87 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:04.450Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=kc&latency=177 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:06.569Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=adl&latency=380 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:07.782Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=kz&latency=186 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:09.338Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pa&latency=231 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:10.780Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=bd&latency=232 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:12.172Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cen&latency=203 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:12.759Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cz&latency=36 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:13.330Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=rs&latency=33 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:14.086Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=gr&latency=48 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:16.060Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=mel&latency=337 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:17.909Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=id&latency=321 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:19.077Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=kr&latency=336 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:20.936Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=auc&latency=1016 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:21.932Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=hi&latency=258 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:22.966Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ri&latency=113 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:23.867Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=in&latency=199 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:24.543Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=is&latency=86 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:25.436Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ae&latency=193 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:26.280Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=tx&latency=170 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:26.905Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=hu&latency=29 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:28.561Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=tw&latency=282 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:30.052Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=np&latency=218 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:32.067Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=brb&latency=350 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:32.901Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=dk&latency=75 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:33.859Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=sg&latency=216 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:34.720Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=lv&latency=69 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:35.192Z",
+      "type": "requestfailed",
+      "text": "https://edgezone-ph.bunnyinfra.net/500b.jpg?s=1787510735149 :: net::ERR_NAME_NOT_RESOLVED"
+    },
+    {
+      "t": "2026-08-23T18:45:35.192Z",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED"
+    },
+    {
+      "t": "2026-08-23T18:45:36.059Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=bg&latency=79 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:37.443Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ct&latency=683 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:38.286Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=be&latency=60 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:39.185Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=md&latency=56 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:39.805Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=hr&latency=28 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:40.886Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=bhr&latency=130 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:41.567Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ie&latency=64 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:42.382Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=lu&latency=63 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:43.771Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=my&latency=218 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:44.795Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ke&latency=251 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:45.459Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=isr&latency=94 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:46.180Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cy&latency=112 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:47.066Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=no&latency=66 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:48.219Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=iq2&latency=167 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:49.749Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=co&latency=256 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:51.503Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cwb&latency=280 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:52.893Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=sil&latency=197 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:54.368Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=hk&latency=233 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:55.186Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ch&latency=56 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:56.412Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=fu&latency=162 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:57.784Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=nd&latency=190 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:58.849Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=fo&latency=279 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:45:59.655Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=den&latency=163 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:00.816Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=asb&latency=168 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:02.640Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=per&latency=319 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:04.306Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=jp&latency=295 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:05.462Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=bs&latency=280 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:06.875Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=wa&latency=195 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:07.675Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=fi&latency=60 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:09.107Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ec&latency=222 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:10.263Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ar&latency=324 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:11.242Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=geo&latency=105 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:12.145Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=se&latency=70 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:12.993Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=uk&latency=59 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:14.291Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=og&latency=180 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:15.610Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=phx&latency=183 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:16.749Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ny&latency=139 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:17.612Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pt&latency=92 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:18.504Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=la&latency=196 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:19.327Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=bu&latency=45 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:20.261Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cr&latency=205 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:21.148Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ams&latency=51 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:21.812Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ru&latency=85 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:22.943Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=mn&latency=133 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:23.672Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=de&latency=40 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:24.509Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pk&latency=157 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:25.336Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ca&latency=144 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:26.082Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=lt&latency=55 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:26.832Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=lj&latency=40 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:27.975Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=bo&latency=125 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:29.808Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pp&latency=324 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:30.969Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ng&latency=147 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:32.606Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=br&latency=263 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:33.465Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=es&latency=68 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:34.704Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=msp&latency=182 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:35.392Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=am&latency=79 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:36.533Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=rj&latency=320 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:37.562Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pe&latency=262 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:38.132Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=at&latency=34 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:40.010Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=syd&latency=326 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:41.267Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=mi&latency=159 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:42.382Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=il&latency=140 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:43.565Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ga&latency=150 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:45.490Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=vn&latency=331 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:46.220Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=sk&latency=33 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:46.967Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ua&latency=47 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:48.128Z",
+      "type": "requestfailed",
+      "text": "https://edgezone-va.bunnyinfra.net/500b.jpg?s=1787510807404 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:48.525Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=es&latency=118 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:49.410Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=mi&latency=204 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:50.107Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=tr&latency=110 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:51.044Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=bd&latency=223 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:51.660Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=de&latency=75 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:52.427Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=iq&latency=142 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:53.372Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=lj&latency=98 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:53.512Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:54.335Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=og&latency=227 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:55.813Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=mx&latency=235 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:56.699Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pk&latency=207 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:57.684Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=in&latency=222 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:58.415Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:58.481Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=clt&latency=166 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:46:59.419Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=nd&latency=221 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:00.473Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=bs&latency=321 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:01.377Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=va&latency=194 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:02.069Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=isr&latency=95 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:03.148Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=fo&latency=268 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:03.465Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:04.395Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=kr&latency=334 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:05.048Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cy&latency=99 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:06.173Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=az&latency=134 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:06.822Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=at&latency=72 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:08.328Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ca&latency=729 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:08.416Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:08.914Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pt&latency=80 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:09.882Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=sil&latency=192 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:11.899Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=adl&latency=406 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:12.540Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=no&latency=63 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:13.331Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ny&latency=134 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:13.481Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:14.417Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=rj&latency=269 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:15.477Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=tw&latency=278 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:17.173Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=lap&latency=281 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:18.331Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pp&latency=325 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:18.434Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:19.047Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ri&latency=114 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:20.282Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=vn&latency=375 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:21.169Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cr&latency=204 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:23.236Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=mel&latency=384 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:23.485Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:24.290Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=jp&latency=264 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:25.519Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=kz&latency=148 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:26.558Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=br&latency=262 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:27.277Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=iq2&latency=111 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:28.058Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=mn&latency=132 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:28.407Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:28.691Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=be&latency=64 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:29.337Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=dk&latency=67 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:30.106Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=asb&latency=131 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:30.972Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=wa&latency=188 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:31.715Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=pl&latency=43 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:32.554Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ie&latency=65 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:33.124Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=it&latency=49 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:33.462Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:34.831Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=id&latency=304 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:36.347Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=sg&latency=227 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:36.952Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=ams&latency=63 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:38.427Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:38.868Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=brb&latency=349 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:40.292Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=jh&latency=220 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:40.985Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=cz&latency=36 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:41.585Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=lu&latency=49 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:42.693Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=per&latency=305 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:43.476Z",
+      "type": "requestfailed",
+      "text": "https://video.bunnycdn.com/.metrics/track-session :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:43.634Z",
+      "type": "requestfailed",
+      "text": "https://rum-metrics.bunny.net/trackperformance?zone=is&latency=92 :: net::ERR_ABORTED"
+    },
+    {
+      "t": "2026-08-23T18:47:44.762Z",
+      "type": "requestfailed",
+      "text": "https://edgezone-np.bunnyinfra.net/500b.jpg?s=1787510864058 :: net::ERR_ABORTED"
+    }
+  ],
+  "stages": [
+    {
+      "t": "2026-08-23T18:43:47.919Z",
+      "stage": "goto",
+      "url": "https://business.activecenter.info/markus?test=1"
+    },
+    {
+      "t": "2026-08-23T18:43:51.977Z",
+      "stage": "intro_clicked"
+    },
+    {
+      "t": "2026-08-23T18:43:53.191Z",
+      "stage": "quiz_option_clicked",
+      "step": 1,
+      "clicked": "Ziele & Fortschritt Ich habe ein Ziel vor Augen und will sehen, wie ic",
+      "excerpt": "PHASE 1 · PERSÖNLICHKEIT 1 / 6 FRAGE 1 Was treibt dich morgens wirklich aus dem Bett? Sei ehrlich. Nicht was du sagen solltest, sondern was wirklich stimmt. Zie"
+    },
+    {
+      "t": "2026-08-23T18:43:54.808Z",
+      "stage": "quiz_option_clicked",
+      "step": 2,
+      "clicked": "Der Richtungsgeber Derjenige, der den Überblick hat und die Richtung v",
+      "excerpt": "PHASE 1 · PERSÖNLICHKEIT 2 / 6 FRAGE 2 In einer Gruppe bist du meistens... Denk an echte Situationen. Im Team, in der Familie oder im Freundeskreis. Der Richtun"
+    },
+    {
+      "t": "2026-08-23T18:43:56.434Z",
+      "stage": "quiz_option_clicked",
+      "step": 3,
+      "clicked": "Blockaden & Zögerer Wenn Dinge nicht vorankommen, weil jemand nicht en",
+      "excerpt": "PHASE 1 · PERSÖNLICHKEIT 3 / 6 FRAGE 3 Was bringt dich wirklich auf die Palme? Dein größter Frustrations-Trigger verrät, was dir am tiefsten wichtig ist. Blocka"
+    },
+    {
+      "t": "2026-08-23T18:43:58.054Z",
+      "stage": "quiz_option_clicked",
+      "step": 4,
+      "clicked": "Freiheit Selbst bestimmen, wann, wie und wo ich arbeite, ohne Erlaubni",
+      "excerpt": "PHASE 2 · LEBEN & ZIELE 4 / 6 FRAGE 4 Was ist dir bei deiner Arbeit am wichtigsten? Wenn du nur eines haben kannst, was darf unter keinen Umständen fehlen? Frei"
+    },
+    {
+      "t": "2026-08-23T18:43:59.670Z",
+      "stage": "quiz_option_clicked",
+      "step": 5,
+      "clicked": null,
+      "excerpt": "🕊️ DEIN FOKUS Freiheit ist dein Kernantrieb Du willst selbst bestimmen, wann, wie und mit wem du arbeitest. Genau deshalb braucht es ein Modell, das nicht wied"
+    },
+    {
+      "t": "2026-08-23T18:44:01.299Z",
+      "stage": "quiz_option_clicked",
+      "step": 6,
+      "clicked": "Finanziell frei Ich entscheide selbst über meine Zeit und mein Einkomm",
+      "excerpt": "PHASE 2 · LEBEN & ZIELE 5 / 6 FRAGE 5 Wie sieht dein ideales Leben in 3 Jahren aus? Schließ kurz die Augen. Was siehst du wirklich? Finanziell frei Ich entschei"
+    },
+    {
+      "t": "2026-08-23T18:44:02.925Z",
+      "stage": "quiz_option_clicked",
+      "step": 7,
+      "clicked": "Fehlendes System Ich habe den Willen, aber noch kein funktionierendes ",
+      "excerpt": "PHASE 2 · LEBEN & ZIELE 6 / 6 FRAGE 6 Was hält dich WIRKLICH davon ab, dieses Leben bereits heute zu leben? Ehrlichkeit hier bringt dich weiter als die vermeint"
+    },
+    {
+      "t": "2026-08-23T18:44:04.549Z",
+      "stage": "quiz_option_clicked",
+      "step": 8,
+      "clicked": null,
+      "excerpt": "⚗️ AUSWERTUNG Dein Profil wird erstellt... ○ Persönlichkeitsmuster werden analysiert... ○ Stärken und Antriebskräfte werden erkannt... ○ Business-Kompatibilität"
+    },
+    {
+      "t": "2026-08-23T18:44:06.177Z",
+      "stage": "quiz_option_clicked",
+      "step": 9,
+      "clicked": null,
+      "excerpt": "⚗️ AUSWERTUNG Dein Profil wird erstellt... ✓ Persönlichkeitsmuster werden analysiert... ✓ Stärken und Antriebskräfte werden erkannt... ✓ Business-Kompatibilität"
+    },
+    {
+      "t": "2026-08-23T18:44:07.791Z",
+      "stage": "quiz_option_clicked",
+      "step": 10,
+      "clicked": null,
+      "excerpt": "⚗️ AUSWERTUNG Dein Profil wird erstellt... ✓ Persönlichkeitsmuster werden analysiert... ✓ Stärken und Antriebskräfte werden erkannt... ✓ Business-Kompatibilität"
+    },
+    {
+      "t": "2026-08-23T18:44:09.395Z",
+      "stage": "quiz_done_optin_visible",
+      "step": 11
+    },
+    {
+      "t": "2026-08-23T18:44:09.573Z",
+      "stage": "optin_submitted",
+      "email": "markus@global-sce.com"
+    },
+    {
+      "t": "2026-08-23T18:44:13.530Z",
+      "stage": "result_visible"
+    },
+    {
+      "t": "2026-08-23T18:44:13.555Z",
+      "stage": "videos_entered"
+    },
+    {
+      "t": "2026-08-23T18:44:13.555Z",
+      "stage": "video_start",
+      "videoStep": 1
+    },
+    {
+      "t": "2026-08-23T18:44:15.067Z",
+      "stage": "video_playing",
+      "videoStep": 1,
+      "duration": 196.333333,
+      "rate": 5
+    },
+    {
+      "t": "2026-08-23T18:44:15.070Z",
+      "stage": "video_progress",
+      "videoStep": 1,
+      "pct": 0,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:44:22.591Z",
+      "stage": "video_progress",
+      "videoStep": 1,
+      "pct": 13,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:44:27.604Z",
+      "stage": "video_progress",
+      "videoStep": 1,
+      "pct": 26,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:44:32.625Z",
+      "stage": "video_progress",
+      "videoStep": 1,
+      "pct": 39,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:44:37.644Z",
+      "stage": "video_progress",
+      "videoStep": 1,
+      "pct": 51,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:44:42.658Z",
+      "stage": "video_progress",
+      "videoStep": 1,
+      "pct": 64,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:44:47.684Z",
+      "stage": "video_progress",
+      "videoStep": 1,
+      "pct": 77,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:44:52.705Z",
+      "stage": "video_progress",
+      "videoStep": 1,
+      "pct": 90,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:44:55.224Z",
+      "stage": "video_unlocked",
+      "videoStep": 1
+    },
+    {
+      "t": "2026-08-23T18:44:56.861Z",
+      "stage": "video_start",
+      "videoStep": 2
+    },
+    {
+      "t": "2026-08-23T18:44:56.866Z",
+      "stage": "video_playing",
+      "videoStep": 2,
+      "duration": 557.6,
+      "rate": 5
+    },
+    {
+      "t": "2026-08-23T18:44:56.870Z",
+      "stage": "video_progress",
+      "videoStep": 2,
+      "pct": 0,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:45:11.948Z",
+      "stage": "video_progress",
+      "videoStep": 2,
+      "pct": 11,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:45:24.491Z",
+      "stage": "video_progress",
+      "videoStep": 2,
+      "pct": 22,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:45:37.051Z",
+      "stage": "video_progress",
+      "videoStep": 2,
+      "pct": 34,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:45:49.638Z",
+      "stage": "video_progress",
+      "videoStep": 2,
+      "pct": 45,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:46:02.205Z",
+      "stage": "video_progress",
+      "videoStep": 2,
+      "pct": 56,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:46:14.758Z",
+      "stage": "video_progress",
+      "videoStep": 2,
+      "pct": 67,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:46:27.306Z",
+      "stage": "video_progress",
+      "videoStep": 2,
+      "pct": 79,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:46:39.859Z",
+      "stage": "video_progress",
+      "videoStep": 2,
+      "pct": 90,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:46:47.393Z",
+      "stage": "video_unlocked",
+      "videoStep": 2
+    },
+    {
+      "t": "2026-08-23T18:46:49.035Z",
+      "stage": "video_start",
+      "videoStep": 3
+    },
+    {
+      "t": "2026-08-23T18:46:49.041Z",
+      "stage": "video_playing",
+      "videoStep": 3,
+      "duration": 268.08,
+      "rate": 5
+    },
+    {
+      "t": "2026-08-23T18:46:49.046Z",
+      "stage": "video_progress",
+      "videoStep": 3,
+      "pct": 0,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:46:56.577Z",
+      "stage": "video_progress",
+      "videoStep": 3,
+      "pct": 10,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:47:04.101Z",
+      "stage": "video_progress",
+      "videoStep": 3,
+      "pct": 24,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:47:11.639Z",
+      "stage": "video_progress",
+      "videoStep": 3,
+      "pct": 38,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:47:19.184Z",
+      "stage": "video_progress",
+      "videoStep": 3,
+      "pct": 52,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:47:26.716Z",
+      "stage": "video_progress",
+      "videoStep": 3,
+      "pct": 66,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:47:34.252Z",
+      "stage": "video_progress",
+      "videoStep": 3,
+      "pct": 80,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:47:41.791Z",
+      "stage": "video_progress",
+      "videoStep": 3,
+      "pct": 94,
+      "paused": false
+    },
+    {
+      "t": "2026-08-23T18:47:44.300Z",
+      "stage": "video_unlocked",
+      "videoStep": 3
+    },
+    {
+      "t": "2026-08-23T18:47:45.966Z",
+      "stage": "final_visible"
+    },
+    {
+      "t": "2026-08-23T18:47:45.992Z",
+      "stage": "cta_clicked"
+    },
+    {
+      "t": "2026-08-23T18:47:47.128Z",
+      "stage": "cta_popup_opened",
+      "url": "https://api.whatsapp.com/send/?phone=41762860217&text=Hallo%21+Ich+habe+gerade+das+Erfolgscode-Quiz+gemacht+und+m%C3%B6c"
+    }
+  ],
+  "videos": [
+    {
+      "videoStep": 1,
+      "unlocked": true,
+      "waitedSeconds": 40
+    },
+    {
+      "videoStep": 2,
+      "unlocked": true,
+      "waitedSeconds": 111
+    },
+    {
+      "videoStep": 3,
+      "unlocked": true,
+      "waitedSeconds": 55
+    }
+  ],
+  "leadState": {
+    "acLeadRun:markus": "{\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"token\":\"tf0935d1a973fa4a0882b61e0e78abe329\",\"event_id\":\"EVTA20BC92E8DE24A9FB23221469E0CB265\",\"session_hash\":\"ac_f21e2440974246d1b6ac20d0c0df870d\",\"tracking_hash\":\"ac_f21e2440974246d1b6ac20d0c0df870d\",\"visitor_id\":\"av_a68f094a2e8b4371b4f564e49c7a65c6\",\"slug\":\"markus\",\"member_id\":\"25851739\",\"state\":\"submitted\",\"createdAt\":\"2026-08-23T18:43:48.965Z\",\"updatedAt\":\"2026-08-23T18:47:44.761Z\",\"submittedAt\":\"2026-08-23T18:44:12.801Z\",\"lead_system_v2_enabled\":true}",
+    "acInternalTraffic": "1",
+    "acLeadSystemV2:markus": "{\"enabled\":true,\"lead_hash\":\"qz_b20385808cd24c85a2f89b3b8dca4a21\",\"client_seed\":\"943345c3-cc6e-4235-b29a-7309f28d049d\",\"flags\":{\"new_lead_writer_enabled\":true,\"new_lead_writer_percent\":100,\"legacy_writer_enabled\":false,\"outbox_worker_enabled\":true},\"checkedAt\":\"2026-08-23T18:43:49.885Z\"}",
+    "acQuizTrackingSession_v1": "{\"hash\":\"ac_f21e2440974246d1b6ac20d0c0df870d\",\"memberId\":\"25851739\",\"slug\":\"markus\",\"updatedAt\":1787510628965}"
+  },
+  "finishedAt": "2026-08-23T18:47:53.191Z"
+}

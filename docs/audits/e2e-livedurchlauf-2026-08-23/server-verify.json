@@ -1,0 +1,109 @@
+{
+  "leadHash": "qz_b20385808cd24c85a2f89b3b8dca4a21",
+  "sessionHash": "ac_f21e2440974246d1b6ac20d0c0df870d",
+  "generate": {
+    "status": 200,
+    "success": true,
+    "token": "<redacted-jwt>",
+    "leadHash": "qz_b20385808cd24c85a2f89b3b8dca4a21",
+    "lang": "de",
+    "lastVideoStep": 3,
+    "resumeTarget": "final",
+    "resumeStartPercent": 0,
+    "profileCode": "FEUER",
+    "aspiration": "freedom",
+    "barrier": "vehicle",
+    "shortKey": "6fdp6AP3P",
+    "shortUrl": "https://business.activecenter.info/markus?r=6fdp6AP3P",
+    "resumeUrl": "https://business.activecenter.info/markus?r=6fdp6AP3P"
+  },
+  "resolve": {
+    "status": 200,
+    "success": true,
+    "sessionHash": "ac_f21e2440974246d1b6ac20d0c0df870d",
+    "leadHash": "qz_b20385808cd24c85a2f89b3b8dca4a21",
+    "email": "markus@global-sce.com",
+    "lang": "de",
+    "firstName": "Markus",
+    "memberId": "25851739",
+    "refId": "25851739",
+    "beraterSlug": "markus",
+    "context": "quiz",
+    "lastVideoStep": 3,
+    "resumeTarget": "final",
+    "resumeStartPercent": 0,
+    "profileCode": "FEUER",
+    "aspiration": "freedom",
+    "barrier": "vehicle"
+  },
+  "health": {
+    "status": 200,
+    "success": true,
+    "ok": true,
+    "checked_at": "2026-08-23T18:48:56.060Z",
+    "flags": {
+      "new_lead_writer_enabled": true,
+      "new_lead_writer_percent": 100,
+      "legacy_writer_enabled": false,
+      "outbox_worker_enabled": true
+    },
+    "counts": {
+      "lead_state_available": 1,
+      "lead_video_progress_available": 1,
+      "lead_events_available": 1,
+      "outbox_pending": 1,
+      "outbox_pending_ready": 0,
+      "outbox_pending_overdue": 0,
+      "outbox_pending_deferred": 1,
+      "outbox_failed_old": 0,
+      "outbox_processing_stale": 0,
+      "outbox_dead": 0,
+      "migration_unresolved_open": 40,
+      "recent_leads_1h": 6,
+      "recent_events_1h": 100,
+      "recent_leads_1h_available": 1,
+      "recent_events_1h_available": 1
+    },
+    "count_caps": {
+      "outbox_pending": false,
+      "outbox_pending_ready": false,
+      "outbox_pending_overdue": false,
+      "outbox_pending_deferred": false,
+      "outbox_failed_old": false,
+      "outbox_processing_stale": false,
+      "outbox_dead": false,
+      "migration_unresolved_open": false,
+      "recent_leads_1h": false,
+      "recent_events_1h": true
+    },
+    "metric_errors": [],
+    "warnings": [],
+    "issues": []
+  },
+  "testLeadMarked": [
+    {
+      "lead": "qz_b20385808cd24c85a2f89b3b8dca4a21",
+      "status": 200,
+      "success": true,
+      "hash": "qz_b20385808cd24c85a2f89b3b8dca4a21"
+    },
+    {
+      "lead": "qz_29a2d6095b8a4f7ca8fe03f2287444ec",
+      "status": 200,
+      "success": true,
+      "hash": "qz_29a2d6095b8a4f7ca8fe03f2287444ec"
+    },
+    {
+      "lead": "qz_519050da1c7f4cdd94b7d41dea797e8a",
+      "status": 200,
+      "success": true,
+      "hash": "qz_519050da1c7f4cdd94b7d41dea797e8a"
+    },
+    {
+      "lead": "qz_2edc05d2393c484d9c561aad775af712",
+      "status": 200,
+      "success": true,
+      "hash": "qz_2edc05d2393c484d9c561aad775af712"
+    }
+  ]
+}
