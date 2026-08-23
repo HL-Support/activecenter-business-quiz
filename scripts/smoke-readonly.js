@@ -37,7 +37,43 @@ async function main() {
   const completionData = JSON.parse(incompleteCompletion.text);
   assert.equal(completionData.email_sent, false, 'read-only smoke must never send email');
 
-  console.log(JSON.stringify({ ok: true, baseUrl, slug, emailSent: false }, null, 2));
+  // Audit 2026-08-23, 13.2.1/13.4: Die DB-Init-Route darf niemals erfolgreich antworten.
+  // Uebergangsphase (Route noch deployt): 403 ist zulaessig. Nach dem Deploy der Entfernung
+  // erzwingt READONLY_SMOKE_STRICT_INIT_ROUTE=1 strikt 404 als Abnahmekriterium.
+  const strictInitRouteRemoved = process.env.READONLY_SMOKE_STRICT_INIT_ROUTE === '1';
+  const removedInitRoute = await request('/api/init-quiz-db');
+  if (strictInitRouteRemoved) {
+    assert.equal(
+      removedInitRoute.response.status,
+      404,
+      'removed init-quiz-db route must return 404 in production'
+    );
+  } else {
+    assert.ok(
+      [403, 404].includes(removedInitRoute.response.status),
+      `init-quiz-db must never answer successfully (got ${removedInitRoute.response.status})`
+    );
+  }
+  assert.doesNotMatch(
+    removedInitRoute.text,
+    /\/assets\/app\.js/,
+    'init-quiz-db must not fall back to the SPA shell'
+  );
+
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        baseUrl,
+        slug,
+        emailSent: false,
+        initRouteStatus: removedInitRoute.response.status,
+        initRouteStrict: strictInitRouteRemoved,
+      },
+      null,
+      2
+    )
+  );
 }
 
 main().catch((error) => {
