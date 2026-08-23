@@ -93,13 +93,15 @@ test('opt-in submission acquires a synchronous lock before starting network work
   );
   const guardPosition = source.indexOf('if (submitLock.current || g) return;');
   const lockPosition = source.indexOf('submitLock.current = !0;', guardPosition);
-  const mauticPosition = source.indexOf('await Hp({', guardPosition);
+  // Erste echte Netzwerkarbeit im Submit-Pfad ist die Quiz-Submission (Qp);
+  // der fruehere Mautic-Call (Hp) wurde am 23.08.2026 als toter Code entfernt.
+  const networkPosition = source.indexOf('await Qp(', guardPosition);
   const releasePosition = source.indexOf('submitLock.current = !1;', guardPosition);
 
   assert.ok(guardPosition >= 0);
   assert.ok(lockPosition > guardPosition);
-  assert.ok(mauticPosition > lockPosition);
-  assert.ok(releasePosition > mauticPosition);
+  assert.ok(networkPosition > lockPosition);
+  assert.ok(releasePosition > networkPosition);
 });
 
 test('canonical quiz submission reuses one in-flight promise', () => {

@@ -9,7 +9,16 @@ const projectRoot = path.resolve(__dirname, '..', '..');
 // Runtime (Default-Secret + Host-Header-Bypass). Migrationen laufen ausschliesslich
 // ueber einen kontrollierten CLI-/CI-Pfad.
 const FORBIDDEN_ROUTE_FILE = path.join(projectRoot, 'api', 'init-quiz-db.js');
-const FORBIDDEN_MARKERS = ['init-quiz-db', 'INIT_DB_TOKEN', 'quiz_init_secret_change_me'];
+// 'mautic.hl-support.biz': Der Browser-Direktcall an Mautic scheiterte in Produktion
+// an CORS (E2E-Livedurchlauf 23.08.2026) und wurde entfernt; Mautic wird ausschliesslich
+// serverseitig ueber den Contacts-Webhook bedient. Die URL darf im Runtime-Code nicht
+// wieder auftauchen (das Attributions-Label source:'mautic' bleibt erlaubt).
+const FORBIDDEN_MARKERS = [
+  'init-quiz-db',
+  'INIT_DB_TOKEN',
+  'quiz_init_secret_change_me',
+  'mautic.hl-support.biz',
+];
 
 function collectRuntimeFiles() {
   const roots = ['api', 'src', 'server'].map((dir) => path.join(projectRoot, dir));

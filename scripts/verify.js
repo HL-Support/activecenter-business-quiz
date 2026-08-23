@@ -243,6 +243,10 @@ function verifyHashFlow() {
     'lead system health endpoint must use disclosed bounded counts instead of exact full-table counts'
   );
   assert(
+    leadHealth.includes('outbox_parked') && leadHealth.includes('OUTBOX_PARKED_THRESHOLD_MS'),
+    'lead system health endpoint must report deliberately parked outbox jobs separately'
+  );
+  assert(
     leadSql.includes('WITH (security_invoker = true)') &&
       leadSql.includes('max_attempts    int DEFAULT 5') &&
       leadSql.includes('FOR UPDATE SKIP LOCKED') &&
