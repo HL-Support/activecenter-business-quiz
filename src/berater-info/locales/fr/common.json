@@ -1,0 +1,73 @@
+{
+  "hero": {
+    "subtitle": "Système Success Code · Document de formation interne",
+    "title": "Formation Success Code",
+    "em": "Formation",
+    "description": "Guide de conversation Success Code – les 16 combinaisons de profils"
+  },
+  "nav": {
+    "grundlage": "🔬 Fondement",
+    "regeln": "⭐ Règles",
+    "profile": "👤 Profils",
+    "referenz": "📋 Référence"
+  },
+  "foundation": {
+    "title": "Base Scientifique",
+    "subtitle": "Pourquoi ce test fonctionne",
+    "intro": "Le Success Code ne repose pas sur l'intuition ou l'invention. Il combine trois des modèles les plus documentés de la psychologie de la personnalité moderne et des sciences du comportement. Chaque question, chaque profil et chaque guide de conversation possède un fondement scientifique vérifiable.",
+    "disc": {
+      "title": "Le Modèle DISC – William Moulton Marston (1928)",
+      "subtitle": "Fondement des quatre profils de personnalité",
+      "p1": "William Moulton Marston, psychologue de Harvard, a développé le modèle DISC en 1928 dans son ouvrage 'Emotions of Normal People'. Il a décrit quatre dimensions comportementales de base présentes chez chaque individu – à des degrés divers :",
+      "p2": "Le modèle DISC est aujourd'hui l'un des modèles de personnalité les plus utilisés au monde. Il est employé dans plus de 40 pays, par les entreprises du Fortune 500 pour le renforcement d'équipe, le développement du leadership, les RH et le coaching de vente."
+    },
+    "motivation": {
+      "title": "Psychologie de la Motivation – Maslow & Deci/Ryan",
+      "subtitle": "Fondement des quatre aspirations",
+      "p1": "Les quatre aspirations du quiz – Liberté, Impact, Sécurité, Croissance – sont basées sur deux des théories de la motivation les plus influentes en psychologie :",
+      "p2": "La combinaison du type de personnalité (COMMENT quelqu'un fonctionne) et de l'aspiration (CE QUI motive quelqu'un) est si puissante qu'elle explique non seulement le comportement d'une personne, mais aussi sa motivation la plus profonde."
+    },
+    "barriers": {
+      "title": "Économie Comportementale – Kahneman & Thaler",
+      "subtitle": "Fondement de la question sur les barrières",
+      "p1": "La sixième question – 'Qu'est-ce qui vous freine VRAIMENT ?' – est la plus forte psychologiquement de tout le quiz. Elle est basée sur les découvertes de l'économie comportementale :",
+      "p2": "Lorsqu'un prospect dit lui-même 'il me manque le bon système' – ce n'est plus une objection. C'est une invitation. C'est précisément ce qui fait de la question sur les barrières l'outil de qualification des prospects le plus précieux du quiz."
+    },
+    "forer": {
+      "label": "Note Importante pour les Conseillers",
+      "p1": "Chaque profil de personnalité active consciemment l'Effet Forer (Bertram Forer, 1948) : les gens se reconnaissent fortement dans des descriptions précises de leur personnalité – cela crée de la confiance et de l'identification.",
+      "p2": "Ce n'est pas de la manipulation – c'est la base psychologique pour que les prospects se sentent compris après le quiz. Et quiconque se sent compris est ouvert à une conversation."
+    }
+  },
+  "rules": {
+    "title": "Les 5 Règles d'Or",
+    "intro": "Sélectionnez le profil Success Code du prospect (Feu, Vent, Eau, Roche), puis l'aspiration via l'onglet. Chacune des 16 combinaisons possède son propre guide de conversation.",
+    "list": [
+      { "nr": "01", "title": "Parlez la langue du type, pas la vôtre.", "text": "Le Réalisateur veut entendre des résultats. Le Connecteur veut ressentir des histoires. Le Pilier veut ressentir de la sécurité. L'Architecte veut voir des faits. Si vous parlez à tout le monde de la même manière, vous ne touchez personne réellement." },
+      { "nr": "02", "title": "Posez des questions avant d'expliquer.", "text": "La seule chose qui convainc vraiment quelqu'un est ce qu'il dit lui-même. Votre travail n'est pas de parler – mais de poser les bonnes questions pour qu'il découvre par lui-même ce qu'il veut." },
+      { "nr": "03", "title": "Jamais de pression. Jamais de manipulation.", "text": "Chaque fois que vous exercez une pression, vous perdez la confiance – même s'il finit par dire oui. Le meilleur oui vient d'une compréhension réelle." },
+      { "nr": "04", "title": "Les objections ne sont pas un non – ce sont des questions sans point d'interrogation.", "text": "Pas de temps = Convainquez-moi que ça en vaut la peine. Trop risqué = Montrez-moi que c'est calculable. Écoutez derrière les mots." },
+      { "nr": "05", "title": "Le résultat n'est pas la conclusion – c'est la relation.", "text": "Les gens qui viennent parce qu'ils vous respectent, restent. Les gens qui ont rejoint sous pression partent au premier vent contraire." }
+    ]
+  },
+  "profiles": {
+    "title": "Sélectionner un Profil",
+    "understand": "Comprendre la Psychologie",
+    "strengths": "Points Forts",
+    "blind_spot": "Point Mort",
+    "never_do": "À ne jamais faire",
+    "red_flag": "Signal d'Alerte",
+    "driver": "Ce qui le motive vraiment",
+    "no_way": "Ce qu'il ne veut absolument pas",
+    "opener": "Amorce de Conversation",
+    "guidance": "Conduite de l'Entretien",
+    "convincer": "Ce qui le convainc vraiment",
+    "objections": "Objections Typiques"
+  },
+  "reference": {
+    "title": "Les Objections en un Coup d'Œil",
+    "magic_question_label": "La question qui fonctionne toujours",
+    "magic_question": "\"Qu'est-ce qui devrait s'avérer vrai pour vous pour que ce soit une bonne décision ?\"",
+    "magic_question_desc": "Cette question unique vous montre ce qui retient réellement quelqu'un – et vous donne la réponse dont vous avez besoin."
+  }
+}

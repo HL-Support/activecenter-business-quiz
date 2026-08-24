@@ -9,6 +9,14 @@ const distDir = path.join(projectRoot, 'dist');
 const assetsDir = path.join(distDir, 'assets');
 const outputJsPath = path.join(assetsDir, 'app.js');
 
+// Zweites, eigenstaendiges Ziel: die Berater-Schulung unter /berater-info. Eigene Shell,
+// eigenes Bundle, kein Lead-/Tracking-Code. Das Quiz-Bundle bleibt unveraendert.
+const beraterInfoHtmlPath = path.join(projectRoot, 'berater-info.html');
+const beraterInfoEntryPath = path.join(projectRoot, 'src', 'berater-info', 'entry.jsx');
+const beraterInfoOutputJsPath = path.join(assetsDir, 'berater-info.js');
+const BERATER_INFO_MODULE_SRC = '/assets/berater-info.js';
+const APP_MODULE_SRC = '/assets/app.js';
+
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
@@ -33,9 +41,11 @@ function extractInlineApp(html) {
   return match[1].trim();
 }
 
-function buildHtmlShell(html) {
+// moduleSrc parametrisiert den Shell-Modus: berater-info.html laedt ein anderes Bundle als
+// index.html und wuerde sonst durch den Legacy-Babel-Zweig laufen (Inventur 8.2, Punkt 2).
+function buildHtmlShell(html, moduleSrc = APP_MODULE_SRC) {
   const hasLoadAppModule = html.includes('loadAppModule');
-  const hasModuleScript = html.includes('<script type="module" src="/assets/app.js">');
+  const hasModuleScript = html.includes(`<script type="module" src="${moduleSrc}">`);
   const hasInlineBabel = html.includes('<script type="text/babel">');
   const isShellMode = (hasLoadAppModule || hasModuleScript) && !hasInlineBabel;
 
@@ -149,6 +159,37 @@ async function main() {
 
   const outputHtml = buildHtmlShell(sourceHtml);
   fs.writeFileSync(path.join(distDir, 'index.html'), outputHtml, 'utf8');
+
+  await buildBeraterInfo();
+}
+
+async function buildBeraterInfo() {
+  if (!fs.existsSync(beraterInfoEntryPath)) {
+    throw new Error('Canonical source file src/berater-info/entry.jsx not found');
+  }
+  if (!fs.existsSync(beraterInfoHtmlPath)) {
+    throw new Error('Canonical source file berater-info.html not found');
+  }
+
+  await esbuild.build({
+    entryPoints: [beraterInfoEntryPath],
+    bundle: true,
+    minify: true,
+    sourcemap: false,
+    target: ['es2020'],
+    format: 'esm',
+    // Die Locale-JSONs werden statisch importiert; esbuild laedt .json nativ.
+    loader: { '.json': 'json' },
+    outfile: beraterInfoOutputJsPath,
+    drop: ['console', 'debugger'],
+  });
+
+  const beraterInfoHtml = buildHtmlShell(
+    fs.readFileSync(beraterInfoHtmlPath, 'utf8'),
+    BERATER_INFO_MODULE_SRC
+  );
+  fs.writeFileSync(path.join(distDir, 'berater-info.html'), beraterInfoHtml, 'utf8');
+  console.log('berater-info.html + assets/berater-info.js built');
 }
 
 main().catch((error) => {

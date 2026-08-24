@@ -1,0 +1,73 @@
+{
+  "hero": {
+    "subtitle": "Sikerkód rendszer · Belső képzési anyag",
+    "title": "Sikerkód képzés",
+    "em": "képzés",
+    "description": "Sikerkód beszélgetési útmutató mind a 16 profilkombinációhoz"
+  },
+  "nav": {
+    "grundlage": "🔬 Alapok",
+    "regeln": "⭐ Szabályok",
+    "profile": "👤 Profilok",
+    "referenz": "📋 Referencia"
+  },
+  "foundation": {
+    "title": "Tudományos alap",
+    "subtitle": "Miért működik ez a teszt",
+    "intro": "A Sikerkód nem megérzésből született. Három olyan modellre épül, amelyeket évtizedek óta kutatnak a személyiséglélektanban és a viselkedéskutatásban. Minden kérdés, minden profil és minden beszélgetési útmutató mögött ott van ez az alap.",
+    "disc": {
+      "title": "A DISC-modell: William Moulton Marston (1928)",
+      "subtitle": "A négy személyiségprofil alapja",
+      "p1": "William Moulton Marston harvardi pszichológus 1928-ban, az Emotions of Normal People című könyvében írta le a DISC-modellt. Négy viselkedési alapdimenziót nevezett meg. Mind a négy megvan minden emberben, csak eltérő erősséggel:",
+      "p2": "A DISC ma az egyik legszélesebb körben használt személyiségmodell. Több mint 40 országban dolgoznak vele: Fortune 500-as cégek csapatépítésben, vezetőfejlesztésben, HR-ben és értékesítési coachingban. Tobias Beck, John Maxwell és Brian Tracy tette széles körben ismertté."
+    },
+    "motivation": {
+      "title": "Motivációkutatás: Maslow és Deci/Ryan",
+      "subtitle": "A négy fő cél alapja",
+      "p1": "A kvíz négy célja, a szabadság, a hatás, a biztonság és a növekedés, a motivációkutatás két legnagyobb hatású elméletére épül:",
+      "p2": "Ezért erős a személyiségtípus és a cél együtt. A típus megmutatja, HOGYAN működik valaki. A cél megmutatja, MI hajtja. A kettő együtt adja meg, miről érdemes vele beszélned."
+    },
+    "barriers": {
+      "title": "Viselkedési közgazdaságtan: Kahneman és Thaler",
+      "subtitle": "Az akadálykérdés alapja",
+      "p1": "A hatodik kérdés a kvíz legerősebb pontja: „Mi tart vissza VALÓJÁBAN?” A viselkedési közgazdaságtan eredményeire épül:",
+      "p2": "Ha az érdeklődő maga mondja ki, hogy „hiányzik a működő rendszer”, az már nem kifogás. Az egy meghívás. Ezért az akadálykérdés a kvíz legértékesebb szűrője."
+    },
+    "forer": {
+      "label": "Fontos a tanácsadóknak",
+      "p1": "Minden profil tudatosan használja a Forer-hatást (Bertram Forer, 1948). Az emberek erősen magukra ismernek a pontosnak hangzó személyiségleírásokban. Ebből születik a bizalom.",
+      "p2": "Ez nem manipuláció. Ez a lélektani oka annak, hogy az emberek a kvíz után megértve érzik magukat. Aki megértve érzi magát, az nyitott a beszélgetésre. Hídnak használd."
+    }
+  },
+  "rules": {
+    "title": "Az 5 aranyszabály",
+    "intro": "Válaszd ki az érdeklődő profilját (Tűz, Szél, Víz, Szikla), utána a célt a fülön. Mind a 16 kombinációhoz külön beszélgetési útmutató tartozik.",
+    "list": [
+      { "nr": "01", "title": "Beszélj a típus nyelvén, ne a sajátodon.", "text": "A Cselekvő eredményt akar hallani. A Kapcsolatteremtő történetet akar érezni. A Támasz biztonságra vágyik. Az Építő tényeket akar látni. Ha mindenkivel ugyanúgy beszélsz, senkit nem érsz el igazán." },
+      { "nr": "02", "title": "Kérdezz, mielőtt magyaráznál.", "text": "Az embert az győzi meg, amit ő maga mond ki. A te dolgod a jó kérdés. A többit ő teszi hozzá." },
+      { "nr": "03", "title": "Soha nyomás. Soha manipuláció.", "text": "Minden nyomás bizalomba kerül, akkor is, ha a végén igent mond. A legjobb igen a megértésből jön." },
+      { "nr": "04", "title": "A kifogás nem nem. Kérdés kérdőjel nélkül.", "text": "A „nincs időm” azt jelenti: győzz meg, hogy megéri. A „túl kockázatos” azt jelenti: mutasd meg, hogy kiszámítható. Hallgasd meg, mi van a szavak mögött." },
+      { "nr": "05", "title": "A kapcsolat az eredmény.", "text": "Aki tisztelettel jön hozzád, marad. Aki nyomás alatt lép be, az első ellenszélnél elmegy." }
+    ]
+  },
+  "profiles": {
+    "title": "Válassz profilt",
+    "understand": "A lélektan mögötte",
+    "strengths": "Erősségek",
+    "blind_spot": "Vakfolt",
+    "never_do": "Soha ne tedd",
+    "red_flag": "Vészjelzés",
+    "driver": "Mi hajtja valójában",
+    "no_way": "Amit semmiképp nem akar",
+    "opener": "Beszélgetésnyitó",
+    "guidance": "Beszélgetésvezetés",
+    "convincer": "Mi győzi meg valójában",
+    "objections": "Gyakori kifogások"
+  },
+  "reference": {
+    "title": "Kifogások egy pillantásra",
+    "magic_question_label": "Az a kérdés, amely mindig működik",
+    "magic_question": "„Minek kellene igaznak bizonyulnia ahhoz, hogy ez jó döntés legyen számodra?”",
+    "magic_question_desc": "Ez az egy kérdés megmutatja, mi tartja vissza. És megadja a választ, amire szükséged van."
+  }
+}

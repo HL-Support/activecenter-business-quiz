@@ -1,0 +1,73 @@
+{
+  "hero": {
+    "subtitle": "Erfolgs-Code System · Internes Schulungsdokument",
+    "title": "Erfolgs-Code Schulung",
+    "em": "Schulung",
+    "description": "Erfolgs-Code Gesprächsleitfaden – alle 16 Profil-Kombinationen"
+  },
+  "nav": {
+    "grundlage": "🔬 Grundlage",
+    "regeln": "⭐ Regeln",
+    "profile": "👤 Profile",
+    "referenz": "📋 Referenz"
+  },
+  "foundation": {
+    "title": "Wissenschaftliche Basis",
+    "subtitle": "Warum dieser Test funktioniert",
+    "intro": "Der Erfolgs-Code basiert nicht auf Intuition oder Erfindung. Er kombiniert drei der am besten erforschten Modelle der modernen Persönlichkeitspsychologie und Verhaltensforschung. Jede Frage, jedes Profil und jeder Gesprächsleitfaden hat eine nachvollziehbare wissenschaftliche Grundlage.",
+    "disc": {
+      "title": "Das DISC-Modell – William Moulton Marston (1928)",
+      "subtitle": "Fundament der vier Persönlichkeitsprofile",
+      "p1": "William Moulton Marston, Harvard-Psychologe, entwickelte 1928 in seinem Werk Emotions of Normal People das DISC-Modell. Er beschrieb vier grundlegende Verhaltensdimensionen die bei jedem Menschen vorhanden sind – in unterschiedlicher Ausprägung:",
+      "p2": "Das DISC-Modell ist heute eines der meistgenutzten Persönlichkeitsmodelle weltweit. Es wird in über 40 Ländern eingesetzt, von Fortune-500-Unternehmen für Teambuilding genutzt und in der Führungskräfteentwicklung, HR und im Vertriebscoaching eingesetzt. Autoren wie Tobias Beck, John Maxwell und Brian Tracy haben es popularisiert."
+    },
+    "motivation": {
+      "title": "Motivationspsychologie – Maslow & Deci/Ryan",
+      "subtitle": "Fundament der vier Aspirationen",
+      "p1": "Die vier Aspirationen im Quiz – Freiheit, Wirkung, Sicherheit, Wachstum – basieren auf zwei der einflussreichsten Motivationstheorien der Psychologie:",
+      "p2": "Die Kombination aus Persönlichkeitstyp (WIE jemand tickt) und Aspiration (WAS jemanden antreibt) ist deshalb so kraftvoll: Sie erklärt nicht nur das Verhalten eines Menschen, sondern auch seine tiefste Motivation. Genau das macht personalisierte Gespräche möglich."
+    },
+    "barriers": {
+      "title": "Verhaltensökonomie – Kahneman & Thaler",
+      "subtitle": "Fundament der Barrieren-Frage",
+      "p1": "Die sechste Frage – \"Was hält dich WIRKLICH davon ab?\" – ist die psychologisch stärkste im gesamten Quiz. Sie basiert auf Erkenntnissen der Verhaltensökonomie:",
+      "p2": "Wenn ein Lead selbst sagt \"mir fehlt das richtige System\" – ist das kein Einwand mehr. Es ist eine Einladung. Genau das macht die Barrieren-Frage zum wertvollsten Lead-Qualifizierungsinstrument im gesamten Quiz."
+    },
+    "forer": {
+      "label": "Wichtiger Hinweis für Berater",
+      "p1": "Jedes Persönlichkeitsprofil aktiviert bewusst den sogenannten Forer-Effekt (Bertram Forer, 1948): Menschen finden sich in präzise klingenden Beschreibungen ihrer Persönlichkeit stark wieder – das erzeugt Vertrauen und Identifikation.",
+      "p2": "Das ist keine Manipulation – es ist die psychologische Grundlage dafür, dass sich Leads nach dem Quiz verstanden fühlen. Und wer sich verstanden fühlt, ist offen für ein Gespräch. Nutze das als Brücke – nicht als Trick."
+    }
+  },
+  "rules": {
+    "title": "Die 5 goldenen Regeln",
+    "intro": "Wähle das Erfolgs-Code Profil des Leads (Feuer, Wind, Wasser, Fels), dann die Aspiration per Tab. Jede der 16 Kombinationen hat einen eigenen Gesprächsleitfaden.",
+    "list": [
+      { "nr": "01", "title": "Sprich die Sprache des Typs, nicht deine eigene.", "text": "Der Macher will Ergebnisse hören. Der Netzwerker will Geschichten fühlen. Der Anker will Sicherheit spüren. Der Architekt will Fakten sehen. Wenn du mit allen gleich redest, erreichst du keinen wirklich." },
+      { "nr": "02", "title": "Stelle Fragen bevor du erklärst.", "text": "Das Einzige was jemanden wirklich überzeugt ist das was er selbst sagt. Deine Aufgabe ist nicht zu reden – sondern die richtigen Fragen zu stellen, damit er selbst herausfindet was er will." },
+      { "nr": "03", "title": "Niemals Druck. Niemals Manipulation.", "text": "Jedes Mal wenn du Druck ausübst verlierst du Vertrauen – auch wenn er am Ende Ja sagt. Das beste Ja kommt aus echtem Verständnis." },
+      { "nr": "04", "title": "Einwände sind kein Nein – sie sind Fragen ohne Fragezeichen.", "text": "Keine Zeit = Überzeug mich dass es das wert ist. Zu riskant = Zeig mir dass es kalkulierbar ist. Höre hinter die Worte." },
+      { "nr": "05", "title": "Das Ergebnis ist nicht der Abschluss – es ist die Beziehung.", "text": "Menschen die kommen weil sie dich respektieren, bleiben. Menschen die unter Druck eingestiegen sind, gehen beim ersten Gegenwind." }
+    ]
+  },
+  "profiles": {
+    "title": "Profil wählen",
+    "understand": "Psychologie verstehen",
+    "strengths": "Stärken",
+    "blind_spot": "Blinder Fleck",
+    "never_do": "Niemals tun",
+    "red_flag": "Red Flag",
+    "driver": "Was ihn wirklich antreibt",
+    "no_way": "Was er auf keinen Fall will",
+    "opener": "Gesprächseinstieg",
+    "guidance": "Gesprächsführung",
+    "convincer": "Was ihn wirklich überzeugt",
+    "objections": "Typische Einwände"
+  },
+  "reference": {
+    "title": "Einwände auf einen Blick",
+    "magic_question_label": "Die eine Frage die immer funktioniert",
+    "magic_question": "\"Was müsste sich für dich bewahrheiten, damit das eine gute Entscheidung wäre?\"",
+    "magic_question_desc": "Diese eine Frage zeigt dir was jemanden wirklich hält – und gibt dir die Antwort die du brauchst."
+  }
+}

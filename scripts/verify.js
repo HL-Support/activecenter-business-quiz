@@ -10,9 +10,14 @@ const filesToSyntaxCheck = [
   path.join(projectRoot, 'src', 'app', 'App.jsx'),
   path.join(projectRoot, 'src', 'lib', 'core.js'),
   path.join(projectRoot, 'src', 'lib', 'lead-event-queue.js'),
+  path.join(projectRoot, 'src', 'berater-info', 'entry.jsx'),
+  path.join(projectRoot, 'src', 'berater-info', 'BeraterInfo.jsx'),
+  path.join(projectRoot, 'src', 'berater-info', 'translations.js'),
+  path.join(projectRoot, 'src', 'berater-info', 'query-contract.js'),
   path.join(projectRoot, 'build.js'),
   path.join(projectRoot, 'api', 'bridge.js'),
   path.join(projectRoot, 'server', 'lead-system.js'),
+  path.join(projectRoot, 'server', 'coach-insights-link.js'),
   path.join(projectRoot, 'api', 'lead-config.js'),
   path.join(projectRoot, 'api', 'lead-init.js'),
   path.join(projectRoot, 'api', 'lead-track.js'),
@@ -113,6 +118,8 @@ function verifyBuildOutput() {
     path.join(distDir, 'translations.js'),
     path.join(distDir, 'video-config.js'),
     path.join(distDir, 'assets', 'app.js'),
+    path.join(distDir, 'berater-info.html'),
+    path.join(distDir, 'assets', 'berater-info.js'),
   ];
 
   for (const filePath of requiredFiles) {
@@ -129,6 +136,81 @@ function verifyBuildOutput() {
   assert(
     !html.includes('/submit-lang-fix.js'),
     'dist/index.html still references submit-lang-fix.js'
+  );
+
+  const beraterInfoHtml = fs.readFileSync(path.join(distDir, 'berater-info.html'), 'utf8');
+  assert(
+    beraterInfoHtml.includes('/assets/berater-info.js'),
+    'dist/berater-info.html is missing assets/berater-info.js'
+  );
+  assert(
+    beraterInfoHtml.includes('/fonts/fonts.css'),
+    'dist/berater-info.html must load the repo fonts, never a third-party CDN'
+  );
+  // Die Schulungsseite ist bewusst still: kein Pixel, keine Quiz-Konfiguration.
+  assert(
+    !beraterInfoHtml.includes('fbq(') &&
+      !beraterInfoHtml.includes('/translations.js') &&
+      !beraterInfoHtml.includes('/video-config.js'),
+    'dist/berater-info.html must stay free of pixel and quiz runtime files'
+  );
+}
+
+// Gate 1 (Inventur D-1/D-2/D-8): Es darf nur EINEN Erzeuger fuer Coach-Insights-Links geben.
+function verifyCoachInsightsLink() {
+  const sharedPath = path.join(projectRoot, 'server', 'coach-insights-link.js');
+  assert(fs.existsSync(sharedPath), 'server/coach-insights-link.js is missing');
+
+  const shared = fs.readFileSync(sharedPath, 'utf8');
+  assert(
+    shared.includes('process.env.COACH_INSIGHTS_BASE_URL'),
+    'server/coach-insights-link.js must read COACH_INSIGHTS_BASE_URL from the environment'
+  );
+
+  for (const producer of ['bridge.js', 'lead-outbox-worker.js']) {
+    const source = fs.readFileSync(path.join(projectRoot, 'api', producer), 'utf8');
+    assert(
+      source.includes("require('../server/coach-insights-link')"),
+      `api/${producer} must use the shared server/coach-insights-link.js`
+    );
+    assert(
+      !source.includes('COACH_INSIGHTS_BASE_URL ='),
+      `api/${producer} must not keep its own COACH_INSIGHTS_BASE_URL constant`
+    );
+    assert(
+      !source.includes('function buildCoachInsightsUrl') &&
+        !source.includes('function normalizeProfileInsightSlug') &&
+        !source.includes('function normalizeProfileCode') &&
+        !source.includes('function normalizeAspirationKey'),
+      `api/${producer} must not keep a local copy of the insights link mappers`
+    );
+    // D-1: Die Mail-Sprache muss im Link landen. Ein Aufruf ohne lang waere still falsch.
+    assert(
+      /buildCoachInsightsUrl\(\{[\s\S]{0,400}?lang,[\s\S]{0,80}?\}\)/.test(source),
+      `api/${producer} must pass the resolved mail language into buildCoachInsightsUrl`
+    );
+  }
+}
+
+// Gate 2 (Inventur 8.1/8.3): Vercel wertet rewrites von oben nach unten aus, erster Treffer
+// gewinnt. Steht /berater-info unter der Slug-Catch-all, liefert die Route still die
+// Missing-Coach-Seite des Quiz.
+function verifyBeraterInfoRewriteOrder() {
+  const config = JSON.parse(fs.readFileSync(path.join(projectRoot, 'vercel.json'), 'utf8'));
+  const rewrites = config.rewrites || [];
+
+  const beraterInfoIndex = rewrites.findIndex((entry) => entry.source === '/berater-info');
+  const slugIndex = rewrites.findIndex((entry) => String(entry.source || '').includes(':slug'));
+
+  assert(beraterInfoIndex >= 0, 'vercel.json must rewrite /berater-info to /berater-info.html');
+  assert(
+    rewrites[beraterInfoIndex].destination === '/berater-info.html',
+    'vercel.json /berater-info must point at /berater-info.html'
+  );
+  assert(slugIndex >= 0, 'vercel.json must keep the coach slug catch-all rewrite');
+  assert(
+    beraterInfoIndex < slugIndex,
+    'vercel.json: the /berater-info rewrite must stand BEFORE the slug catch-all'
   );
 }
 
@@ -372,6 +454,8 @@ function main() {
 
   verifyRemovedRuntimeSurface();
   verifyApiHardening();
+  verifyCoachInsightsLink();
+  verifyBeraterInfoRewriteOrder();
 
   verifyTranslations();
   verifyVideoConfig();

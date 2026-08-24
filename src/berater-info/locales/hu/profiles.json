@@ -1,0 +1,249 @@
+{
+  "feuer": {
+    "name": "A Cselekvő",
+    "tagline": "Határozott. Egyenes. Eredményközpontú.",
+    "psychologie": "A Cselekvő eredményekben gondolkodik. Azt akarja tudni, MI jön ki belőle és MILYEN GYORSAN. A csevegés nála időveszteség. Ha azt érzi, hogy valaki kerülgeti a lényeget, gondolatban már ki is lépett.",
+    "stärken": ["Gyors és tiszta döntések", "Következetes út az ötlettől a megvalósításig", "Természetes vezetői erő", "Önálló, belülről hajtott működés"],
+    "fleck": "Türelmetlennek tűnhet, néha keveset hallgat, és könnyen túlbecsüli magát.",
+    "niemals": "Hosszú magyarázat, kerülgető beszéd, megjátszott együttérzés.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Szabadság",
+        "antrieb": "Ő akar a kapitány lenni. Engedélyt nem kér, plafont nem tűr. A szabadság nála a döntés joga.",
+        "nein": "Hierarchia, ami lassítja. Rendszer, ami túl lassan skálázódik.",
+        "opener": "Röviden megmutatom, hogyan működik a modell. Számok és struktúra, semmi felvezetés. Utána te döntesz.",
+        "gespräch": "Beszélj skálázásról, tempóról és irányításról. Mutasd meg, hogy a saját területén ő a főnök. Hozz konkrét számokat más Cselekvőktől, ne átlagokat.",
+        "überzeugt": "Valódi számok valódi emberektől. Azt akarja látni, mit ért el valaki 6 hónap alatt ennyi munkával.",
+        "einwände": [
+          { "q": "Nincs erre időm.", "a": "Pont ezért. Akinek tartósan nincs ideje, az rossz rendszerben van. Hány órát tennél bele hetente?" }
+        ],
+        "redflag": "Ha folyton azt kérdezi, mikor lát pénzt, de felelősséget nem vállalna."
+      },
+      "wirkung": {
+        "label": "Hatás",
+        "antrieb": "Nyomot akar hagyni. Vinni akarja magával a többieket, és olyat építeni, ami nagyobb nála. A hatás nála a vezetői erő bizonyítéka.",
+        "nein": "Olyan üzlet, ami csak róla szól. Magány. Modell, ami kicsiben tartja.",
+        "opener": "Látszik rajtad, hogy nem csak magadban gondolkodsz. Megmutatom, hogyan fordítod ezt olyan rendszerré, ami tényleg skálázódik.",
+        "gespräch": "Mutasd meg a tőkeáttételt. A kérdés az, mi születik rajta keresztül. Hány emberhez ér el a csapatán át?",
+        "überzeugt": "Történetek Cselekvőkről, akik csapatot építettek. Csapatméretek, ne csak egyéni jövedelem.",
+        "einwände": [
+          { "q": "Nem akarok másokat beszervezni.", "a": "Nem is fogsz. Olyan embereket hívsz meg, akik maguk akarnak változtatni. Ez a különbség dönt el mindent." },
+          { "q": "Nem vagyok üzletkötő.", "a": "Aki tényleg vezet, annak nem kell eladnia. Inspirál. Ezt te már most is csinálod." }
+        ],
+        "redflag": "Ha a hatás nála csak az egóról szól, és nem másokról."
+      },
+      "sicherheit": {
+        "label": "Biztonság",
+        "antrieb": "A határozott fellépés mögött a családért érzett felelősség áll. Nagyban gondolkodik, de csak stabil alapon.",
+        "nein": "Légvárak. Üres ígéretek. Kockázat, amit nem tud kiszámolni.",
+        "opener": "Előre akarsz jutni, de biztos talajon. Megmutatom, hogyan épül fel ez a modell, és miért marad kezelhető a kockázat.",
+        "gespräch": "Számok, idővonal, reális forgatókönyvek. Mi az óvatos út? Mi a legrosszabb eset?",
+        "überzeugt": "Az átláthatóság. Érteni akarja a modellt, mielőtt igent mond. Adj neki időt és tényeket.",
+        "einwände": [
+          { "q": "Mi van, ha nem építek csapatot?", "a": "Akkor marad a termékforgalom. Az önmagában is működik. A csapatépítés lehetőség, nem kötelesség." },
+          { "q": "Nem akarok másoktól függeni.", "a": "Értem. Mondd el, ma miből van biztos bevételed. Utána megnézzük, ennek van-e itt helye." }
+        ],
+        "redflag": "Ha minden válasz után új kifogást gyárt, és közben nem figyel."
+      },
+      "wachstum": {
+        "label": "Növekedés",
+        "antrieb": "A legjobb akar lenni. Nem csak az üzletben, hanem önmagához képest is. Nála a fejlődés sportág.",
+        "nein": "Megrekedés. Környezet, ami nem kéri tőle a maximumot. Mentor, aki kevesebbet tud nála.",
+        "opener": "Olyan emberekkel dolgozom, akik sosem állnak meg. Téged a rendszer visz előre, és még inkább az emberek benne.",
+        "gespräch": "Beszélj fejlődésről: képességek, vezetés, vállalkozás. Kik a csapat legjobbjai?",
+        "überzeugt": "Az, hogy vannak a csapatban, akik kihívást jelentenek neki. A legjobb szobában akar ülni, nem a szoba legnagyobbja lenni.",
+        "einwände": [
+          { "q": "Jobban szeretek egyedül tanulni.", "a": "Elhiszem. A legjobb Cselekvők, akiket ismerek, mégis egymástól tanulnak, nem könyvekből." },
+          { "q": "Mit tanulhatok itt, amit még nem tudok?", "a": "Nem tudom. Mondd el, hol tartasz, és őszintén megmondom, van-e itt neked újdonság." }
+        ],
+        "redflag": "Ha a fejlődésre hivatkozva sosem kezd el semmit."
+      }
+    }
+  },
+  "wind": {
+    "name": "A Kapcsolatteremtő",
+    "tagline": "Lelkesítő. Emberi. Energikus.",
+    "psychologie": "A Kapcsolatteremtő emberekből, kapcsolatokból és hangulatból él. Érzelmet vesz, nem adatot. Előbb kedvelnie kell téged, csak utána hallgat rád. Ha jó az energia, azonnal benne van.",
+    "stärken": ["Ragadós lelkesedés", "Gyors bizalomépítés", "Kapcsolódást teremtő jelenlét minden csapatban", "Pozitív, magával ragadó kisugárzás"],
+    "fleck": "Ötletről ötletre ugrik, és néha a lelkesedésre hallgat a józan ész helyett.",
+    "niemals": "Száraz számok kontextus nélkül, rideg prezentáció, mosolytalan arc. Éreznie kell, hogy kedveled.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Szabadság",
+        "antrieb": "Nála a szabadság ennyi: reggel felébred, és eldönti, kivel tölti a napot. Utazik, ha kedve van. Élvezi az életet munka közben.",
+        "nein": "Merev keretek, egyhangú rutin, emberek, akik lehúzzák.",
+        "opener": "Képzeld el, hogy holnap reggel te döntöd el, ki kerül a naptáradba. Megmutatom, hogy néz ki ez a gyakorlatban.",
+        "gespräch": "Fesd le a képet. Képekben beszélj, ne táblázatban. Milyen a napja? Mikor és hol dolgozik? Kivel?",
+        "überzeugt": "Történetek a csapatból, akik így élnek. Valódi pillanatok. Az életképet veszi meg.",
+        "einwände": [
+          { "q": "Túl társasági ember vagyok, nem akarok otthon ülni.", "a": "Ott dolgozol, ahol az emberek vannak. Rendezvényen, telefonon, kávézóban. Az az irodád." },
+          { "q": "Az elején biztos sok időt visz el.", "a": "Az elején igen. És ma mennyi időt teszel bele egy olyan életbe, ami nem a tiéd?" }
+        ],
+        "redflag": "Ha lelkes, de sosem kötelezi el magát. Mindig új időpont, mindig majdnem igen."
+      },
+      "wirkung": {
+        "label": "Hatás",
+        "antrieb": "Látni akarja, hogy az energiája segít másokon. Azt a pillanatot keresi, amikor valaki azt mondja neki: megváltoztattad az életemet. Szereti, ha szükség van rá.",
+        "nein": "Feleslegesnek érezni magát. Semmilyen visszajelzést nem kapni. Kapcsolatok nélkül dolgozni.",
+        "opener": "Van egy adottságod, amit a legtöbben soha nem fejlesztenek ki: megmozgatod az embereket. Megmutatom, hogyan lesz ebből valami nagy.",
+        "gespräch": "A hatásra fókuszálj. Hány emberre hatott eddig anélkül, hogy figyelt volna rá? Mi lenne, ha ezt tudatosan csinálná?",
+        "überzeugt": "Vélemények, sikertörténetek, érzelmes pillanatok. Éreznie kell, hogy itt valódi embereken segítenek.",
+        "einwände": [
+          { "q": "Nem akarok termékeket tolni.", "a": "Nem is fogsz. Megosztod azt, ami neked segített. Az őszinteség a különbség, és az megvan benned." },
+          { "q": "Mi van, ha a termékek nem hatnak?", "a": "Használd őket magad. Utána saját tapasztalatból beszélsz. Csak az számít." }
+        ],
+        "redflag": "Ha hatást akar, de saját tapasztalatot nem akar szerezni."
+      },
+      "sicherheit": {
+        "label": "Biztonság",
+        "antrieb": "A könnyedsége mögött ott az aggódás a családért és a barátaiért. Nála a biztonság érzelmi megbízhatóság.",
+        "nein": "Az az érzés, hogy cserben hagy valakit. Pénzügyi bizonytalanság, ami a kapcsolatait terheli.",
+        "opener": "Tudom, hogy ott akarsz lenni másoknak. Megmutatom, hogyan teheted ezt anyagilag is biztossá anélkül, hogy feladnád, ahogy élsz.",
+        "gespräch": "Kösd össze a bevételt azzal, ami fontos neki: több idő a családra, kevesebb stressz.",
+        "überzeugt": "Reális jövedelmi példák hozzá hasonló, hétköznapi emberektől. El kell tudnia hinni magára nézve.",
+        "einwände": [
+          { "q": "Nem akarok kockáztatni.", "a": "Mi a legrosszabb, ami történhet? Gondoljuk végig együtt. Nem fogom szépíteni." },
+          { "q": "Mi van, ha a barátaim furán néznek rám?", "a": "Ez valódi félelem, és tiszteletben tartom. Megmutatom, mások hogyan kezelték." }
+        ],
+        "redflag": "Ha mások véleménye annyira nyom, hogy saját döntést nem tud hozni."
+      },
+      "wachstum": {
+        "label": "Növekedés",
+        "antrieb": "Fejlődni akar, új oldalait megismerni, jobban bánni az emberekkel. A megrekedés a legnagyobb ellensége.",
+        "nein": "Elszigeteltség, rutin, emberek, akik nem inspirálják.",
+        "opener": "Tudod magadról, hogy több van benned. Megmutatok egy környezetet, amely ezt tényleg előhozza.",
+        "gespräch": "A közösségre, a rendezvényekre és a közös fejlődésre fókuszálj. ÉREZNIE kell az energiát, mielőtt dönt.",
+        "überzeugt": "Hívd meg egy rendezvényre vagy csapathívásra. Egyetlen dokumentum sem hat rá úgy, mint egy energiával teli terem.",
+        "einwände": [
+          { "q": "Már sok projektben benne vagyok.", "a": "Melyik változtatta meg tényleg az életedet? És melyik csak lefoglalt?" },
+          { "q": "Előbb több információ kell.", "a": "Valódi képet egy valódi embertől kapsz a csapatból. Összekösselek vele?" }
+        ],
+        "redflag": "Ha lelkesedésről lelkesedésre vándorol, és sehová nem érkezik meg."
+      }
+    }
+  },
+  "wasser": {
+    "name": "A Támasz",
+    "tagline": "Hűséges. Megbízható. Mély.",
+    "psychologie": "A Támasz lassan dönt, de utána tartósan kitart. Biztonság, bizalom és idő kell neki. Ha nyomást érez, visszahúzódik. Ha egyszer benne van, aranyat ér: hűséges, kitartó, ő fogja össze a csapatot.",
+    "stärken": ["Megbízhatóság és következetesség", "Mély, tartós bizalom", "Nyugalom nehéz helyzetekben", "Kiegyensúlyozott, békét teremtő működés"],
+    "fleck": "Nagyon lassan dönt, sok megerősítést kér, és szó nélkül tűri, ha átlépnek rajta.",
+    "niemals": "Nyomás, kitalált határidő, rábeszélés. Minden manipulációt észrevesz, és sosem felejti el.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Szabadság",
+        "antrieb": "A Támasznak a szabadság nyugalom, egzisztenciális félelem nélkül. Nem kell kalandokat keresnie. Attól akar szabad lenni, ami kényszer.",
+        "nein": "Káosz, kiszámíthatatlanság, az az érzés, hogy kicsúszik a kezéből az irányítás.",
+        "opener": "Mi lenne, ha a mostani életed mellett építenél egy bevételt, amely egyszer majd választási lehetőséget ad?",
+        "gespräch": "Semmi nyomás, semmi sürgetés. Mutasd meg a lassú belépőt. Mi a legkisebb első lépés? Mibe kerül valójában?",
+        "überzeugt": "Példák olyan emberekről, akik a saját életük mellett építették fel ezt, és semmit nem forgattak fel.",
+        "einwände": [
+          { "q": "Nem vagyok én erre való.", "a": "Mire gondolsz pontosan? Mit képzelsz, mit kellene csinálnod?" },
+          { "q": "Idő kell, hogy átgondoljam.", "a": "Természetesen. Mi kell konkrétan ahhoz, hogy dönteni tudj?" }
+        ],
+        "redflag": "Ha örökké gondolkodik, de egyetlen konkrét kérdést sem tesz fel."
+      },
+      "wirkung": {
+        "label": "Hatás",
+        "antrieb": "A háttérben segít a legszívesebben. Tudni akarja, hogy amit tesz, számít. Reflektorfény nélkül. Nála a hatás csendes és mély.",
+        "nein": "Nyilvánosság, amit nem kért. Elvárás, ami túlmegy a komfortzónáján.",
+        "opener": "Képzeld el, hogy segítesz embereken. A saját tempódban, a saját módodon. Show nélkül, színpad nélkül.",
+        "gespräch": "Mutasd meg, mekkora hatása lehet a háttérből. Valódi ügyféltörténetek és az a csendes állandóság, amire a csapatának szüksége van.",
+        "überzeugt": "Valódi, csendes történetek hozzá hasonló emberekről. Színpadi pillanatok nélkül.",
+        "einwände": [
+          { "q": "Túl visszahúzódó vagyok ehhez.", "a": "A csapat legerősebb emberei gyakran a legcsendesebbek. Megmutassam, miért?" },
+          { "q": "Nem akarom terhelni az ismerőseimet.", "a": "Nem is kell. Felajánlod. Aki nem kéri, nemet mond." }
+        ],
+        "redflag": "Ha minden lépés fenyegetésnek tűnik neki. Kezdd egy valódi termékélménnyel."
+      },
+      "sicherheit": {
+        "label": "Biztonság",
+        "antrieb": "A biztonság AZ elsődleges célja. A párjára, a gyerekeire és a szüleire gondol. Csendben és komolyan viseli a felelősséget.",
+        "nein": "Minden kockázat, amit nem ért. Ígéret, amit nem tartanak be.",
+        "opener": "Gyors pénzt nem tudok mutatni. Azt viszont igen, hogyan épített hozzád hasonló helyzetben lévő ember nyugodt, stabil mellékjövedelmet.",
+        "gespräch": "Nagyon lassan, nagyon őszintén. Mondd el azt is, ami nem működik. Az többet épít, mint a fényezés.",
+        "überzeugt": "Idő és bizonyíték. Több beszélgetés kell, és ez normális. Aki sürgeti, elveszíti. Aki teret ad neki, évekre nyer egy partnert.",
+        "einwände": [
+          { "q": "Mi van, ha ez nem működik?", "a": "Vegyük végig a legrosszabb esetet. Utána te döntöd el, elviselhető-e a kockázat." },
+          { "q": "Meg kell beszélnem a párommal.", "a": "Teljesen helyes. Adjak mindkettőtöknek egy rövid áttekintést? Akkor ugyanazt tudjátok." }
+        ],
+        "redflag": "Ha 3-4 beszélgetés után sem tett fel egyetlen konkrét kérdést sem."
+      },
+      "wachstum": {
+        "label": "Növekedés",
+        "antrieb": "Mélyülni akar, nem szélesedni. Egy dolgot akar igazán jól tudni, nem tízet félig. Megbízhatóságból és következetességből fejlődik.",
+        "nein": "Felszínesség, folyamatos változás, rendszer, amely hetente újratalálja magát.",
+        "opener": "Neked a fejlődés nem gyorstalpaló. A nyugodt következetesség az, ami másokból hiányzik. Itt pont ez épül.",
+        "gespräch": "Mutasd meg a rendszer mélységét. Ki kíséri az úton? Milyen képzések vannak?",
+        "überzeugt": "Egy mentor a csapatból, aki hasonlóan működik: nyugodt, kitartó, mély. Egy beszélgetés vele többet ér minden prezentációnál.",
+        "einwände": [
+          { "q": "Sok idő kell, míg készen állok.", "a": "Ez nem gyengeség. A csapat legjobbjai pont ilyenek. Mikor jó neked egy első beszélgetés?" },
+          { "q": "Sok itt a nyomás és a gyors eredmény?", "a": "Nincs. A te tempód a te tempód. Az irány számít, nem a sebesség." }
+        ],
+        "redflag": "Ha a fejlődésre hivatkozva sosem kezd bele. Mindig még egy könyv, még egy tanfolyam."
+      }
+    }
+  },
+  "fels": {
+    "name": "Az Építő",
+    "tagline": "Elemző. Pontos. Rendszerben gondolkodik.",
+    "psychologie": "Az Építő fejjel dönt, nem hassal. Előbb elemez, utána cselekszik. Ha nyomással közelítesz, elveszíted. Ha tényeket és teret adsz neki, évekre megnyered.",
+    "stärken": ["Átgondolt és megalapozott döntések", "Rendszerszemlélet előrelátással", "Következetes optimalizálás pontossággal", "Belső motiváció és önállóság"],
+    "fleck": "Beleragadhat az elemzésbe, és lassan dönt.",
+    "niemals": "Hype, túlzó ígéretek, érzelmi nyomásgyakorlás. Azonnal átlát rajta.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Szabadság",
+        "antrieb": "Nála a szabadság ennyi: legyen egy rendszere, amely nélküle is működik. Irányítást ÉS függetlenséget akar.",
+        "nein": "Függés egy munkáltatótól, egy ügyféltől, mások hangulatától.",
+        "opener": "Megmutatom a mechanikát mögötte. Hogyan épül fel a rendszer, és miért fut akkor is, ha te épp nem dolgozol.",
+        "gespräch": "Magyarázd el a szerkezetet: bevételi források, tőkeáttétel, skálázhatóság. Előbb az egészet akarja érteni, csak utána néz a részletekre.",
+        "überzeugt": "Írásos anyag, tiszta dokumentumok, valódi számok. Mindent végigolvas. Hívd fel 3 nappal később.",
+        "einwände": [
+          { "q": "Ezt alaposan át kell néznem.", "a": "Pont ezt várom tőled. Itt van minden, ami kell. Mi hiányzik még?" },
+          { "q": "Mik a rejtett költségek?", "a": "Tételesen végigveszem az egészet. Meglepetés nem lesz." }
+        ],
+        "redflag": "Ha már mindent megkapott, mégis új kérdéseket gyárt, és egyre sem válaszol."
+      },
+      "wirkung": {
+        "label": "Hatás",
+        "antrieb": "Nem elég neki, hogy épít egy rendszert. Azt akarja, hogy valóban változtasson valamin. A tartalom nélküli hatás hidegen hagyja.",
+        "nein": "Felszínesség. Zöldre festés. Ígéret, amit nem lehet mérni.",
+        "opener": "Megmutatom, hogyan hoz a modell mérhető eredményt. Számokkal és valódi emberek visszajelzéseivel.",
+        "gespräch": "Mutasd meg a hatásláncot: termék, ember, változás. Az ok-okozatot akarja érteni.",
+        "überzeugt": "Tanulmányok, termékadatok, írásos és ellenőrizhető bizonyítékok. Vélemény-videók nem.",
+        "einwände": [
+          { "q": "Honnan tudom, hogy a termékek tényleg hatnak?", "a": "Itt vannak az elérhető tanulmányok és klinikai adatok. Melyik a legfontosabb neked?" },
+          { "q": "Vannak fenntartásaim ezzel a szakmával szemben.", "a": "Jogosak a fenntartások. Megmutatom, hol a különbség: szakmailag, szerkezetileg és jogilag." }
+        ],
+        "redflag": "Ha a hatás nála szellemi gyakorlat, de maga sosem próbál ki semmit."
+      },
+      "sicherheit": {
+        "label": "Biztonság",
+        "antrieb": "Teljesen érteni és kézben tartani akarja a kockázatot. Nála a biztonság ennyi: nincs ismeretlen változó, nincs meglepetés.",
+        "nein": "Átláthatatlanság, zavaros szerződések, függés olyasmitől, amit nem tud befolyásolni.",
+        "opener": "Mielőtt döntesz, megmutatom a teljes szerkezetet. Minden költséget, minden kockázatot, minden lehetőséget. Valódi alap, valódi döntés.",
+        "gespräch": "Legyél teljesen átlátható. Mutasd meg a hátrányokat is. Mi mehet félre? Ha érzi, hogy őszinte vagy, megnyílik.",
+        "überzeugt": "Egy beszélgetés valakivel, aki már benne van. Reálisan, kritikusan, őszintén.",
+        "einwände": [
+          { "q": "Mi van, ha ki akarok szállni?", "a": "Bármikor abbahagyhatod. Nincs minimális futamidő, nincs felmondási idő. Itt a pontos folyamat." },
+          { "q": "Mennyire megbízható valójában ez a bevétel?", "a": "Nem fogom szépíteni. Itt vannak a valós sávok 3, 6 és 12 hónap után." }
+        ],
+        "redflag": "Ha teljes átláthatóság után is gyanakszik. Ilyenkor idő kell neki, nem több adat."
+      },
+      "wachstum": {
+        "label": "Növekedés",
+        "antrieb": "Mesteri szintet akar. A mély megértés érdekli, a széles tudás kevésbé. Annyira akarja ismerni a rendszert, hogy javítani tudjon rajta.",
+        "nein": "Felszínes tréningek. Mentorok, akik kevesebbet értenek nála. Rendszerek, amelyeken nem javíthat.",
+        "opener": "Te az a fajta vagy, aki a rendszert nem csak használja, hanem jobbá is teszi. Pont ilyen embereket keresünk a következő szintre.",
+        "gespräch": "Mutasd meg a mélységet: termékismeret, üzleti stratégia, rendszerépítés. Hol tud tényleg mélyre menni?",
+        "überzeugt": "Hozzáférés valódi szakértőkhöz a csapatban. Ne motivációs előadót hozz, hanem szakembert, aki magas szinten optimalizált.",
+        "einwände": [
+          { "q": "Sok értékesítési tapasztalatom van már.", "a": "Annál jobb. Akkor tudod, mi működik. Mi hiányzik még a mostani modelledből?" },
+          { "q": "Nem túl egyszerű ez nekem?", "a": "Amit látsz, az a felszín. Az alatta lévő mélység még senkit nem untatott, aki tényleg belenézett." }
+        ],
+        "redflag": "Ha mindent kritizál, de semmit nem próbál ki. Az okoskodás nála önvédelem."
+      }
+    }
+  }
+}

@@ -14,6 +14,15 @@ const {
   supabaseRpc,
 } = require('../server/lead-system');
 
+// Seit Phase 1 (/berater-info) gibt es genau EINEN Erzeuger fuer Coach-Insights-Links.
+// Vorher lagen hier und in api/bridge.js zwei Kopien mit unterschiedlichem Profil-Mapping
+// (Inventur 2026-08-24, Befund D-2).
+const {
+  buildCoachInsightsUrl,
+  normalizeAspirationKey,
+  normalizeProfileCode,
+} = require('../server/coach-insights-link');
+
 const N8N_UPDATE_RESULT_URL = process.env.N8N_UPDATE_RESULT_URL;
 const N8N_UPDATE_RESULT_SECRET = String(process.env.N8N_UPDATE_RESULT_SECRET || '').trim();
 const WORKER_SECRET = process.env.LEAD_OUTBOX_WORKER_SECRET || process.env.BRIDGE_KEY;
@@ -26,7 +35,6 @@ const HOT_LEAD_OUTBOX_EMAIL_ENABLED =
   String(process.env.HOT_LEAD_OUTBOX_EMAIL_ENABLED || '').trim() === '1';
 const BRAND_LOGO_URL = 'https://hl-support.biz/storage/images/cwemaillogo-1bcb4f.png';
 const BRAND_PRIVACY_URL = 'https://hl-support.biz/impressum-datenschutz/';
-const COACH_INSIGHTS_BASE_URL = 'https://business-schulung.vercel.app/';
 
 const MYSQL_SYNC_TYPES = new Set(['mysql_initial_rank', 'mysql_rank_update']);
 const SUPPORTED_SYNC_TYPES = new Set([...MYSQL_SYNC_TYPES, 'coach_hot_lead_email']);
@@ -349,82 +357,6 @@ const HOT_LEAD_EMAIL_I18N = {
     },
   },
 };
-
-function normalizeProfileCode(value) {
-  const normalized = String(value || '').trim().toLowerCase();
-  const letter = normalized.match(/\b([abcd])\b/i);
-  if (letter) return letter[1].toUpperCase();
-  if (normalized.includes('feuer') || normalized.includes('macher') || normalized.includes('realizzatore') || normalized.includes('doer') || normalized.includes('cselekvő') || normalized.includes('cselekvo')) return 'A';
-  if (normalized.includes('wind') || normalized.includes('netzwerker') || normalized.includes('connettore') || normalized.includes('connector') || normalized.includes('kapcsolatteremtő') || normalized.includes('kapcsolatteremto')) return 'B';
-  if (normalized.includes('wasser') || normalized.includes('anker') || normalized.includes('ancora') || normalized.includes('anchor') || normalized.includes('támasz') || normalized.includes('tamasz')) return 'C';
-  if (normalized.includes('fels') || normalized.includes('architekt') || normalized.includes('architetto') || normalized.includes('architect') || normalized.includes('építő') || normalized.includes('epito')) return 'D';
-  return '';
-}
-
-function normalizeProfileInsightSlug(value) {
-  const profileCode = normalizeProfileCode(value);
-  const byCode = {
-    A: 'feuer',
-    B: 'wind',
-    C: 'wasser',
-    D: 'fels',
-  };
-  if (byCode[profileCode]) return byCode[profileCode];
-
-  const normalized = String(value || '').trim().toLowerCase();
-  if (normalized.includes('feuer') || normalized.includes('macher') || normalized.includes('realizzatore') || normalized.includes('cselekvő') || normalized.includes('cselekvo')) return 'feuer';
-  if (normalized.includes('wind') || normalized.includes('netzwerker') || normalized.includes('connettore') || normalized.includes('kapcsolatteremtő') || normalized.includes('kapcsolatteremto')) return 'wind';
-  if (normalized.includes('wasser') || normalized.includes('anker') || normalized.includes('ancora') || normalized.includes('támasz') || normalized.includes('tamasz')) return 'wasser';
-  if (normalized.includes('fels') || normalized.includes('architekt') || normalized.includes('architetto') || normalized.includes('építő') || normalized.includes('epito')) return 'fels';
-  return '';
-}
-
-function normalizeAspirationKey(value) {
-  const normalized = String(value || '').trim().toLowerCase();
-  const map = {
-    freedom: 'freedom',
-    freiheit: 'freedom',
-    liberta: 'freedom',
-    libertà: 'freedom',
-    liberte: 'freedom',
-    liberté: 'freedom',
-    свобода: 'freedom',
-    szabadság: 'freedom',
-    szabadsag: 'freedom',
-    impact: 'impact',
-    wirkung: 'impact',
-    impatto: 'impact',
-    влияние: 'impact',
-    hatás: 'impact',
-    hatas: 'impact',
-    security: 'security',
-    sicherheit: 'security',
-    sicurezza: 'security',
-    securite: 'security',
-    sécurité: 'security',
-    безопасность: 'security',
-    biztonság: 'security',
-    biztonsag: 'security',
-    growth: 'growth',
-    wachstum: 'growth',
-    crescita: 'growth',
-    croissance: 'growth',
-    рост: 'growth',
-    növekedés: 'growth',
-    novekedes: 'growth',
-  };
-  return map[normalized] || '';
-}
-
-function buildCoachInsightsUrl(profileValue, aspirationValue) {
-  const params = [];
-  const profileSlug = normalizeProfileInsightSlug(profileValue);
-  const aspirationSlug = normalizeAspirationKey(aspirationValue);
-  if (profileSlug) params.push(`type=${encodeURIComponent(profileSlug)}`);
-  if (aspirationSlug) params.push(`goal=${encodeURIComponent(aspirationSlug)}`);
-  const query = params.join('&');
-  return query ? `${COACH_INSIGHTS_BASE_URL}?${query}` : COACH_INSIGHTS_BASE_URL;
-}
 
 function normalizeBarrierKey(value) {
   const normalized = String(value || '').trim().toLowerCase();
@@ -819,7 +751,13 @@ function buildHotLeadEmail({ lead, coach, answers, job }) {
     copy.barriers[normalizeBarrierKey(rawBarrier)] ||
     safeString(lead.initial_barrier_label || lead.initial_barrier, 180) ||
     '-';
-  const insightsUrl = buildCoachInsightsUrl(rawProfile, rawAspiration);
+  // D-1: Die Mail-Sprache steht hier schon fest (lang, oben) und wandert jetzt in den Link.
+  const insightsUrl = buildCoachInsightsUrl({
+    profileCode: lead.profile_code,
+    profileLabel: lead.profile_label,
+    aspiration: rawAspiration,
+    lang,
+  });
   const completedAt = formatLocalizedDateTime(
     lead.video3_completed_at || job.context_data?.event_at || new Date().toISOString(),
     lang

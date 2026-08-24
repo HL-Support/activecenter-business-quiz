@@ -21,6 +21,14 @@ const jwt = require('jsonwebtoken');
 // allowedCorsOrigin kommt seit P0-4 aus derselben Quelle wie fuer die lead-Routen; der Import
 // aus server/lead-system.js bestand fuer sendMetaCAPIEvent bereits und ist zyklusfrei.
 const { allowedCorsOrigin, sendMetaCAPIEvent } = require('../server/lead-system');
+// Seit Phase 1 (/berater-info) gibt es genau EINEN Erzeuger fuer Coach-Insights-Links.
+// Die frueheren lokalen Kopien in dieser Datei und im Outbox-Worker waren nicht
+// deckungsgleich (Inventur 2026-08-24, Befund D-2).
+const {
+  buildCoachInsightsUrl,
+  normalizeAspirationKey,
+  normalizeProfileCode,
+} = require('../server/coach-insights-link');
 function cleanEnvSecret(value) {
   return String(value || '')
     .replace(/\\n$/g, '')
@@ -49,7 +57,6 @@ const N8N_UPDATE_RESULT_URL = process.env.N8N_UPDATE_RESULT_URL;
 const N8N_UPDATE_RESULT_SECRET = String(process.env.N8N_UPDATE_RESULT_SECRET || '').trim();
 const BRAND_LOGO_URL = 'https://hl-support.biz/storage/images/cwemaillogo-1bcb4f.png';
 const BRAND_PRIVACY_URL = 'https://impressum.hl-support.biz/privacy.html';
-const COACH_INSIGHTS_BASE_URL = 'https://business-schulung.vercel.app/';
 const DEFAULT_COACH_LANGUAGE_OVERRIDES = { markus: 'de' };
 
 const TYPEFORM_TARGET = 'https://contacts.hl-support.biz/webhook/typeform';
@@ -2715,99 +2722,6 @@ function detectCoachLanguage(coach, session, payload) {
   );
 }
 
-function normalizeProfileCode(value) {
-  const match = String(value || '').match(/\b([ABCD])\b/i);
-  return match ? match[1].toUpperCase() : '';
-}
-
-function normalizeProfileInsightSlug(value) {
-  const normalized = String(value || '').trim().toLowerCase();
-  const profileCode = normalizeProfileCode(value);
-  const byCode = {
-    A: 'feuer',
-    B: 'wind',
-    C: 'wasser',
-    D: 'fels',
-  };
-  if (byCode[profileCode]) return byCode[profileCode];
-  if (
-    normalized.includes('feuer') ||
-    normalized.includes('macher') ||
-    normalized.includes('realizzatore') ||
-    normalized.includes('cselekvő') ||
-    normalized.includes('cselekvo')
-  ) return 'feuer';
-  if (
-    normalized.includes('wind') ||
-    normalized.includes('netzwerker') ||
-    normalized.includes('connettore') ||
-    normalized.includes('kapcsolatteremtő') ||
-    normalized.includes('kapcsolatteremto')
-  ) return 'wind';
-  if (
-    normalized.includes('wasser') ||
-    normalized.includes('anker') ||
-    normalized.includes('ancora') ||
-    normalized.includes('támasz') ||
-    normalized.includes('tamasz')
-  ) return 'wasser';
-  if (
-    normalized.includes('fels') ||
-    normalized.includes('architekt') ||
-    normalized.includes('architetto') ||
-    normalized.includes('építő') ||
-    normalized.includes('epito')
-  ) return 'fels';
-  return '';
-}
-
-function normalizeAspirationKey(value) {
-  const normalized = String(value || '').trim().toLowerCase();
-  const map = {
-    freedom: 'freedom',
-    freiheit: 'freedom',
-    libertà: 'freedom',
-    liberta: 'freedom',
-    liberté: 'freedom',
-    liberte: 'freedom',
-    свобода: 'freedom',
-    szabadság: 'freedom',
-    szabadsag: 'freedom',
-    impact: 'impact',
-    wirkung: 'impact',
-    impatto: 'impact',
-    влияние: 'impact',
-    hatás: 'impact',
-    hatas: 'impact',
-    security: 'security',
-    sicherheit: 'security',
-    sicurezza: 'security',
-    sécurité: 'security',
-    securite: 'security',
-    безопасность: 'security',
-    biztonság: 'security',
-    biztonsag: 'security',
-    growth: 'growth',
-    wachstum: 'growth',
-    crescita: 'growth',
-    croissance: 'growth',
-    рост: 'growth',
-    növekedés: 'growth',
-    novekedes: 'growth',
-  };
-  return map[normalized] || '';
-}
-
-function buildCoachInsightsUrl(profileValue, aspirationValue) {
-  const params = [];
-  const profileSlug = normalizeProfileInsightSlug(profileValue);
-  const aspirationSlug = normalizeAspirationKey(aspirationValue);
-  if (profileSlug) params.push(`type=${encodeURIComponent(profileSlug)}`);
-  if (aspirationSlug) params.push(`goal=${encodeURIComponent(aspirationSlug)}`);
-  const query = params.join('&');
-  return query ? `${COACH_INSIGHTS_BASE_URL}?${query}` : COACH_INSIGHTS_BASE_URL;
-}
-
 function normalizeBarrierKey(value) {
   const normalized = String(value || '').trim().toLowerCase();
   if (
@@ -2978,7 +2892,13 @@ function buildAllVideosCompletedCoachEmail({ session, coach, payload }) {
   const aspiration = copy.aspirations[normalizeAspirationKey(rawAspiration)] || rawAspiration || '-';
   const rawBarrier = session.quiz_barrier || payload.quiz_barrier || '';
   const barrier = copy.barriers[normalizeBarrierKey(rawBarrier)] || rawBarrier || '-';
-  const insightsUrl = buildCoachInsightsUrl(fallbackProfile || rawProfileCode, rawAspiration);
+  // D-1: Die Mail-Sprache steht hier schon fest (lang, oben) und wandert jetzt in den Link.
+  const insightsUrl = buildCoachInsightsUrl({
+    profileCode: rawProfileCode,
+    profileLabel: session.quiz_profile_name || payload.quiz_profile_name || fallbackProfile,
+    aspiration: rawAspiration,
+    lang,
+  });
   const completedAt = formatLocalizedDateTime(payload.completed_at || nowIso(), lang);
   const slug = String(payload.berater_slug || payload.slug || session.berater_slug || '').toLowerCase().trim();
   const coachFirstName = coach.first_name || 'Markus';

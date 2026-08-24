@@ -1,0 +1,249 @@
+{
+  "feuer": {
+    "name": "Der Macher",
+    "tagline": "Entschlossen. Direkt. Ergebnisorientiert.",
+    "psychologie": "Der Macher denkt in Resultaten, nicht in Prozessen. Er will wissen WAS rauskommt und WIE SCHNELL. Smalltalk kostet ihn Zeit. Wenn er das Gefühl hat, dass jemand um den heissen Brei redet, ist er innerlich schon weg.",
+    "stärken": ["Schnelle, klare Entscheidungskraft", "Konsequent vom Plan zur Umsetzung", "Natürliche Führungspersönlichkeit", "Selbstgetrieben und unabhängig"],
+    "fleck": "Kann ungeduldig wirken, hört manchmal zu wenig zu, Gefahr der Überschätzung.",
+    "niemals": "Langatmige Erklärungen, Weichspüler-Sprache, zu viel Empathie-Theater.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Freiheit",
+        "antrieb": "Er will der Kapitän sein – keine Erlaubnis brauchen, keine Decke über sich. Freiheit bedeutet maximale Handlungsmacht.",
+        "nein": "Hierarchien die ihn bremsen. Systeme die zu langsam skalieren.",
+        "opener": "Ich zeige dir kurz wie das Modell funktioniert. Kein Blabla – einfach Zahlen und Struktur. Dann entscheidest du selbst.",
+        "gespräch": "Sprich über Skalierung, Tempo und Kontrolle. Zeig ihm dass er der Boss seines eigenen Bereichs ist. Konkrete Zahlen von anderen Machern – keine Durchschnittswerte.",
+        "überzeugt": "Echte Zahlen von echten Menschen. Er will sehen: Was hat jemand mit seinem Einsatz in 6 Monaten erreicht?",
+        "einwände": [
+          { "q": "Ich habe keine Zeit dafür.", "a": "Genau deshalb. Wer dauerhaft keine Zeit hat, hat das falsche System. Wie viele Stunden wärst du bereit zu investieren?" }
+        ],
+        "redflag": "Wenn er ständig fragt wann er Geld sieht, ohne selbst Verantwortung übernehmen zu wollen."
+      },
+      "wirkung": {
+        "label": "Wirkung",
+        "antrieb": "Er will Spuren hinterlassen. Andere mitziehen, etwas aufbauen das größer ist als er selbst. Wirkung ist für ihn der Beweis echter Führungsqualität.",
+        "nein": "Ein Business das nur um ihn kreist. Isolation. Ein Modell das ihn klein hält.",
+        "opener": "Du bist jemand der nicht nur für sich denkt – das merkt man. Ich zeige dir, wie du das in ein System übersetzen kannst, das wirklich skaliert.",
+        "gespräch": "Zeig ihm die Hebelwirkung: nicht was ER tut, sondern was durch ihn entsteht. Wie viele Menschen kann er durch sein Team beeinflussen?",
+        "überzeugt": "Geschichten von Machern die Teams aufgebaut haben. Zahlen über Teamgrößen, nicht nur Einzeleinkommen.",
+        "einwände": [
+          { "q": "Ich will nicht andere anwerben müssen.", "a": "Du wirst niemanden anwerben. Du wirst Menschen einladen die selbst etwas verändern wollen. Der Unterschied ist entscheidend." },
+          { "q": "Ich bin kein Verkäufer.", "a": "Macher die wirklich führen müssen nicht verkaufen. Sie inspirieren. Genau das tust du schon." }
+        ],
+        "redflag": "Wenn er Wirkung nur als Ego-Bestätigung sucht, nicht als echten Service an anderen."
+      },
+      "sicherheit": {
+        "label": "Sicherheit",
+        "antrieb": "Hinter dem Macher-Auftreten steckt die tiefe Verantwortung für Familie und Zukunft. Er will groß denken – aber auf einem Fundament das nicht wackelt.",
+        "nein": "Luftschlösser. Versprechen ohne Substanz. Risiken die er nicht kalkulieren kann.",
+        "opener": "Du willst vorwärts – aber auf einem Boden der hält. Ich zeige dir wie das hier strukturiert ist und warum das Risiko überschaubar ist.",
+        "gespräch": "Zahlen, Zeitlinie, realistische Szenarien. Was ist der konservative Pfad? Was ist der Worst Case?",
+        "überzeugt": "Transparenz. Er will das Modell verstehen bevor er Ja sagt. Gib ihm Zeit und Fakten.",
+        "einwände": [
+          { "q": "Was passiert wenn ich kein Team aufbaue?", "a": "Dann hast du das Produktgeschäft. Das läuft unabhängig. Teamaufbau ist eine Option, keine Pflicht." },
+          { "q": "Ich will nicht von anderen abhängig sein.", "a": "Verstehe ich. Was hast du heute an sicheren Einnahmequellen – dann sehen wir ob das eine sinnvolle Ergänzung ist." }
+        ],
+        "redflag": "Wenn er nach jeder Antwort neue Einwände produziert ohne wirklich zuzuhören."
+      },
+      "wachstum": {
+        "label": "Wachstum",
+        "antrieb": "Er will der Beste werden. Nicht nur im Business – er will sich selbst übertreffen. Wachstum ist für den Macher Sport.",
+        "nein": "Stagnation. Ein Umfeld das ihn nicht fordert. Coaches die weniger können als er.",
+        "opener": "Ich arbeite mit Menschen die nie aufhören zu wachsen. Das ist genau das Umfeld das dich weiterbringt – nicht nur das System, sondern die Leute darin.",
+        "gespräch": "Sprich über Entwicklung: Skills, Führung, Unternehmertum. Wer sind die Top-Performer im Team?",
+        "überzeugt": "Der Beweis dass es Menschen im Team gibt die ihn herausfordern. Er will im besten Raum sein, nicht der Größte.",
+        "einwände": [
+          { "q": "Ich lerne lieber alleine.", "a": "Das glaube ich dir. Aber die besten Macher die ich kenne lernen von anderen Machern – nicht aus Büchern." },
+          { "q": "Was kann ich hier lernen was ich nicht schon weiß?", "a": "Das weiß ich nicht. Sag mir wo du stehst – dann sage ich dir ehrlich ob das Neuland ist." }
+        ],
+        "redflag": "Wenn er Wachstum als Ausrede nutzt um nie ins Handeln zu kommen."
+      }
+    }
+  },
+  "wind": {
+    "name": "Der Netzwerker",
+    "tagline": "Begeisternd. Menschlich. Energiegeladen.",
+    "psychologie": "Der Netzwerker lebt für Menschen, Verbindungen und Stimmungen. Er kauft Emotionen, nicht Fakten. Er muss dich mögen bevor er dir zuhört. Wenn die Energie stimmt, ist er sofort dabei.",
+    "stärken": ["Ansteckende Begeisterungsfähigkeit", "Vertrauen in kürzester Zeit aufgebaut", "Verbindender Kitt in jedem Team", "Unwiderstehlich positive Ausstrahlung"],
+    "fleck": "Springt von Idee zu Idee, folgt manchmal Begeisterung statt Vernunft.",
+    "niemals": "Trockene Zahlen ohne Kontext, kalte Präsentation, kein Lächeln. Er muss spüren dass du ihn magst.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Freiheit",
+        "antrieb": "Freiheit bedeutet für ihn: jeden Tag aufwachen und frei entscheiden mit wem er Zeit verbringt. Spontan reisen. Das Leben geniessen während er arbeitet.",
+        "nein": "Starre Strukturen, eintönige Routine, Menschen die seine Energie runterziehen.",
+        "opener": "Stell dir vor du wachst morgen auf und entscheidest selbst wer auf deiner Agenda steht. Ich zeige dir wie das aussieht.",
+        "gespräch": "Zeichne das Bild. Nicht Zahlen – Bilder. Wie sieht sein Alltag aus? Wann und wo arbeitet er? Mit wem?",
+        "überzeugt": "Geschichten von Menschen im Team die dieses Leben leben. Echte Momente. Er kauft das Lifestyle-Bild.",
+        "einwände": [
+          { "q": "Ich bin zu gesellig, ich will nicht zuhause sitzen.", "a": "Du arbeitest genau dort wo die Menschen sind – auf Events, am Telefon, in Cafés. Das ist dein Büro." },
+          { "q": "Das braucht bestimmt viel Zeit am Anfang.", "a": "Am Anfang ja. Aber wie viel Zeit investierst du heute für ein Leben das dir nicht gehört?" }
+        ],
+        "redflag": "Wenn er begeistert ist aber nie verbindlich wird. Immer neue Termine, immer fast dabei."
+      },
+      "wirkung": {
+        "label": "Wirkung",
+        "antrieb": "Er will sehen wie seine Energie anderen hilft. Die Reaktion wenn jemand sagt: Du hast mein Leben verändert. Er liebt es, gebraucht zu werden.",
+        "nein": "Sich nutzlos fühlen. Kein Feedback bekommen. Ohne Verbindung arbeiten.",
+        "opener": "Du hast eine Gabe die die meisten nie entwickeln: du bewegst Menschen. Ich zeige dir wie du das in etwas Großes übersetzen kannst.",
+        "gespräch": "Fokus auf Impact: wie viele Menschen hat er bisher unbewusst beeinflusst? Was wäre wenn er das systematisch tun könnte?",
+        "überzeugt": "Testimonials, Erfolgsgeschichten, emotionale Momente. Er muss spüren dass hier echte Menschen wirklich geholfen werden.",
+        "einwände": [
+          { "q": "Ich will nicht Produkte pushen.", "a": "Du pushst keine Produkte. Du teilst was dir geholfen hat. Der Unterschied liegt in der Echtheit – und die hast du." },
+          { "q": "Was wenn die Produkte nicht wirken?", "a": "Nutze sie selbst. Dann kannst du aus echter Erfahrung sprechen – das ist das Einzige was zählt." }
+        ],
+        "redflag": "Wenn er Wirkung will aber keine eigene Erfahrung machen möchte."
+      },
+      "sicherheit": {
+        "label": "Sicherheit",
+        "antrieb": "Hinter seiner Leichtigkeit steckt die tiefe Sorge um sein Umfeld – Familie, Freunde. Sicherheit ist für ihn emotionale Verlässlichkeit.",
+        "nein": "Das Gefühl jemanden im Stich zu lassen. Finanzielle Unsicherheit die auf Beziehungen drückt.",
+        "opener": "Ich weiß dass du für andere da sein willst – ich zeige dir wie du das auch finanziell absichern kannst ohne deine Art zu leben aufzugeben.",
+        "gespräch": "Verbinde das Einkommen direkt mit dem was ihm wichtig ist: mehr Zeit für Familie, weniger Stress.",
+        "überzeugt": "Realistische Einkommensbeispiele von normalen Menschen mit seinem Profil. Er muss es für sich glauben können.",
+        "einwände": [
+          { "q": "Ich will keine Risiken eingehen.", "a": "Was wäre das schlimmste Szenario? Lass uns das gemeinsam durchdenken. Ich rede nicht schön." },
+          { "q": "Was wenn meine Freunde mich schief anschauen?", "a": "Das ist eine echte Angst und ich respektiere sie. Lass mich dir zeigen wie andere das gehandhabt haben." }
+        ],
+        "redflag": "Wenn die Meinung anderer so stark ist, dass er keine eigene Entscheidung treffen kann."
+      },
+      "wachstum": {
+        "label": "Wachstum",
+        "antrieb": "Er will sich entwickeln, neue Seiten entdecken, besser werden im Umgang mit Menschen. Stagnation ist sein größter Feind.",
+        "nein": "Isolation, Routine, Menschen die ihn nicht inspirieren.",
+        "opener": "Du weißt dass du mehr in dir hast. Ich zeige dir ein Umfeld, das dieses Mehr wirklich rausholt.",
+        "gespräch": "Fokus auf Community, Events, gemeinsames Wachstum. Er muss die Energie FÜHLEN bevor er entscheidet.",
+        "überzeugt": "Einladung zu einem Event oder Team-Call. Kein Dokument überzeugt ihn so wie ein echter Raum voller Energie.",
+        "einwände": [
+          { "q": "Ich bin schon in vielen Projekten.", "a": "Was hat davon wirklich dein Leben verändert – und was hat es nur beschäftigt?" },
+          { "q": "Ich brauche erstmal mehr Infos.", "a": "Der beste Weg um echte Infos zu bekommen ist ein echter Mensch aus dem Team. Darf ich dich verbinden?" }
+        ],
+        "redflag": "Wenn er von Begeisterung zu Begeisterung zieht ohne je anzukommen."
+      }
+    }
+  },
+  "wasser": {
+    "name": "Der Anker",
+    "tagline": "Loyal. Verlässlich. Tief.",
+    "psychologie": "Der Anker entscheidet langsam aber hält dann dauerhaft. Er braucht Sicherheit, Vertrauen und Zeit – keinen Druck. Wenn er Druck spürt, zieht er sich zurück. Er ist Gold wenn er einmal dabei ist: loyal, ausdauernd, der Kitt im Team.",
+    "stärken": ["Absolut verlässlich und wortgetreu", "Tiefes, dauerhaftes Vertrauensfundament", "Ruhepol in jeder Krisensituation", "Ausgeglichen und konfliktfrei"],
+    "fleck": "Entscheidet sehr langsam, braucht viel Bestätigung, kann übergangen werden ohne es zu sagen.",
+    "niemals": "Druck, künstliche Deadlines, überreden. Er merkt jede Manipulation und vergisst sie nie.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Freiheit",
+        "antrieb": "Freiheit bedeutet für den Anker: Ruhe ohne Existenzangst. Nicht müssen müssen. Er will keine wilden Abenteuer – er will frei sein von Zwang.",
+        "nein": "Chaos, Unvorhersehbarkeit, das Gefühl die Kontrolle zu verlieren.",
+        "opener": "Was wäre, wenn du weiter deinen Alltag lebst – aber nebenbei ein Einkommen aufbaust das dir irgendwann Optionen gibt?",
+        "gespräch": "Kein Druck, kein Tempo. Zeig den sanften Einstieg. Was ist der kleinste erste Schritt? Was kostet es wirklich?",
+        "überzeugt": "Beispiele von Menschen die dieses Modell neben ihrem Leben aufgebaut haben ohne alles auf den Kopf zu stellen.",
+        "einwände": [
+          { "q": "Ich bin nicht der Typ dafür.", "a": "Was meinst du damit – was stellst du dir vor müsstest du tun?" },
+          { "q": "Ich brauche Zeit zum Nachdenken.", "a": "Selbstverständlich. Was brauchst du konkret um eine Entscheidung treffen zu können?" }
+        ],
+        "redflag": "Wenn er ewig nachdenkt ohne je eine konkrete Frage zu stellen."
+      },
+      "wirkung": {
+        "label": "Wirkung",
+        "antrieb": "Er hilft am liebsten im Verborgenen. Er will wissen dass sein Tun etwas bewegt – ohne im Rampenlicht zu stehen. Wirkung für ihn ist still und tief.",
+        "nein": "Öffentlichkeit die er nicht will. Erwartungen die über sein Komfortniveau gehen.",
+        "opener": "Stell dir vor du hilfst Menschen – ganz in deinem Tempo, auf deine Art. Ohne Show, ohne Bühne. Einfach echt.",
+        "gespräch": "Zeig wie er im Hintergrund Großes bewirken kann. Echte Kundenstories, die stille Konstanz die sein Team braucht.",
+        "überzeugt": "Echte, ruhige Geschichten von Menschen wie ihm. Keine Bühnen-Momente.",
+        "einwände": [
+          { "q": "Ich bin zu introvertiert dafür.", "a": "Die stärksten Menschen im Team sind oft genau die, die am ruhigsten auftreten. Darf ich dir zeigen warum?" },
+          { "q": "Ich will nicht mein Netzwerk belasten.", "a": "Du musst niemanden belasten. Du bietest an – und wer es nicht will, sagt nein." }
+        ],
+        "redflag": "Wenn jeder Schritt als Bedrohung wirkt – zuerst ein echtes Produkterlebnis schaffen."
+      },
+      "sicherheit": {
+        "label": "Sicherheit",
+        "antrieb": "Sicherheit IST sein primäres Ziel. Er denkt an Partner, Kinder, Eltern. Er trägt Verantwortung still und ernsthaft.",
+        "nein": "Jedes Risiko das er nicht versteht. Versprechen die nicht gehalten werden.",
+        "opener": "Ich zeige dir kein schnelles Geld – ich zeige dir wie andere in deiner Situation ein ruhiges, stabiles Nebeneinkommen aufgebaut haben.",
+        "gespräch": "Sehr langsam, sehr ehrlich. Sag auch was nicht funktioniert – das baut mehr Vertrauen als Hochglanz.",
+        "überzeugt": "Zeit und Beweise. Mehrere Gespräche sind normal. Wer ihn pusht, verliert ihn. Wer ihm Raum gibt, gewinnt einen Partner für Jahre.",
+        "einwände": [
+          { "q": "Was wenn das nicht funktioniert?", "a": "Lass uns den Worst Case durchgehen – danach kannst du selbst beurteilen ob das Risiko tragbar ist." },
+          { "q": "Ich muss das mit meinem Partner besprechen.", "a": "Absolut richtig. Soll ich euch beiden einen kurzen Überblick geben? Dann seid ihr auf demselben Stand." }
+        ],
+        "redflag": "Wenn er nach 3-4 Gesprächen noch keine einzige konkrete Frage gestellt hat."
+      },
+      "wachstum": {
+        "label": "Wachstum",
+        "antrieb": "Er will tiefer werden, nicht breiter. Nicht 10 neue Skills – einen wirklich gut. Er wächst durch Verlässlichkeit und Konsequenz, nicht durch Hype.",
+        "nein": "Oberflächlichkeit, ständige Veränderungen, ein System das sich jede Woche neu erfindet.",
+        "opener": "Wachstum für dich ist kein Crash-Kurs – es ist die ruhige Konsequenz die andere nicht haben. Genau das wird hier gebaut.",
+        "gespräch": "Zeig die Tiefe des Systems. Wer coacht ihn auf dem Weg? Welche Schulungen gibt es?",
+        "überzeugt": "Ein Mentor aus dem Team der ähnlich strukturiert ist – ruhig, ausdauernd, tief. Ein Gespräch mit dieser Person ist mehr wert als jede Präsentation.",
+        "einwände": [
+          { "q": "Ich brauche lange bis ich bereit bin.", "a": "Das ist keine Schwäche. Die besten Leute im Team sind genau so. Wann wärst du bereit für ein erstes Gespräch?" },
+          { "q": "Gibt es viel Druck und schnelle Ergebnisse?", "a": "Nein. Dein Tempo ist dein Tempo. Was zählt ist Richtung, nicht Geschwindigkeit." }
+        ],
+        "redflag": "Wenn er Wachstum als Grund nutzt um nie anzufangen – immer noch ein Buch, noch ein Kurs."
+      }
+    }
+  },
+  "fels": {
+    "name": "Der Architekt",
+    "tagline": "Analytisch. Präzise. Systemisch.",
+    "psychologie": "Der Architekt kauft mit dem Kopf, nicht mit dem Bauch. Er analysiert bevor er handelt. Wenn du ihn mit Druck überwältigst, verlierst du ihn. Wenn du ihm Fakten und Raum gibst, gewinnst du einen langjährigen Partner.",
+    "stärken": ["Durchdachte, fundierte Entscheidungsqualität", "Systemischer Denker mit Weitblick", "Konsequenter Optimierer mit Präzision", "Intrinsisch motiviert und unabhängig"],
+    "fleck": "Kann in Analyse-Schleifen stecken bleiben, entscheidet langsam.",
+    "niemals": "Hype, übertriebene Versprechen, emotionale Manipulation. Er durchschaut das sofort.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Freiheit",
+        "antrieb": "Freiheit bedeutet für ihn: ein System besitzen das ohne seine ständige Anwesenheit läuft. Er will Kontrolle UND Unabhängigkeit.",
+        "nein": "Abhängigkeit von einem Arbeitgeber, von einem Kunden, von Launen anderer.",
+        "opener": "Ich zeige dir die Mechanik dahinter – wie das System aufgebaut ist und warum es auch dann läuft, wenn du nicht aktiv bist.",
+        "gespräch": "Erkläre die Struktur: Einkommensquellen, Hebelwirkung, Skalierbarkeit. Er will alles verstehen bevor er ein Detail bewertet.",
+        "überzeugt": "Schriftliche Unterlagen, klare Dokumente, echte Zahlen. Er wird alles gründlich lesen. Ruf 3 Tage später an.",
+        "einwände": [
+          { "q": "Ich muss das gründlich analysieren.", "a": "Genau das erwarte ich von dir. Hier ist alles was du brauchst – was fehlt dir noch?" },
+          { "q": "Was sind die versteckten Kosten?", "a": "Lass mich das komplett transparent aufschlüsseln – keine Überraschungen." }
+        ],
+        "redflag": "Wenn er nach vollständiger Information immer noch neue Fragen produziert ohne je eine zu beantworten."
+      },
+      "wirkung": {
+        "label": "Wirkung",
+        "antrieb": "Er will nicht nur ein System bauen – er will dass es wirklich etwas verändert. Wirkung ohne Substanz interessiert ihn nicht.",
+        "nein": "Oberflächlichkeit. Greenwashing. Versprechen die nicht messbar sind.",
+        "opener": "Ich zeige dir wie das Modell echte, messbare Wirkung erzeugt – mit Zahlen und Feedback von echten Menschen.",
+        "gespräch": "Zeig die Wirkungskette: Produkt zu Mensch zu Veränderung. Er will die Kausalität verstehen.",
+        "überzeugt": "Studien, Produktdaten, schriftliche nachvollziehbare Belege. Keine Testimonial-Videos.",
+        "einwände": [
+          { "q": "Wie weiß ich dass die Produkte wirklich wirken?", "a": "Hier sind die verfügbaren Studien und klinischen Daten. Was davon ist für dich am relevantesten?" },
+          { "q": "Ich habe Bedenken gegenüber der Branche.", "a": "Die Bedenken sind berechtigt. Lass mich zeigen wo der Unterschied liegt – fachlich, strukturell, rechtlich." }
+        ],
+        "redflag": "Wenn er Wirkung als intellektuelle Übung betrachtet aber nie selbst etwas ausprobiert."
+      },
+      "sicherheit": {
+        "label": "Sicherheit",
+        "antrieb": "Er will Risiken vollständig verstehen und kontrollieren. Sicherheit heißt: keine unbekannten Variablen, keine Überraschungen.",
+        "nein": "Intransparenz, unklare Vertragsstrukturen, Abhängigkeit von unkontrollierbaren Faktoren.",
+        "opener": "Bevor du entscheidest zeige ich dir die gesamte Struktur – alle Kosten, alle Risiken, alle Optionen. Echte Basis, echte Entscheidung.",
+        "gespräch": "Extrem transparent. Zeig auch die Nachteile. Was kann schiefgehen? Wenn er merkt dass du ehrlich bist, öffnet er sich.",
+        "überzeugt": "Ein Gespräch mit jemandem der schon dabei ist – realistisch, kritisch, ehrlich.",
+        "einwände": [
+          { "q": "Was ist wenn ich aussteigen will?", "a": "Du kannst jederzeit aufhören. Keine Mindestlaufzeit, keine Kündigungsfristen. Hier ist der genaue Prozess." },
+          { "q": "Wie verlässlich ist das Einkommen wirklich?", "a": "Ich werde das nicht schönreden. Hier sind reale Einkommensbereiche nach 3, 6 und 12 Monaten." }
+        ],
+        "redflag": "Wenn er nach vollständiger transparenter Information immer noch misstrauisch ist – das braucht Zeit, kein mehr an Fakten."
+      },
+      "wachstum": {
+        "label": "Wachstum",
+        "antrieb": "Er will Meisterschaft. Nicht breites Wissen – tiefes Verstehen. Er will das System so gut kennen dass er es optimieren kann.",
+        "nein": "Oberflächliche Trainings. Coaches die weniger verstehen als er. Systeme die er nicht verbessern darf.",
+        "opener": "Du bist der Typ der ein System nicht nur nutzt, sondern es besser macht. Genau solche Menschen suchen wir für die nächste Ebene.",
+        "gespräch": "Zeig die Tiefe: Produktwissen, Businessstrategie, Systemaufbau. Wo kann er wirklich tief einsteigen?",
+        "überzeugt": "Zugang zu echten Experten im Team. Kein Motivationsredner – ein Fachmensch der auf hohem Niveau optimiert hat.",
+        "einwände": [
+          { "q": "Ich habe schon viel Erfahrung im Vertrieb.", "a": "Umso besser. Dann weißt du was funktioniert. Was fehlt dir noch in deinem aktuellen Modell?" },
+          { "q": "Ist das nicht zu simpel für mich?", "a": "Was du siehst ist die Oberflächlichkeit. Die Tiefe darunter hat noch niemanden der wirklich hingeschaut hat, gelangweilt." }
+        ],
+        "redflag": "Wenn er alles kritisiert ohne je selbst etwas auszuprobieren – intellektuelle Arroganz als Selbstschutz."
+      }
+    }
+  }
+}
