@@ -17,7 +17,9 @@
 // Bis zum Domain-Cutover bleibt die heutige Zieladresse der Default. Die Env-Variable
 // existiert noch nicht im Deployment; sie einzufuehren ist Teil des Cutovers und macht
 // den Wechsel zu einer Konfigurationsaenderung statt zu einem Code-Deploy.
-const DEFAULT_COACH_INSIGHTS_BASE_URL = 'https://business-schulung.vercel.app/';
+// Seit 24.08.2026 zeigt der Default auf die integrierte Seite unter der eigenen Domain
+// (Phase-1-Cutover); COACH_INSIGHTS_BASE_URL bleibt als Notfall-Override.
+const DEFAULT_COACH_INSIGHTS_BASE_URL = 'https://business.activecenter.info/berater-info';
 
 // Die Schulungsseite fuehrt seit der Integration dieselben sechs Sprachen wie das Quiz.
 const COACH_INSIGHTS_LANGS = ['de', 'it', 'en', 'fr', 'ru', 'hu'];
