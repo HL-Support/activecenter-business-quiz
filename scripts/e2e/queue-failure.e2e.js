@@ -24,10 +24,23 @@ const {
 test('Queue uebersteht Totalausfall, Reload und transiente 500er ohne Eventverlust', async (t) => {
   const harness = await startHarness();
   const browser = await launchBrowser();
-  const context = await browser.newContext({ viewport: { width: 480, height: 900 } });
+  // locale festnageln: CI-Runner laufen englisch, die Selektoren sind deutsch.
+  const context = await browser.newContext({
+    viewport: { width: 480, height: 900 },
+    locale: 'de-DE',
+  });
   const page = await context.newPage();
 
   t.after(async () => {
+    // Debug-Artefakte fuer CI-Fehlschlaege (Workflow laedt sie bei failure() hoch).
+    try {
+      const fs = require('node:fs');
+      fs.mkdirSync('e2e-artifacts', { recursive: true });
+      await page.screenshot({ path: 'e2e-artifacts/last-state.png' }).catch(() => {});
+      fs.writeFileSync('e2e-artifacts/api-log.json', JSON.stringify(harness.apiLog, null, 2));
+    } catch {
+      /* Artefakte sind best effort */
+    }
     await browser.close();
     await harness.close();
   });

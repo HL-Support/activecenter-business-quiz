@@ -1,0 +1,126 @@
+[
+  {
+    "path": "/api/bridge",
+    "status": 200,
+    "request": "{\"action\":\"lookup_subdomain\",\"subdomain\":\"markus\"}",
+    "response": "{\"found\":true,\"source\":\"user\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"match\":\"1\",\"id\":4677,\"first_name\":\"Markus\",\"last_name\":\"Oberhofer\",\"full_name\":\"Markus Oberhofer\",\"email\":\"info@global-sce.com\",\"phone\":\"+41 76 286 02 17\",\"herbalife_id\":\"25851739\",\"organisation_id\":2,\"marketing_status\":\"Millionaire Team 7,5K\",\"marketing_level_id\":\"10\",\"level_name\":\"Millionaire Team 7,5K\",\"level_id\":\"10\",\"preferred_newsletter_language\":\"de\",\"avatar_150\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-150.jpg\",\"avatar_300\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-300.jpg\",\"avatar_600\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-600.jpg\",\"image\":\"161953387560882033a2e1f.jpeg\",\"instagram\":\"markus24fit\",\"facebook\":\"markus.oberhofer.9\",\"organisation_name\":\"Activecenter\",\"address\":{"
+  },
+  {
+    "path": "/api/lead/init",
+    "status": 200,
+    "request": "{\"client_seed\":\"6feaebfc-5c61-49c2-80cd-f0b16eb8f4a9\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"ref_type\":\"member\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"country\":\"DE\",\"utm_source\":\"\",\"utm_medium\":\"\",\"utm_campaign\":\"\",\"utm_content\":\"\",\"utm_campaign_id\":\"\",\"utm_adset_id\":\"\",\"utm_ad_id\":\"\",\"utm_term\":\"\",\"fbclid\":\"\",\"fbc\":\"\",\"fbp\":\"fb.0.1787592500343.815273524773541822\",\"event_source_url\":\"http://localhost:57787/markus?test=1\"}",
+    "response": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"flags\":{\"new_lead_writer_enabled\":true,\"new_lead_writer_percent\":100,\"legacy_writer_enabled\":false,\"outbox_worker_enabled\":true}}"
+  },
+  {
+    "path": "/api/lead-track",
+    "injected": "refuse"
+  },
+  {
+    "path": "/api/lead-track",
+    "injected": "refuse"
+  },
+  {
+    "path": "/api/lead-track",
+    "injected": "refuse"
+  },
+  {
+    "path": "/api/lead-track",
+    "injected": "refuse"
+  },
+  {
+    "path": "/api/lead-track",
+    "injected": "refuse"
+  },
+  {
+    "path": "/api/lead-track",
+    "injected": "refuse"
+  },
+  {
+    "path": "/api/lead-track",
+    "injected": "refuse"
+  },
+  {
+    "path": "/api/lead-track",
+    "injected": "refuse"
+  },
+  {
+    "path": "/api/bridge",
+    "status": 200,
+    "request": "{\"action\":\"lookup_subdomain\",\"subdomain\":\"markus\"}",
+    "response": "{\"found\":true,\"source\":\"user\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"match\":\"1\",\"id\":4677,\"first_name\":\"Markus\",\"last_name\":\"Oberhofer\",\"full_name\":\"Markus Oberhofer\",\"email\":\"info@global-sce.com\",\"phone\":\"+41 76 286 02 17\",\"herbalife_id\":\"25851739\",\"organisation_id\":2,\"marketing_status\":\"Millionaire Team 7,5K\",\"marketing_level_id\":\"10\",\"level_name\":\"Millionaire Team 7,5K\",\"level_id\":\"10\",\"preferred_newsletter_language\":\"de\",\"avatar_150\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-150.jpg\",\"avatar_300\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-300.jpg\",\"avatar_600\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-600.jpg\",\"image\":\"161953387560882033a2e1f.jpeg\",\"instagram\":\"markus24fit\",\"facebook\":\"markus.oberhofer.9\",\"organisation_name\":\"Activecenter\",\"address\":{"
+  },
+  {
+    "path": "/api/bridge",
+    "status": 200,
+    "request": "{\"action\":\"write_analytics_batch\",\"payload\":{\"events\":[{\"event_id\":\"evt_1787592508758_5jpcyrdg8\",\"event_name\":\"page_view\",\"session_hash\":\"ac_4922c9d228de4af8a5e6c046e9bacb3a\",\"berater_slug\":\"markus\",\"event_at\":\"2026-08-24T17:28:28.758Z\",\"source_app\":\"business_leads_quiz\",\"funnel\":\"business\",\"schema_version\":\"ac_tracking_v1\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"visitor_id\":\"av_bb85ae379daf41048c78c8c06431f924\",\"is_internal_traffic\":true,\"is_resume\":false,\"herbalife_id\":\"25851739\",\"member_id\":\"25851739\",\"lang\":\"de\",\"visited_at\":\"2026-08-24T17:28:28.758Z\",\"country\":\"DE\",\"device_type\":\"desktop\"}]}}",
+    "response": "{\"success\":true,\"processed\":1,\"failed\":0,\"total\":1}"
+  },
+  {
+    "path": "/api/lead-track",
+    "status": 200,
+    "request": "{\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"event_name\":\"page_view\",\"payload\":{\"visited_at\":\"2026-08-24T17:28:21.395Z\",\"country\":\"DE\",\"device_type\":\"desktop\",\"lang\":\"de\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"client_seed\":\"6feaebfc-5c61-49c2-80cd-f0b16eb8f4a9\",\"visitor_id\":\"av_bb85ae379daf41048c78c8c06431f924\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"event_at\":\"2026-08-24T17:28:21.395Z\",\"is_internal_traffic\":true,\"is_resume\":false,\"event_uid\":\"evtq_ba27b24efa294c4f8017cb4526466f4a\",\"queued_at\":\"2026-08-24T17:28:21.395Z\",\"queue_attempts\":2}}",
+    "response": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\"}"
+  },
+  {
+    "path": "/api/lead-track",
+    "status": 200,
+    "request": "{\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"event_name\":\"quiz_started\",\"payload\":{\"quiz_started_at\":\"2026-08-24T17:28:23.502Z\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"client_seed\":\"6feaebfc-5c61-49c2-80cd-f0b16eb8f4a9\",\"visitor_id\":\"av_bb85ae379daf41048c78c8c06431f924\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-24T17:28:23.502Z\",\"is_internal_traffic\":true,\"is_resume\":false,\"event_uid\":\"evtq_ed729288f8b54bae80f695b19efbbe6b\",\"queued_at\":\"2026-08-24T17:28:23.502Z\",\"queue_attempts\":0}}",
+    "response": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\"}"
+  },
+  {
+    "path": "/api/lead-track",
+    "status": 200,
+    "request": "{\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"event_name\":\"question_viewed\",\"payload\":{\"step_index\":1,\"question_index\":1,\"question_key\":1,\"question_phase\":1,\"question_viewed_at\":\"2026-08-24T17:28:23.870Z\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"client_seed\":\"6feaebfc-5c61-49c2-80cd-f0b16eb8f4a9\",\"visitor_id\":\"av_bb85ae379daf41048c78c8c06431f924\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-24T17:28:23.870Z\",\"is_internal_traffic\":true,\"is_resume\":false,\"event_uid\":\"evtq_0ce703e27d8440ea9bf448f87076948c\",\"queued_at\":\"2026-08-24T17:28:23.870Z\",\"queue_attempts\":0}}",
+    "response": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\"}"
+  },
+  {
+    "path": "/api/lead-track",
+    "status": 200,
+    "request": "{\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"event_name\":\"quiz_answer\",\"payload\":{\"step_index\":1,\"question_index\":1,\"question_key\":1,\"question_phase\":1,\"answer_label\":\"Ziele & Fortschritt\",\"answer_type\":\"R\",\"answer_aspiration\":\"\",\"answer_barrier\":\"\",\"answered_at\":\"2026-08-24T17:28:25.428Z\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"client_seed\":\"6feaebfc-5c61-49c2-80cd-f0b16eb8f4a9\",\"visitor_id\":\"av_bb85ae379daf41048c78c8c06431f924\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-24T17:28:25.428Z\",\"is_internal_traffic\":true,\"is_resume\":false,\"event_uid\":\"evtq_6699741b10d54a438e50806a9e1f65b3\",\"queued_at\":\"2026-08-24T17:28:25.428Z\",\"queue_attempts\":0}}",
+    "response": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\"}"
+  },
+  {
+    "path": "/api/lead-track",
+    "status": 200,
+    "request": "{\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"event_name\":\"question_viewed\",\"payload\":{\"step_index\":2,\"question_index\":2,\"question_key\":2,\"question_phase\":1,\"question_viewed_at\":\"2026-08-24T17:28:25.785Z\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"client_seed\":\"6feaebfc-5c61-49c2-80cd-f0b16eb8f4a9\",\"visitor_id\":\"av_bb85ae379daf41048c78c8c06431f924\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-24T17:28:25.785Z\",\"is_internal_traffic\":true,\"is_resume\":false,\"event_uid\":\"evtq_6af344f7703a464abfd40797afb0b3bb\",\"queued_at\":\"2026-08-24T17:28:25.785Z\",\"queue_attempts\":0}}",
+    "response": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\"}"
+  },
+  {
+    "path": "/api/lead-track",
+    "status": 200,
+    "request": "{\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"event_name\":\"quiz_answer\",\"payload\":{\"step_index\":2,\"question_index\":2,\"question_key\":2,\"question_phase\":1,\"answer_label\":\"Der Richtungsgeber\",\"answer_type\":\"R\",\"answer_aspiration\":\"\",\"answer_barrier\":\"\",\"answered_at\":\"2026-08-24T17:28:27.049Z\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"client_seed\":\"6feaebfc-5c61-49c2-80cd-f0b16eb8f4a9\",\"visitor_id\":\"av_bb85ae379daf41048c78c8c06431f924\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-24T17:28:27.049Z\",\"is_internal_traffic\":true,\"is_resume\":false,\"event_uid\":\"evtq_d98dfd2fb0604764b44cd3093b6731b2\",\"queued_at\":\"2026-08-24T17:28:27.049Z\",\"queue_attempts\":0}}",
+    "response": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\"}"
+  },
+  {
+    "path": "/api/lead-track",
+    "status": 200,
+    "request": "{\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"event_name\":\"question_viewed\",\"payload\":{\"step_index\":3,\"question_index\":3,\"question_key\":3,\"question_phase\":1,\"question_viewed_at\":\"2026-08-24T17:28:27.402Z\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"client_seed\":\"6feaebfc-5c61-49c2-80cd-f0b16eb8f4a9\",\"visitor_id\":\"av_bb85ae379daf41048c78c8c06431f924\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"event_at\":\"2026-08-24T17:28:27.403Z\",\"is_internal_traffic\":true,\"is_resume\":false,\"event_uid\":\"evtq_df1c95e540734265b79ee05064a6a73e\",\"queued_at\":\"2026-08-24T17:28:27.403Z\",\"queue_attempts\":0}}",
+    "response": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\"}"
+  },
+  {
+    "path": "/api/bridge",
+    "status": 200,
+    "request": "{\"action\":\"lookup_subdomain\",\"subdomain\":\"markus\"}",
+    "response": "{\"found\":true,\"source\":\"user\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"match\":\"1\",\"id\":4677,\"first_name\":\"Markus\",\"last_name\":\"Oberhofer\",\"full_name\":\"Markus Oberhofer\",\"email\":\"info@global-sce.com\",\"phone\":\"+41 76 286 02 17\",\"herbalife_id\":\"25851739\",\"organisation_id\":2,\"marketing_status\":\"Millionaire Team 7,5K\",\"marketing_level_id\":\"10\",\"level_name\":\"Millionaire Team 7,5K\",\"level_id\":\"10\",\"preferred_newsletter_language\":\"de\",\"avatar_150\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-150.jpg\",\"avatar_300\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-300.jpg\",\"avatar_600\":\"https://live-support-center.nbg1.your-objectstorage.com/3366/conversions/f8318153-02bf-4ac2-8ebc-d377fe27c3f2-cropped-600.jpg\",\"image\":\"161953387560882033a2e1f.jpeg\",\"instagram\":\"markus24fit\",\"facebook\":\"markus.oberhofer.9\",\"organisation_name\":\"Activecenter\",\"address\":{"
+  },
+  {
+    "path": "/api/lead/init",
+    "status": 200,
+    "request": "{\"client_seed\":\"6feaebfc-5c61-49c2-80cd-f0b16eb8f4a9\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"ref_type\":\"member\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"lang\":\"de\",\"country\":\"DE\",\"utm_source\":\"\",\"utm_medium\":\"\",\"utm_campaign\":\"\",\"utm_content\":\"\",\"utm_campaign_id\":\"\",\"utm_adset_id\":\"\",\"utm_ad_id\":\"\",\"utm_term\":\"\",\"fbclid\":\"\",\"fbc\":\"\",\"fbp\":\"fb.0.1787592500343.815273524773541822\",\"event_source_url\":\"http://localhost:57787/markus?test=1\"}",
+    "response": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"adopted\":true,\"flags\":{\"new_lead_writer_enabled\":true,\"new_lead_writer_percent\":100,\"legacy_writer_enabled\":false,\"outbox_worker_enabled\":true}}"
+  },
+  {
+    "path": "/api/lead-track",
+    "injected": "http500"
+  },
+  {
+    "path": "/api/lead-track",
+    "injected": "http500"
+  },
+  {
+    "path": "/api/lead-track",
+    "status": 200,
+    "request": "{\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"event_name\":\"page_view\",\"payload\":{\"visited_at\":\"2026-08-24T17:28:40.341Z\",\"country\":\"DE\",\"device_type\":\"desktop\",\"lang\":\"de\",\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\",\"client_seed\":\"6feaebfc-5c61-49c2-80cd-f0b16eb8f4a9\",\"visitor_id\":\"av_bb85ae379daf41048c78c8c06431f924\",\"member_id\":\"25851739\",\"ref_id\":\"25851739\",\"berater_slug\":\"markus\",\"source_app\":\"business_leads_quiz\",\"funnel_key\":\"business\",\"event_at\":\"2026-08-24T17:28:40.341Z\",\"is_internal_traffic\":true,\"is_resume\":false,\"event_uid\":\"evtq_ca58a54d08c64c75bd1e3c6c63787229\",\"queued_at\":\"2026-08-24T17:28:40.341Z\",\"queue_attempts\":2}}",
+    "response": "{\"success\":true,\"enabled\":true,\"lead_hash\":\"qz_a399b5add97842fcb6dcd08b5660375a\"}"
+  }
+]

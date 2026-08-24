@@ -80,3 +80,11 @@ jobs:
 
       - name: Queue failure suite
         run: pnpm run e2e:queue
+
+      - name: Upload debug artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-debug
+          path: e2e-artifacts/
+          retention-days: 7

@@ -12,6 +12,7 @@
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
+const { Buffer } = require('buffer');
 
 const projectRoot = path.resolve(__dirname, '../..');
 const DIST = path.join(projectRoot, 'dist');
