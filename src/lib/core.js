@@ -1,4 +1,5 @@
 import { recordAttributionShadow } from './attribution-shadow.js';
+import { createLeadEventQueue } from './lead-event-queue.js';
 
 const TRACKING_SESSION_KEY = 'acQuizTrackingSession_v1';
 const TRACKING_COOKIE = 'acTrackingHash';
@@ -657,6 +658,35 @@ async function initializeLeadSystemV2(coach, slug) {
   return { enabled, leadRun: updatedRun, flags: data.flags || null };
 }
 
+const LEAD_TRACK_ENDPOINT = '/api/lead-track';
+let leadEventQueue = null;
+
+function getLeadEventQueue() {
+  if (leadEventQueue) return leadEventQueue;
+
+  const queue = createLeadEventQueue({
+    storage,
+    // Thunk statt window.fetch: eine losgeloeste fetch-Referenz wirft im Browser "Illegal invocation".
+    fetchFn: (url, options) => fetch(url, options),
+    endpoint: LEAD_TRACK_ENDPOINT,
+  });
+  leadEventQueue = queue;
+
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    // Einmalige Registrierung beim ersten Queue-Zugriff: der Start selbst liefert nach einem
+    // Reload nach, danach uebernehmen Online- und Sichtbarkeitswechsel.
+    window.addEventListener('online', () => queue.drain());
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') queue.drain();
+      });
+    }
+    queue.drain();
+  }
+
+  return leadEventQueue;
+}
+
 function sendLeadTrackEvent(eventName, payload = {}) {
   const slug = String(
     storage.getItem('acBeraterSlug') || (getCoachFromStorage() || {}).slug || getCurrentSlug() || 'default'
@@ -680,16 +710,12 @@ function sendLeadTrackEvent(eventName, payload = {}) {
     is_resume: storage.getItem('acSessionIsResume') === 'true',
   };
 
-  fetch('/api/lead-track', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    keepalive: true,
-    body: JSON.stringify({
-      lead_hash: leadRun.lead_hash,
-      event_name: normalizedName,
-      payload: eventPayload,
-    }),
-  }).catch(() => undefined);
+  getLeadEventQueue().enqueue({
+    uid: generateId('evtq', 24),
+    leadHash: leadRun.lead_hash,
+    eventName: normalizedName,
+    payload: eventPayload,
+  });
 }
 
 function metaQualityFromTrackEvent(eventName, payload = {}) {
@@ -849,6 +875,11 @@ function normalizeCoach(rawCoach, slug) {
 
 export async function initializeQuizEnvironment(options = {}) {
   const { deferLeadSystem = false } = options || {};
+  // Queue immer beim App-Start initialisieren (Nachlieferung + online-Listener), auch wenn
+  // /api/lead/init danach scheitert oder kein Coach-Slug vorliegt: ein Offline-Reload setzt
+  // den v2-State lokal auf enabled:false, und ohne diesen Aufruf wuerde ein wartender
+  // Backlog erst beim naechsten erfolgreichen Besuch wieder angefasst.
+  getLeadEventQueue();
   const slug = getCurrentSlug();
   storage.removeItem(LEGACY_QUIZ_HASH_KEY);
   storage.removeItem(`${LEGACY_QUIZ_HASH_PREFIX}${slug}`);

@@ -2,6 +2,10 @@
   "name": "business-leads-quiz",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
+  "packageManager": "pnpm@10.32.1",
   "scripts": {
     "build": "node build.js",
     "test": "node --test scripts/tests/*.test.js",

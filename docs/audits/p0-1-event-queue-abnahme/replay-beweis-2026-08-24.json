@@ -1,0 +1,76 @@
+{
+  "phaseA": {
+    "queueSize": 7,
+    "uids": [
+      "evtq_78159ef870ad4a528b3fef9318779e85",
+      "evtq_c60f4746051749f19974013cee9b8551",
+      "evtq_59b2a8cf3b434a05bca2d56dd56c037b",
+      "evtq_d1b6a86f26d14a2baaa2544a1a95e848",
+      "evtq_03d09526f5434c498e805cdf580c8e3b",
+      "evtq_49f4fd0063764fa19185258264208453",
+      "evtq_02b668565c994e5fb5632085ac68426d"
+    ],
+    "events": [
+      "page_view",
+      "quiz_started",
+      "question_viewed",
+      "quiz_answer",
+      "question_viewed",
+      "quiz_answer",
+      "question_viewed"
+    ],
+    "attemptsMax": 2
+  },
+  "phaseB": {
+    "queueRemaining": 0,
+    "replayedCount": 7,
+    "replayed": [
+      {
+        "uid": "evtq_78159ef870ad4a528b3fef9318779e85",
+        "event": "page_view",
+        "status": 200,
+        "success": true
+      },
+      {
+        "uid": "evtq_c60f4746051749f19974013cee9b8551",
+        "event": "quiz_started",
+        "status": 200,
+        "success": true
+      },
+      {
+        "uid": "evtq_59b2a8cf3b434a05bca2d56dd56c037b",
+        "event": "question_viewed",
+        "status": 200,
+        "success": true
+      },
+      {
+        "uid": "evtq_d1b6a86f26d14a2baaa2544a1a95e848",
+        "event": "quiz_answer",
+        "status": 200,
+        "success": true
+      },
+      {
+        "uid": "evtq_03d09526f5434c498e805cdf580c8e3b",
+        "event": "question_viewed",
+        "status": 200,
+        "success": true
+      },
+      {
+        "uid": "evtq_49f4fd0063764fa19185258264208453",
+        "event": "quiz_answer",
+        "status": 200,
+        "success": true
+      },
+      {
+        "uid": "evtq_02b668565c994e5fb5632085ac68426d",
+        "event": "question_viewed",
+        "status": 200,
+        "success": true
+      }
+    ],
+    "allSameUids": true,
+    "all200Success": true,
+    "deadLetters": []
+  },
+  "verdict": "PASS"
+}
