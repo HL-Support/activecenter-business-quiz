@@ -9,6 +9,7 @@ const filesToSyntaxCheck = [
   path.join(projectRoot, 'src', 'app', 'bootstrap.js'),
   path.join(projectRoot, 'src', 'app', 'App.jsx'),
   path.join(projectRoot, 'src', 'lib', 'core.js'),
+  path.join(projectRoot, 'src', 'lib', 'lead-event-queue.js'),
   path.join(projectRoot, 'build.js'),
   path.join(projectRoot, 'api', 'bridge.js'),
   path.join(projectRoot, 'server', 'lead-system.js'),
@@ -184,6 +185,16 @@ function verifyHashFlow() {
       core.includes('/api/lead/init') &&
       core.includes('/api/lead-track'),
     'core.js must initialize and use lead system v2 endpoints'
+  );
+  assert(
+    core.includes('createLeadEventQueue') &&
+      core.includes('getLeadEventQueue().enqueue') &&
+      !core.includes("fetch('/api/lead-track'"),
+    'core.js must send lead events through the persistent queue, never fire-and-forget'
+  );
+  assert(
+    /initializeQuizEnvironment[\s\S]{0,600}getLeadEventQueue\(\);/.test(core),
+    'core.js must initialize the lead event queue at app start (offline-reload backlog drain)'
   );
   assert(
     core.includes('lead_system_v2_enabled') && app.includes('isLeadSystemV2Active'),
