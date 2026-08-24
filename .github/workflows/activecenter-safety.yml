@@ -42,11 +42,16 @@ jobs:
         run: pnpm run verify
 
       - name: Resume smoke
-        # P0-4: generate_resume_token laeuft im Auth-Beobachtungsmodus, der Smoke bleibt ohne
-        # Key gruen. Sobald BRIDGE_SERVICE_AUTH_ENFORCE=1 in Produktion gesetzt wird, muss hier
-        # env: BRIDGE_SERVICE_KEY: ${{ secrets.BRIDGE_SERVICE_KEY }} ergaenzt werden - sonst
-        # antwortet die Bridge mit 401 service_auth_required.
+        # P0-4: generate_resume_token laeuft im Auth-Beobachtungsmodus. Der Service-Key wird
+        # seit der Rotation vom 24.08.2026 bereits mitgeschickt, damit der Smoke am Tag des
+        # Enforcements (BRIDGE_SERVICE_AUTH_ENFORCE=1) nicht als Erster mit 401
+        # service_auth_required umfaellt. Solange die Produktion den rotierten Key noch nicht
+        # ausgerollt hat, meldet die Bridge lediglich auth_state 'invalid' und bleibt gruen.
+        # Fehlt das Secret (z.B. in einem Fork), geht der Header gar nicht erst mit - das ist
+        # exakt der bisherige Zustand.
         run: pnpm run smoke:resume
+        env:
+          BRIDGE_SERVICE_KEY: ${{ secrets.BRIDGE_SERVICE_KEY }}
 
       - name: Read-only production smoke
         run: pnpm run smoke:readonly
