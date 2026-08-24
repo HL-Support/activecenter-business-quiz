@@ -18,6 +18,10 @@ const ALERT_EMAIL = process.env.IDENTITY_ALERT_EMAIL || 'markus@global-sce.com';
 const HEALTH_READ_TIMEOUT_MS = 5000;
 const HEALTH_METRIC_CONCURRENCY = 3;
 const HEALTH_ALERT_REMINDER_MS = 4 * 60 * 60 * 1000;
+// Bewusst geparkte Jobs (next_attempt_at weit in der Zukunft, z. B. 2099) zaehlen
+// weiterhin in outbox_pending/deferred, werden aber als outbox_parked getrennt
+// ausgewiesen, damit das Grundrauschen echte Staus beim Ablesen nicht maskiert.
+const OUTBOX_PARKED_THRESHOLD_MS = 30 * 24 * 60 * 60 * 1000;
 const CRITICAL_AVAILABILITY_METRICS = new Set([
   'lead_state_available',
   'lead_video_progress_available',
@@ -291,6 +295,7 @@ async function collectHealth() {
   const nowIso = new Date(now).toISOString();
   const tenMinutesAgo = new Date(now - 10 * 60 * 1000).toISOString();
   const oneHourAgo = new Date(now - 60 * 60 * 1000).toISOString();
+  const parkedThreshold = new Date(now + OUTBOX_PARKED_THRESHOLD_MS).toISOString();
   let flags = null;
   const issues = [];
   const warnings = [];
@@ -320,6 +325,10 @@ async function collectHealth() {
     outbox_pending_deferred: () =>
       boundedCount(
         `lead_sync_outbox?status=eq.pending&next_attempt_at=gt.${encodeURIComponent(nowIso)}&select=id`
+      ),
+    outbox_parked: () =>
+      boundedCount(
+        `lead_sync_outbox?status=eq.pending&next_attempt_at=gt.${encodeURIComponent(parkedThreshold)}&select=id`
       ),
     outbox_failed_old: () =>
       boundedCount(

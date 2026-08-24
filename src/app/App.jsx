@@ -7,7 +7,6 @@ import {
   storage as le,
   videoProgressStore as ld,
   trackQuizAnalytics as Dt,
-  submitMauticLead as Hp,
   forwardQuizSubmission as Qp,
   getVideoConfig as Ap,
   getAspirationLabel,
@@ -451,14 +450,6 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
           form_first_name: C,
           form_email: z,
           form_submitted_at: new Date().toISOString(),
-        });
-        await Hp({
-          vorname: C,
-          email: z,
-          typ: e?.animal || '',
-          barriere: deriveQuizBarrier(t),
-          aspiration: r,
-          berater: n,
         });
         const submitResult = await Qp(C, z, t, e, r);
         if (!submitResult || submitResult.success === false || submitResult.error) {

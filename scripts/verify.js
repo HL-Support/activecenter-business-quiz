@@ -18,7 +18,6 @@ const filesToSyntaxCheck = [
   path.join(projectRoot, 'api', 'lead-outbox-worker.js'),
   path.join(projectRoot, 'api', 'lead-system-health.js'),
   path.join(projectRoot, 'api', 'validate-email.js'),
-  path.join(projectRoot, 'api', 'init-quiz-db.js'),
 ];
 
 function assert(condition, message) {
@@ -244,6 +243,10 @@ function verifyHashFlow() {
     'lead system health endpoint must use disclosed bounded counts instead of exact full-table counts'
   );
   assert(
+    leadHealth.includes('outbox_parked') && leadHealth.includes('OUTBOX_PARKED_THRESHOLD_MS'),
+    'lead system health endpoint must report deliberately parked outbox jobs separately'
+  );
+  assert(
     leadSql.includes('WITH (security_invoker = true)') &&
       leadSql.includes('max_attempts    int DEFAULT 5') &&
       leadSql.includes('FOR UPDATE SKIP LOCKED') &&
@@ -272,10 +275,21 @@ function verifyHashFlow() {
   assert(readme.includes('main_aspiration'), 'README.md must document main_aspiration');
 }
 
+function verifyRemovedRuntimeSurface() {
+  // Audit 2026-08-23, 13.2.1: Die DB-Init-Route hatte ein Default-Secret und einen
+  // Host-Header-Bypass und darf nicht wieder in die deploybare Runtime gelangen.
+  assert(
+    !fs.existsSync(path.join(projectRoot, 'api', 'init-quiz-db.js')),
+    'api/init-quiz-db.js must stay removed; run migrations via a controlled CLI/CI path'
+  );
+}
+
 function main() {
   for (const filePath of filesToSyntaxCheck) {
     runNodeCheck(filePath);
   }
+
+  verifyRemovedRuntimeSurface();
 
   verifyTranslations();
   verifyVideoConfig();

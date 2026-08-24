@@ -1,6 +1,5 @@
 import { recordAttributionShadow } from './attribution-shadow.js';
 
-const MAUTIC_BASE_URL = 'https://mautic.hl-support.biz';
 const TRACKING_SESSION_KEY = 'acQuizTrackingSession_v1';
 const TRACKING_COOKIE = 'acTrackingHash';
 const TRACKING_SESSION_TTL_MS = 60 * 60 * 1000;
@@ -1276,30 +1275,10 @@ export async function validateEmailAddress(email) {
   }
 }
 
-export async function submitMauticLead({ vorname, email, typ, barriere, berater, aspiration }) {
-  if (!MAUTIC_BASE_URL || MAUTIC_BASE_URL.includes('deinedomain.com')) {
-    return;
-  }
-
-  try {
-    await fetch(`${MAUTIC_BASE_URL}/api/contacts/new`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        firstname: vorname,
-        email,
-        custom_fields: {
-          persoenlichkeitstyp: typ,
-          quiz_barriere: barriere || '',
-          quiz_aspiration: aspiration || 'freedom',
-          berater: berater || '',
-        },
-      }),
-    });
-  } catch (error) {
-    console.warn('Failed to send analytics:', error);
-  }
-}
+// Der fruehere Browser-Direktcall an Mautic (submitMauticLead) wurde am 23.08.2026
+// entfernt: Er scheiterte in Produktion nachweislich an CORS und war damit toter
+// Code; die Mautic-Anbindung laeuft ausschliesslich serverseitig ueber den
+// Contacts-Webhook (E2E-Livedurchlauf, docs/audits/e2e-livedurchlauf-2026-08-23).
 
 function normalizeAspiration(value) {
   return ['freedom', 'impact', 'security', 'growth'].includes(value) ? value : 'freedom';

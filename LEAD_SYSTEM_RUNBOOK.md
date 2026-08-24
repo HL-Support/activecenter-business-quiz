@@ -67,6 +67,10 @@ Healthy means:
 - no pending jobs that have been due for more than 10 minutes
 - no dead, old failed, or stale processing Outbox jobs
 - deferred/quarantined pending jobs are reported separately and do not block health
+- `outbox_parked` (seit 23.08.2026) zaehlt bewusst geparkte Jobs (`next_attempt_at` mehr als
+  30 Tage in der Zukunft, z. B. Job 117 mit 2099) separat: `outbox_pending` minus
+  `outbox_parked` ist die real wartende Menge; echte Staus zeigen sich an
+  `outbox_pending_ready`/`outbox_pending_overdue`
 - unresolved migration count is exact up to the safety cap and explicitly marked as capped above it
 - configuration and metric read failures are reported as availability failures, never as fallback flag values
 - every dependency read has a bounded timeout so the endpoint responds before the 30-second n8n timeout
