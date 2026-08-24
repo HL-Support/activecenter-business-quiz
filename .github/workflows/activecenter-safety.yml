@@ -48,3 +48,7 @@ jobs:
 
       - name: Read-only production smoke
         run: pnpm run smoke:readonly
+        env:
+          # Seit 24.08.2026 (init-quiz-db-Entfernung deployt): entfernte Route
+          # muss in Produktion strikt 404 liefern (Audit-Abnahmekriterium 13.4).
+          READONLY_SMOKE_STRICT_INIT_ROUTE: '1'
