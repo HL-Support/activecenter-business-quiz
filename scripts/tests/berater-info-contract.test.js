@@ -264,11 +264,19 @@ test('die fuenf Bestandssprachen sind byte-gleich zur Quelle uebernommen', () =>
     return;
   }
 
+  // Zeilenenden werden vor dem Vergleich normalisiert: Git materialisiert die Kopien auf
+  // Windows-Checkouts mit CRLF (core.autocrlf), waehrend die Quelle LF traegt. Gemeint ist
+  // Inhaltsgleichheit - kein Zeichen Text darf abweichen, Zeilenenden sind checkout-abhaengig.
+  const normalized = (buffer) => buffer.toString('utf8').replace(/\r\n/g, '\n');
   for (const lang of ['de', 'it', 'en', 'fr', 'ru']) {
     for (const namespace of ['common', 'profiles']) {
       const source = fs.readFileSync(path.join(sourceRoot, lang, `${namespace}.json`));
       const copy = fs.readFileSync(path.join(localesDir, lang, `${namespace}.json`));
-      assert.ok(source.equals(copy), `${lang}/${namespace}.json ist nicht byte-gleich`);
+      assert.equal(
+        normalized(copy),
+        normalized(source),
+        `${lang}/${namespace}.json weicht inhaltlich von der Quelle ab`
+      );
     }
   }
 });
