@@ -1,16 +1,24 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 
 // Muss VOR dem require stehen: api/bridge.js liest die Supabase-Konfiguration beim Laden.
 // Ohne gesetzte SUPABASE_URL wuerde supabaseRequest gar nicht erst fetchen.
 process.env.SUPABASE_URL = 'https://bridge-hardening-test.supabase.co';
 process.env.SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'bridge-hardening-test-service-key';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'bridge-hardening-test-secret-bridge-test';
+process.env.BRIDGE_SERVICE_KEY = process.env.BRIDGE_SERVICE_KEY || 'p0-4-observe-test';
+// Der Beobachtungsmodus ist der Default; das Enforcement setzt jeder Test selbst und nimmt
+// es im finally wieder zurueck.
+delete process.env.BRIDGE_SERVICE_AUTH_ENFORCE;
 
 const handler = require('../../api/bridge.js');
 
 const KNOWN_LEAD_HASH = 'qz_bridgehardeningknown001';
 const UNKNOWN_LEAD_HASH = 'qz_bridgehardeningfake0001';
+const RESUME_LEAD_HASH = 'qz_bridgehardeningresume01';
+const RESUME_SESSION_HASH = 'ac_bridgehardeningresume01';
+const SERVICE_KEY_HEADER = { 'x-bridge-service-key': process.env.BRIDGE_SERVICE_KEY };
 
 function invoke(body = {}, { method = 'POST', headers = {} } = {}) {
   const result = { statusCode: 200, body: null, headers: {}, ended: false };
@@ -63,6 +71,86 @@ async function withLeadStateMock(rows, run) {
   } finally {
     globalThis.fetch = originalFetch;
   }
+}
+
+// Resume- und Metrik-Pfade brauchen einen bekannten Lead bzw. einen aufloesbaren
+// Resume-Datensatz; alles andere antwortet leer. So laufen die Actions echt durch und der
+// Test misst wirklich das Verhalten, nicht nur einen Fruehausstieg.
+const RESUME_LEAD_ROW = {
+  lead_hash: RESUME_LEAD_HASH,
+  email: 'resume@example.com',
+  email_normalized: 'resume@example.com',
+  first_name: 'Smoke',
+  lang: 'de',
+  berater_slug: 'markus',
+};
+const RESUME_TRACKING_ROW = {
+  id: 42,
+  session_hash: RESUME_SESSION_HASH,
+  lead_hash: RESUME_LEAD_HASH,
+  form_email: 'resume@example.com',
+  funnel: 'quiz',
+};
+
+async function withResumeMock(run) {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, options = {}) => {
+    const path = String(url);
+    calls.push({ path, method: options.method || 'GET' });
+    const rows = path.includes('lead_state?lead_hash=eq.')
+      ? [RESUME_LEAD_ROW]
+      : path.includes('tracking_sessions?id=eq.')
+        ? [RESUME_TRACKING_ROW]
+        : [];
+    return new globalThis.Response(JSON.stringify(rows), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  };
+  try {
+    return await run(calls);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+function generateResumeTokenBody() {
+  return {
+    action: 'generate_resume_token',
+    payload: {
+      sessionHash: RESUME_SESSION_HASH,
+      leadHash: RESUME_LEAD_HASH,
+      email: 'resume@example.com',
+      slug: 'markus',
+      context: 'quiz',
+      resumeTarget: 'videos',
+    },
+  };
+}
+
+// Spiegelt createResumeKey aus api/bridge.js (base62-Id + 6 Zeichen HMAC): nur mit einem
+// echten Schluessel beweist der Regressionstest, dass resolve_resume_key OHNE Header voll
+// funktionsfaehig bleibt.
+function resumeKeyFor(recordId, secret = process.env.JWT_SECRET) {
+  const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let number = BigInt(recordId);
+  let encodedId = '';
+  if (number === 0n) {
+    encodedId = '0';
+  } else {
+    while (number > 0n) {
+      encodedId = alphabet[Number(number % 62n)] + encodedId;
+      number /= 62n;
+    }
+  }
+  const signature = crypto
+    .createHmac('sha256', secret)
+    .update(`resume:${encodedId}`)
+    .digest('base64url')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 6);
+  return `${encodedId}${signature}`;
 }
 
 test('notify_all_videos_completed materialisiert keinen unbekannten Lead mehr', async () => {
@@ -172,4 +260,145 @@ test('Aufrufe ohne Origin bleiben unberuehrt (same-origin, Server-zu-Server)', a
   const response = await invoke({});
   assert.equal(response.headers['Access-Control-Allow-Origin'], undefined);
   assert.equal(response.headers.Vary, 'Origin');
+});
+
+test('generate_resume_token ohne Service-Key wird verarbeitet und als missing beobachtet', async () => {
+  await withResumeMock(async (calls) => {
+    const response = await invoke(generateResumeTokenBody());
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.success, true);
+    assert.equal(response.body.auth_state, 'missing');
+    assert.ok(response.body.token, 'das Resume-JWT muss weiterhin entstehen');
+    assert.equal(response.body.leadHash, RESUME_LEAD_HASH);
+    assert.ok(calls.length > 0, 'der Beobachtungsmodus darf nichts abschneiden');
+  });
+});
+
+test('generate_resume_token mit korrektem Service-Key meldet auth_state ok', async () => {
+  await withResumeMock(async () => {
+    const primary = await invoke(generateResumeTokenBody(), { headers: SERVICE_KEY_HEADER });
+    assert.equal(primary.statusCode, 200);
+    assert.equal(primary.body.auth_state, 'ok');
+    assert.ok(primary.body.token);
+
+    // Kompatibilitaetsname: bestehende Server-zu-Server-Aufrufer kennen x-bridge-key.
+    const compatibility = await invoke(generateResumeTokenBody(), {
+      headers: { 'x-bridge-key': process.env.BRIDGE_SERVICE_KEY },
+    });
+    assert.equal(compatibility.body.auth_state, 'ok');
+  });
+});
+
+test('generate_resume_token mit falschem Service-Key ist invalid, laeuft aber weiter', async () => {
+  await withResumeMock(async () => {
+    const response = await invoke(generateResumeTokenBody(), {
+      headers: { 'x-bridge-service-key': 'falscher-key' },
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.success, true);
+    assert.equal(response.body.auth_state, 'invalid');
+    assert.ok(response.body.token, 'Beobachtung heisst: nichts wird abgewiesen');
+  });
+});
+
+test('BRIDGE_SERVICE_AUTH_ENFORCE=1 weist generate_resume_token ohne Key mit 401 ab', async () => {
+  process.env.BRIDGE_SERVICE_AUTH_ENFORCE = '1';
+  try {
+    await withResumeMock(async (calls) => {
+      const blocked = await invoke(generateResumeTokenBody());
+      assert.equal(blocked.statusCode, 401);
+      assert.deepEqual(blocked.body, {
+        success: false,
+        error: 'service_auth_required',
+        auth_state: 'missing',
+      });
+      assert.equal(calls.length, 0, 'abgewiesene Aufrufe duerfen Supabase nicht beruehren');
+
+      const allowed = await invoke(generateResumeTokenBody(), { headers: SERVICE_KEY_HEADER });
+      assert.equal(allowed.statusCode, 200);
+      assert.equal(allowed.body.auth_state, 'ok');
+      assert.ok(allowed.body.token);
+    });
+  } finally {
+    delete process.env.BRIDGE_SERVICE_AUTH_ENFORCE;
+  }
+});
+
+test('get_funnel_metrics wird beobachtet und erst mit Enforcement abgewiesen', async () => {
+  await withResumeMock(async (calls) => {
+    const observed = await invoke({
+      action: 'get_funnel_metrics',
+      payload: { berater_slug: 'markus' },
+    });
+    assert.equal(observed.statusCode, 200);
+    assert.equal(observed.body.success, true);
+    assert.equal(observed.body.auth_state, 'missing');
+    assert.equal(observed.body.data.berater_slug, 'markus');
+    assert.ok(
+      calls.some((call) => call.path.includes('v_funnel_analysis')),
+      'die Metrikabfrage muss im Beobachtungsmodus stattfinden'
+    );
+  });
+
+  process.env.BRIDGE_SERVICE_AUTH_ENFORCE = '1';
+  try {
+    await withResumeMock(async (calls) => {
+      const blocked = await invoke({
+        action: 'get_funnel_metrics',
+        payload: { berater_slug: 'markus' },
+      });
+      assert.equal(blocked.statusCode, 401);
+      assert.equal(blocked.body.error, 'service_auth_required');
+      assert.equal(calls.length, 0);
+
+      const allowed = await invoke(
+        { action: 'get_resume_metrics', payload: { berater_slug: 'markus' } },
+        { headers: SERVICE_KEY_HEADER }
+      );
+      assert.equal(allowed.statusCode, 200);
+      assert.equal(allowed.body.auth_state, 'ok');
+    });
+  } finally {
+    delete process.env.BRIDGE_SERVICE_AUTH_ENFORCE;
+  }
+});
+
+test('resolve_resume_key bleibt ohne Header voll funktional - auch mit Enforcement', async () => {
+  const key = resumeKeyFor(RESUME_TRACKING_ROW.id);
+
+  await withResumeMock(async () => {
+    const response = await invoke({
+      action: 'resolve_resume_key',
+      payload: { key, resumeTarget: 'videos' },
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.success, true);
+    assert.equal(response.body.leadHash, RESUME_LEAD_HASH);
+    assert.equal(response.body.resumeTarget, 'videos');
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(response.body, 'auth_state'),
+      false,
+      'oeffentliche Resume-Aufloesung darf kein auth_state-Feld bekommen'
+    );
+  });
+
+  process.env.BRIDGE_SERVICE_AUTH_ENFORCE = '1';
+  try {
+    await withResumeMock(async () => {
+      const response = await invoke({
+        action: 'resolve_resume_key',
+        payload: { key, resumeTarget: 'videos' },
+      });
+      assert.equal(response.statusCode, 200, 'der Einstieg aus der Nurture-Mail darf nie 401 sein');
+      assert.equal(response.body.success, true);
+
+      const token = await invoke({ action: 'resolve_resume_token', payload: {} });
+      assert.equal(token.statusCode, 400, 'resolve_resume_token bleibt unveraendert oeffentlich');
+    });
+  } finally {
+    delete process.env.BRIDGE_SERVICE_AUTH_ENFORCE;
+  }
 });

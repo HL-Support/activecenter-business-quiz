@@ -325,8 +325,42 @@ function sendJson(res, status, data) {
   res.status(status).json(data);
 }
 
+// P0-4: Kanonische CORS-Allowlist fuer ALLE Routen dieses Projekts. Sie stand seit P0-3 nur
+// in api/bridge.js; jede zweite Kopie wuerde frueher oder spaeter auseinanderlaufen. bridge.js
+// importiert diese Funktion von hier (der Import bestand fuer sendMetaCAPIEvent bereits,
+// server/lead-system.js selbst requiret nur 'crypto' - es gibt keinen Zyklus).
+const CORS_ALLOWED_ORIGINS = new Set([
+  'https://business.activecenter.info',
+  'https://quiz.activecenter.info',
+  'https://business.eaglesfit.ch',
+  'https://businessleadsquiz.vercel.app',
+]);
+// Eine reine Suffixpruefung auf '.vercel.app' wuerde JEDE fremde Vercel-App zulassen; erlaubt
+// ist deshalb nur das projekteigene Team-Suffix der Preview-Deployments.
+const PREVIEW_ORIGIN_SUFFIX = '-markus-oberhofers-projects.vercel.app';
+
+function allowedCorsOrigin(origin) {
+  const value = String(origin || '').trim();
+  if (!value) return '';
+  if (CORS_ALLOWED_ORIGINS.has(value)) return value;
+  // Nur https-Origins ohne Port, Pfad oder Userinfo - sonst genuegte
+  // 'https://evil.example/-markus-oberhofers-projects.vercel.app' fuer die Suffixpruefung.
+  if (!/^https:\/\/[a-z0-9.-]+$/i.test(value)) return '';
+  return value.endsWith(PREVIEW_ORIGIN_SUFFIX) ? value : '';
+}
+
 function handleOptions(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // Identisch zu api/bridge.js: Kein Wildcard mehr. Ist der Origin nicht erlaubt, wird der
+  // ACAO-Header GAR NICHT gesetzt - der Browser blockt dann selbst. Der Funnel selbst ruft
+  // ausschliesslich relativ (same-origin) auf und braucht den Header nie; Server-zu-Server
+  // (n8n, Worker-Selbstaufrufe, curl) sendet keinen Origin und bleibt unberuehrt.
+  // 'Vary: Origin' muss immer mitgehen, sonst liefert ein Cache die Antwort eines Origins
+  // an einen anderen aus.
+  const allowedOrigin = allowedCorsOrigin(req?.headers?.origin);
+  res.setHeader('Vary', 'Origin');
+  if (allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -345,6 +379,7 @@ function eventUid(event) {
 }
 
 module.exports = {
+  allowedCorsOrigin,
   deterministicBucket,
   eventUid,
   generateLeadHash,
