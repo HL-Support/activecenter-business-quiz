@@ -1,0 +1,249 @@
+{
+  "feuer": {
+    "name": "The doer",
+    "tagline": "Determined. Direct. Result-oriented.",
+    "psychologie": "The doer thinks in results, not processes. They want to know WHAT the outcome is and HOW FAST. Small talk is a waste of time for them. If they feel someone is beating around the bush, they are mentally already gone.",
+    "stärken": ["Fast, clear decision-making", "Consistent transition from plan to execution", "Natural leadership personality", "Self-driven and independent"],
+    "fleck": "Can appear impatient, sometimes listens too little, risk of overestimation.",
+    "niemals": "Long-winded explanations, sugar-coated language, too much empathy-theater.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Freedom",
+        "antrieb": "They want to be the captain – no permission needed, no ceiling above them. Freedom means maximum power to act.",
+        "nein": "Hierarchies that slow them down. Systems that scale too slowly.",
+        "opener": "I'll briefly show you how the model works. No fluff – just numbers and structure. Then you decide for yourself.",
+        "gespräch": "Talk about scaling, speed, and control. Show them they are the boss of their own area. Concrete numbers from other Drivers – no averages.",
+        "überzeugt": "Real numbers from real people. They want to see: What did someone achieve with their commitment in 6 months?",
+        "einwände": [
+          { "q": "I don't have time for that.", "a": "Exactly why. Anyone who permanently has no time has the wrong system. How many hours would you be willing to invest?" }
+        ],
+        "redflag": "If they constantly ask when they'll see money without wanting to take responsibility themselves."
+      },
+      "wirkung": {
+        "label": "Impact",
+        "antrieb": "They want to leave a mark. Pull others along, build something bigger than themselves. Impact is for them the proof of true leadership quality.",
+        "nein": "A business that only revolves around them. Isolation. A model that keeps them small.",
+        "opener": "You are someone who doesn't just think for themselves – that's noticeable. I'll show you how to translate that into a system that truly scales.",
+        "gespräch": "Show them the leverage: not what THEY do, but what is created through them. How many people can they influence through their team?",
+        "überzeugt": "Stories of Drivers who built teams. Numbers about team sizes, not just individual income.",
+        "einwände": [
+          { "q": "I don't want to have to recruit others.", "a": "You won't recruit anyone. You will invite people who want to change something themselves. The difference is crucial." },
+          { "q": "I'm not a salesperson.", "a": "Drivers who truly lead don't need to sell. They inspire. That's exactly what you're already doing." }
+        ],
+        "redflag": "If they seek impact only as ego-confirmation, not as true service to others."
+      },
+      "sicherheit": {
+        "label": "Security",
+        "antrieb": "Behind the Driver appearance lies deep responsibility for family and future. They want to think big – but on a foundation that doesn't shake.",
+        "nein": "Castles in the air. Promises without substance. Risks they cannot calculate.",
+        "opener": "You want to move forward – but on a ground that holds. I'll show you how this is structured here and why the risk is manageable.",
+        "gespräch": "Numbers, timeline, realistic scenarios. What is the conservative path? What is the worst case?",
+        "überzeugt": "Transparency. They want to understand the model before saying yes. Give them time and facts.",
+        "einwände": [
+          { "q": "What happens if I don't build a team?", "a": "Then you have the product business. That runs independently. Team building is an option, not a duty." },
+          { "q": "I don't want to be dependent on others.", "a": "I understand. What secure income sources do you have today – then we'll see if this is a sensible addition." }
+        ],
+        "redflag": "If they produce new objections after every answer without truly listening."
+      },
+      "wachstum": {
+        "label": "Growth",
+        "antrieb": "They want to become the best. Not just in business – they want to surpass themselves. Growth is a sport for the Driver.",
+        "nein": "Stagnation. An environment that doesn't challenge them. Coaches who can do less than they can.",
+        "opener": "I work with people who never stop growing. This is exactly the environment that moves you forward – not just the system, but the people in it.",
+        "gespräch": "Talk about development: skills, leadership, entrepreneurship. Who are the top performers in the team?",
+        "überzeugt": "Proof that there are people in the team who challenge them. They want to be in the best room, not the biggest.",
+        "einwände": [
+          { "q": "I prefer to learn alone.", "a": "I believe you. But the best Drivers I know learn from other Drivers – not from books." },
+          { "q": "What can I learn here that I don't already know?", "a": "I don't know. Tell me where you stand – then I'll honestly tell you if this is new ground." }
+        ],
+        "redflag": "If they use growth as an excuse to never take action."
+      }
+    }
+  },
+  "wind": {
+    "name": "The connector",
+    "tagline": "Inspiring. Human. Energetic.",
+    "psychologie": "The connector lives for people, connections, and moods. They buy emotions, not facts. They have to like you before they listen to you. If the energy is right, they are in immediately.",
+    "stärken": ["Infectious enthusiasm", "Trust built in no time", "Connecting glue in every team", "Irresistible positive charisma"],
+    "fleck": "Jumps from idea to idea, sometimes follows enthusiasm instead of reason.",
+    "niemals": "Dry numbers without context, cold presentation, no smile. They must feel that you like them.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Freedom",
+        "antrieb": "Freedom means for them: waking up every day and freely deciding who they spend time with. Spontaneous travel. Enjoying life while working.",
+        "nein": "Rigid structures, monotonous routine, people who drag their energy down.",
+        "opener": "Imagine waking up tomorrow and deciding for yourself who is on your agenda. I'll show you what that looks like.",
+        "gespräch": "Paint the picture. Not numbers – images. What does their everyday life look like? When and where do they work? With whom?",
+        "überzeugt": "Stories of people in the team who live this life. Real moments. They buy the lifestyle image.",
+        "einwände": [
+          { "q": "I'm too social, I don't want to sit at home.", "a": "You work exactly where the people are – at events, on the phone, in cafes. That is your office." },
+          { "q": "It probably takes a lot of time at the beginning.", "a": "At the beginning, yes. But how much time do you invest today for a life that isn't yours?" }
+        ],
+        "redflag": "If they are enthusiastic but never become committed. Always new appointments, always almost there."
+      },
+      "wirkung": {
+        "label": "Impact",
+        "antrieb": "They want to see how their energy helps others. The reaction when someone says: You changed my life. They love being needed.",
+        "nein": "Feeling useless. Getting no feedback. Working without connection.",
+        "opener": "You have a gift that most never develop: you move people. I'll show you how you can translate that into something big.",
+        "gespräch": "Focus on impact: how many people have they unconsciously influenced so far? What if they could do that systematically?",
+        "überzeugt": "Testimonials, success stories, emotional moments. They must feel that real people are truly being helped here.",
+        "einwände": [
+          { "q": "I don't want to push products.", "a": "You're not pushing products. You're sharing what helped you. The difference lies in authenticity – and you have that." },
+          { "q": "What if the products don't work?", "a": "Use them yourself. Then you can speak from real experience – that's the only thing that counts." }
+        ],
+        "redflag": "If they want impact but don't want to have their own experience."
+      },
+      "sicherheit": {
+        "label": "Security",
+        "antrieb": "Behind their lightheartedness lies deep concern for their environment – family, friends. Security is emotional reliability for them.",
+        "nein": "The feeling of letting someone down. Financial insecurity pressing on relationships.",
+        "opener": "I know you want to be there for others – I'll show you how you can also secure that financially without giving up your way of living.",
+        "gespräch": "Connect income directly to what is important to them: more time for family, less stress.",
+        "überzeugt": "Realistic income examples from normal people with their profile. They must be able to believe it for themselves.",
+        "einwände": [
+          { "q": "I don't want to take risks.", "a": "What would be the worst-case scenario? Let's think through that together. I don't sugarcoat." },
+          { "q": "What if my friends look at me strangely?", "a": "That is a real fear and I respect it. Let me show you how others have handled that." }
+        ],
+        "redflag": "If others' opinions are so strong that they cannot make their own decision."
+      },
+      "wachstum": {
+        "label": "Growth",
+        "antrieb": "They want to develop, discover new sides, become better at dealing with people. Stagnation is their greatest enemy.",
+        "nein": "Isolation, routine, people who don't inspire them.",
+        "opener": "You know you have more in you. I'll show you an environment that truly brings out that 'more'.",
+        "gespräch": "Focus on community, events, mutual growth. They must FEEL the energy before they decide.",
+        "überzeugt": "Invitation to an event or team call. No document convinces them like a real room full of energy.",
+        "einwände": [
+          { "q": "I'm already in many projects.", "a": "What of those has truly changed your life – and what has only occupied it?" },
+          { "q": "I need more info first.", "a": "The best way to get real info is a real person from the team. May I connect you?" }
+        ],
+        "redflag": "If they move from enthusiasm to enthusiasm without ever arriving."
+      }
+    }
+  },
+  "wasser": {
+    "name": "The anchor",
+    "tagline": "Loyal. Reliable. Deep.",
+    "psychologie": "The anchor decides slowly but then holds on permanently. They need security, trust, and time – no pressure. If they feel pressure, they withdraw. They are gold once they are in: loyal, persevering, the glue in the team.",
+    "stärken": ["Absolutely reliable and true to their word", "Deep, permanent foundation of trust", "Calm pole in every crisis situation", "Balanced and conflict-free"],
+    "fleck": "Decides very slowly, needs a lot of confirmation, can be overlooked without saying it.",
+    "niemals": "Pressure, artificial deadlines, persuasion. They notice every manipulation and never forget it.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Freedom",
+        "antrieb": "Freedom means for the Supporter: peace without existential fear. Not 'having to have to'. They don't want wild adventures – they want to be free from compulsion.",
+        "nein": "Chaos, unpredictability, the feeling of losing control.",
+        "opener": "What if you continue to live your everyday life – but build an income on the side that gives you options at some point?",
+        "gespräch": "No pressure, no speed. Show the gentle entry. What is the smallest first step? What does it really cost?",
+        "überzeugt": "Examples of people who built this model alongside their lives without turning everything upside down.",
+        "einwände": [
+          { "q": "I'm not the type for it.", "a": "What do you mean by that – what do you imagine you would have to do?" },
+          { "q": "I need time to think about it.", "a": "Of course. What specifically do you need to be able to make a decision?" }
+        ],
+        "redflag": "If they think forever without ever asking a concrete question."
+      },
+      "wirkung": {
+        "label": "Impact",
+        "antrieb": "They prefer to help in secret. They want to know that their actions move something – without being in the spotlight. Impact for them is quiet and deep.",
+        "nein": "Publicity they don't want. Expectations that go beyond their comfort level.",
+        "opener": "Imagine you help people – entirely at your own pace, in your own way. No show, no stage. Just real.",
+        "gespräch": "Show how they can achieve great things in the background. Real customer stories, the quiet consistency their team needs.",
+        "überzeugt": "Real, quiet stories from people like them. No stage moments.",
+        "einwände": [
+          { "q": "I'm too introverted for that.", "a": "The strongest people in the team are often exactly those who appear the quietest. May I show you why?" },
+          { "q": "I don't want to burden my network.", "a": "You don't have to burden anyone. You offer – and whoever doesn't want it, says no." }
+        ],
+        "redflag": "If every step feels like a threat – create a real product experience first."
+      },
+      "sicherheit": {
+        "label": "Security",
+        "antrieb": "Security IS their primary goal. They think of partners, children, parents. They carry responsibility quietly and seriously.",
+        "nein": "Every risk they don't understand. Promises that are not kept.",
+        "opener": "I'm not showing you fast money – I'm showing you how others in your situation have built a quiet, stable side income.",
+        "gespräch": "Very slow, very honest. Also say what doesn't work – that builds more trust than gloss.",
+        "überzeugt": "Time and evidence. Multiple conversations are normal. Anyone who pushes them loses them. Anyone who gives them space wins a partner for years.",
+        "einwände": [
+          { "q": "What if this doesn't work?", "a": "Let's go through the worst case – then you can judge for yourself if the risk is bearable." },
+          { "q": "I have to discuss this with my partner.", "a": "Absolutely right. Should I give you both a short overview? Then you'll be on the same page." }
+        ],
+        "redflag": "If they haven't asked a single concrete question after 3-4 conversations."
+      },
+      "wachstum": {
+        "label": "Growth",
+        "antrieb": "They want to become deeper, not broader. Not 10 new skills – one really well. They grow through reliability and consistency, not through hype.",
+        "nein": "Shallowness, constant changes, a system that reinvents itself every week.",
+        "opener": "Growth for you is not a crash course – it's the quiet consistency that others don't have. Exactly that is being built here.",
+        "gespräch": "Show the depth of the system. Who coaches them along the way? What training is there?",
+        "überzeugt": "A mentor from the team who is similarly structured – quiet, persevering, deep. A conversation with this person is worth more than any presentation.",
+        "einwände": [
+          { "q": "It takes a long time until I'm ready.", "a": "That's not a weakness. The best people in the team are exactly like that. When would you be ready for a first conversation?" },
+          { "q": "Is there a lot of pressure and fast results?", "a": "No. Your pace is your pace. What counts is direction, not speed." }
+        ],
+        "redflag": "If they use growth as a reason to never start – always one more book, one more course."
+      }
+    }
+  },
+  "fels": {
+    "name": "The architect",
+    "tagline": "Analytical. Precise. Systemic.",
+    "psychologie": "The architect buys with the head, not with the stomach. They analyze before they act. If you overwhelm them with pressure, you lose them. If you give them facts and space, you win a long-term partner.",
+    "stärken": ["Thought-out, well-founded decision quality", "Systemic thinker with foresight", "Consistent optimizer with precision", "Intrinsically motivated and independent"],
+    "fleck": "Can get stuck in analysis loops, decides slowly.",
+    "niemals": "Hype, exaggerated promises, emotional manipulation. They see through that immediately.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Freedom",
+        "antrieb": "Freedom means for them: owning a system that runs without their constant presence. They want control AND independence.",
+        "nein": "Dependency on an employer, on a client, on others' whims.",
+        "opener": "I'll show you the mechanics behind it – how the system is built and why it runs even when you're not active.",
+        "gespräch": "Explain the structure: income sources, leverage, scalability. They want to understand everything before they evaluate a detail.",
+        "überzeugt": "Written documents, clear records, real numbers. They will read everything thoroughly. Call back in 3 days.",
+        "einwände": [
+          { "q": "I have to analyze this thoroughly.", "a": "Exactly what I expect from you. Here is everything you need – what else are you missing?" },
+          { "q": "What are the hidden costs?", "a": "Let me break that down completely transparently – no surprises." }
+        ],
+        "redflag": "If they still produce new questions after complete information without ever answering one."
+      },
+      "wirkung": {
+        "label": "Impact",
+        "antrieb": "They don't just want to build a system – they want it to truly change something. Impact without substance doesn't interest them.",
+        "nein": "Shallowness. Greenwashing. Promises that are not measurable.",
+        "opener": "I'll show you how the model creates real, measurable impact – with numbers and feedback from real people.",
+        "gespräch": "Show the chain of impact: product to person to change. They want to understand the causality.",
+        "überzeugt": "Studies, product data, written verifiable evidence. No testimonial videos.",
+        "einwände": [
+          { "q": "How do I know that the products really work?", "a": "Here are the available studies and clinical data. Which of those is most relevant to you?" },
+          { "q": "I have concerns about the industry.", "a": "The concerns are justified. Let me show you where the difference lies – professionally, structurally, legally." }
+        ],
+        "redflag": "If they consider impact as an intellectual exercise but never try anything themselves."
+      },
+      "sicherheit": {
+        "label": "Security",
+        "antrieb": "They want to fully understand and control risks. Security means: no unknown variables, no surprises.",
+        "nein": "Intransparency, unclear contract structures, dependency on uncontrollable factors.",
+        "opener": "Before you decide, I'll show you the entire structure – all costs, all risks, all options. Real basis, real decision.",
+        "gespräch": "Extremely transparent. Also show the disadvantages. What can go wrong? When they realize you are honest, they open up.",
+        "überzeugt": "A conversation with someone who is already in – realistic, critical, honest.",
+        "einwände": [
+          { "q": "What if I want to get out?", "a": "You can stop at any time. No minimum term, no notice periods. Here is the exact process." },
+          { "q": "How reliable is the income really?", "a": "I'm not going to sugarcoat it. Here are real income ranges after 3, 6, and 12 months." }
+        ],
+        "redflag": "If they are still suspicious after complete transparent information – that takes time, not more facts."
+      },
+      "wachstum": {
+        "label": "Growth",
+        "antrieb": "They want mastery. Not broad knowledge – deep understanding. They want to know the system so well that they can optimize it.",
+        "nein": "Shallow training. Coaches who understand less than they do. Systems they are not allowed to improve.",
+        "opener": "You are the type of person who doesn't just use a system, but makes it better. Those are exactly the people we are looking for for the next level.",
+        "gespräch": "Show the depth: product knowledge, business strategy, system setup. Where can they truly dive deep?",
+        "überzeugt": "Access to real experts in the team. No motivational speaker – a specialist who has optimized at a high level.",
+        "einwände": [
+          { "q": "I already have a lot of experience in sales.", "a": "All the better. Then you know what works. What are you still missing in your current model?" },
+          { "q": "Isn't this too simple for me?", "a": "What you see is the shallowness. The depth beneath it hasn't bored anyone who truly looked." }
+        ],
+        "redflag": "If they criticize everything without ever trying anything themselves – intellectual arrogance as self-protection."
+      }
+    }
+  }
+}

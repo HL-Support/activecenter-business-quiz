@@ -1,0 +1,73 @@
+{
+  "hero": {
+    "subtitle": "Success Code System · Internal Training Document",
+    "title": "Success Code Training",
+    "em": "Training",
+    "description": "Success Code Conversation Guide – all 16 profile combinations"
+  },
+  "nav": {
+    "grundlage": "🔬 Foundation",
+    "regeln": "⭐ Rules",
+    "profile": "👤 Profiles",
+    "referenz": "📋 Reference"
+  },
+  "foundation": {
+    "title": "Scientific Basis",
+    "subtitle": "Why this test works",
+    "intro": "The Success Code is not based on intuition or invention. It combines three of the most well-researched models in modern personality psychology and behavioral science. Every question, every profile, and every conversation guide has a verifiable scientific foundation.",
+    "disc": {
+      "title": "The DISC Model – William Moulton Marston (1928)",
+      "subtitle": "Foundation of the four personality profiles",
+      "p1": "William Moulton Marston, a Harvard psychologist, developed the DISC model in 1928 in his work 'Emotions of Normal People'. He described four basic behavioral dimensions present in every person – in varying degrees:",
+      "p2": "The DISC model is one of the most widely used personality models in the world today. It is used in over 40 countries, by Fortune 500 companies for team building, and in leadership development, HR, and sales coaching. Authors like Tobias Beck, John Maxwell, and Brian Tracy have popularized it."
+    },
+    "motivation": {
+      "title": "Motivational Psychology – Maslow & Deci/Ryan",
+      "subtitle": "Foundation of the four aspirations",
+      "p1": "The four aspirations in the quiz – Freedom, Impact, Security, Growth – are based on two of the most influential motivational theories in psychology:",
+      "p2": "The combination of personality type (HOW someone ticks) and aspiration (WHAT drives someone) is so powerful because it explains not only a person's behavior but also their deepest motivation. This is exactly what makes personalized conversations possible."
+    },
+    "barriers": {
+      "title": "Behavioral Economics – Kahneman & Thaler",
+      "subtitle": "Foundation of the barrier question",
+      "p1": "The sixth question – 'What REALLY holds you back?' – is the psychologically strongest in the entire quiz. It is based on findings from behavioral economics:",
+      "p2": "When a lead says themselves 'I lack the right system' – it's no longer an objection. It's an invitation. This is exactly what makes the barrier question the most valuable lead qualification tool in the entire quiz."
+    },
+    "forer": {
+      "label": "Important Note for Advisors",
+      "p1": "Every personality profile consciously activates the so-called Forer Effect (Bertram Forer, 1948): People strongly recognize themselves in precise-sounding descriptions of their personality – this creates trust and identification.",
+      "p2": "This is not manipulation – it is the psychological basis for leads feeling understood after the quiz. And anyone who feels understood is open for a conversation. Use it as a bridge – not as a trick."
+    }
+  },
+  "rules": {
+    "title": "The 5 Golden Rules",
+    "intro": "Select the lead's Success Code profile (Fire, Wind, Water, Rock), then the aspiration via tab. Each of the 16 combinations has its own conversation guide.",
+    "list": [
+      { "nr": "01", "title": "Speak the type's language, not your own.", "text": "The Driver wants to hear results. The Connector wants to feel stories. The Supporter wants to feel security. The Architect wants to see facts. If you speak to everyone the same way, you truly reach no one." },
+      { "nr": "02", "title": "Ask questions before you explain.", "text": "The only thing that truly convinces someone is what they say themselves. Your job is not to talk – but to ask the right questions so they find out for themselves what they want." },
+      { "nr": "03", "title": "Never pressure. Never manipulate.", "text": "Every time you exert pressure, you lose trust – even if they say yes in the end. The best yes comes from true understanding." },
+      { "nr": "04", "title": "Objections are not a no – they are questions without question marks.", "text": "No time = Convince me it's worth it. Too risky = Show me it's calculable. Listen behind the words." },
+      { "nr": "05", "title": "The result is not the closing – it is the relationship.", "text": "People who come because they respect you, stay. People who joined under pressure, leave at the first headwind." }
+    ]
+  },
+  "profiles": {
+    "title": "Select Profile",
+    "understand": "Understand Psychology",
+    "strengths": "Strengths",
+    "blind_spot": "Blind Spot",
+    "never_do": "Never do",
+    "red_flag": "Red Flag",
+    "driver": "What really drives them",
+    "no_way": "What they absolutely don't want",
+    "opener": "Conversation Opener",
+    "guidance": "Conversation Guidance",
+    "convincer": "What really convinces them",
+    "objections": "Typical Objections"
+  },
+  "reference": {
+    "title": "Objections at a Glance",
+    "magic_question_label": "The one question that always works",
+    "magic_question": "\"What would have to prove true for you for this to be a good decision?\"",
+    "magic_question_desc": "This one question shows you what really holds someone back – and gives you the answer you need."
+  }
+}

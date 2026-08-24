@@ -1,0 +1,249 @@
+{
+  "feuer": {
+    "name": "Le faiseur",
+    "tagline": "Déterminé. Direct. Orienté vers les résultats.",
+    "psychologie": "Le faiseur pense en termes de résultats, pas de processus. Il veut savoir CE QUI en ressort et À QUELLE VITESSE. Les bavardages sont pour lui une perte de temps. S'il sent que quelqu'un tourne autour du pot, il est déjà parti mentalement.",
+    "stärken": ["Capacité de décision rapide et claire", "Passage cohérent du plan à l'exécution", "Personnalité de leadership naturelle", "Auto-motivé et indépendant"],
+    "fleck": "Peut paraître impatient, écoute parfois trop peu, risque de surestimation.",
+    "niemals": "Explications interminables, langage édulcoré, trop de mise en scène de l'empathie.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Liberté",
+        "antrieb": "Il veut être le capitaine – pas besoin de permission, pas de plafond au-dessus de lui. La liberté signifie un pouvoir d'action maximal.",
+        "nein": "Hiérarchies qui le ralentissent. Systèmes qui passent à l'échelle trop lentement.",
+        "opener": "Je vous montre brièvement comment fonctionne le modèle. Pas de blabla – juste des chiffres et de la structure. Ensuite, vous décidez par vous-même.",
+        "gespräch": "Parlez de mise à l'échelle, de vitesse et de contrôle. Montrez-lui qu'il est le patron de son propre domaine. Des chiffres concrets d'autres Réalisateurs – pas de moyennes.",
+        "überzeugt": "Des chiffres réels de personnes réelles. Il veut voir : qu'est-ce que quelqu'un a accompli avec son engagement en 6 mois ?",
+        "einwände": [
+          { "q": "Je n'ai pas le temps pour ça.", "a": "C'est précisément pour cela. Celui qui n'a jamais de temps a le mauvais système. Combien d'heures seriez-vous prêt à investir ?" }
+        ],
+        "redflag": "S'il demande constamment quand il verra l'argent sans vouloir assumer lui-même ses responsabilités."
+      },
+      "wirkung": {
+        "label": "Impact",
+        "antrieb": "Il veut laisser une trace. Entraîner les autres, construire quelque chose de plus grand que lui. L'impact est pour lui la preuve d'une véritable qualité de leadership.",
+        "nein": "Une entreprise qui ne tourne qu'autour de lui. Isolement. Un modèle qui le maintient petit.",
+        "opener": "Vous êtes quelqu'un qui ne pense pas qu'à soi – cela se remarque. Je vais vous montrer comment traduire cela dans un système qui passe vraiment à l'échelle.",
+        "gespräch": "Montrez-lui l'effet de levier : non pas ce qu'IL fait, mais ce qui est créé à travers lui. Combien de personnes peut-il influencer grâce à son équipe ?",
+        "überzeugt": "Histoires de Réalisateurs qui ont construit des équipes. Chiffres sur la taille des équipes, pas seulement sur les revenus individuels.",
+        "einwände": [
+          { "q": "Je ne veux pas avoir à recruter d'autres personnes.", "a": "Vous ne recruterez personne. Vous inviterez des personnes qui veulent changer quelque chose par elles-mêmes. La différence est cruciale." },
+          { "q": "Je ne suis pas un vendeur.", "a": "Les Réalisateurs qui dirigent vraiment n'ont pas besoin de vendre. Ils inspirent. C'est exactement ce que vous faites déjà." }
+        ],
+        "redflag": "S'il ne cherche l'impact que comme une confirmation de son ego, et non comme un véritable service aux autres."
+      },
+      "sicherheit": {
+        "label": "Sécurité",
+        "antrieb": "Derrière l'apparence de Réalisateur se cache une profonde responsabilité pour la famille et l'avenir. Il veut voir grand – mais sur des bases qui ne tremblent pas.",
+        "nein": "Châteaux en Espagne. Promesses sans substance. Risques qu'il ne peut pas calculer.",
+        "opener": "Vous voulez aller de l'avant – mais sur un sol qui tient. Je vais vous montrer comment cela est structuré ici et pourquoi le risque est gérable.",
+        "gespräch": "Chiffres, calendrier, scénarios réalistes. Quel est le chemin conservateur ? Quel est le pire des cas ?",
+        "überzeugt": "Transparence. Il veut comprendre le modèle avant de dire oui. Donnez-lui du temps et des faits.",
+        "einwände": [
+          { "q": "Que se passe-t-il si je ne construis pas d'équipe ?", "a": "Alors vous avez l'activité produits. Elle fonctionne de manière indépendante. La construction d'une équipe est une option, pas un devoir." },
+          { "q": "Je ne veux pas dépendre des autres.", "a": "Je comprends. Quelles sont vos sources de revenus sûres aujourd'hui – nous verrons ensuite si c'est un complément judicieux." }
+        ],
+        "redflag": "S'il produit de nouvelles objections après chaque réponse sans vraiment écouter."
+      },
+      "wachstum": {
+        "label": "Croissance",
+        "antrieb": "Il veut devenir le meilleur. Pas seulement dans le business – il veut se surpasser. La croissance est un sport pour le Réalisateur.",
+        "nein": "Stagnation. Un environnement qui ne le met pas au défi. Des coachs qui en savent moins que lui.",
+        "opener": "Je travaille avec des personnes qui n'arrêtent jamais de grandir. C'est exactement l'environnement qui vous fait progresser – pas seulement le système, mais les personnes qui le composent.",
+        "gespräch": "Parlez de développement : compétences, leadership, entrepreneuriat. Qui sont les top performers de l'équipe ?",
+        "überzeugt": "La preuve qu'il y a des personnes dans l'équipe qui le mettent au défi. Il veut être dans la meilleure pièce, pas être le plus grand.",
+        "einwände": [
+          { "q": "Je préfère apprendre seul.", "a": "Je vous crois. Mais les meilleurs Réalisateurs que je connais apprennent d'autres Réalisateurs – pas dans les livres." },
+          { "q": "Qu'est-ce que je peux apprendre ici que je ne sais pas déjà ?", "a": "Je ne sais pas. Dites-moi où vous en êtes – je vous dirai honnêtement si c'est un terrain nouveau." }
+        ],
+        "redflag": "S'il utilise la croissance comme excuse pour ne jamais passer à l'action."
+      }
+    }
+  },
+  "wind": {
+    "name": "Le connecteur",
+    "tagline": "Inspirant. Humain. Énergique.",
+    "psychologie": "Le connecteur vit pour les gens, les relations et les ambiances. Il achète des émotions, pas des faits. Il doit vous apprécier avant de vous écouter. Si l'énergie est bonne, il est immédiatement de la partie.",
+    "stärken": ["Enthousiasme contagieux", "Confiance instaurée en un rien de temps", "Véritable ciment au sein de chaque équipe", "Charisme positif irrésistible"],
+    "fleck": "Saute d'une idée à l'autre, suit parfois l'enthousiasme au lieu de la raison.",
+    "niemals": "Chiffres bruts sans contexte, présentation froide, pas de sourire. Il doit sentir que vous l'appréciez.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Liberté",
+        "antrieb": "La liberté signifie pour lui : se réveiller chaque jour et décider librement avec qui il passe son temps. Voyager spontanément. Profiter de la vie tout en travaillant.",
+        "nein": "Structures rigides, routine monotone, personnes qui plombent son énergie.",
+        "opener": "Imaginez-vous réveiller demain et décider vous-même de qui figure à votre agenda. Je vous montre à quoi cela ressemble.",
+        "gespräch": "Peignez le tableau. Pas de chiffres – des images. À quoi ressemble son quotidien ? Quand et où travaille-t-il ? Avec qui ?",
+        "überzeugt": "Histoires de personnes de l'équipe qui vivent cette vie. Des moments réels. Il achète l'image du style de vie.",
+        "einwände": [
+          { "q": "Je suis trop sociable, je ne veux pas rester à la maison.", "a": "Vous travaillez exactement là où se trouvent les gens – lors d'événements, au téléphone, dans des cafés. C'est votre bureau." },
+          { "q": "Cela prend probablement beaucoup de temps au début.", "a": "Au début, oui. Mais combien de temps investissez-vous aujourd'hui pour une vie qui ne vous appartient pas ?" }
+        ],
+        "redflag": "S'il est enthousiaste mais ne s'engage jamais. Toujours de nouveaux rendez-vous, toujours presque prêt."
+      },
+      "wirkung": {
+        "label": "Impact",
+        "antrieb": "Il veut voir comment son énergie aide les autres. La réaction quand quelqu'un dit : tu as changé ma vie. Il aime être utile.",
+        "nein": "Se sentir inutile. Ne recevoir aucun feedback. Travailler sans lien.",
+        "opener": "Vous avez un don que la plupart ne développent jamais : vous faites bouger les gens. Je vais vous montrer comment traduire cela en quelque chose de grand.",
+        "gespräch": "Focus sur l'impact : combien de personnes a-t-il influencées inconsciemment jusqu'à présent ? Et s'il pouvait le faire systématiquement ?",
+        "überzeugt": "Témoignages, histoires de réussite, moments forts en émotion. Il doit sentir que de vraies personnes sont réellement aidées ici.",
+        "einwände": [
+          { "q": "Je ne veux pas pousser des produits.", "a": "Vous ne poussez pas de produits. Vous partagez ce qui vous a aidé. La différence réside dans l'authenticité – et vous avez cela." },
+          { "q": "Et si les produits ne fonctionnent pas ?", "a": "Utilisez-les vous-même. Vous pourrez ensuite parler d'expérience réelle – c'est la seule chose qui compte." }
+        ],
+        "redflag": "S'il veut de l'impact mais ne veut pas faire sa propre expérience."
+      },
+      "sicherheit": {
+        "label": "Sécurité",
+        "antrieb": "Derrière sa légèreté se cache une profonde inquiétude pour son entourage – famille, amis. La sécurité est pour lui une fiabilité émotionnelle.",
+        "nein": "Le sentiment de laisser tomber quelqu'un. L'insécurité financière qui pèse sur les relations.",
+        "opener": "Je sais que vous voulez être là pour les autres – je vais vous montrer comment vous pouvez aussi assurer cela financièrement sans renoncer à votre mode de vie.",
+        "gespräch": "Liez le revenu directement à ce qui est important pour lui : plus de temps pour la famille, moins de stress.",
+        "überzeugt": "Exemples de revenus réalistes de personnes normales ayant son profil. Il doit pouvoir y croire pour lui-même.",
+        "einwände": [
+          { "q": "Je ne veux pas prendre de risques.", "a": "Quel serait le pire des scénarios ? Réfléchissons-y ensemble. Je n'édulcore pas la réalité." },
+          { "q": "Et si mes amis me regardent bizarrement ?", "a": "C'est une crainte réelle et je la respecte. Laissez-moi vous montrer comment d'autres ont géré cela." }
+        ],
+        "redflag": "Si l'opinion des autres est si forte qu'il ne peut pas prendre sa propre décision."
+      },
+      "wachstum": {
+        "label": "Croissance",
+        "antrieb": "Il veut se développer, découvrir de nouvelles facettes, s'améliorer dans ses relations avec les gens. La stagnation est son plus grand ennemi.",
+        "nein": "Isolement, routine, personnes qui ne l'inspirent pas.",
+        "opener": "Vous savez que vous avez plus en vous. Je vais vous montrer un environnement qui fait vraiment ressortir ce 'plus'.",
+        "gespräch": "Focus sur la communauté, les événements, la croissance mutuelle. Il doit RESSENTIR l'énergie avant de décider.",
+        "überzeugt": "Invitation à un événement ou à un appel d'équipe. Aucun document ne le convainc autant qu'une pièce remplie d'une énergie réelle.",
+        "einwände": [
+          { "q": "Je suis déjà sur de nombreux projets.", "a": "Qu'est-ce qui, parmi tout cela, a vraiment changé votre vie – et qu'est-ce qui ne l'a fait que vous occuper ?" },
+          { "q": "J'ai d'abord besoin de plus d'infos.", "a": "Le meilleur moyen d'obtenir de vraies infos est de parler à une vraie personne de l'équipe. Puis-je vous mettre en contact ?" }
+        ],
+        "redflag": "S'il passe d'enthousiasme en enthousiasme sans jamais se poser."
+      }
+    }
+  },
+  "wasser": {
+    "name": "L'ancre",
+    "tagline": "Loyal. Fiable. Profond.",
+    "psychologie": "L'ancre décide lentement mais reste ensuite fidèle durablement. Il a besoin de sécurité, de confiance et de temps – pas de pression. S'il sent de la pression, il se retire. C'est de l'or une fois qu'il est de la partie : loyal, persévérant, le ciment de l'équipe.",
+    "stärken": ["Absolument fiable et fidèle à sa parole", "Fondement de confiance profond et durable", "Pôle de calme dans chaque situation de crise", "Équilibré et sans conflit"],
+    "fleck": "Décide très lentement, a besoin de beaucoup de confirmation, peut être ignoré sans le dire.",
+    "niemals": "Pression, délais artificiels, persuasion. Il remarque chaque manipulation et ne l'oublie jamais.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Liberté",
+        "antrieb": "La liberté signifie pour le Pilier : le calme sans peur existentielle. Ne pas 'devoir devoir'. Il ne veut pas d'aventures folles – il veut être libre de toute contrainte.",
+        "nein": "Chaos, imprévisibilité, le sentiment de perdre le contrôle.",
+        "opener": "Et si vous continuiez à vivre votre quotidien – mais que vous construisiez en parallèle un revenu qui vous donne des options à un moment donné ?",
+        "gespräch": "Pas de pression, pas de vitesse. Montrez l'entrée en douceur. Quel est le premier petit pas ? Combien cela coûte-t-il vraiment ?",
+        "überzeugt": "Exemples de personnes qui ont construit ce modèle parallèlement à leur vie sans tout bouleverser.",
+        "einwände": [
+          { "q": "Je ne suis pas le type de personne pour ça.", "a": "Qu'entendez-vous par là – qu'imaginez-vous devoir faire ?" },
+          { "q": "J'ai besoin de temps pour y réfléchir.", "a": "Bien entendu. De quoi avez-vous besoin concrètement pour pouvoir prendre une décision ?" }
+        ],
+        "redflag": "S'il réfléchit indéfiniment sans jamais poser de question concrète."
+      },
+      "wirkung": {
+        "label": "Impact",
+        "antrieb": "Il préfère aider dans l'ombre. Il veut savoir que son action fait bouger les choses – sans être sous les projecteurs. L'impact pour lui est silencieux et profond.",
+        "nein": "Publicité qu'il ne veut pas. Attentes qui dépassent son niveau de confort.",
+        "opener": "Imaginez que vous aidiez les gens – entièrement à votre rythme, à votre manière. Pas de spectacle, pas de scène. Juste du vrai.",
+        "gespräch": "Montrez comment il peut accomplir de grandes choses en arrière-plan. De vraies histoires de clients, la constance silencieuse dont son équipe a besoin.",
+        "überzeugt": "Histoires réelles et calmes de personnes comme lui. Pas de moments sur scène.",
+        "einwände": [
+          { "q": "Je suis trop introverti pour ça.", "a": "Les personnes les plus fortes de l'équipe sont souvent celles qui se font le plus discrètes. Puis-je vous montrer pourquoi ?" },
+          { "q": "Je ne veux pas peser sur mon réseau.", "a": "Vous n'avez pas à peser sur qui que ce soit. Vous proposez – et celui qui ne veut pas dit non." }
+        ],
+        "redflag": "Si chaque étape ressemble à une menace – créez d'abord une véritable expérience produit."
+      },
+      "sicherheit": {
+        "label": "Sécurité",
+        "antrieb": "La sécurité EST son objectif principal. Il pense à son partenaire, ses enfants, ses parents. Il porte la responsabilité silencieusement et sérieusement.",
+        "nein": "Tout risque qu'il ne comprend pas. Promesses non tenues.",
+        "opener": "Je ne vous montre pas de l'argent facile – je vous montre comment d'autres dans votre situation ont construit un revenu d'appoint calme et stable.",
+        "gespräch": "Très lent, très honnête. Dites aussi ce qui ne fonctionne pas – cela renforce la confiance plus que le vernis.",
+        "überzeugt": "Du temps et des preuves. Plusieurs entretiens sont normaux. Celui qui le pousse le perd. Celui qui lui donne de l'espace gagne un partenaire pour des années.",
+        "einwände": [
+          { "q": "Et si ça ne fonctionne pas ?", "a": "Passons en revue le pire des cas – vous pourrez ensuite juger par vous-même si le risque est supportable." },
+          { "q": "Je dois en discuter avec mon partenaire.", "a": "C'est tout à fait juste. Dois-je vous donner à tous les deux un bref aperçu ? Vous serez ainsi sur la même longueur d'onde." }
+        ],
+        "redflag": "S'il n'a pas posé une seule question concrète après 3 ou 4 entretiens."
+      },
+      "wachstum": {
+        "label": "Croissance",
+        "antrieb": "Il veut de la profondeur, pas de la largeur. Pas 10 nouvelles compétences – une seule vraiment bien. Il grandit grâce à la fiabilité et à la constance, pas au battage médiatique.",
+        "nein": "Superficialité, changements constants, un système qui se réinvente chaque semaine.",
+        "opener": "La croissance pour vous n'est pas un cours intensif – c'est la constance tranquille que les autres n'ont pas. C'est exactement ce qui se construit ici.",
+        "gespräch": "Montrez la profondeur du système. Qui le coache en chemin ? Quelles formations sont disponibles ?",
+        "überzeugt": "Un mentor de l'équipe structuré de la même manière – calme, persévérant, profond. Un entretien avec cette personne vaut plus que n'importe quelle présentation.",
+        "einwände": [
+          { "q": "Il me faut beaucoup de temps avant d'être prêt.", "a": "Ce n'est pas une faiblesse. Les meilleures personnes de l'équipe sont exactement comme ça. Quand seriez-vous prêt pour un premier entretien ?" },
+          { "q": "Y a-t-il beaucoup de pression et des résultats rapides ?", "a": "Non. Votre rythme est votre rythme. Ce qui compte, c'est la direction, pas la vitesse." }
+        ],
+        "redflag": "S'il utilise la croissance comme raison pour ne jamais commencer – toujours un livre de plus, un cours de plus."
+      }
+    }
+  },
+  "fels": {
+    "name": "L'architecte",
+    "tagline": "Analytique. Précis. Systémique.",
+    "psychologie": "L'architecte achète avec la tête, pas avec le ventre. Il analyse avant d'agir. Si vous le submergez de pression, vous le perdez. Si vous lui donnez des faits et de l'espace, vous gagnez un partenaire à long terme.",
+    "stärken": ["Qualité de décision réfléchie et fondée", "Penseur systémique prévoyant", "Optimisateur constant et précis", "Intrinsèquement motivé et indépendant"],
+    "fleck": "Peut rester bloqué dans des boucles d'analyse, décide lentement.",
+    "niemals": "Hype, promesses exagérées, manipulation émotionnelle. Il s'en rend compte immédiatement.",
+    "aspirations": {
+      "freiheit": {
+        "label": "Liberté",
+        "antrieb": "La liberté signifie pour lui : posséder un système qui fonctionne sans sa présence constante. Il veut le contrôle ET l'indépendance.",
+        "nein": "Dépendance vis-à-vis d'un employeur, d'un client, des humeurs des autres.",
+        "opener": "Je vous montre la mécanique derrière – comment le système est construit et pourquoi il fonctionne même quand vous n'êtes pas actif.",
+        "gespräch": "Expliquez la structure : sources de revenus, effet de levier, évolutivité. Il veut tout comprendre avant d'évaluer un détail.",
+        "überzeugt": "Documents écrits, dossiers clairs, chiffres réels. Il lira tout à fond. Rappelez 3 jours plus tard.",
+        "einwände": [
+          { "q": "Je dois analyser cela en profondeur.", "a": "C'est exactement ce que j'attends de vous. Voici tout ce dont vous avez besoin – que vous manque-t-il encore ?" },
+          { "q": "Quels sont les coûts cachés ?", "a": "Laissez-moi décomposer cela de manière totalement transparente – pas de surprises." }
+        ],
+        "redflag": "S'il produit toujours de nouvelles questions après une information complète sans jamais répondre à aucune."
+      },
+      "wirkung": {
+        "label": "Impact",
+        "antrieb": "Il ne veut pas seulement construire un système – il veut qu'il change vraiment quelque chose. L'impact sans substance ne l'intéresse pas.",
+        "nein": "Superficialité. Greenwashing. Promesses qui ne sont pas mesurables.",
+        "opener": "Je vous montre comment le modèle crée un impact réel et mesurable – avec des chiffres et les retours de personnes réelles.",
+        "gespräch": "Montrez la chaîne d'impact : du produit à la personne jusqu'au changement. Il veut comprendre la causalité.",
+        "überzeugt": "Études, données sur les produits, preuves écrites vérifiables. Pas de vidéos de témoignages.",
+        "einwände": [
+          { "q": "Comment savoir si les produits fonctionnent vraiment ?", "a": "Voici les études disponibles et les données cliniques. Qu'est-ce qui est le plus pertinent pour vous ?" },
+          { "q": "J'ai des doutes concernant le secteur.", "a": "Ces doutes sont justifiés. Laissez-moi vous montrer où se situe la différence – sur le plan professionnel, structurel, juridique." }
+        ],
+        "redflag": "S'il considère l'impact comme un exercice intellectuel mais n'essaie jamais rien par lui-même."
+      },
+      "sicherheit": {
+        "label": "Sécurité",
+        "antrieb": "Il veut comprendre et contrôler pleinement les risques. La sécurité signifie : pas de variables inconnues, pas de surprises.",
+        "nein": "Intransparence, structures contractuelles peu claires, dépendance vis-à-vis de facteurs incontrôlables.",
+        "opener": "Avant de décider, je vous montre toute la structure – tous les coûts, tous les risques, toutes les options. Base réelle, décision réelle.",
+        "gespräch": "Extrêmement transparent. Montrez aussi les inconvénients. Qu'est-ce qui peut mal se passer ? Quand il réalise que vous êtes honnête, il s'ouvre.",
+        "überzeugt": "Un entretien avec quelqu'un qui est déjà de la partie – réaliste, critique, honnête.",
+        "einwände": [
+          { "q": "Et si je veux arrêter ?", "a": "Vous pouvez arrêter à tout moment. Pas de durée minimale, pas de préavis. Voici le processus exact." },
+          { "q": "À quel point le revenu est-il vraiment fiable ?", "a": "Je ne vais pas édulcorer la réalité. Voici les fourchettes de revenus réelles après 3, 6 et 12 mois." }
+        ],
+        "redflag": "S'il est toujours méfiant après une information transparente complète – cela prend du temps, pas plus de faits."
+      },
+      "wachstum": {
+        "label": "Croissance",
+        "antrieb": "Il veut la maîtrise. Pas une connaissance superficielle – une compréhension profonde. Il veut connaître le système si bien qu'il peut l'optimiser.",
+        "nein": "Formations superficielles. Des coachs qui en savent moins que lui. Systèmes qu'il n'est pas autorisé à améliorer.",
+        "opener": "Vous êtes le type de personne qui n'utilise pas seulement un système, mais qui l'améliore. Ce sont exactement les personnes que nous recherchons pour le niveau supérieur.",
+        "gespräch": "Montrez la profondeur : connaissance des produits, stratégie commerciale, configuration du système. Où peut-il vraiment s'immerger ?",
+        "überzeugt": "Accès à de vrais experts au sein de l'équipe. Pas de conférencier motivateur – un spécialiste qui a optimisé à un haut niveau.",
+        "einwände": [
+          { "q": "J'ai déjà beaucoup d'expérience dans la vente.", "a": "Tant mieux. Vous savez alors ce qui fonctionne. Que vous manque-t-il encore dans votre modèle actuel ?" },
+          { "q": "N'est-ce pas trop simple pour moi ?", "a": "Ce que vous voyez est la superficialité. La profondeur en dessous n'a encore ennuyé personne qui y a vraiment regardé." }
+        ],
+        "redflag": "S'il critique tout sans jamais rien essayer par lui-même – l'arrogance intellectuelle comme autoprotection."
+      }
+    }
+  }
+}
