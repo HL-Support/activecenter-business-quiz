@@ -10,11 +10,17 @@
  * - generate_resume_token (creates JWT token plus short resume key for resume links)
  * - resolve_resume_token (verifies JWT token and resolves latest video progress)
  * - resolve_resume_key (resolves a short resume key to the latest video progress)
+ *
+ * Nicht-Browser-Actions (generate_resume_token, get_*_metrics) laufen seit P0-4 im
+ * Auth-Beobachtungsmodus: siehe SERVICE_AUTH_ACTIONS / resolveServiceAuthState.
  */
 
 const crypto = require('crypto');
+const { Buffer } = require('buffer');
 const jwt = require('jsonwebtoken');
-const { sendMetaCAPIEvent } = require('../server/lead-system');
+// allowedCorsOrigin kommt seit P0-4 aus derselben Quelle wie fuer die lead-Routen; der Import
+// aus server/lead-system.js bestand fuer sendMetaCAPIEvent bereits und ist zyklusfrei.
+const { allowedCorsOrigin, sendMetaCAPIEvent } = require('../server/lead-system');
 function cleanEnvSecret(value) {
   return String(value || '')
     .replace(/\\n$/g, '')
@@ -51,6 +57,58 @@ const ALLOWED_ADAPTER_KEYS = new Set(['business_leads_quiz_v1']);
 
 if (!SUPABASE_KEY) {
   console.error('ERROR: SUPABASE_SERVICE_KEY environment variable is not set');
+}
+
+// P0-4 (Audit 4.5): Diese vier Actions sind keine Browser-Actions. Sie erzeugen einen
+// Besitzlink bzw. liefern Coach-Kennzahlen und sind heute ohne jede Aufrufer-Authentisierung
+// erreichbar. Bevor irgendetwas abgewiesen wird, wird GEMESSEN: Jede Antwort traegt
+// auth_state, jeder Aufruf ohne gueltigen Service-Key hinterlaesst den Log-Marker
+// '[bridge-auth-observe]'. Erst wenn dieser Marker fuer echte Aufrufer (n8n-Workflow
+// RqKSRTgFv8mv04H2, CI-Smoke) verschwunden ist, darf BRIDGE_SERVICE_AUTH_ENFORCE=1 gesetzt
+// werden. resolve_resume_token/resolve_resume_key bleiben bewusst oeffentlich - sie sind der
+// Einstieg aus der Nurture-Mail in den Funnel.
+const SERVICE_AUTH_ACTIONS = new Set([
+  'generate_resume_token',
+  'get_funnel_metrics',
+  'get_resume_metrics',
+  'get_completion_metrics',
+]);
+
+function serviceAuthSecret() {
+  // Bewusst pro Aufruf gelesen statt als Modulkonstante: Eine Env-Aenderung wirkt so ohne
+  // Kaltstart, und die Tests koennen den Zustand deterministisch setzen und zuruecknehmen.
+  return cleanEnvSecret(process.env.BRIDGE_SERVICE_KEY || process.env.BRIDGE_KEY);
+}
+
+function isServiceAuthEnforced() {
+  return process.env.BRIDGE_SERVICE_AUTH_ENFORCE === '1';
+}
+
+function requestHeader(req, name) {
+  const wanted = String(name).toLowerCase();
+  const entry = Object.entries(req?.headers || {}).find(([key]) => key.toLowerCase() === wanted);
+  return entry ? String(entry[1] || '').trim() : '';
+}
+
+function timingSafeEqualText(a, b) {
+  const left = Buffer.from(String(a || '').trim());
+  const right = Buffer.from(String(b || '').trim());
+  if (left.length !== right.length) return false;
+  return crypto.timingSafeEqual(left, right);
+}
+
+function resolveServiceAuthState(req) {
+  // Nur Header, nie ein Query-Parameter (Lehre aus Audit 13.2.2: Secrets in der URL landen in
+  // Logs, Referrern und Proxy-Caches). x-bridge-key ist der Kompatibilitaetsname, den die
+  // bestehenden Server-zu-Server-Aufrufer dieses Projekts ohnehin schon kennen.
+  const provided =
+    requestHeader(req, 'x-bridge-service-key') || requestHeader(req, 'x-bridge-key');
+  if (!provided) return 'missing';
+  // Fehlende Env bedeutet 'missing', nicht 'invalid': fail-open wie beim JWT_SECRET-Muster
+  // aus P0-3. Eine vergessene Variable darf den Funnel nie haerter machen als beabsichtigt.
+  const expected = serviceAuthSecret();
+  if (!expected) return 'missing';
+  return timingSafeEqualText(provided, expected) ? 'ok' : 'invalid';
 }
 
 function nowIso() {
@@ -3577,31 +3635,12 @@ function buildBusinessTypeformPayload(input) {
   };
 }
 
-const CORS_ALLOWED_ORIGINS = new Set([
-  'https://business.activecenter.info',
-  'https://quiz.activecenter.info',
-  'https://business.eaglesfit.ch',
-  'https://businessleadsquiz.vercel.app',
-]);
-// Eine reine Suffixpruefung auf '.vercel.app' wuerde JEDE fremde Vercel-App zulassen; erlaubt
-// ist deshalb nur das projekteigene Team-Suffix der Preview-Deployments.
-const PREVIEW_ORIGIN_SUFFIX = '-markus-oberhofers-projects.vercel.app';
-
-function allowedCorsOrigin(origin) {
-  const value = String(origin || '').trim();
-  if (!value) return '';
-  if (CORS_ALLOWED_ORIGINS.has(value)) return value;
-  // Nur https-Origins ohne Port, Pfad oder Userinfo - sonst genuegte
-  // 'https://evil.example/-markus-oberhofers-projects.vercel.app' fuer die Suffixpruefung.
-  if (!/^https:\/\/[a-z0-9.-]+$/i.test(value)) return '';
-  return value.endsWith(PREVIEW_ORIGIN_SUFFIX) ? value : '';
-}
-
 module.exports = async function handler(req, res) {
-  // P0-4: Kein Wildcard-CORS mehr. Ist der Origin nicht erlaubt, wird der ACAO-Header GAR
+  // Kein Wildcard-CORS mehr. Ist der Origin nicht erlaubt, wird der ACAO-Header GAR
   // NICHT gesetzt - der Browser blockt dann selbst. Same-Origin- und Server-zu-Server-Aufrufe
   // (n8n, Worker, curl) senden keinen Origin und bleiben unberuehrt. 'Vary: Origin' muss
   // immer mitgehen, sonst liefert ein Cache die Antwort eines Origins an einen anderen aus.
+  // Die Allowlist selbst liegt seit P0-4 kanonisch in server/lead-system.js.
   const allowedOrigin = allowedCorsOrigin(req.headers?.origin);
   res.setHeader('Vary', 'Origin');
   if (allowedOrigin) {
@@ -3624,6 +3663,22 @@ module.exports = async function handler(req, res) {
 
   if (!action) {
     return res.status(400).json({ error: 'Missing action' });
+  }
+
+  // Beobachtung, kein Enforcement: Die Verarbeitung bleibt unveraendert, die Antwort traegt
+  // zusaetzlich auth_state. Fuer alle anderen Actions bleibt serviceAuthState null und es
+  // aendert sich nichts - kein zusaetzliches Feld, kein zusaetzliches Log.
+  let serviceAuthState = null;
+  if (SERVICE_AUTH_ACTIONS.has(action)) {
+    serviceAuthState = resolveServiceAuthState(req);
+    if (serviceAuthState !== 'ok') {
+      console.warn('[bridge-auth-observe]', action, serviceAuthState);
+      if (isServiceAuthEnforced()) {
+        return res
+          .status(401)
+          .json({ success: false, error: 'service_auth_required', auth_state: serviceAuthState });
+      }
+    }
   }
 
   if (action === 'track_event') {
@@ -4127,12 +4182,12 @@ module.exports = async function handler(req, res) {
   if (action === 'generate_resume_token') {
     if (!JWT_SECRET) {
       console.error('ERROR: JWT_SECRET environment variable is not set');
-      return res.status(500).json({ error: 'Server configuration error' });
+      return res.status(500).json({ error: 'Server configuration error', auth_state: serviceAuthState });
     }
     const requestedSessionHash = safeString(payload?.sessionHash || payload?.session_hash, 96);
     const requestedLeadHash = safeString(payload?.leadHash || payload?.lead_hash, 96);
     if (!payload || !payload.email || (!requestedSessionHash && !isLeadHash(requestedLeadHash))) {
-      return res.status(400).json({ error: 'Missing resume contact context' });
+      return res.status(400).json({ error: 'Missing resume contact context', auth_state: serviceAuthState });
     }
 
     const contactLead = await resolveContactLeadForResume({
@@ -4142,7 +4197,7 @@ module.exports = async function handler(req, res) {
       fallbackContact: payload.contact || null,
     });
     if (!contactLead.leadHash) {
-      return res.status(409).json({ error: 'Resume contact not found' });
+      return res.status(409).json({ error: 'Resume contact not found', auth_state: serviceAuthState });
     }
 
     const targetOverride = requestedResumeTarget(
@@ -4194,6 +4249,7 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
+      auth_state: serviceAuthState,
       token,
       leadHash: contactLead.leadHash,
       lang:
@@ -4338,7 +4394,7 @@ module.exports = async function handler(req, res) {
   if (action === 'get_funnel_metrics') {
     const slug = payload?.berater_slug || payload?.slug;
     if (!slug) {
-      return res.status(400).json({ error: 'Missing berater_slug' });
+      return res.status(400).json({ error: 'Missing berater_slug', auth_state: serviceAuthState });
     }
 
     try {
@@ -4352,6 +4408,7 @@ module.exports = async function handler(req, res) {
       if (!metrics) {
         return res.status(200).json({
           success: true,
+          auth_state: serviceAuthState,
           data: {
             berater_slug: slug,
             step_1_starts: 0,
@@ -4363,17 +4420,19 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      return res.status(200).json({ success: true, data: metrics });
+      return res.status(200).json({ success: true, auth_state: serviceAuthState, data: metrics });
     } catch (error) {
       console.error('get_funnel_metrics error:', error.message);
-      return res.status(500).json({ error: 'Failed to fetch funnel metrics' });
+      return res
+        .status(500)
+        .json({ error: 'Failed to fetch funnel metrics', auth_state: serviceAuthState });
     }
   }
 
   if (action === 'get_resume_metrics') {
     const slug = payload?.berater_slug || payload?.slug;
     if (!slug) {
-      return res.status(400).json({ error: 'Missing berater_slug' });
+      return res.status(400).json({ error: 'Missing berater_slug', auth_state: serviceAuthState });
     }
 
     try {
@@ -4387,6 +4446,7 @@ module.exports = async function handler(req, res) {
       if (!metrics) {
         return res.status(200).json({
           success: true,
+          auth_state: serviceAuthState,
           data: {
             berater_slug: slug,
             total_resume_sessions: 0,
@@ -4396,17 +4456,19 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      return res.status(200).json({ success: true, data: metrics });
+      return res.status(200).json({ success: true, auth_state: serviceAuthState, data: metrics });
     } catch (error) {
       console.error('get_resume_metrics error:', error.message);
-      return res.status(500).json({ error: 'Failed to fetch resume metrics' });
+      return res
+        .status(500)
+        .json({ error: 'Failed to fetch resume metrics', auth_state: serviceAuthState });
     }
   }
 
   if (action === 'get_completion_metrics') {
     const slug = payload?.berater_slug || payload?.slug;
     if (!slug) {
-      return res.status(400).json({ error: 'Missing berater_slug' });
+      return res.status(400).json({ error: 'Missing berater_slug', auth_state: serviceAuthState });
     }
 
     try {
@@ -4420,6 +4482,7 @@ module.exports = async function handler(req, res) {
       if (!metrics) {
         return res.status(200).json({
           success: true,
+          auth_state: serviceAuthState,
           data: {
             berater_slug: slug,
             total_starts: 0,
@@ -4429,10 +4492,12 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      return res.status(200).json({ success: true, data: metrics });
+      return res.status(200).json({ success: true, auth_state: serviceAuthState, data: metrics });
     } catch (error) {
       console.error('get_completion_metrics error:', error.message);
-      return res.status(500).json({ error: 'Failed to fetch completion metrics' });
+      return res
+        .status(500)
+        .json({ error: 'Failed to fetch completion metrics', auth_state: serviceAuthState });
     }
   }
 

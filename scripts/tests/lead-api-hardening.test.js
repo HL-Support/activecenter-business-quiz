@@ -285,6 +285,67 @@ test('lead-init setzt zusaetzlich ein signiertes Session-Cookie, ohne lead_hash 
   });
 });
 
+// P0-4: handleOptions setzte fuer alle lead-Routen ein pauschales '*'. Jetzt gilt dieselbe
+// Allowlist wie in der Bridge - der Handler wird direkt mit Fake-req/res geprueft.
+async function options(headers = {}) {
+  const { res, result } = createResponse();
+  await trackHandler({ method: 'OPTIONS', body: {}, headers }, res);
+  return result;
+}
+
+test('OPTIONS auf lead-track spiegelt nur erlaubte Origins und setzt immer Vary', async () => {
+  for (const origin of [
+    'https://business.activecenter.info',
+    'https://quiz.activecenter.info',
+    'https://business.eaglesfit.ch',
+    'https://businessleadsquiz.vercel.app',
+    'https://business-leads-quiz-abc123-markus-oberhofers-projects.vercel.app',
+  ]) {
+    const response = await options({ origin });
+    assert.equal(response.statusCode, 204);
+    assert.equal(response.headers['Access-Control-Allow-Origin'], origin);
+    assert.equal(response.headers.Vary, 'Origin');
+  }
+});
+
+test('OPTIONS auf lead-track spiegelt fremde Origins nicht mehr', async () => {
+  for (const origin of [
+    'https://evil.example',
+    'http://business.activecenter.info',
+    'https://business.activecenter.info.evil.example',
+    'https://fremdes-projekt.vercel.app',
+    'https://evil.example/-markus-oberhofers-projects.vercel.app',
+  ]) {
+    const response = await options({ origin });
+    assert.equal(response.statusCode, 204);
+    assert.equal(
+      response.headers['Access-Control-Allow-Origin'],
+      undefined,
+      `${origin} darf nicht gespiegelt werden`
+    );
+    assert.equal(response.headers.Vary, 'Origin');
+  }
+});
+
+test('OPTIONS ohne Origin bekommt keinen ACAO-Header, der POST-Pfad bleibt unberuehrt', async () => {
+  const preflight = await options();
+  assert.equal(preflight.statusCode, 204);
+  assert.equal(preflight.headers['Access-Control-Allow-Origin'], undefined);
+  assert.equal(preflight.headers.Vary, 'Origin');
+  assert.equal(preflight.headers['Access-Control-Allow-Methods'], 'GET, POST, OPTIONS');
+
+  await withSupabaseMock(async () => {
+    const response = await track({
+      lead_hash: LEAD_HASH,
+      event_name: 'page_view',
+      payload: { lead_hash: LEAD_HASH },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.headers['Access-Control-Allow-Origin'], undefined);
+    assert.equal(response.headers.Vary, 'Origin');
+  });
+});
+
 test('ohne JWT_SECRET faellt nur das Session-Cookie weg, der Funnel laeuft weiter', async () => {
   const secret = process.env.JWT_SECRET;
   delete process.env.JWT_SECRET;

@@ -318,18 +318,50 @@ function verifyApiHardening() {
     'api/lead-track.js must reject unknown events with event_not_allowed (400 = permanent in the client queue)'
   );
 
-  const apiDir = path.join(projectRoot, 'api');
-  const wildcardCors = fs
-    .readdirSync(apiDir, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.js'))
-    .filter((entry) =>
-      fs.readFileSync(path.join(apiDir, entry.name), 'utf8').includes("Access-Control-Allow-Origin', '*'")
-    )
-    .map((entry) => `api/${entry.name}`);
+  // P0-4: Das Gate gilt fuer beide Runtime-Verzeichnisse. server/lead-system.js setzt die
+  // CORS-Header fuer saemtliche lead-Routen - ein Wildcard dort wirkt breiter als in api/.
+  const wildcardCors = ['api', 'server'].flatMap((dirName) => {
+    const dirPath = path.join(projectRoot, dirName);
+    if (!fs.existsSync(dirPath)) return [];
+    return fs
+      .readdirSync(dirPath, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith('.js'))
+      .filter((entry) =>
+        fs
+          .readFileSync(path.join(dirPath, entry.name), 'utf8')
+          .includes("Access-Control-Allow-Origin', '*'")
+      )
+      .map((entry) => `${dirName}/${entry.name}`);
+  });
 
   assert(
     wildcardCors.length === 0,
-    `Wildcard CORS is not allowed in api/: ${wildcardCors.join(', ')}`
+    `Wildcard CORS is not allowed in api/ or server/: ${wildcardCors.join(', ')}`
+  );
+
+  const leadSystem = fs.readFileSync(path.join(projectRoot, 'server', 'lead-system.js'), 'utf8');
+  assert(
+    leadSystem.includes('function allowedCorsOrigin') &&
+      leadSystem.includes('PREVIEW_ORIGIN_SUFFIX') &&
+      leadSystem.includes('const allowedOrigin = allowedCorsOrigin(req?.headers?.origin);'),
+    'server/lead-system.js must keep the canonical CORS allowlist and use it in handleOptions'
+  );
+
+  // P0-4 (Audit 4.5): Der Beobachtungsmodus und der Enforcement-Schalter fuer die
+  // Nicht-Browser-Actions duerfen nicht still aus der Bridge verschwinden.
+  const apiBridge = fs.readFileSync(path.join(projectRoot, 'api', 'bridge.js'), 'utf8');
+  assert(
+    apiBridge.includes('SERVICE_AUTH_ACTIONS') &&
+      apiBridge.includes('resolveServiceAuthState') &&
+      apiBridge.includes('[bridge-auth-observe]'),
+    'api/bridge.js must keep the service auth observation for resume/metric actions'
+  );
+  // Bewusst die exakten Literale: 'includes' auf den blossen Namen wuerde auch bei einem
+  // umbenannten Fehlercode ('service_auth_required_v2') noch gruen bleiben.
+  assert(
+    apiBridge.includes("error: 'service_auth_required'") &&
+      apiBridge.includes("process.env.BRIDGE_SERVICE_AUTH_ENFORCE === '1'"),
+    'api/bridge.js must keep the BRIDGE_SERVICE_AUTH_ENFORCE gate with service_auth_required'
   );
 }
 

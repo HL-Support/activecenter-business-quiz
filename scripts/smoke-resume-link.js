@@ -6,6 +6,19 @@ const slug = process.env.RESUME_SMOKE_SLUG || 'markus';
 const memberId = process.env.RESUME_SMOKE_MEMBER_ID || '24';
 const organisationId = process.env.RESUME_SMOKE_ORGANISATION_ID || '2';
 const TRANSIENT_HTTP_STATUSES = new Set([502, 503, 504]);
+// P0-4: generate_resume_token laeuft im Auth-Beobachtungsmodus. Ohne konfigurierten Key
+// aendert sich nichts (der Aufruf bleibt gruen, die Bridge protokolliert nur auth_state);
+// sobald BRIDGE_SERVICE_AUTH_ENFORCE=1 gesetzt wird, braucht dieser Smoke den Key als
+// GitHub-Secret. Der Header geht nur mit, wenn ein Wert existiert - ein leerer Header-Wert
+// waere gegenueber Edge/WAF-Schichten unnoetiges Risiko und bedeutet ohnehin 'missing'.
+const SERVICE_AUTH_KEY = process.env.BRIDGE_SERVICE_KEY || process.env.BRIDGE_KEY || '';
+
+function bridgeHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    ...(SERVICE_AUTH_KEY ? { 'x-bridge-service-key': SERVICE_AUTH_KEY } : {}),
+  };
+}
 
 function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -17,7 +30,7 @@ async function postBridge(payload, attempts = 3) {
     try {
       const response = await fetch(`${baseUrl}/api/bridge`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: bridgeHeaders(),
         body: JSON.stringify(payload),
       });
 
