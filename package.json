@@ -8,6 +8,7 @@
   "packageManager": "pnpm@10.32.1",
   "scripts": {
     "build": "node build.js",
+    "start:server": "node server/app-server.js",
     "test": "node --test scripts/tests/*.test.js",
     "e2e:queue": "pnpm run build && node --test scripts/e2e/queue-failure.e2e.js",
     "verify": "node scripts/verify.js",
