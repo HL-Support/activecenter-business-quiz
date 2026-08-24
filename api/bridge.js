@@ -3725,9 +3725,12 @@ module.exports = async function handler(req, res) {
       }).catch((error) => {
         console.error('Canonical hot-lead enqueue error:', error.message);
       });
+      // Ehrliche Semantik (Audit 4.7): hier ist nur der Outbox-Job erzeugt worden.
+      // Ob die Mail wirklich zugestellt wurde, weiss ausschliesslich der Worker/Provider.
       return res.status(200).json({
         success: true,
-        email_sent: true,
+        queued: true,
+        email_sent: false,
         skipped_direct_email: true,
         reason: 'canonical_outbox_handles_hot_lead',
         lead_hash: canonicalLeadHash,

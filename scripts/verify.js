@@ -230,6 +230,16 @@ function verifyHashFlow() {
     'api/bridge.js must skip legacy resume/initial points writes for lead system v2'
   );
   assert(
+    /queued: true,\s*\n\s*email_sent: false,[\s\S]{0,250}canonical_outbox_handles_hot_lead/.test(
+      apiBridge
+    ),
+    'bridge canonical notify path must report queued:true, never a delivery it cannot know'
+  );
+  assert(
+    app.includes('data.queued === true || data.email_sent === true'),
+    'App.jsx must accept the honest queued ack for the notify-sent marker'
+  );
+  assert(
     leadInit.includes("supabaseRpc('init_lead'") &&
       leadTrack.includes("supabaseRpc('upsert_video_progress_monotonic'") &&
       leadTrack.includes("supabaseRpc('enqueue_lead_sync'") &&

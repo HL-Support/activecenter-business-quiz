@@ -135,7 +135,9 @@ function sendAllVideosCompletedCoachNotification(slug, memberId, completedStep, 
   })
     .then((response) => response.json().catch(() => ({})))
     .then((data) => {
-      if (data && data.success && data.email_sent) {
+      // queued:true ist die ehrliche kanonische Antwort (Outbox uebernimmt die Mail);
+      // email_sent:true bleibt fuer den Legacy-Direktversandpfad akzeptiert.
+      if (data && data.success && (data.queued === true || data.email_sent === true)) {
         le.setItem(notifyKey, 'sent');
       }
     })
