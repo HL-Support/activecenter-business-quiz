@@ -305,12 +305,41 @@ function verifyRemovedRuntimeSurface() {
   );
 }
 
+function verifyApiHardening() {
+  // P0-3: Drei Eigenschaften, die nicht still zurueckfallen duerfen.
+  const leadTrack = fs.readFileSync(path.join(projectRoot, 'api', 'lead-track.js'), 'utf8');
+
+  assert(
+    leadTrack.includes('ALLOWED_EVENTS'),
+    'api/lead-track.js must keep the ALLOWED_EVENTS allowlist at the HTTP boundary'
+  );
+  assert(
+    leadTrack.includes('event_not_allowed'),
+    'api/lead-track.js must reject unknown events with event_not_allowed (400 = permanent in the client queue)'
+  );
+
+  const apiDir = path.join(projectRoot, 'api');
+  const wildcardCors = fs
+    .readdirSync(apiDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.js'))
+    .filter((entry) =>
+      fs.readFileSync(path.join(apiDir, entry.name), 'utf8').includes("Access-Control-Allow-Origin', '*'")
+    )
+    .map((entry) => `api/${entry.name}`);
+
+  assert(
+    wildcardCors.length === 0,
+    `Wildcard CORS is not allowed in api/: ${wildcardCors.join(', ')}`
+  );
+}
+
 function main() {
   for (const filePath of filesToSyntaxCheck) {
     runNodeCheck(filePath);
   }
 
   verifyRemovedRuntimeSurface();
+  verifyApiHardening();
 
   verifyTranslations();
   verifyVideoConfig();

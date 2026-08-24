@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 const {
   generateLeadHash,
   getLeadFlags,
@@ -13,6 +15,42 @@ const {
   supabaseJson,
   supabaseRpc,
 } = require('../server/lead-system');
+
+const LEAD_SESSION_COOKIE = 'ac_lead_session';
+const LEAD_SESSION_MAX_AGE_SECONDS = 7776000; // 90 Tage, identisch zur JWT-Laufzeit
+
+// Audit 4.3, Beobachtungsmodus: Das signierte Cookie erlaubt lead-track spaeter zu pruefen,
+// ob ein lead_hash zum Browser gehoert, der ihn bekommen hat. Zwei Invarianten:
+//  - Fehlt JWT_SECRET, wird KEIN Cookie gesetzt und KEIN Fehler geworfen (fail-open): Ein
+//    fehlendes Secret darf den bezahlten Funnel nicht anhalten.
+//  - setLeadCookie() hat den Set-Cookie-Header schon belegt; setHeader wuerde ihn
+//    ueberschreiben. Deshalb wird an den vorhandenen Wert angehaengt, nie ersetzt.
+function setLeadSessionCookie(res, leadHash) {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || !leadHash) return;
+
+  let token;
+  try {
+    token = jwt.sign({ lh: leadHash, v: 1 }, secret, { algorithm: 'HS256', expiresIn: '90d' });
+  } catch (error) {
+    console.warn('Lead session cookie skipped (non-critical):', error.message);
+    return;
+  }
+
+  const cookie = [
+    `${LEAD_SESSION_COOKIE}=${token}`,
+    `Max-Age=${LEAD_SESSION_MAX_AGE_SECONDS}`,
+    'Path=/',
+    'HttpOnly',
+    'Secure',
+    'SameSite=Lax',
+  ].join('; ');
+
+  const existing = typeof res.getHeader === 'function' ? res.getHeader('Set-Cookie') : null;
+  const cookies = Array.isArray(existing) ? [...existing] : existing ? [existing] : [];
+  cookies.push(cookie);
+  res.setHeader('Set-Cookie', cookies);
+}
 
 module.exports = async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -81,6 +119,7 @@ module.exports = async function handler(req, res) {
           ).catch((err) => console.warn('UTM backfill failed (non-critical):', err?.message));
         }
         setLeadCookie(res, existingLeadHash);
+        setLeadSessionCookie(res, existingLeadHash);
         return sendJson(res, 200, {
           success: true,
           enabled: true,
@@ -142,6 +181,7 @@ module.exports = async function handler(req, res) {
     }
 
     setLeadCookie(res, leadHash);
+    setLeadSessionCookie(res, leadHash);
     return sendJson(res, 200, {
       success: true,
       enabled: true,

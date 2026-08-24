@@ -3577,8 +3577,36 @@ function buildBusinessTypeformPayload(input) {
   };
 }
 
+const CORS_ALLOWED_ORIGINS = new Set([
+  'https://business.activecenter.info',
+  'https://quiz.activecenter.info',
+  'https://business.eaglesfit.ch',
+  'https://businessleadsquiz.vercel.app',
+]);
+// Eine reine Suffixpruefung auf '.vercel.app' wuerde JEDE fremde Vercel-App zulassen; erlaubt
+// ist deshalb nur das projekteigene Team-Suffix der Preview-Deployments.
+const PREVIEW_ORIGIN_SUFFIX = '-markus-oberhofers-projects.vercel.app';
+
+function allowedCorsOrigin(origin) {
+  const value = String(origin || '').trim();
+  if (!value) return '';
+  if (CORS_ALLOWED_ORIGINS.has(value)) return value;
+  // Nur https-Origins ohne Port, Pfad oder Userinfo - sonst genuegte
+  // 'https://evil.example/-markus-oberhofers-projects.vercel.app' fuer die Suffixpruefung.
+  if (!/^https:\/\/[a-z0-9.-]+$/i.test(value)) return '';
+  return value.endsWith(PREVIEW_ORIGIN_SUFFIX) ? value : '';
+}
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // P0-4: Kein Wildcard-CORS mehr. Ist der Origin nicht erlaubt, wird der ACAO-Header GAR
+  // NICHT gesetzt - der Browser blockt dann selbst. Same-Origin- und Server-zu-Server-Aufrufe
+  // (n8n, Worker, curl) senden keinen Origin und bleiben unberuehrt. 'Vary: Origin' muss
+  // immer mitgehen, sonst liefert ein Cache die Antwort eines Origins an einen anderen aus.
+  const allowedOrigin = allowedCorsOrigin(req.headers?.origin);
+  res.setHeader('Vary', 'Origin');
+  if (allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -3701,6 +3729,24 @@ module.exports = async function handler(req, res) {
 
     const canonicalLeadHash = leadHashOf(payload);
     if (canonicalLeadHash) {
+      // Live-Befund 24.08.2026: Ein frei erfundener qz_-Hash hat ueber diesen Zweig einen
+      // echten lead_state-Datensatz und 4 Outbox-Jobs erzeugt (der Mirror legt den Lead bei
+      // Bedarf an). Diese Route darf Leads nur noch fortschreiben, nie materialisieren.
+      // Ein leeres Array ist der Beweis, dass es den Lead nicht gibt -> 404, keine
+      // Folgeaufrufe. null bedeutet dagegen "Supabase gar nicht konfiguriert"; dann kann
+      // dieser Zweig ohnehin nichts schreiben und die Semantik bleibt wie bisher.
+      const knownLeadRows = await supabaseJson(
+        `lead_state?lead_hash=eq.${encodeURIComponent(canonicalLeadHash)}&select=lead_hash&limit=1`
+      );
+      if (Array.isArray(knownLeadRows) && knownLeadRows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          queued: false,
+          email_sent: false,
+          error: 'unknown_lead',
+        });
+      }
+
       const completedAt = safeString(payload.completed_at || nowIso(), 40);
       for (const step of completedSteps) {
         await mirrorLegacyTrackingToLeadSystemV2({
