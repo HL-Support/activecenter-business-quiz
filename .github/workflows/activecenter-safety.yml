@@ -50,3 +50,41 @@ jobs:
           # Seit 24.08.2026 (init-quiz-db-Entfernung deployt): entfernte Route
           # muss in Produktion strikt 404 liefern (Audit-Abnahmekriterium 13.4).
           READONLY_SMOKE_STRICT_INIT_ROUTE: '1'
+
+  e2e-queue:
+    # Fehlerfall-E2E (Audit P0-6): der frisch gebaute Client laeuft im echten Browser
+    # gegen die Produktions-API (markierte Testleads) und muss Totalausfall, Reload-
+    # Nachlieferung und transiente 500er ohne Eventverlust ueberstehen.
+    name: e2e-queue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+
+      - name: Install Chromium
+        run: npx playwright install chromium
+
+      - name: Queue failure suite
+        run: pnpm run e2e:queue
+
+      - name: Upload debug artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-debug
+          path: e2e-artifacts/
+          retention-days: 7
