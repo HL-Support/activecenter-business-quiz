@@ -106,6 +106,27 @@ test('incomplete video completion is a safe no-send response', async () => {
   });
 });
 
+test('complete canonical video completion reports honest queued semantics', async () => {
+  // Audit 4.7: Der kanonische Zweig erzeugt nur den Outbox-Job. Die Antwort darf keine
+  // Zustellung behaupten - email_sent kennt ausschliesslich der Worker/Provider.
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new globalThis.Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } });
+  try {
+    const response = await invoke({
+      action: 'notify_all_videos_completed',
+      payload: { lead_hash: 'qz_contracttestlead0001', completed_steps: [1, 2, 3], lang: 'de' },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.success, true);
+    assert.equal(response.body.queued, true);
+    assert.equal(response.body.email_sent, false);
+    assert.equal(response.body.reason, 'canonical_outbox_handles_hot_lead');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('lookup_subdomain falls back from a contact id to its coach Herbalife id', async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];
