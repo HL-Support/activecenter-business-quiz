@@ -11,6 +11,7 @@
     "test": "node --test scripts/tests/*.test.js",
     "e2e:queue": "pnpm run build && node --test scripts/e2e/queue-failure.e2e.js",
     "verify": "node scripts/verify.js",
+    "inventory:check": "node scripts/inventory/check-consumers.js",
     "smoke:resume": "node scripts/smoke-resume-link.js",
     "smoke:readonly": "node scripts/smoke-readonly.js",
     "guard:deploy": "node scripts/guard-production-deploy.js",

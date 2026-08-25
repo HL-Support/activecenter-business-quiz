@@ -1,0 +1,782 @@
+{
+  "$comment": "Maschinenpruefbares Inventar aller Verbraucher der Supabase-Instanz Stats_Logs. Erzeugt fuer Audit 2026-08-23, Kapitel 12 Punkt 3; Voraussetzung fuer Phase 4 und Phase 6. Pflege dieses Inventar zusammen mit docs/audits/verbraucher-inventar/INVENTAR.md. Das Gate scripts/inventory/check-consumers.js prueft es gegen einen frischen ripgrep-Scan.",
+  "version": 1,
+  "generated_at": "2026-08-24",
+  "supabase_project": {
+    "name": "Stats_Logs",
+    "ref": "xlpiisbozpgmemxhtivj",
+    "rest_base": "https://xlpiisbozpgmemxhtivj.supabase.co/rest/v1",
+    "note": "Einzige Supabase-Instanz im Workspace. Ein zweiter Projekt-Ref (gtvgbvtqmzrcvhumoxog) gehoert zu Future Online Support und ist nicht Teil dieser Migration."
+  },
+  "workspace_root_relative_to_repo": "..",
+  "schemas_in_instance": [
+    "public",
+    "marathon",
+    "marathon_backup",
+    "analytics_internal",
+    "cron",
+    "storage"
+  ],
+  "storage": {
+    "buckets": [
+      {
+        "id": "images",
+        "public": true,
+        "objects": 14,
+        "last_object_at": "2026-07-27T03:55:48Z",
+        "owner": "fitapp-marathon",
+        "note": "Audit Kapitel 8 Phase 7 Punkt 4 verlangt migrierte Storage-Inhalte vor der Kuendigung. Der Bucket gehoert nicht dem Business-Leads-Produkt."
+      }
+    ]
+  },
+  "consumer_kinds": {
+    "app": "Eigenstaendig deploybare Anwendung mit Laufzeitzugriff auf die Instanz.",
+    "workflow": "n8n-Workflow auf der Hetzner-Instanz; Zugriff ueber die n8n-Credential Supabase Stats_Logs (service role).",
+    "in-database": "Laeuft in der Datenbank selbst (pg_cron); kein externer Aufrufer.",
+    "ops-script": "Lokales Werkzeug ohne Deployment, das mit produktiven Rechten gegen die Instanz laufen kann.",
+    "legacy": "Code vorhanden, Deployment abgeschaltet oder verwaist; Abschaltentscheidung noetig.",
+    "foreign-instance": "Spricht eine andere Supabase-Instanz; nur inventarisiert, damit es nicht verwechselt wird.",
+    "non-consumer": "Treffer im Scan ohne Laufzeitzugriff (Deploy-Guards, Dokumentation, Mitschnitte).",
+    "credential-store": "Datei, die Zugaenge zur Instanz haelt, ohne selbst Code auszufuehren; relevant fuer die Schluesselrotation."
+  },
+  "consumers": [
+    {
+      "id": "business-leads-quiz",
+      "kind": "app",
+      "title": "Business Leads Quiz — Funnel-Web und APIs",
+      "platform": "Vercel",
+      "vercel_project": "business_leads_quiz",
+      "domains": [
+        "business.activecenter.info",
+        "quiz.activecenter.info"
+      ],
+      "status": "aktiv",
+      "access": "rest+rpc",
+      "writes": true,
+      "canonical_writer": true,
+      "env_source": "Vercel-Env (production): SUPABASE_URL, SUPABASE_SERVICE_KEY. Kein Fallback auf eine feste Projekt-URL.",
+      "paths": [
+        "business_leads_quiz/api/**",
+        "business_leads_quiz/server/**",
+        "business_leads_quiz/*.sql",
+        "business_leads_quiz/*.md",
+        "business_leads_quiz/docs/**",
+        "business_leads_quiz/.env*",
+        "business_leads_quiz/supabase/**"
+      ],
+      "evidence": [
+        "business_leads_quiz/server/lead-system.js:6-7 — SUPABASE_URL/SUPABASE_SERVICE_KEY aus process.env, kein Fallback",
+        "business_leads_quiz/server/lead-system.js:228 — fetch(`${SUPABASE_URL}/rest/v1/${path}`)",
+        "business_leads_quiz/server/lead-system.js:253 — supabaseRpc() baut rpc/${functionName}",
+        "business_leads_quiz/api/bridge.js:342 — ZWEITER, eigener Supabase-Client im Bridge-Monolithen (Audit 4.6)",
+        "business_leads_quiz/api/lead-init.js:150 — supabaseRpc('init_lead')",
+        "business_leads_quiz/api/lead-track.js:289,405,495 — enqueue_lead_sync, upsert_answer_current, upsert_video_progress_monotonic",
+        "business_leads_quiz/api/lead-outbox-worker.js:929,940,967 — mark_outbox_done, mark_outbox_failed, claim_outbox_jobs",
+        "business_leads_quiz/api/lead-system-health.js:191 — app_config Upsert (einziger Schreibzugriff des Health-Endpunkts)"
+      ],
+      "objects": [
+        "lead_state",
+        "lead_events",
+        "lead_video_progress",
+        "lead_answers_current",
+        "lead_sync_outbox",
+        "lead_profiles",
+        "lead_migration_unresolved",
+        "app_config",
+        "quiz_sessions",
+        "tracking_sessions",
+        "tracking_events",
+        "tracking_video_progress",
+        "v_lead_state_full",
+        "v_funnel_analysis",
+        "v_resume_metrics",
+        "v_completion_metrics",
+        "rpc/init_lead",
+        "rpc/enqueue_lead_sync",
+        "rpc/upsert_answer_current",
+        "rpc/upsert_video_progress_monotonic",
+        "rpc/claim_outbox_jobs",
+        "rpc/mark_outbox_done",
+        "rpc/mark_outbox_failed"
+      ],
+      "migration_relevance": "kritisch",
+      "shutdown_gate": "Phase 4: alle /rest/v1- und rpc/-Aufrufe durch Kysely ersetzt, beide Supabase-Clients (server/lead-system.js UND api/bridge.js) abgeloest. Restgate laut Audit 8/Phase 4 Punkt 7."
+    },
+    {
+      "id": "activecenter-analytics",
+      "kind": "app",
+      "title": "Activecenter Analytics — Auswertungs-Bridge",
+      "platform": "Vercel",
+      "vercel_project": "activecenter-analytics",
+      "domains": [
+        "activecenter-analytics.vercel.app"
+      ],
+      "status": "aktiv",
+      "access": "rest",
+      "writes": true,
+      "env_source": "Vercel-Env (production): SUPABASE_URL, SUPABASE_SERVICE_KEY; lokal zusaetzlich .env.local",
+      "paths": [
+        "analytics/api/**",
+        "analytics/.env*"
+      ],
+      "evidence": [
+        "analytics/api/bridge.js:16-17 — SUPABASE_URL/SUPABASE_SERVICE_KEY aus process.env",
+        "analytics/api/bridge.js:211 — POST webhook_deliveries (Schreibzugriff)",
+        "analytics/api/bridge.js:2148 — POST lead_events mit createEventUid('test_lead') (Schreibzugriff in den Leadkern)"
+      ],
+      "objects": [
+        "v_lead_state_full",
+        "lead_state",
+        "lead_events",
+        "lead_answers_current",
+        "lead_video_progress",
+        "lead_sync_outbox",
+        "system_alerts",
+        "webhook_deliveries"
+      ],
+      "migration_relevance": "kritisch",
+      "shutdown_gate": "Muss vor dem Datenbank-Cutover auf fachliche APIs oder den direkten Treiber umgestellt sein. Schreibt in lead_events — kein isolierter Quiz-Cutover moeglich (Audit 8/Phase 6 Punkt 2)."
+    },
+    {
+      "id": "herbalife-erfolgs-berechner",
+      "kind": "app",
+      "title": "Business-Kalkulator / Kontaktliste",
+      "platform": "Vercel",
+      "vercel_project": "herbalife-erfolgs-berechner",
+      "domains": [
+        "herbalife-erfolgs-berechner.vercel.app"
+      ],
+      "status": "aktiv",
+      "access": "rest",
+      "writes": true,
+      "env_source": "Vercel-Env (production): SUPABASE_URL, SUPABASE_SERVICE_KEY",
+      "paths": [
+        "Business_Kalkulator/api/**",
+        "Business_Kalkulator/.env*"
+      ],
+      "evidence": [
+        "Business_Kalkulator/api/contacts.js:1322 — POST lead_contact_crm?on_conflict=lead_hash (Upsert)",
+        "Business_Kalkulator/api/contacts.js:1377 — zweiter lead_contact_crm-Upsert",
+        "Business_Kalkulator/api/contacts.js:980,1012,1018,1023 — Lesezugriffe auf v_lead_state_full, lead_events, lead_video_progress, lead_sync_outbox",
+        "Business_Kalkulator/api/sso.js:42 — POST sso_token_consumptions"
+      ],
+      "objects": [
+        "v_lead_state_full",
+        "lead_events",
+        "lead_video_progress",
+        "lead_sync_outbox",
+        "lead_contact_crm",
+        "sso_token_consumptions"
+      ],
+      "migration_relevance": "kritisch",
+      "shutdown_gate": "Einziger Schreiber von lead_contact_crm. Tabelle steht in der Besitzmatrix unter 'Sicher in business_leads' — der Schreiber ist aber ein FREMDES Projekt. Eigentuemerfrage vor Phase 5 klaeren."
+    },
+    {
+      "id": "herbalife-business-analyse",
+      "kind": "app",
+      "title": "Herbalife Business Analyse (HBA)",
+      "platform": "Vercel",
+      "vercel_project": "herbalife-business-analyse",
+      "domains": [
+        "herbalife-business-analyse.vercel.app"
+      ],
+      "status": "aktiv",
+      "access": "rest+rpc",
+      "writes": true,
+      "env_source": "Vercel-Env (production): HBA_SUPABASE_URL/HBA_SUPABASE_SERVICE_KEY/HBA_SUPABASE_ANON_KEY sowie QUIZ_SUPABASE_URL/QUIZ_SUPABASE_SERVICE_KEY. Beide Paare zeigen auf dieselbe Instanz; hartkodierter Fallback im Code und der Anon-Key im ausgelieferten index.html.",
+      "paths": [
+        "Herbalife Business Analyse/**"
+      ],
+      "evidence": [
+        "Herbalife Business Analyse/api/bridge.js:58 — process.env.HBA_SUPABASE_URL || 'https://xlpiisbozpgmemxhtivj.supabase.co' (stiller Fallback)",
+        "Herbalife Business Analyse/api/bridge.js:519 — gleicher Fallback fuer QUIZ_SUPABASE_URL",
+        "Herbalife Business Analyse/api/bridge.js:523,531,569 — Lesezugriffe auf lead_events, lead_state, v_lead_state_full",
+        "Herbalife Business Analyse/index.html:1593 — Instanz-URL im ausgelieferten Browser-Bundle"
+      ],
+      "objects": [
+        "hba_persons",
+        "hba_monthly_metrics",
+        "hba_special_recognitions",
+        "hba_supervisor_stage_reviews",
+        "hba_supervisor_stage_achievements",
+        "hba_lines_monthly_summary",
+        "hba_data_source_status",
+        "lead_events",
+        "lead_state",
+        "v_lead_state_full",
+        "rpc/set_hba_supervisor_stage_review_awt",
+        "rpc/decide_hba_supervisor_stage_review"
+      ],
+      "migration_relevance": "hoch",
+      "shutdown_gate": "Liest den Leadkern, schreibt nur hba_*. Die hba_*-Tabellen gehen laut Besitzmatrix NICHT nach business_leads. Vor Phase 6 entscheiden, wo hba_* kuenftig liegt und wie HBA an Leaddaten kommt (fachliche API statt Direktzugriff). Der hartkodierte Fallback muss vorher weg, sonst schreibt HBA nach dem Umzug weiter in die Altinstanz."
+    },
+    {
+      "id": "hl-support-analytics",
+      "kind": "app",
+      "title": "HL-Support Analytics — Nurture-/Webhook-/Cron-Dashboard",
+      "platform": "Vercel",
+      "vercel_project": "hl-support-analytics",
+      "domains": [
+        "hl-support-analytics.vercel.app"
+      ],
+      "status": "aktiv",
+      "access": "rest+rpc",
+      "writes": true,
+      "env_source": "Vercel-Env (production): SUPABASE_URL, SUPABASE_SERVICE_KEY; faellt ohne Konfiguration weich aus",
+      "paths": [
+        "HL-Support_Analytics/**"
+      ],
+      "evidence": [
+        "HL-Support_Analytics/AGENTS.md:38 — nennt xlpiisbozpgmemxhtivj als Zielinstanz",
+        "HL-Support_Analytics/api/_supabase.js:12 — zentraler REST-Zugriff, u.a. form_webhook_deliveries",
+        "HL-Support_Analytics/api/cron-runs.js:52 — Lesezugriff auf cron_runs",
+        "HL-Support_Analytics/supabase/schema.sql — Definition von cron_runs und webhook_connector_heartbeats"
+      ],
+      "objects": [
+        "cron_runs",
+        "webhook_connector_heartbeats",
+        "webhook_delivery_jobs",
+        "webhook_delivery_attempts",
+        "webhook_delivery_actions",
+        "webhook_source_events",
+        "form_webhook_deliveries",
+        "lead_sync_outbox",
+        "rpc/nurture_overview",
+        "rpc/nurture_people_page",
+        "rpc/nurture_events_page",
+        "rpc/nurture_health_signals",
+        "rpc/webhook_delivery_overview",
+        "rpc/webhook_delivery_health_signals",
+        "rpc/retry_webhook_delivery_job",
+        "rpc/record_webhook_connector_heartbeat"
+      ],
+      "migration_relevance": "hoch",
+      "shutdown_gate": "Konsumiert die nurture_*-RPCs, die auf lead_events/lead_sync_outbox lesen. Die RPCs muessen im neuen PostgreSQL 1:1 existieren oder durch fachliche APIs ersetzt werden, bevor die Subscription/der Dump gefahren wird."
+    },
+    {
+      "id": "fitapp-marathon",
+      "kind": "app",
+      "title": "FitApp Marathon — eigene Schemas plus zentrale Protokolltabellen",
+      "platform": "Vercel + Coolify",
+      "vercel_project": "fitapp-marathon",
+      "domains": [
+        "fitapp-marathon.vercel.app"
+      ],
+      "status": "aktiv",
+      "access": "direct-postgres+rest+storage",
+      "writes": true,
+      "env_source": "DATABASE_URL auf den Supabase-Supavisor-Pooler (Session-Modus, Port 5432) mit Rolle marathon_app; zusaetzlich SUPABASE_URL/SUPABASE_SERVICE_KEY fuer den verbliebenen supabase-js-Pfad. Optional CENTRAL_SUPABASE_URL/CENTRAL_SUPABASE_KEY (derzeit ungesetzt).",
+      "paths": [
+        "fitapp-marathon/**"
+      ],
+      "evidence": [
+        "fitapp-marathon/lib/db.ts:11-17 — DATABASE_URL zeigt waehrend des Umbaus auf den Supabase-Pooler, spaeter auf 10.0.1.3",
+        "fitapp-marathon/docs/runbooks/datenzugriff-kysely.md:47 — Verbindung ueber aws-1-eu-west-1.pooler.supabase.com:5432",
+        "fitapp-marathon/lib/central-db.ts:60 — einziger verbliebener createClient(); bedient public.cron_runs und public.sso_token_consumptions",
+        "fitapp-marathon/lib/cronlog.ts:16-17 — Rolle marathon_app hat auf public.cron_runs KEINE Rechte, deshalb bleibt dieser Pfad auf supabase-js",
+        "fitapp-marathon/app/sso/route.ts — Schreibzugriff auf sso_token_consumptions"
+      ],
+      "objects": [
+        "marathon.* (eigene Schemas, ca. 40 Tabellen)",
+        "marathon_backup.*",
+        "cron_runs",
+        "sso_token_consumptions",
+        "storage.objects (Bucket images)"
+      ],
+      "migration_relevance": "kritisch",
+      "shutdown_gate": "Haelt als EINZIGER Verbraucher eine direkte PostgreSQL-Verbindung in dieselbe Instanz und verbraucht damit Connection-Budget, das der Kysely-Umbau des Quiz in Phase 4 ebenfalls beansprucht. Marathon zieht parallel auf 10.0.1.3 um. Beide Umzuege muessen koordiniert werden; cron_runs und sso_token_consumptions brauchen eine explizite Eigentuemerentscheidung, bevor eine der beiden Seiten abschaltet."
+    },
+    {
+      "id": "landing-page",
+      "kind": "app",
+      "title": "Landing Page (global-sce.com) — Tracking-Schreiber",
+      "platform": "Vercel",
+      "vercel_project": "landing-page",
+      "domains": [
+        "global-sce.com"
+      ],
+      "status": "aktiv",
+      "access": "rest",
+      "writes": true,
+      "env_source": "Vercel-Env (production + preview): SUPABASE_URL, SUPABASE_SERVICE_KEY; lokal .env.local/.env.supabase",
+      "paths": [
+        "landing-page/**"
+      ],
+      "evidence": [
+        "landing-page/api/bridge.js:15-16 — SUPABASE_URL/SUPABASE_SERVICE_KEY aus process.env",
+        "landing-page/api/bridge.js — POST-Inserts in tracking_sessions/tracking_events/tracking_video_progress"
+      ],
+      "objects": [
+        "tracking_sessions",
+        "tracking_events",
+        "tracking_video_progress",
+        "form_webhook_deliveries",
+        "landing_page"
+      ],
+      "migration_relevance": "hoch",
+      "shutdown_gate": "Schreibt in dieselben tracking_*-Tabellen, die die Besitzmatrix dem Business-Leads-Produkt zuordnet. Zweiter aktiver Schreiber auf demselben Objektsatz — muss im Cutover-Fenster mit stillgelegt werden (Audit 13.5.2 Schreibbarriere)."
+    },
+    {
+      "id": "activecenter-hautanalyse",
+      "kind": "app",
+      "title": "Hautanalyse — Webhook-Monitor und Delivery-Queue",
+      "platform": "Vercel",
+      "vercel_project": "activecenter-hautanalyse",
+      "domains": [
+        "skin.hl-support.biz"
+      ],
+      "status": "aktiv",
+      "access": "rest+rpc",
+      "writes": true,
+      "env_source": "Vercel-Env (production): SUPABASE_URL, SUPABASE_SERVICE_KEY",
+      "paths": [
+        "hautanalyse/**"
+      ],
+      "evidence": [
+        "hautanalyse/api/_webhook-monitor.js:1 — POST/PATCH auf form_webhook_deliveries",
+        "hautanalyse/api/_delivery-queue.js:15 — generischer RPC-Dispatcher /rest/v1/rpc/${functionName}"
+      ],
+      "objects": [
+        "form_webhook_deliveries",
+        "webhook_delivery_jobs",
+        "rpc/claim_webhook_delivery_jobs",
+        "rpc/mark_webhook_delivery_done",
+        "rpc/mark_webhook_delivery_failed",
+        "rpc/enqueue_webhook_event"
+      ],
+      "migration_relevance": "mittel",
+      "shutdown_gate": "form_webhook_deliveries steht in der Besitzmatrix unter 'Eigentuemer noch bestaetigen'. Vier fremde Apps schreiben hinein — die Tabelle gehoert dem Webhook-Verbund, nicht dem Quiz. Zuordnung vor der Publication entscheiden."
+    },
+    {
+      "id": "wellness-check",
+      "kind": "app",
+      "title": "Wellness-Check — Webhook-Monitor",
+      "platform": "Vercel",
+      "vercel_project": "wellness-check",
+      "domains": [
+        "wc.hl-support.biz"
+      ],
+      "status": "aktiv",
+      "access": "rest",
+      "writes": true,
+      "env_source": "Vercel-Env (production): SUPABASE_URL, SUPABASE_SERVICE_KEY",
+      "paths": [
+        "wellness-check/**"
+      ],
+      "evidence": [
+        "wellness-check/api/_webhook-monitor.js:1 — POST/PATCH auf form_webhook_deliveries"
+      ],
+      "objects": [
+        "form_webhook_deliveries"
+      ],
+      "migration_relevance": "mittel",
+      "shutdown_gate": "Wie hautanalyse: haengt an der Eigentuemerentscheidung fuer form_webhook_deliveries."
+    },
+    {
+      "id": "activecenter-surveys",
+      "kind": "app",
+      "title": "Umfragen / Lifestyle-Survey — Webhook-Monitor",
+      "platform": "Vercel",
+      "vercel_project": "activecenter-surveys",
+      "domains": [
+        "lifestylesurvey.info"
+      ],
+      "status": "aktiv",
+      "access": "rest",
+      "writes": true,
+      "env_source": "Vercel-Env (production): SUPABASE_URL, SUPABASE_SERVICE_KEY; .env.example dokumentiert beide",
+      "paths": [
+        "Umfragen/**"
+      ],
+      "evidence": [
+        "Umfragen/src/server/webhook-monitor.ts:1,29 — POST-Insert plus PATCH-Status auf form_webhook_deliveries"
+      ],
+      "objects": [
+        "form_webhook_deliveries"
+      ],
+      "migration_relevance": "mittel",
+      "shutdown_gate": "Wie hautanalyse: haengt an der Eigentuemerentscheidung fuer form_webhook_deliveries."
+    },
+    {
+      "id": "n8n-quiz-nurture-email-sender",
+      "kind": "workflow",
+      "title": "AC - Quiz Nurture Email Sender",
+      "platform": "n8n (n8n.hl-support.biz)",
+      "workflow_id": "RqKSRTgFv8mv04H2",
+      "status": "aktiv",
+      "access": "rest+rpc",
+      "writes": true,
+      "env_source": "n8n-Credential 'Supabase Stats_Logs (service role)' (Typ supabaseApi), httpRequest-Nodes",
+      "paths": [],
+      "evidence": [
+        "n8n API GET /api/v1/workflows — Node 'Supabase - Get Eligible Leads': GET /rest/v1/v_lead_state_full?source_app=eq.business_leads_quiz&funnel_key=eq.business, limit 5000",
+        "Node 'Supabase - Get Test Events': GET /rest/v1/lead_events?event_name=in.(test_lead_marked,test_lead_unmarked,nurture_sent)",
+        "Node 'Supabase - Get Resume Session': GET /rest/v1/tracking_sessions?lead_hash=eq.<expr>",
+        "Nodes 'Supabase - Log Sent/Skip/Run': POST /rest/v1/rpc/record_nurture_sent | record_nurture_skip | record_nurture_run",
+        "Leads_quiz_Nurture/docs/NURTURE_EMAIL_SENDER_WORKFLOW.md:253-255 — dokumentiert dieselben Pfade"
+      ],
+      "objects": [
+        "v_lead_state_full",
+        "lead_events",
+        "tracking_sessions",
+        "rpc/record_nurture_sent",
+        "rpc/record_nurture_skip",
+        "rpc/record_nurture_run"
+      ],
+      "migration_relevance": "kritisch",
+      "shutdown_gate": "Aktiver Schreiber im Leadkern ueber RPCs. Audit 8/Phase 6 Punkt 6 verlangt Pausieren im Cutover-Fenster. Ziel laut Kapitel 6: n8n ruft fachliche APIs statt PostgREST; sonst braucht 10.0.1.4 eigene UFW-/pg_hba-/Rollenfreigaben."
+    },
+    {
+      "id": "n8n-error-alert-postmark",
+      "kind": "workflow",
+      "title": "AC - Error Alert (Postmark)",
+      "platform": "n8n (n8n.hl-support.biz)",
+      "workflow_id": "vSpXIyOUK9WIlvxi",
+      "status": "aktiv",
+      "access": "rpc",
+      "writes": true,
+      "env_source": "n8n-Credential 'Supabase Stats_Logs (service role)'",
+      "paths": [],
+      "evidence": [
+        "n8n API — Node 'Supabase - Log Nurture Failure': POST /rest/v1/rpc/record_nurture_failure, p_workflow_id faellt auf RqKSRTgFv8mv04H2 zurueck"
+      ],
+      "objects": [
+        "rpc/record_nurture_failure",
+        "nurture_runs"
+      ],
+      "migration_relevance": "hoch",
+      "shutdown_gate": "Fehlerpfad des Nurture-Senders. Muss zusammen mit RqKSRTgFv8mv04H2 umgestellt werden, sonst gehen nach dem Cutover genau die Fehlermeldungen verloren, die den Cutover bewerten."
+    },
+    {
+      "id": "n8n-supabase-keepalive",
+      "kind": "workflow",
+      "title": "Supabase Keep-Alive",
+      "platform": "n8n (n8n.hl-support.biz)",
+      "workflow_id": "CODeVYeZ_63C-DoT4Z8SN",
+      "status": "aktiv",
+      "access": "rest",
+      "writes": false,
+      "env_source": "n8n-Credential 'Supabase Stats_Logs (service role)'",
+      "paths": [],
+      "evidence": [
+        "n8n API — Schedule alle 5 Tage; zwei Nodes ('Image Factory', 'Reconnect') pingen beide GET https://xlpiisbozpgmemxhtivj.supabase.co/rest/v1/ ohne Tabelle"
+      ],
+      "objects": [],
+      "migration_relevance": "niedrig",
+      "shutdown_gate": "Reiner Ping gegen die PostgREST-Wurzel. Muss beim Restscan als 0-Treffer nachweisbar abgeschaltet sein, sonst haelt er die Instanz aktiv und verfaelscht 'keine Zugriffe mehr'. Nebenbefund: beide Nodes zeigen trotz unterschiedlicher Namen auf dasselbe Projekt."
+    },
+    {
+      "id": "n8n-quiz-video-inactivity-checker",
+      "kind": "workflow",
+      "title": "AC - Quiz Video Inactivity Checker",
+      "platform": "n8n (n8n.hl-support.biz)",
+      "workflow_id": "ie2WEc1RmFhN5LQf",
+      "status": "inaktiv",
+      "access": "rest",
+      "writes": false,
+      "env_source": "n8n-Credential 'Supabase Stats_Logs (service role)'",
+      "paths": [],
+      "evidence": [
+        "n8n API — active:false; Node 'Supabase - Get Active Leads (Stage 1-3)': GET /rest/v1/lead_profiles?lifecycle_stage=in.(video_1_watched,video_2_watched,video_3_watched)"
+      ],
+      "objects": [
+        "lead_profiles"
+      ],
+      "migration_relevance": "niedrig",
+      "shutdown_gate": "Aktuell abgeschaltet, Definition aber vorhanden. Vor Phase 6 entscheiden: loeschen oder mitmigrieren. Wird er ohne Umbau reaktiviert, liest er nach dem Cutover die Altinstanz."
+    },
+    {
+      "id": "pg-cron-analytics-refresh",
+      "kind": "in-database",
+      "title": "pg_cron Job 'stats-logs-analytics-v2-current-day'",
+      "platform": "PostgreSQL (pg_cron in der Instanz)",
+      "status": "aktiv",
+      "access": "in-database",
+      "writes": true,
+      "env_source": "cron.job in der Datenbank; kein externer Aufrufer, keine Env",
+      "paths": [],
+      "evidence": [
+        "SELECT jobid, schedule, jobname, command FROM cron.job — jobid 1, '*/15 * * * *', select analytics_internal.refresh_event_daily(...)",
+        "jobid 2, '15 3 1 * *', select pg_stat_statements_reset()",
+        "analytics_internal.refresh_runs: letzter Lauf 2026-08-24T21:15:00Z"
+      ],
+      "objects": [
+        "analytics_internal.event_daily",
+        "analytics_internal.refresh_runs",
+        "rpc/refresh_event_daily",
+        "lead_events"
+      ],
+      "migration_relevance": "hoch",
+      "shutdown_gate": "Laeuft INNERHALB der Datenbank und taucht in keinem Codescan und keiner Env-Liste auf. Er schreibt alle 15 Minuten und wuerde eine Schreibruhe-Messung (Audit 13.5.2) still unterlaufen. Muss im Cutover-Fenster deaktiviert und auf der Zielseite als Scheduler neu angelegt werden (pg_cron auf 18.6 oder Coolify Scheduled Task)."
+    },
+    {
+      "id": "business-leads-quiz-ops-scripts",
+      "kind": "ops-script",
+      "title": "Business Leads Quiz — Migrations- und Diagnoseskripte",
+      "platform": "lokal",
+      "status": "vorhanden",
+      "access": "rest+rpc+management-api",
+      "writes": true,
+      "env_source": "SUPABASE_URL/SUPABASE_SERVICE_KEY und SUPABASE_ACCESS_TOKEN/SUPABASE_PROJECT_REF aus .env.local/.env.prod",
+      "paths": [
+        "business_leads_quiz/scripts/**"
+      ],
+      "evidence": [
+        "business_leads_quiz/scripts/phase1-schema-migration.js:33 — POST /rest/v1/rpc/sql_execute (DDL ueber RPC)",
+        "business_leads_quiz/scripts/stats-logs-baseline.js:78 — POST https://api.supabase.com/v1/projects/{ref}/database/query (Management-API)",
+        "business_leads_quiz/scripts/migrate-lead-system-v2.js:92 — direkter /rest/v1-Zugriff",
+        "business_leads_quiz/scripts/backfill-nurture-sent-events.py:19 — hartkodierte Instanz-URL"
+      ],
+      "objects": [
+        "Management-API database/query (beliebiges SQL)",
+        "rpc/sql_execute",
+        "lead_events",
+        "lead_state"
+      ],
+      "migration_relevance": "hoch",
+      "shutdown_gate": "Die Management-API ist explizit Teil des Restgates (Audit 8/Phase 4 Punkt 7). Vor Phase 4 durch den Migration Runner aus 13.5.3 ersetzen; danach darf kein Skript mehr DDL ueber rpc/sql_execute fahren."
+    },
+    {
+      "id": "n8n-deploy-scripts",
+      "kind": "ops-script",
+      "title": "n8n-Deploy- und Backfill-Skripte im Workspace",
+      "platform": "lokal",
+      "status": "vorhanden",
+      "access": "rest",
+      "writes": true,
+      "env_source": "Hartkodierte Instanz-URL plus SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY aus der Umgebung",
+      "paths": [
+        "n8n/**",
+        "Leads_quiz_Nurture/**"
+      ],
+      "evidence": [
+        "n8n/deploy-quiz-nurture-email-sender.py:12 — SUPABASE_URL hartkodiert; :251 Zugriff auf /rest/v1/lead_profiles",
+        "n8n/backfill-nurture-email-subjects.js:33 — GET lead_events (nurture_sent); :49 PATCH lead_events nach event_uid"
+      ],
+      "objects": [
+        "lead_events",
+        "lead_profiles",
+        "lead_sync_outbox"
+      ],
+      "migration_relevance": "mittel",
+      "shutdown_gate": "PATCHt lead_events mit Servicerechten. Hartkodierte URL muss vor dem Cutover raus, sonst schreibt ein spaeterer Backfill in die Altinstanz."
+    },
+    {
+      "id": "analytics-ops-scripts",
+      "kind": "ops-script",
+      "title": "Analytics — lokale Wartungsskripte",
+      "platform": "lokal",
+      "status": "vorhanden",
+      "access": "rest",
+      "writes": true,
+      "env_source": "SUPABASE_URL/SUPABASE_SERVICE_KEY aus .env.local",
+      "paths": [
+        "analytics/scripts/**"
+      ],
+      "evidence": [
+        "analytics/scripts/fill-mautic-v2-fields.js:112 — PATCH lead_state (nicht deployt, laeuft aber mit Servicerechten)",
+        "analytics/scripts/analytics-v2-live-parity.js — Lesevergleich auf lead_events"
+      ],
+      "objects": [
+        "lead_state",
+        "lead_events"
+      ],
+      "migration_relevance": "mittel",
+      "shutdown_gate": "Schreibt direkt in lead_state. Muss in der Schreibbarriere aus 13.5.2 mit erfasst werden — ein Mensch, der dieses Skript im Cutover-Fenster startet, bricht die Schreibruhe."
+    },
+    {
+      "id": "adhoc-service-key-scripts",
+      "kind": "ops-script",
+      "title": "Ad-hoc-Skripte mit hartkodiertem service_role-Schluessel",
+      "platform": "lokal",
+      "status": "vorhanden",
+      "access": "rest",
+      "writes": true,
+      "env_source": "KEINE — Instanz-URL und vollstaendiger service_role-JWT stehen im Klartext im Code",
+      "paths": [
+        "create-quiz-sessions-table.js",
+        "scratch/**"
+      ],
+      "evidence": [
+        "create-quiz-sessions-table.js:6-7 — Instanz-URL plus service_role-JWT im Klartext; legt public.quiz_sessions per DDL an",
+        "scratch/find_and_fix_lisa.js:4-5 — derselbe service_role-JWT im Klartext; liest lead_state, tracking_sessions, quiz_sessions"
+      ],
+      "objects": [
+        "quiz_sessions",
+        "lead_state",
+        "tracking_sessions"
+      ],
+      "migration_relevance": "hoch",
+      "shutdown_gate": "Sicherheitsbefund, nicht nur Inventar: derselbe langlebige service_role-Schluessel liegt zweimal im Klartext im OneDrive-synchronisierten Workspace. Audit 13.3.6 macht den Plattformwechsel zum Rotationszeitpunkt — diese beiden Dateien sind vor der Rotation zu loeschen, nicht anzupassen."
+    },
+    {
+      "id": "workspace-root-env",
+      "kind": "credential-store",
+      "title": "Loses .env.local auf Workspace-Ebene",
+      "platform": "lokal",
+      "status": "vorhanden",
+      "access": "rest+management-api",
+      "writes": false,
+      "env_source": "Die Datei IST die Quelle: SUPABASE_URL, SUPABASE_SERVICE_KEY, SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF, dazu BRIDGE_KEY, LEAD_OUTBOX_WORKER_SECRET und N8N_API_KEY.",
+      "paths": [
+        ".env.local"
+      ],
+      "evidence": [
+        ".env.local (Workspace-Wurzel, Stand 15.07.2026) — enthaelt SUPABASE_SERVICE_KEY und SUPABASE_ACCESS_TOKEN fuer xlpiisbozpgmemxhtivj",
+        "Gehoert zu keinem Projekt: liegt eine Ebene ueber allen Repos und wird von keinem Deployment gelesen"
+      ],
+      "objects": [
+        "Management-API database/query (beliebiges SQL)"
+      ],
+      "migration_relevance": "hoch",
+      "shutdown_gate": "Kein Verbraucher im Betriebssinn, aber ein Zugang. SUPABASE_ACCESS_TOKEN oeffnet die Management-API mit vollem SQL-Zugriff, und die Datei liegt im OneDrive-synchronisierten Workspace. Audit 13.3.6 verlangt Rotation zum Plattformwechsel: Diese Datei ist vor der Rotation zu loeschen und danach nicht neu anzulegen."
+    },
+    {
+      "id": "workspace-api-orphan",
+      "kind": "legacy",
+      "title": "Verwaister api/-Ordner auf Workspace-Ebene",
+      "platform": "keine",
+      "status": "verwaist",
+      "access": "rest+rpc",
+      "writes": true,
+      "env_source": "process.env.SUPABASE_URL/SUPABASE_SERVICE_KEY; kein package.json, kein vercel.json, kein .vercel",
+      "paths": [
+        "api/**"
+      ],
+      "evidence": [
+        "api/bridge.js — aeltere Kopie von landing-page/api/bridge.js (gleicher tracking_*-Objektsatz)",
+        "api/init-db.js:27 — RPC 'sql'/'create_landing_page_table'",
+        "api/setup-supabase.js:48 — DDL-Setup"
+      ],
+      "objects": [
+        "tracking_sessions",
+        "tracking_events",
+        "tracking_video_progress",
+        "webhook_deliveries",
+        "landing_page",
+        "rpc/sql",
+        "rpc/create_landing_page_table"
+      ],
+      "migration_relevance": "niedrig",
+      "shutdown_gate": "Kein Deployment nachweisbar. Vor Phase 6 loeschen, damit der organisationsweite Restscan (Phase 7 Punkt 4) sauber 0 liefern kann."
+    },
+    {
+      "id": "bioniq-admin",
+      "kind": "legacy",
+      "title": "Bioniq Admin",
+      "platform": "Vercel (deaktiviert)",
+      "status": "abgeschaltet",
+      "access": "rest",
+      "writes": true,
+      "env_source": "process.env.SUPABASE_URL/SUPABASE_SERVICE_KEY aus .env.production.local; Marker zzz_vercel_disabled, kein .vercel-Link",
+      "paths": [
+        "zzz_Bioniq_Admin/**"
+      ],
+      "evidence": [
+        "zzz_Bioniq_Admin/api/bioniq-links.js:7,34 — advisor_bionic_links (POST-Upsert und DELETE)",
+        "zzz_Bioniq_Admin/api/sso.js:19,27 — sso_token_consumptions (Schreibzugriff)"
+      ],
+      "objects": [
+        "advisor_bionic_links",
+        "sso_token_consumptions"
+      ],
+      "migration_relevance": "mittel",
+      "shutdown_gate": "Formal abgeschaltet, aber Mitbesitzer von sso_token_consumptions. Die Begruendung fuer die zentrale Haltung dieser Tabelle in fitapp-marathon/lib/central-db.ts stuetzt sich auf Bioniq. Ist Bioniq endgueltig tot, faellt diese Begruendung — das ist vor Phase 5 zu bestaetigen, nicht anzunehmen."
+    },
+    {
+      "id": "bioniq-links",
+      "kind": "legacy",
+      "title": "Bioniq Links",
+      "platform": "Vercel (deaktiviert)",
+      "status": "abgeschaltet",
+      "access": "rest",
+      "writes": true,
+      "env_source": "process.env.SUPABASE_URL/SUPABASE_SERVICE_KEY aus .env.production.local; Marker zzz_vercel_disabled",
+      "paths": [
+        "zzz_Bioniq_Links/**"
+      ],
+      "evidence": [
+        "zzz_Bioniq_Links/api/bioniq-public.js:5,113 — advisor_bionic_links lesen und schreiben"
+      ],
+      "objects": [
+        "advisor_bionic_links"
+      ],
+      "migration_relevance": "niedrig",
+      "shutdown_gate": "advisor_bionic_links gehoert nicht zum Business-Leads-Produkt und darf nicht mit nach business_leads."
+    },
+    {
+      "id": "wellness-check-release-snapshot",
+      "kind": "legacy",
+      "title": "wellness-check-release-06d9ca7 (Release-Schnappschuss)",
+      "platform": "keine",
+      "status": "schnappschuss",
+      "access": "rest",
+      "writes": true,
+      "env_source": "identisch zu wellness-check; .vercel/project.json traegt dieselbe projectId",
+      "paths": [
+        "wellness-check-release-06d9ca7/**"
+      ],
+      "evidence": [
+        "wellness-check-release-06d9ca7/api/_webhook-monitor.js — bytegleich mit wellness-check/api/_webhook-monitor.js",
+        ".vercel/project.json — dieselbe projectId prj_Hr7KcfZ589a4ADRUTYZEV6dA3X7g wie wellness-check"
+      ],
+      "objects": [
+        "form_webhook_deliveries"
+      ],
+      "migration_relevance": "keine",
+      "shutdown_gate": "Kein zweiter Verbraucher, sondern eine Kopie desselben Vercel-Projekts. Loeschkandidat; zaehlt nicht als eigener Verbraucher."
+    },
+    {
+      "id": "future-online-support",
+      "kind": "foreign-instance",
+      "title": "Future Online Support",
+      "platform": "Vercel",
+      "vercel_project": "future-online-support",
+      "status": "aktiv",
+      "access": "rest",
+      "writes": true,
+      "env_source": "NEXT_PUBLIC_SUPABASE_URL/NEXT_PUBLIC_SUPABASE_ANON_KEY/SUPABASE_SERVICE_ROLE_KEY — zeigt auf gtvgbvtqmzrcvhumoxog.supabase.co",
+      "paths": [
+        "Future Online Support/**"
+      ],
+      "evidence": [
+        "Future Online Support/.env.local — https://gtvgbvtqmzrcvhumoxog.supabase.co (andere Instanz)",
+        "Future Online Support/src/lib/supabase/admin.ts:6 — eigener Service-Client"
+      ],
+      "objects": [],
+      "migration_relevance": "keine",
+      "shutdown_gate": "Gehoert NICHT zu Stats_Logs. Ausdruecklich inventarisiert, damit es beim Restscan nicht faelschlich als offener Verbraucher zaehlt — und damit niemand seine Supabase-Kuendigung mit dieser Migration verwechselt."
+    },
+    {
+      "id": "deploy-guards-and-docs",
+      "kind": "non-consumer",
+      "title": "Deploy-Guards, Dokumentation und Mitschnitte",
+      "platform": "keine",
+      "status": "kein Laufzeitzugriff",
+      "access": "none",
+      "writes": false,
+      "env_source": "keine",
+      "paths": [
+        "bioniq-go/scripts/**",
+        "bioniq_hl-support/scripts/**",
+        "analysen/docs/**",
+        "Coolify/**",
+        "FitApp-Bot/**",
+        "archive/**",
+        "tmp/**",
+        "SECURITY_INCIDENT_REMEDIATION_2026_04_25.md"
+      ],
+      "evidence": [
+        "bioniq-go/scripts/guard-production-deploy.cjs:14 — prueft, dass SUPABASE_URL NICHT ins Bundle gelangt",
+        "bioniq_hl-support/scripts/verify-runtime.js:17 — gleicher Leak-Guard",
+        "analysen/docs/BETRIEB.md:892 — dokumentiert die bereits erfolgte Entfernung von SUPABASE_URL/SUPABASE_SERVICE_KEY",
+        "FitApp-Bot/docs/audits/stats-logs-consumer-inventory.md — Vorlaeufer-Inventar vom 21.07.2026",
+        "tmp/** — n8n-Workflow-Mitschnitte, spiegeln die Workflows oben, kein eigener Zugriff"
+      ],
+      "objects": [],
+      "migration_relevance": "keine",
+      "shutdown_gate": "Kein Gate. Bewusst inventarisiert, damit der Restscan diese Treffer nicht jedes Mal neu bewerten muss."
+    }
+  ],
+  "ignore_paths": []
+}
