@@ -1,0 +1,9 @@
+{
+ "zone": "05ad960f8f1650fdd51353a2ef9e0d98",
+ "id": "3f457835fd2abc64c5f02bf3220727c1",
+ "type": "CNAME",
+ "name": "business.eaglesfit.ch",
+ "content": "2940e78cbc83cdf4.vercel-dns-017.com",
+ "ttl": 60,
+ "proxied": false
+}

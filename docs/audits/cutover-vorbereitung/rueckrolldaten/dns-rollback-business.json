@@ -1,0 +1,23 @@
+{
+  "zone_id": "0b43ccb0e932d3bb314941e9e57c5d00",
+  "records": [
+    {
+      "id": "74aeca3b5f7a079630c24229a63b100d",
+      "name": "business.activecenter.info",
+      "type": "CNAME",
+      "content": "12b0f53f0226bb49.vercel-dns-017.com",
+      "proxiable": true,
+      "proxied": false,
+      "ttl": 60,
+      "settings": {
+        "flatten_cname": false
+      },
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2026-04-17T06:21:47.252989Z",
+      "modified_on": "2026-08-25T13:53:55.598236Z"
+    }
+  ],
+  "gesichert_am": "2026-08-25"
+}
