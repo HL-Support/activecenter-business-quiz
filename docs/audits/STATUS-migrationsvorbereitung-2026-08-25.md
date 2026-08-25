@@ -125,6 +125,70 @@ leer verifiziert), Ursache seit #60 serverseitig unmöglich.
 
 Coolify ist auf 46.224.76.193 **nicht installiert**. Server gesund (Ubuntu 24.04, Docker 29.6.1, 113G frei, 9.1Gi RAM frei, 11 Produktivcontainer alle auf 127.0.0.1 gebunden, UFW deny-incoming außer 80/443/2255). **Zwei Kollisionen für einen Install:** Port 8000 (Coolify-UI-Default) gehört mautic_app; 80/443 hält der Host-nginx — Coolifys Traefik will genau diese. Architekturentscheidung nötig (separater Coolify-Server vs. Koexistenz hinter nginx vs. Proxy-Umzug). Smoke-Image blq-smoke:2026-08-25 liegt auf dem Server bereit.
 
+
+### F. Phase 3 Schritt 2 — Coolify-Staging (25.08., Befunde)
+
+Staging: `business-leads-test.hl-support.biz` (App `business-leads-web`, UUID
+liydqvexwattbkkhigpluc1q) auf der bestehenden Coolify-Box 167.233.251.217. **Kein Cutover.**
+
+**🔴 Der teuerste Fund: JWT-Escaping hätte alle Resume-Links getötet.**
+Der produktive `JWT_SECRET` endet auf ein *literales* `
+` (Backslash+n, altes
+Paste-Artefakt in Vercel) — mit genau diesem Wert sind alle bestehenden Resume-Tokens und
+Kurzlink-Signaturen erzeugt. Coolify escapt beim Schreiben seiner `.env` Backslashes,
+daraus wurde `\n` und damit ein anderer Schlüssel. Folge wäre gewesen: **jeder Link aus
+jeder Nurture-Mail** (90 Tage Laufzeit) hätte nach dem Cutover einen Fehler geliefert — bei
+gesunder App, grünem Healthcheck und leerem Fehlerlog. Lösung: Coolifys `is_literal`-Flag
+(byte-genaue Übernahme). **Regel daraus: Sicherheitsrelevante Env-Werte werden am laufenden
+Container gehasht (`docker exec … sha256sum`) und gegen die Produktion verglichen — das
+Verwaltungsformular zeigte die ganze Zeit den richtigen Wert an.**
+
+**Beweis der Linkkontinuität:** Drei echte Leads (April), Link jeweils von der PRODUKTION
+erzeugt, von Coolify aufgelöst — Kurzlink und JWT-Form, identische Zielwerte (step/target/
+email) wie in der Produktion.
+
+**Selbst korrigierte Konfiguration** (unabhängig von Nachbarprojekten geprüft):
+- Container-Healthcheck `/health/ready` → **`/health/live`**: Der Ready-Pfad fasst Supabase
+  an; eine Supabase-Störung hätte Container-Neustarts ausgelöst (Störung eskaliert statt
+  toleriert). Start-Period 5 s → 10 s.
+- Ressourcengrenzen gesetzt (768 MB / 1 CPU) — vorher unbegrenzt auf einer Box mit 14
+  produktiven Anwendungen.
+- **HSTS** (`max-age=63072000; includeSubDomains`) im Adapter ergänzt: Vercel liefert ihn
+  heute, ohne ihn wäre der Wechsel ein stiller Sicherheitsrückschritt. Nur auf
+  verschlüsselten Anfragen (X-Forwarded-Proto), damit ein lokaler http-Start sich nicht
+  selbst aussperrt.
+- Beim Anlegen war `inject_build_args_to_dockerfile` auf `true` (Coolify-Default für
+  Neuanlagen) — vor dem Setzen der Envs korrigiert, sonst wären Secrets ins Image gelangt.
+
+**Vollständiger Browsertest gegen Staging** (eigene Durchführung, echte Eingaben): Funnel
+komplett, 3 Videos real entsperrt, 97 API-Calls ohne Fehler, 94/94 `session_state: match`,
+Queue leer/0 Dead-Letters, WhatsApp-CTA, echter Produktions-Resume-Link landet korrekt auf
+Video 1, `/berater-info` in hu/en/it inkl. `goal`-ohne-`type`, HSTS im Browser bestätigt,
+0 `http://`-Links, Konsole sauber, serverseitig alle 5 Outbox-Jobs `done`.
+
+**Offen vor dem Cutover:** Better-Stack-/GlitchTip-Anbindung, `GIT_COMMIT_SHA` ins Image,
+Prüfung der externen Rückrufpfade gegen die neue Adresse, DNS-Plan mit Rollback.
+
+### G. Testdaten-Bereinigung (25.08.)
+
+Aus `typeform_surveys` (Legacy-MySQL, Quelle der Erfolgs-Code-Zählung) wurden Testeinträge
+**soft-gelöscht** (`deleted_at`, wiederherstellbar), ausschließlich adressgenau:
+
+| Schritt | Zeilen | Zählung |
+| --- | ---: | --- |
+| Eigene E2E-Läufe 23.–25.08. | 11 | 1266 → 1255 |
+| Testadressen Gruppe 1+2 (markus+NN@, codex-test-*, audit/langtest/bridgetest+*, admin@, info@, contact@, konrad.rungger@, wisa92+business-…) | 86 | 1255 → **1169** |
+
+Bewusst **behalten**: `peter@global-sce.com` (Entscheidung Markus) und
+`fliegendeweinprobe@gmail.com` (Fehltreffer des Suchmusters „probe" — echter Lead).
+Sicherungen: `/root/backup-typeform-tests-*.json` und `/root/backup-testreinigung-*.json`
+auf 167.233.251.217, zusätzlich lokal. Vor jeder Löschung lief eine Einzelprüfung je ID
+(Adresse + Hash), echte Leads wurden stichprobenweise als aktiv verifiziert.
+
+**Lehre:** Die E-Mail steht nicht in einer Spalte, sondern im JSON (`answers[].email`). Ein
+Löschen „aller qz_-Zeilen der letzten Tage" hätte echte Leads getroffen — im selben
+Zeitfenster kamen mehrere herein.
+
 ## 6. Fahrplan ab hier (Audit §8, aktualisiert)
 
 1. **Phase 3 — Coolify-Hosting** (Startsignal Markus): Docker/Container-Smoke →
