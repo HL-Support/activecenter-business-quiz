@@ -334,6 +334,13 @@ const CORS_ALLOWED_ORIGINS = new Set([
   'https://quiz.activecenter.info',
   'https://business.eaglesfit.ch',
   'https://businessleadsquiz.vercel.app',
+  // Legacy-Landeseite /<slug>/business-info auf global-sce.com: Sie loest Resume-Links per
+  // Browser-fetch gegen resolve_resume_key/resolve_resume_token auf und stand vor der
+  // Allowlist (24.08.2026) unter dem alten Wildcard. Ohne diese beiden Eintraege sind
+  // Resume-Links aus aelteren Mails, die dorthin zeigen, unerreichbar - der Aufruf schlaegt
+  // still im Browser fehl, ohne Serverfehler. Beide Schreibweisen sind live erreichbar.
+  'https://global-sce.com',
+  'https://www.global-sce.com',
 ]);
 // Eine reine Suffixpruefung auf '.vercel.app' wuerde JEDE fremde Vercel-App zulassen; erlaubt
 // ist deshalb nur das projekteigene Team-Suffix der Preview-Deployments.
