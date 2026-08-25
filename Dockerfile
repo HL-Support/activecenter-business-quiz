@@ -19,7 +19,7 @@
 # ---------------------------------------------------------------------------------------
 # Stage 1: Produktionsabhaengigkeiten (nur "dependencies", kein devDependencies-Ballast)
 # ---------------------------------------------------------------------------------------
-FROM node:24-slim AS deps
+FROM node:24-slim@sha256:a9f5f7c91a432850b2a8a7797adf5eadb6c733ceed61167806cee7ea7fbc29df AS deps
 WORKDIR /app
 ENV CI=1
 RUN corepack enable
@@ -29,7 +29,7 @@ RUN pnpm install --frozen-lockfile --prod
 # ---------------------------------------------------------------------------------------
 # Stage 2: Build (braucht devDependencies: esbuild)
 # ---------------------------------------------------------------------------------------
-FROM node:24-slim AS build
+FROM node:24-slim@sha256:a9f5f7c91a432850b2a8a7797adf5eadb6c733ceed61167806cee7ea7fbc29df AS build
 WORKDIR /app
 ENV CI=1
 RUN corepack enable
@@ -42,7 +42,7 @@ RUN pnpm run build
 # ---------------------------------------------------------------------------------------
 # Stage 3: Runtime
 # ---------------------------------------------------------------------------------------
-FROM node:24-slim AS runtime
+FROM node:24-slim@sha256:a9f5f7c91a432850b2a8a7797adf5eadb6c733ceed61167806cee7ea7fbc29df AS runtime
 ENV NODE_ENV=production \
     PORT=3000 \
     HOST=0.0.0.0
