@@ -18,6 +18,10 @@ const filesToSyntaxCheck = [
   path.join(projectRoot, 'api', 'bridge.js'),
   path.join(projectRoot, 'server', 'lead-system.js'),
   path.join(projectRoot, 'server', 'coach-insights-link.js'),
+  path.join(projectRoot, 'server', 'commit.js'),
+  path.join(projectRoot, 'server', 'fehlermeldung.js'),
+  path.join(projectRoot, 'server', 'http-adapter.js'),
+  path.join(projectRoot, 'server', 'app-server.js'),
   path.join(projectRoot, 'api', 'lead-config.js'),
   path.join(projectRoot, 'api', 'lead-init.js'),
   path.join(projectRoot, 'api', 'lead-track.js'),
@@ -387,6 +391,117 @@ function verifyRemovedRuntimeSurface() {
   );
 }
 
+// Gate (Audit P1 "private Source Maps zu einem Fehlerdienst"): Der Melder muss verdrahtet
+// BLEIBEN, und er darf niemals zum Datenabfluss werden. Beides faellt sonst still aus - ein
+// entfernter melden()-Aufruf macht keinen Test rot, und ein mitgegebener Payload faellt erst
+// auf, wenn er im Fehlerdienst steht.
+function verifyFehlermeldung() {
+  const reporterPath = path.join(projectRoot, 'server', 'fehlermeldung.js');
+  assert(fs.existsSync(reporterPath), 'server/fehlermeldung.js is missing');
+
+  const reporter = fs.readFileSync(reporterPath, 'utf8');
+  const adapter = fs.readFileSync(path.join(projectRoot, 'server', 'http-adapter.js'), 'utf8');
+  const appServer = fs.readFileSync(path.join(projectRoot, 'server', 'app-server.js'), 'utf8');
+
+  // 1. Inaktiv ohne DSN, Release aus derselben Quelle wie /health/live.
+  assert(
+    reporter.includes('env.GLITCHTIP_DSN'),
+    'server/fehlermeldung.js must read the DSN from GLITCHTIP_DSN'
+  );
+  assert(
+    reporter.includes("require('./commit')") && reporter.includes('resolveCommit('),
+    'server/fehlermeldung.js must reuse resolveCommit instead of duplicating the commit order'
+  );
+  assert(
+    !/COMMIT_ENV_ORDER\s*=/.test(reporter) &&
+      !reporter.includes('VERCEL_GIT_COMMIT_SHA'),
+    'server/fehlermeldung.js must not keep its own copy of the commit env order'
+  );
+
+  // 2. Die Drosselung ist Teil des Vertrags, nicht Geschmackssache.
+  assert(
+    reporter.includes('GLEICHER_FEHLER_MS') && reporter.includes('HOECHSTENS_PRO_MINUTE'),
+    'server/fehlermeldung.js must keep both rate limits (per error and per minute)'
+  );
+  assert(
+    !/\bawait\s+(?:senden|fetchImpl|globalThis\.fetch)/.test(reporter),
+    'server/fehlermeldung.js must never await the outgoing POST'
+  );
+
+  // 3. Verdrahtung im Adapter: geworfener Handler UND selbst erzeugte 5xx.
+  assert(
+    adapter.includes("require('./fehlermeldung')"),
+    'server/http-adapter.js must require the error reporter'
+  );
+  assert(
+    /res\.statusCode\s*>=\s*500[\s\S]{0,400}?meldeFehler\(/.test(adapter),
+    'server/http-adapter.js must report 5xx responses the handlers produce themselves'
+  );
+  assert(
+    /catch \(error\)[\s\S]{0,1200}?meldeFehler\(error,/.test(adapter),
+    'server/http-adapter.js must report handlers that throw'
+  );
+
+  // 4. Verdrahtung im Prozess.
+  assert(
+    appServer.includes("require('./fehlermeldung')") &&
+      /uncaughtException[\s\S]{0,400}?melden\(/.test(appServer) &&
+      /unhandledRejection[\s\S]{0,400}?melden\(/.test(appServer),
+    'server/app-server.js must report uncaughtException and unhandledRejection'
+  );
+
+  // 5. Kein Datenabfluss - strukturell, nicht per Stichwortliste: der Melder uebernimmt
+  //    ausschliesslich die Felder aus KONTEXT_FELDER. Steht dort ploetzlich mehr, ist das
+  //    eine bewusste Entscheidung und muss hier mitgetragen werden.
+  const felderMatch = reporter.match(/const KONTEXT_FELDER = \[([^\]]*)\]/);
+  assert(felderMatch, 'server/fehlermeldung.js must declare the KONTEXT_FELDER allowlist');
+  const felder = felderMatch[1]
+    .split(',')
+    .map((entry) => entry.trim().replace(/^'|'$/g, ''))
+    .filter(Boolean);
+  assert(
+    JSON.stringify(felder) ===
+      JSON.stringify(['bereich', 'route', 'request_id', 'status', 'level']),
+    `server/fehlermeldung.js: KONTEXT_FELDER must stay bereich/route/request_id/status/level, got ${felder.join(', ')}`
+  );
+  assert(
+    reporter.includes('for (const feld of KONTEXT_FELDER)'),
+    'server/fehlermeldung.js must build its context from KONTEXT_FELDER only'
+  );
+  // Der Melder darf den Request gar nicht erst kennen - dann kann er auch nichts daraus
+  // mitschicken.
+  for (const token of [/\breq\b/, /\.headers\b/, /\.body\b/, /\.rawBody\b/, /\.query\b/]) {
+    assert(
+      !token.test(reporter),
+      `server/fehlermeldung.js must not touch the request object (${token})`
+    );
+  }
+
+  // 6. Und keine Aufrufstelle darf etwas anderes uebergeben als den erlaubten Kontext.
+  const forbidden =
+    /req\.body|req\.rawBody|req\.headers|req\.query|url\.search|lead_hash|cookie|authorization|email/i;
+  for (const [name, source] of [
+    ['server/http-adapter.js', adapter],
+    ['server/app-server.js', appServer],
+  ]) {
+    const calls = source.match(/melde(?:Fehler|n)\([\s\S]{0,400}?\);/g) || [];
+    assert(calls.length > 0, `${name} must contain at least one reporter call`);
+    for (const call of calls) {
+      assert(
+        !forbidden.test(call),
+        `${name}: a reporter call must not pass payloads, headers, cookies, emails or lead_hash\n${call}`
+      );
+    }
+  }
+
+  // 7. Die Route im Kontext ist die ANONYMISIERTE (kein Slug-Wert, kein Query-String,
+  //    Audit 13.2.2) - dieselbe Quelle wie das Logformat.
+  assert(
+    /meldeFehler\(error,\s*\{[^}]*route: routeLabelFor\(url\.pathname\)/.test(adapter),
+    'server/http-adapter.js must report the anonymised route label, never the raw path'
+  );
+}
+
 function verifyApiHardening() {
   // P0-3: Drei Eigenschaften, die nicht still zurueckfallen duerfen.
   const leadTrack = fs.readFileSync(path.join(projectRoot, 'api', 'lead-track.js'), 'utf8');
@@ -454,6 +569,7 @@ function main() {
 
   verifyRemovedRuntimeSurface();
   verifyApiHardening();
+  verifyFehlermeldung();
   verifyCoachInsightsLink();
   verifyBeraterInfoRewriteOrder();
 
