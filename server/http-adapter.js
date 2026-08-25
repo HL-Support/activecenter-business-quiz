@@ -477,15 +477,73 @@ async function readinessReport({
   }
 }
 
+/**
+ * Reihenfolge, in der die Herkunft des Commits gesucht wird (Audit 13.5.6). Die erste
+ * Quelle mit einem plausiblen Wert gewinnt:
+ *
+ *  1. `GIT_COMMIT_SHA`      - ins Image gebacken (Dockerfile-ARG, siehe dort). Der explizit
+ *                             gesetzte Wert schlaegt alles andere, damit ein `docker build`
+ *                             ausserhalb von Coolify (Container-Smoke, CI) beweisbar bleibt.
+ *  2. `SOURCE_COMMIT`       - setzt COOLIFY zur LAUFZEIT in den Container. Empirisch belegt
+ *                             am 25.08.2026 an der Staging-App: der Wert ist derselbe
+ *                             40-stellige SHA, mit dem Coolify das Image taggt
+ *                             (`-t <resource-uuid>:<sha>`). Coolify uebergibt KEINEN
+ *                             Commit als Build-Arg - die Bau-Zeile kennt nur COOLIFY_URL,
+ *                             COOLIFY_FQDN, COOLIFY_BRANCH, COOLIFY_RESOURCE_UUID und
+ *                             COOLIFY_BUILD_SECRETS_HASH.
+ *  3. `VERCEL_GIT_COMMIT_SHA` - der gleichwertige Wert im Vercel-Betrieb, damit dieselbe
+ *                             Antwort auch waehrend des Rollback-Fensters etwas aussagt.
+ *
+ * Fehlt alles, bleibt das Feld LEER statt zu raten - ein falscher Commit im Rollback-Beweis
+ * waere schaedlicher als gar keiner.
+ */
+const COMMIT_ENV_ORDER = ['GIT_COMMIT_SHA', 'SOURCE_COMMIT', 'VERCEL_GIT_COMMIT_SHA'];
+
+/** Ein Commit-SHA ist hexadezimal und 7-40 Zeichen lang. Alles andere ist kein Commit. */
+const COMMIT_SHA = /^[0-9a-f]{7,40}$/i;
+
+/**
+ * Liefert den laufenden Commit und die Variable, aus der er stammt. Die Herkunft wird
+ * mitgegeben, weil sie beim Cutover die eigentliche Frage beantwortet: Steht da ein
+ * gebackener Wert (`GIT_COMMIT_SHA`) oder einer, den die Plattform beisteuert
+ * (`SOURCE_COMMIT`)? Ohne diese Angabe sieht beides gleich aus.
+ */
+function resolveCommit({ env = process.env } = {}) {
+  for (const name of COMMIT_ENV_ORDER) {
+    const value = String(env[name] || '').trim();
+    if (COMMIT_SHA.test(value)) return { commit: value.toLowerCase(), commit_source: name };
+  }
+  return { commit: '', commit_source: '' };
+}
+
+/**
+ * Bezeichner des laufenden Abbilds. `IMAGE_DIGEST` ist der ehrlichste Wert (fest gebacken).
+ * Ersatzweise wird der Tag rekonstruiert, den Coolify nachweislich vergibt:
+ * `<COOLIFY_RESOURCE_UUID>:<SOURCE_COMMIT>` - am 25.08.2026 gegen `docker ps` der
+ * Staging-App gegengeprueft. Fehlt eines von beiden, bleibt das Feld leer.
+ */
+function resolveImageRef({ env = process.env } = {}) {
+  const digest = String(env.IMAGE_DIGEST || '').trim();
+  if (digest) return digest;
+
+  const uuid = String(env.COOLIFY_RESOURCE_UUID || '').trim();
+  const source = String(env.SOURCE_COMMIT || '').trim();
+  if (uuid && COMMIT_SHA.test(source)) return `${uuid}:${source.toLowerCase()}`;
+
+  return '';
+}
+
 function livenessReport({ env = process.env } = {}) {
+  const { commit, commit_source: commitSource } = resolveCommit({ env });
   return {
     status: 'live',
     pid: process.pid,
     uptime_s: Math.round(process.uptime()),
-    // Audit 13.5.6: Commit-SHA und Image-Digest muessen an der Laufzeit ablesbar sein.
-    // Beides kommt aus dem Build; fehlt es, bleibt das Feld leer statt zu raten.
-    commit: String(env.GIT_COMMIT_SHA || ''),
-    image: String(env.IMAGE_DIGEST || ''),
+    // Audit 13.5.6: Commit-SHA und Abbild muessen an der Laufzeit ablesbar sein - das ist
+    // die Grundlage jeder Cutover-Verifikation und jedes Rollback-Beweises.
+    commit,
+    commit_source: commitSource,
+    image: resolveImageRef({ env }),
   };
 }
 
@@ -842,6 +900,8 @@ module.exports = {
   queryFromSearchParams,
   readRawBody,
   readinessReport,
+  resolveCommit,
+  resolveImageRef,
   resolveStaticPath,
   validateEnv,
 };

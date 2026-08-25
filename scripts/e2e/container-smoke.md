@@ -45,10 +45,18 @@ Repository noch im Image.
 ## 2. Image bauen
 
 ```bash
-docker build -t business-leads-web:smoke .
+docker build --build-arg GIT_COMMIT_SHA="$(git rev-parse HEAD)" -t business-leads-web:smoke .
 ```
 
 Erwartung: drei Stages (`deps`, `build`, `runtime`), `pnpm run build` erzeugt `dist/`.
+
+`GIT_COMMIT_SHA` backt den Commit ins Image (Audit 13.5.6) — hier ist es noetig, weil bei
+einem Bau von Hand niemand sonst den Wert beisteuert. **Unter Coolify wird nichts uebergeben:**
+dort kommt der Commit zur Laufzeit als `SOURCE_COMMIT` in den Container, und
+`server/http-adapter.js` liest ihn als zweite Quelle.
+🔴 Auf diesem Weg NIE ein Geheimnis hereinreichen — Build-Args stehen dauerhaft in der
+Image-Schichthistorie (`Coolify/BETRIEB.md` §8). Ein Commit-SHA ist ein oeffentlicher
+Bezeichner, ein Token nicht.
 
 ## 3. Container starten
 
@@ -77,6 +85,12 @@ BASE=http://127.0.0.1:18080
 # 4.1 Liveness (Container-Healthcheck)
 curl -sS -o /dev/null -w '%{http_code}\n' $BASE/health/live
 # erwartet: 200
+
+# 4.1b Laeuft wirklich der gebaute Commit? (Audit 13.5.6 - Grundlage jedes Rollback-Beweises)
+curl -sS $BASE/health/live
+# erwartet: "commit" == git rev-parse HEAD, "commit_source":"GIT_COMMIT_SHA"
+# 🔴 Ein LEERES "commit" ist ein Befund, kein Schoenheitsfehler: dann laesst sich hinterher
+#    nicht mehr belegen, welcher Stand lief.
 
 # 4.2 Readiness (Env + kurzer Datenquellen-Ping, 2s-Timeout)
 curl -sS -w '\n%{http_code}\n' $BASE/health/ready

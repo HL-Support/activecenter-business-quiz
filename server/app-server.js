@@ -22,6 +22,8 @@ const {
   createApiRegistry,
   createApp,
   createShutdownController,
+  resolveCommit,
+  resolveImageRef,
   validateEnv,
 } = require('./http-adapter');
 
@@ -101,12 +103,17 @@ async function main() {
   });
 
   server.listen(PORT, HOST, () => {
+    // Dieselbe Aufloesung wie /health/live - Startzeile und Endpunkt koennen sich damit
+    // nicht widersprechen, wenn beim Cutover beide zum Beweis herangezogen werden.
+    const { commit, commit_source: commitSource } = resolveCommit();
     log({
       msg: 'server_listening',
       host: HOST,
       port: PORT,
       node: process.version,
-      commit: String(process.env.GIT_COMMIT_SHA || ''),
+      commit,
+      commit_source: commitSource,
+      image: resolveImageRef(),
     });
   });
 }
