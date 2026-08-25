@@ -26,10 +26,16 @@ const {
   resolveImageRef,
   validateEnv,
 } = require('./http-adapter');
+const { melden, nachlauf } = require('./fehlermeldung');
 
 const PORT = Number(process.env.PORT || 3000);
 // 0.0.0.0 ist im Container Pflicht: an 127.0.0.1 gebunden kaeme Traefik nicht heran.
 const HOST = String(process.env.HOST || '0.0.0.0');
+// Der Melder schickt fire-and-forget; bei uncaughtException endet der Prozess unmittelbar
+// danach. Ohne dieses kurze Fenster waere die letzte - und wichtigste - Meldung genau die,
+// die nie ankommt. 500 ms sind lang genug fuer einen POST ins interne Netz und kurz genug,
+// dass Coolify den Neustart nicht als Haenger sieht.
+const UNCAUGHT_FLUSH_MS = 500;
 
 /** Eine Zeile JSON pro Ereignis - direkt in `docker logs` bzw. den Coolify-Logviewer. */
 function log(entry) {
@@ -99,7 +105,20 @@ async function main() {
   }
 
   process.on('unhandledRejection', (reason) => {
+    // Melden, dann exakt wie bisher weiter: nur loggen, kein Exit. Ein abgelehntes Promise
+    // ist hier haeufig ein abgebrochener Hintergrund-Fetch und kein Grund, laufende Leads
+    // mitzureissen - das Verhalten bleibt deshalb unveraendert.
+    melden(reason, { bereich: 'process/unhandled_rejection' });
     log({ level: 'error', msg: 'unhandled_rejection', error: String((reason && reason.message) || reason) });
+  });
+
+  // Neu (Audit P1): Bisher gab es dafuer keinen Handler - Node brach den Prozess ab und die
+  // einzige Spur war der Stack auf stderr. Jetzt geht der Fehler zuerst an GlitchTip, danach
+  // bleibt es beim bisherigen Ergebnis: Prozess beendet mit Code 1, Coolify startet neu.
+  process.on('uncaughtException', (error) => {
+    melden(error, { bereich: 'process/uncaught_exception', level: 'fatal' });
+    log({ level: 'error', msg: 'uncaught_exception', error: String((error && error.stack) || error) });
+    nachlauf(UNCAUGHT_FLUSH_MS).then(() => process.exit(1));
   });
 
   server.listen(PORT, HOST, () => {

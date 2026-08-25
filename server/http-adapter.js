@@ -26,7 +26,18 @@ const crypto = require('crypto');
 const { Buffer } = require('buffer');
 const { pipeline } = require('stream/promises');
 
+const { COMMIT_SHA, resolveCommit } = require('./commit');
+const { melden } = require('./fehlermeldung');
+
 const projectRoot = path.resolve(__dirname, '..');
+
+/**
+ * Responses, fuer die bereits eine Fehlermeldung abgesetzt (oder bewusst unterdrueckt) wurde.
+ * Ohne das wuerde ein geworfener Handler zweimal gemeldet: einmal aus dem catch (mit Stack)
+ * und einmal aus dem close-Listener (nur mit Status). Ein WeakSet statt einer Eigenschaft auf
+ * res, damit der Adapter das Response-Objekt nicht anfasst.
+ */
+const fehlerGemeldet = new WeakSet();
 
 // 1 MB deckt jeden heutigen Payload um Groessenordnungen ab (der groesste reale Body ist ein
 // Event-Batch der Client-Queue; keepalive-Fetches sind ohnehin auf 64 KB begrenzt, Audit
@@ -478,43 +489,12 @@ async function readinessReport({
 }
 
 /**
- * Reihenfolge, in der die Herkunft des Commits gesucht wird (Audit 13.5.6). Die erste
- * Quelle mit einem plausiblen Wert gewinnt:
- *
- *  1. `GIT_COMMIT_SHA`      - ins Image gebacken (Dockerfile-ARG, siehe dort). Der explizit
- *                             gesetzte Wert schlaegt alles andere, damit ein `docker build`
- *                             ausserhalb von Coolify (Container-Smoke, CI) beweisbar bleibt.
- *  2. `SOURCE_COMMIT`       - setzt COOLIFY zur LAUFZEIT in den Container. Empirisch belegt
- *                             am 25.08.2026 an der Staging-App: der Wert ist derselbe
- *                             40-stellige SHA, mit dem Coolify das Image taggt
- *                             (`-t <resource-uuid>:<sha>`). Coolify uebergibt KEINEN
- *                             Commit als Build-Arg - die Bau-Zeile kennt nur COOLIFY_URL,
- *                             COOLIFY_FQDN, COOLIFY_BRANCH, COOLIFY_RESOURCE_UUID und
- *                             COOLIFY_BUILD_SECRETS_HASH.
- *  3. `VERCEL_GIT_COMMIT_SHA` - der gleichwertige Wert im Vercel-Betrieb, damit dieselbe
- *                             Antwort auch waehrend des Rollback-Fensters etwas aussagt.
- *
- * Fehlt alles, bleibt das Feld LEER statt zu raten - ein falscher Commit im Rollback-Beweis
- * waere schaedlicher als gar keiner.
+ * Die Aufloesung des laufenden Commits (Audit 13.5.6) liegt in server/commit.js, weil
+ * server/fehlermeldung.js sie fuer die Release-Angabe braucht und dieser Adapter die
+ * Fehlermeldung seinerseits einbindet - ein wechselseitiges require() waere ein Zyklus.
+ * `resolveCommit` bleibt Teil der Exportflaeche dieses Moduls, damit kein Aufrufer und kein
+ * Test angepasst werden muss.
  */
-const COMMIT_ENV_ORDER = ['GIT_COMMIT_SHA', 'SOURCE_COMMIT', 'VERCEL_GIT_COMMIT_SHA'];
-
-/** Ein Commit-SHA ist hexadezimal und 7-40 Zeichen lang. Alles andere ist kein Commit. */
-const COMMIT_SHA = /^[0-9a-f]{7,40}$/i;
-
-/**
- * Liefert den laufenden Commit und die Variable, aus der er stammt. Die Herkunft wird
- * mitgegeben, weil sie beim Cutover die eigentliche Frage beantwortet: Steht da ein
- * gebackener Wert (`GIT_COMMIT_SHA`) oder einer, den die Plattform beisteuert
- * (`SOURCE_COMMIT`)? Ohne diese Angabe sieht beides gleich aus.
- */
-function resolveCommit({ env = process.env } = {}) {
-  for (const name of COMMIT_ENV_ORDER) {
-    const value = String(env[name] || '').trim();
-    if (COMMIT_SHA.test(value)) return { commit: value.toLowerCase(), commit_source: name };
-  }
-  return { commit: '', commit_source: '' };
-}
 
 /**
  * Bezeichner des laufenden Abbilds. `IMAGE_DIGEST` ist der ehrlichste Wert (fest gebacken).
@@ -719,6 +699,9 @@ function createApp(options = {}) {
   const maxBodyBytes = options.maxBodyBytes || MAX_BODY_BYTES;
   const isShuttingDown = options.isShuttingDown || (() => false);
   const readiness = options.readiness || readinessReport;
+  // Fire-and-forget. Injizierbar, damit ein Test die Meldungen einsammeln kann, ohne dass
+  // der Adapter dafuer etwas anderes tut als im Container.
+  const meldeFehler = options.melden || melden;
 
   async function handleApi(req, res, url, moduleName) {
     const handler = await registry.resolve(moduleName);
@@ -807,16 +790,30 @@ function createApp(options = {}) {
 
     res.on('close', () => {
       clearTimeout(timer);
+      const route = routeLabelFor(url.pathname);
       log({
         level: 'info',
         msg: 'request',
         request_id: requestId,
         method: req.method,
-        route: routeLabelFor(url.pathname),
+        route,
         status: res.statusCode,
         duration_ms: Math.round(Number(process.hrtime.bigint() - startedAt) / 1e4) / 100,
         client_ip: req.clientIp || clientIpFromRequest(req),
       });
+
+      // Audit P1: JEDE 5xx-Antwort wird gemeldet - auch die, die kein Handler wirft, sondern
+      // selbst zurueckgibt (res.status(500).json(...)). Genau die waren bisher unsichtbar,
+      // weil der catch unten sie nie zu sehen bekommt. Bewusst hier im close-Listener, weil
+      // erst dort der endgueltige Status feststeht (auch der 504 des Watchdogs).
+      if (res.statusCode >= 500 && !fehlerGemeldet.has(res)) {
+        fehlerGemeldet.add(res);
+        meldeFehler(`HTTP ${res.statusCode} auf ${route}`, {
+          route,
+          request_id: requestId,
+          status: res.statusCode,
+        });
+      }
     });
 
     try {
@@ -824,6 +821,10 @@ function createApp(options = {}) {
         // Waehrend des Drains keine neue Arbeit annehmen; Traefik nimmt den Container
         // dann aus der Rotation, statt weiter Requests zu schicken.
         res.setHeader('Connection', 'close');
+        // Die einzige 5xx, die NICHT gemeldet wird: sie ist die geplante Antwort eines
+        // geordneten Shutdowns. Gemeldet wuerde sie bei jedem Deploy das Minutenbudget
+        // aufbrauchen und echte Fehler desselben Fensters verdraengen.
+        fehlerGemeldet.add(res);
         sendJsonResponse(res, 503, { success: false, error: 'server_shutting_down' });
         return;
       }
@@ -859,6 +860,18 @@ function createApp(options = {}) {
         status: statusCode,
         error: String(error.message || error),
       });
+      // Nur echte Serverfehler. Ein geworfener 4xx (payload_too_large, invalid_json) ist ein
+      // Client-Fehler und gehoert nicht in den Fehlerdienst - sonst meldet jeder Bot-Scan.
+      // Hier statt im close-Listener, weil nur an dieser Stelle der Stack vorliegt; die
+      // Markierung verhindert die doppelte Meldung.
+      if (statusCode >= 500) {
+        fehlerGemeldet.add(res);
+        meldeFehler(error, {
+          route: routeLabelFor(url.pathname),
+          request_id: requestId,
+          status: statusCode,
+        });
+      }
       // Ein abgebrochener Body-Upload wird nicht zu Ende gelesen; die Verbindung muss
       // deshalb nach der Antwort geschlossen werden, sonst wartet Node auf den Rest.
       if (error.code === 'payload_too_large' && !res.headersSent) {
