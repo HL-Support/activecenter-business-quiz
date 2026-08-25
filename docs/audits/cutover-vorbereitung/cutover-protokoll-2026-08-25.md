@@ -165,7 +165,54 @@ eigenen Host — Zeile für Zeile deckungsgleich mit Stufe 2.
 
 ---
 
-## 🔴 Offene Abhängigkeit: der Hilfs-Router hält das Zertifikat
+## ✅ Aufgelöst am selben Abend: der Hilfs-Router ist wieder weg
+
+Der unten beschriebene Zwischenzustand hat **von 18:24 bis 20:12** bestanden. Er ist
+aufgelöst — nicht durch Überwachung eines Flickens, sondern durch Beseitigung des Flickens.
+
+**Wie:** Coolify legt die von ihm erzeugten Traefik-Labels in einem **editierbaren** Feld der
+Anwendung ab (`custom_labels`, base64). Dort wurde **genau eine Zeile** geändert:
+
+```
+traefik.http.routers.https-2-….tls.certresolver=letsencrypt
+                                              → letsencryptdns
+```
+
+Damit fordert der **echte** Router der Anwendung das Zertifikat über die DNS-Prüfung an. Das
+vorhandene Zertifikat liegt bereits in der Ablage genau dieses Auflösers — der Besitz
+wechselt also, ohne dass ein neues bestellt werden muss und ohne eine Sekunde ohne
+gültiges Zertifikat.
+
+Die beiden anderen Domains bleiben unverändert auf der HTTP-Prüfung. Es gab keinen Grund,
+funktionierende Zertifikate anzufassen.
+
+**Geprüft, nicht angenommen:**
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| Änderung erzwingt genau eine Zeile | Schutz im Skript: bei ≠ 1 geänderter Zeile Abbruch |
+| Label am laufenden Container | `https-2` = `letsencryptdns`, `https-0/1` unverändert |
+| **Überlebt es einen weiteren Deploy?** | ja — Container **und** Coolify-Datenbank unverändert |
+| Entfernen des Hilfs-Routers | 613 Proben, TLS durchgehend gültig, keine Fehler im Proxy |
+| Zertifikatsbesitz danach | liegt in `acme-dns.json`, referenziert vom regulären App-Router |
+
+⚠️ **Ein Restrisiko bleibt und gehört benannt:** Ändert jemand die **Domainliste** dieser
+Anwendung, erzeugt Coolify die Labels neu und setzt `certresolver` vermutlich auf
+`letsencrypt` zurück. Dann müsste die Zeile erneut gesetzt werden. Das Netz darunter ist die
+seit heute laufende `ZERT`-Prüfung im stündlichen Domain-Sweep (`Coolify/BETRIEB.md`), die
+lange vor einem Ausfall anschlägt.
+
+Der entfernte Hilfs-Router liegt gesichert unter
+`/data/coolify/proxy/backups/zzz-zertifikat-business.yaml.entfernt-20260825`.
+
+**Beobachtete Nebenwirkung, die vorher niemand gemessen hatte:** Ein Deploy dieser Anwendung
+erzeugt rund **6 Sekunden HTTP 503** auf der betroffenen Domain (gemessen 20:03:13–20:03:19
+bei sekündlicher Probe). Die rollende Aktualisierung ist also **nicht** vollständig nahtlos.
+Bei stichprobenartiger Messung alle 2 Sekunden war das vorher nicht aufgefallen.
+
+---
+
+## Zwischenzustand 18:24–20:12 (aufgelöst, zur Nachvollziehbarkeit erhalten)
 
 Das Zertifikat für `business.activecenter.info` liegt **ausschliesslich** in
 `acme-dns.json`. Der reguläre, von Coolify erzeugte Router benutzt weiterhin die
