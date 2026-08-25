@@ -205,10 +205,36 @@ lange vor einem Ausfall anschlägt.
 Der entfernte Hilfs-Router liegt gesichert unter
 `/data/coolify/proxy/backups/zzz-zertifikat-business.yaml.entfernt-20260825`.
 
-**Beobachtete Nebenwirkung, die vorher niemand gemessen hatte:** Ein Deploy dieser Anwendung
-erzeugt rund **6 Sekunden HTTP 503** auf der betroffenen Domain (gemessen 20:03:13–20:03:19
-bei sekündlicher Probe). Die rollende Aktualisierung ist also **nicht** vollständig nahtlos.
-Bei stichprobenartiger Messung alle 2 Sekunden war das vorher nicht aufgefallen.
+### Korrektur: Deploys sind sehr wohl ausfallfrei
+
+Beim Setzen des Labels wurden 20:03:13–20:03:19 rund **6 Sekunden HTTP 503** gemessen. Das
+wurde hier zunächst als Eigenschaft der rollenden Aktualisierung festgehalten. **Das war
+falsch**, und die Messung selbst enthielt schon den Widerspruch: Die 503 trafen
+**ausschliesslich** `business.activecenter.info`, während `quiz.activecenter.info` und
+`business.eaglesfit.ch` durchgehend 200 lieferten — obwohl alle drei am **selben Container**
+hängen. Eine Container-Umschaltung hätte alle drei gleichzeitig getroffen.
+
+Gegenprobe um 20:25 mit einem Deploy **ohne jede Konfigurationsänderung**, durchgehende
+Messung aller drei Domains, 375 Proben über fünf Minuten:
+
+| | |
+| --- | --- |
+| HTTP 503 | **kein einziges Mal** |
+| Verbindungsabbrüche | 4, verteilt über 5 Minuten, jedes Mal auf einer **anderen** Domain, nie gleichzeitig |
+| davon im Umschaltfenster (Container-Start 20:25:18) | genau **einer** — die übrigen drei liegen unabhängig davon |
+
+Die Proben laufen nacheinander (je ~300 ms), ein Klemmer unter einer Sekunde trifft deshalb
+nur eine Domain. Das Grundrauschen der Messung liegt bei rund einem Ausreisser je 90
+Sekunden — die vier Werte liegen darin.
+
+**Fazit: Die rollende Aktualisierung arbeitet wie vorgesehen** — neuer Container starten,
+Gesundheitsprüfung abwarten, erst dann den alten entfernen (im Deploy-Protokoll wörtlich
+nachlesbar). Die 6 Sekunden entstanden, weil Traefik den Router `https-2` wegen des
+**geänderten TLS-Auflösers** neu bauen musste; währenddessen gab es für diesen einen
+Hostnamen keine Route, und der Catch-all antwortete mit 503.
+
+Das ist kein Deploy-Verhalten, sondern der Preis einer Router-Umkonfiguration — ein Vorgang,
+der im Normalbetrieb nicht vorkommt. **Es gibt hier nichts einzurichten.**
 
 ---
 
