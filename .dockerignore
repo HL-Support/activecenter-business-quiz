@@ -1,0 +1,42 @@
+# Was NICHT in den Build-Kontext gehoert (Audit 2026-08-23, §7 P0-5).
+# Zwei Ziele: kleiner/schneller Kontext - und vor allem keine Geheimnisse oder
+# Host-Artefakte im Image.
+
+# Geheimnisse und lokale Konfiguration
+.env
+.env.*
+*.pem
+*.key
+
+# Host-Artefakte, die im Container falsch waeren
+node_modules
+dist
+.git
+.gitignore
+.vercel
+.playwright-cli
+e2e-artifacts
+test-results
+output
+__pycache__
+*.log
+*.zip
+*.bak
+*.bak-*
+.DS_Store
+
+# Nicht laufzeitrelevant: Dokumentation, Datenbank-/Automationsartefakte, Editorkram
+docs
+code_details
+n8n
+supabase
+*.sql
+*.md
+!README.md
+.vscode
+.idea
+*.code-workspace
+
+# Das Image baut sich selbst; die Docker-Dateien muessen nicht mit hinein
+Dockerfile
+.dockerignore
