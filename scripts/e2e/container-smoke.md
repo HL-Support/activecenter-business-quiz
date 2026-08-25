@@ -165,3 +165,7 @@ docker rm -f business-leads-smoke
 docker rmi business-leads-web:smoke
 rm .env.container-smoke
 ```
+
+## 8. Durchgeführt am 25.08.2026 (Hetzner 46.224.76.193)
+
+Alle Proben aus §1–7 bestanden — Belege im Statusdokument §5E und im Agentenbericht der Session. Kernwerte: Image 355 MB non-root, /health/ready echt grün (Supabase 147 ms), SIGTERM-Drain 0.206 s Exit 0, fail-closed Exit 1. Basisimage-Digest seither im Dockerfile gepinnt.

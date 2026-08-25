@@ -86,8 +86,8 @@ leer verifiziert), Ursache seit #60 serverseitig unmöglich.
 
 | Punkt | Gate |
 | --- | --- |
-| Container-Smoke (Docker-Build, non-root, HEALTHCHECK, SIGTERM im Container) | Docker lokal installieren **oder** direkt am Coolify-Preview; Ablauf: scripts/e2e/container-smoke.md |
-| Dockerfile-Basisimage **Digest-Pin** (13.5.6) | erster echter Build (TODO markiert) |
+| ~~Container-Smoke~~ **ERLEDIGT 25.08. auf Hetzner**: Build Exit 0 (355 MB, non-root, healthy), alle Proben grün, /health/ready mit echtem Supabase-HEAD (147 ms), SIGTERM-Drain 0.2 s Exit 0, fail-closed Env-Gate Exit 1 | — |
+| ~~Digest-Pin~~ **ERLEDIGT 25.08.**: node:24-slim@sha256:a9f5f7c9… (OCI-Index, alle 3 Stages) | — |
 | Coolify-Deploy-Pipeline (13.3.3/13.5.6: Digest-Promotion, Preview-App, CI-Gates vor Webhook) | Phase-3-Design |
 | Vercel-Nachlauf: Projekt/Env/Domains erst nach bewusst aufgegebenem Rollback entfernen (Phase 7) | Cutover + Beobachtungsfrist |
 | zzz-Vercel-Projekt endgültig löschen | Nachlauffrist (Empfehlung 6–12 Monate, Klickzahlen ~0) |
@@ -120,6 +120,10 @@ leer verifiziert), Ursache seit #60 serverseitig unmöglich.
    geplanten 10.0.1.4-Freigaben entfallen.
 6. **2 hartkodierte service_role-Keys** in Workspace-Skripten → bei Supabase-Key-Rotation
    (13.3.6) explizit mitziehen.
+
+### E. Coolify-Discovery Hetzner (25.08., read-only)
+
+Coolify ist auf 46.224.76.193 **nicht installiert**. Server gesund (Ubuntu 24.04, Docker 29.6.1, 113G frei, 9.1Gi RAM frei, 11 Produktivcontainer alle auf 127.0.0.1 gebunden, UFW deny-incoming außer 80/443/2255). **Zwei Kollisionen für einen Install:** Port 8000 (Coolify-UI-Default) gehört mautic_app; 80/443 hält der Host-nginx — Coolifys Traefik will genau diese. Architekturentscheidung nötig (separater Coolify-Server vs. Koexistenz hinter nginx vs. Proxy-Umzug). Smoke-Image blq-smoke:2026-08-25 liegt auf dem Server bereit.
 
 ## 6. Fahrplan ab hier (Audit §8, aktualisiert)
 
