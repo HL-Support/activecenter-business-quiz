@@ -300,6 +300,10 @@ test('OPTIONS auf lead-track spiegelt nur erlaubte Origins und setzt immer Vary'
     'https://business.eaglesfit.ch',
     'https://businessleadsquiz.vercel.app',
     'https://business-leads-quiz-abc123-markus-oberhofers-projects.vercel.app',
+    // Legacy-Resume-Landeseite: loest Resume-Links per Browser-fetch auf. Ohne diese beiden
+    // Origins waeren Links aus aelteren Mails dorthin still unerreichbar (Regression 24.08.).
+    'https://global-sce.com',
+    'https://www.global-sce.com',
   ]) {
     const response = await options({ origin });
     assert.equal(response.statusCode, 204);
@@ -314,6 +318,8 @@ test('OPTIONS auf lead-track spiegelt fremde Origins nicht mehr', async () => {
     'http://business.activecenter.info',
     'https://business.activecenter.info.evil.example',
     'https://fremdes-projekt.vercel.app',
+    'https://global-sce.com.evil.example',
+    'http://global-sce.com',
     'https://evil.example/-markus-oberhofers-projects.vercel.app',
   ]) {
     const response = await options({ origin });
