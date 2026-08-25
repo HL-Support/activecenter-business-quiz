@@ -127,6 +127,31 @@ test('complete canonical video completion reports honest queued semantics', asyn
   }
 });
 
+test('resume-Aufloesung funktioniert OHNE target-Parameter (Mail-Links tragen keinen)', async () => {
+  // Produktionsfehler 25.08.2026: requestedResumeTarget() rief .toLowerCase() auf das
+  // Ergebnis von safeString() auf, das bei fehlendem Wert null ist. Jeder Resume-Link aus
+  // einer Nurture-Mail - die tragen kein &target= - liess damit die Funktion abstuerzen
+  // (500), der Browser fiel auf die Startseite zurueck und der Empfaenger musste das Quiz
+  // neu machen. Serverseitig sichtbar war nur ein Funktionsfehler, im Funnel nichts.
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new globalThis.Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } });
+  try {
+    for (const payload of [
+      { key: 'irgendeinschluessel' },
+      { key: 'irgendeinschluessel', resumeTarget: undefined },
+      { token: 'nicht-verifizierbar' },
+    ]) {
+      const action = payload.key ? 'resolve_resume_key' : 'resolve_resume_token';
+      const response = await invoke({ action, payload });
+      assert.notEqual(response.statusCode, 500, `${action} ohne target darf nicht abstuerzen`);
+      assert.ok(response.statusCode < 500, `${action}: erwartete fachliche Antwort, bekam ${response.statusCode}`);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('lookup_subdomain falls back from a contact id to its coach Herbalife id', async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];

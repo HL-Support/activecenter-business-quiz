@@ -646,7 +646,9 @@ function resumeStateFromVideoProgress(rows) {
 }
 
 function normalizeResumeProfileCode(value) {
-  const raw = safeString(value, 40).toLowerCase();
+  // safeString liefert bei null/undefined null - ohne Absicherung wirft .toLowerCase()
+  // hier einen TypeError und die ganze Bridge-Antwort wird zu einem 500er.
+  const raw = String(safeString(value, 40) || '').toLowerCase();
   if (!raw) return '';
   if (raw === 'r' || raw === 'a' || raw === 'typ a' || raw === 'type a' || raw === 'tipo a' || raw.includes('macher')) return 'R';
   if (raw === 'y' || raw === 'typ b' || raw === 'type b' || raw === 'tipo b' || raw.includes('netzwerker')) return 'Y';
@@ -765,7 +767,10 @@ function hasPointsResultContactContext(context = {}, leadState = {}) {
 }
 
 function requestedResumeTarget(value) {
-  const target = safeString(value, 32).toLowerCase();
+  // Ohne diese Absicherung stuerzte JEDER Resume-Link ohne &target=-Parameter ab
+  // (safeString(undefined) === null, null.toLowerCase() wirft) - der Nutzer landete
+  // dann auf der Startseite statt an seiner Stelle im Funnel.
+  const target = String(safeString(value, 32) || '').toLowerCase();
   return target === 'videos' ? 'videos' : '';
 }
 
@@ -780,7 +785,7 @@ function resumeStateForRequestedTarget(resumeState, target) {
 
 async function persistContactLeadStateFromResumePayload(payload) {
   const leadHash = safeString(payload?.leadHash || payload?.lead_hash, 96);
-  const email = safeString(payload?.email, 180).toLowerCase();
+  const email = String(safeString(payload?.email, 180) || '').toLowerCase();
   const firstName = normalizePersonName(payload?.firstName || payload?.first_name, 120);
 
   if (!isLeadHash(leadHash) || !email || !firstName) {
@@ -887,7 +892,7 @@ async function resolveContactLeadForResume({ sessionHash, email, leadHash, fallb
   }
 
   if (!leadState.lead_hash && email) {
-    const normalizedEmail = safeString(email, 180).toLowerCase();
+    const normalizedEmail = String(safeString(email, 180) || '').toLowerCase();
     const response = await supabaseRequest(
       `lead_state?email_normalized=eq.${encodeURIComponent(normalizedEmail)}&lifecycle_stage=neq.merged_duplicate&select=lead_hash,member_id,organisation_id,ref_id,berater_slug,lang,first_name,email,email_normalized,form_submitted_at,profile_code,main_aspiration,initial_barrier,lifecycle_stage,migration_flags&order=form_submitted_at.desc&limit=1`
     );
@@ -908,7 +913,7 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
     ...typeformHidden(webhookPayload),
   };
   const leadHash = safeString(hidden.lead_hash || hidden.hash || submissionPayload?.lead_hash, 96);
-  const email = safeString(submissionPayload?.email || webhookPayload?.email, 180).toLowerCase();
+  const email = String(safeString(submissionPayload?.email || webhookPayload?.email, 180) || '').toLowerCase();
 
   if (!isLeadHash(leadHash) || !email) {
     return { persisted: false, reason: 'missing_lead_hash_or_email' };
