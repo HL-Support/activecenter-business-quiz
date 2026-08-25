@@ -189,6 +189,50 @@ auf 167.233.251.217, zusätzlich lokal. Vor jeder Löschung lief eine Einzelprü
 Löschen „aller qz_-Zeilen der letzten Tage" hätte echte Leads getroffen — im selben
 Zeitfenster kamen mehrere herein.
 
+
+### H. Fehlermeldung, Monitoring und ein geschlossener Vorfall (25.08., Nachmittag)
+
+**P1 „Fehlerdienst" umgesetzt** (PR #76): `server/fehlermeldung.js` meldet Serverfehler an
+GlitchTip (`errors.hl-support.biz`, Projekt `business-leads`, das zehnte der Flotte) — ohne
+SDK, nach dem kanonischen Muster aus `analysen/api/_fehlermeldung.js`. Drei Eigenschaften
+sind bindend und getestet: nie werfen, nie warten, nie fluten (gleicher Fehler 1×/min,
+global 20/min).
+
+Zwei Entwurfsentscheidungen, die den Unterschied machen:
+
+- **Zwei Meldewege.** Ein `catch` sieht nur geworfene Fehler; ein Handler, der selbst mit
+  500 antwortet, käme nie an. Zusätzlich meldet ein `close`-Listener jede 5xx-Antwort
+  (Doppelmeldung per WeakSet ausgeschlossen).
+- **Redigierung vor der Drosselung.** Fehlertexte kommen aus Node/Supabase und enthalten
+  Hashes und Adressen. Ohne Normalisierung wäre jede Meldung eines Massenfehlers einzigartig
+  und das Minutenbudget in Sekunden verbraucht. Datenschutz und Drosselung fallen zusammen.
+
+Der Melder kennt das Request-Objekt strukturell nicht (kein `req`/`.headers`/`.body` im
+File, per Gate geprüft); Kontext ist eine feste Allowlist (bereich, route ohne Slug/Query,
+request_id, status, level). Nicht gemeldet: 4xx (sonst meldet jeder Bot-Scan) und die
+geplante 503 beim Herunterfahren (sonst verbraucht jedes Deploy das Budget).
+
+**Zustellweg Ende-zu-Ende bewiesen:** Probemeldung durch die echte Kette geschickt, im
+Projekt sichtbar, danach entfernt (Projekt startet mit 0 Meldungen). `GLITCHTIP_DSN` ist in
+der Staging-Umgebung gesetzt; Staging läuft auf dem aktuellen Commit
+(`commit_source: SOURCE_COMMIT`, Funnel und `/berater-info` unverändert 200).
+
+**Monitoring:** Kein neuer Better-Stack-Monitor (Kontingent 10/10). Der Flottenweg ist die
+Sammelliste `SITES` in HL-Support_Analytics, abgedeckt vom Monitor
+`[SITES] Coolify-Anwendungen`. Unser Eintrag liegt dort als PR #1 **mit Merge-Sperre bis
+nach dem Cutover** (auf Vercel liefert `/health/live` heute 404). Geprüft wird bewusst
+`/health/live`: `/` wäre auch bei totem Prozess 200, `/health/ready` würde eine
+Supabase-Störung als unseren Ausfall melden.
+
+**Vorfall `[WEBHOOK] Zentrale Zustellungen` (fremdes Projekt) geschlossen.** Signal
+`legacy_form_failed=1` → eine echte Umfrage-Einsendung vom 25.08. 10:44 UTC stand auf
+`failed` (Timeout). Belegt: Die Daten **waren angekommen** (contacts 3684031,
+typeform_surveys 42950, 10:44:41 UTC) — nur die Antwort kam nach dem Timeout des Senders.
+Datensatz nach Beleg korrigiert (mit Begründung im Feld), Signale sauber, Monitor 12:39 UTC
+wieder `up`. **Ursache bleibt offen und liegt außerhalb dieses Projekts:** zu knapper
+Sende-Timeout gegenüber der Antwortzeit des Empfängers — kann jederzeit erneut einen
+Fehlalarm erzeugen.
+
 ## 6. Fahrplan ab hier (Audit §8, aktualisiert)
 
 1. **Phase 3 — Coolify-Hosting** (Startsignal Markus): Docker/Container-Smoke →
