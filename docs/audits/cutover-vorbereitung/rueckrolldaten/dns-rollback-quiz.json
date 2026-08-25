@@ -1,0 +1,21 @@
+{
+  "zone_id": "0b43ccb0e932d3bb314941e9e57c5d00",
+  "record": {
+    "id": "dcb343518ddc9683f51323e90ce9897d",
+    "name": "quiz.activecenter.info",
+    "type": "CNAME",
+    "content": "2940e78cbc83cdf4.vercel-dns-017.com",
+    "proxiable": true,
+    "proxied": false,
+    "ttl": 60,
+    "settings": {
+      "flatten_cname": false
+    },
+    "meta": {},
+    "comment": null,
+    "tags": [],
+    "created_on": "2026-04-16T07:45:22.017203Z",
+    "modified_on": "2026-08-25T13:53:56.315212Z"
+  },
+  "gesichert_am": "2026-08-25"
+}
