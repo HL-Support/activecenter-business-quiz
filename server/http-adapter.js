@@ -260,10 +260,31 @@ function parseBody(raw, contentTypeHeader) {
 
 // --- Response-Adapter ---------------------------------------------------------------------
 
-function applySecurityHeaders(res) {
+// HSTS gehoert zur Sicherheitsparitaet mit dem heutigen Betrieb: Vercel liefert
+// max-age=63072000 (2 Jahre). Ohne den Header duerfte ein Browser nach dem Wechsel wieder
+// eine erste Verbindung ueber http zulassen - das ist die Luecke, die SSL-Stripping nutzt.
+// Bewusst hier statt in der Proxy-Konfiguration: Der Header reist mit der Anwendung, egal
+// auf welcher Plattform sie laeuft, und steht in derselben Quelle wie die uebrigen vier.
+// Nur auf tatsaechlich verschluesselten Anfragen setzen (Traefik terminiert TLS und meldet
+// das ueber X-Forwarded-Proto) - sonst wuerde ein lokaler http-Start den Browser aussperren.
+const HSTS_HEADER = 'max-age=63072000; includeSubDomains';
+
+function applySecurityHeaders(res, { secure = false } = {}) {
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
     res.setHeader(name, value);
   }
+  if (secure) {
+    res.setHeader('Strict-Transport-Security', HSTS_HEADER);
+  }
+}
+
+function isSecureRequest(req) {
+  const forwarded = String(req?.headers?.['x-forwarded-proto'] || '')
+    .split(',')[0]
+    .trim()
+    .toLowerCase();
+  if (forwarded) return forwarded === 'https';
+  return Boolean(req?.socket?.encrypted);
 }
 
 /**
@@ -711,12 +732,12 @@ function createApp(options = {}) {
     try {
       url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     } catch {
-      applySecurityHeaders(res);
+      applySecurityHeaders(res, { secure: isSecureRequest(req) });
       sendTextResponse(res, 400, 'Bad Request');
       return;
     }
 
-    applySecurityHeaders(res);
+    applySecurityHeaders(res, { secure: isSecureRequest(req) });
     res.setHeader('X-Request-Id', requestId);
 
     const timer = setTimeout(() => {
@@ -805,6 +826,8 @@ module.exports = {
   REQUEST_TIMEOUT_MS,
   REQUIRED_ENV,
   SECURITY_HEADERS,
+  HSTS_HEADER,
+  isSecureRequest,
   SHUTDOWN_GRACE_MS,
   SLUG_REWRITE,
   clientIpFromRequest,

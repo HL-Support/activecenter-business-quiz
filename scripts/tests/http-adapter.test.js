@@ -331,6 +331,42 @@ test('Security-Header aus vercel.json liegen auf jeder Antwort', async (t) => {
   }
 });
 
+test('HSTS liegt nur auf verschluesselten Anfragen, nie auf unverschluesselten', async (t) => {
+  const restoreFetch = withFetchMock();
+  const server = await startServer();
+  t.after(async () => {
+    await server.close();
+    restoreFetch();
+  });
+
+  // Sicherheitsparitaet zum Vercel-Betrieb (max-age=63072000). Ohne den Header duerfte ein
+  // Browser nach dem Hostingwechsel wieder eine erste http-Verbindung aufbauen.
+  const secure = await server.request('/markus', { headers: { 'x-forwarded-proto': 'https' } });
+  assert.equal(
+    secure.headers.get('strict-transport-security'),
+    'max-age=63072000; includeSubDomains'
+  );
+
+  const secureApi = await server.request('/api/gibt-es-nicht', {
+    headers: { 'x-forwarded-proto': 'https' },
+  });
+  assert.equal(
+    secureApi.headers.get('strict-transport-security'),
+    'max-age=63072000; includeSubDomains',
+    'auch API-Antworten tragen HSTS'
+  );
+
+  // Ohne TLS davor (lokaler Start, interner Aufruf) darf der Header NICHT gesetzt werden -
+  // sonst sperrt sich ein Entwickler den eigenen http-Zugang fuer zwei Jahre aus.
+  const plain = await server.request('/markus');
+  assert.equal(plain.headers.get('strict-transport-security'), null);
+
+  const forwardedHttp = await server.request('/markus', {
+    headers: { 'x-forwarded-proto': 'http' },
+  });
+  assert.equal(forwardedHttp.headers.get('strict-transport-security'), null);
+});
+
 test('Pfad-Traversal aus dist/ heraus wird blockiert', () => {
   const distDir = path.join(projectRoot, 'dist');
   const root = path.resolve(distDir);
