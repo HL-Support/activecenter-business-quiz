@@ -63,6 +63,37 @@ COPY --chown=node:node api ./api
 COPY --chown=node:node server ./server
 
 # Non-root (Audit 13.5.6). Das Image node:24-slim bringt den Benutzer "node" (uid 1000) mit.
+# ---------------------------------------------------------------------------------------
+# Herkunft des Abbilds (Audit 13.5.6)
+# ---------------------------------------------------------------------------------------
+# Bewusst GANZ am Ende: ein neuer SHA invalidiert nur diese beiden Schichten, nicht den
+# teuren pnpm-/Build-Teil darueber.
+#
+# 🔴 Coolify uebergibt KEINEN Commit als Build-Arg. Empirisch am 25.08.2026 aus dem
+# Bauprotokoll der Staging-App gelesen - die Bau-Zeile kennt genau:
+#   --build-arg COOLIFY_URL / COOLIFY_FQDN / COOLIFY_BRANCH / COOLIFY_RESOURCE_UUID
+#   --build-arg COOLIFY_BUILD_SECRETS_HASH=...
+# Der Commit steht dort nur im Image-TAG (`-t <resource-uuid>:<sha>`) und kommt zusaetzlich
+# zur LAUFZEIT als `SOURCE_COMMIT` in den Container. Genau diesen Weg liest
+# server/http-adapter.js als zweite Quelle - deshalb ist unter Coolify NICHTS zu setzen.
+#
+# Diese ARGs decken den anderen Fall ab: jeden Bau OHNE Coolify (Container-Smoke, CI, ein
+# kuenftiger Build-Server), wo der Wert sonst nirgendwoher kaeme:
+#
+#   docker build --build-arg GIT_COMMIT_SHA="$(git rev-parse HEAD)" -t business-leads-web:smoke .
+#
+# ⚠️ Bauzeit-Variablen sind flottenweit abgeschaltet, weil sie Geheimnisse dauerhaft in die
+# Image-Schichthistorie schreiben (Coolify/BETRIEB.md §8). Ein Commit-SHA und ein
+# Image-Digest sind oeffentliche Bezeichner - hier gilt der Grund nicht. NIEMALS ein
+# Geheimnis auf diesem Weg hereinreichen.
+#
+# Nicht uebergeben = leer; server/http-adapter.js faellt dann auf SOURCE_COMMIT bzw.
+# VERCEL_GIT_COMMIT_SHA zurueck und laesst das Feld sonst leer, statt zu raten.
+ARG GIT_COMMIT_SHA=""
+ARG IMAGE_DIGEST=""
+ENV GIT_COMMIT_SHA=${GIT_COMMIT_SHA} \
+    IMAGE_DIGEST=${IMAGE_DIGEST}
+
 USER node
 
 EXPOSE 3000

@@ -32,6 +32,8 @@ const {
   parseBody,
   queryFromSearchParams,
   readinessReport,
+  resolveCommit,
+  resolveImageRef,
   resolveStaticPath,
   validateEnv,
 } = require('../../server/http-adapter.js');
@@ -410,6 +412,119 @@ test('/health/live antwortet ohne externen Aufruf mit 200', async (t) => {
   assert.equal(response.status, 200);
   assert.equal(response.json.status, 'live');
   assert.equal(typeof response.json.uptime_s, 'number');
+});
+
+// --- Herkunft des laufenden Abbilds (Audit 13.5.6) -------------------------------------------
+//
+// Grundlage jeder Cutover-Verifikation: Am laufenden Container muss ablesbar sein, WELCHER
+// Commit laeuft. Vor diesen Tests lieferte /health/live `commit` und `image` dauerhaft leer,
+// weil nichts die Variablen setzte - der Endpunkt sah dabei gesund aus.
+
+const SHA = 'e3a0a05be3a0a05be3a0a05be3a0a05be3a0a05b';
+const OTHER_SHA = '51e845de515228345f977917f278a69b07d6b9c1';
+
+test('resolveCommit: gebackenes GIT_COMMIT_SHA schlaegt die Plattformwerte', () => {
+  const result = resolveCommit({
+    env: { GIT_COMMIT_SHA: SHA, SOURCE_COMMIT: OTHER_SHA, VERCEL_GIT_COMMIT_SHA: OTHER_SHA },
+  });
+  assert.deepEqual(result, { commit: SHA, commit_source: 'GIT_COMMIT_SHA' });
+});
+
+test('resolveCommit: unter Coolify traegt SOURCE_COMMIT den Wert', () => {
+  // Coolify uebergibt keinen Commit als Build-Arg, setzt ihn aber zur Laufzeit - genau
+  // dieser Pfad haelt die Staging- und spaeter die Produktions-App am Leben.
+  assert.deepEqual(resolveCommit({ env: { SOURCE_COMMIT: OTHER_SHA } }), {
+    commit: OTHER_SHA,
+    commit_source: 'SOURCE_COMMIT',
+  });
+});
+
+test('resolveCommit: im Vercel-Betrieb greift VERCEL_GIT_COMMIT_SHA', () => {
+  // Waehrend des Rollback-Fensters laeuft die Produktion weiter auf Vercel; die Antwort
+  // muss auch dort etwas aussagen.
+  assert.deepEqual(resolveCommit({ env: { VERCEL_GIT_COMMIT_SHA: SHA } }), {
+    commit: SHA,
+    commit_source: 'VERCEL_GIT_COMMIT_SHA',
+  });
+});
+
+test('resolveCommit: ohne Quelle bleibt das Feld leer statt zu raten', () => {
+  assert.deepEqual(resolveCommit({ env: {} }), { commit: '', commit_source: '' });
+});
+
+test('resolveCommit: unplausible Werte werden uebersprungen, nicht gemeldet', () => {
+  // Ein Platzhalter wie "unknown" oder ein leerer Build-Arg darf einen Rollback-Beweis
+  // nicht faelschen - er wird verworfen, und die naechste Quelle kommt zum Zug.
+  for (const junk of ['', '   ', 'unknown', 'HEAD', 'refs/heads/main', 'abc123']) {
+    assert.deepEqual(
+      resolveCommit({ env: { GIT_COMMIT_SHA: junk, SOURCE_COMMIT: OTHER_SHA } }),
+      { commit: OTHER_SHA, commit_source: 'SOURCE_COMMIT' },
+      `"${junk}" ist kein Commit-SHA`,
+    );
+  }
+  assert.deepEqual(resolveCommit({ env: { GIT_COMMIT_SHA: 'unknown' } }), {
+    commit: '',
+    commit_source: '',
+  });
+});
+
+test('resolveCommit: kurzer SHA wird akzeptiert und normalisiert', () => {
+  assert.deepEqual(resolveCommit({ env: { GIT_COMMIT_SHA: '  E3A0A05  ' } }), {
+    commit: 'e3a0a05',
+    commit_source: 'GIT_COMMIT_SHA',
+  });
+});
+
+test('resolveImageRef: IMAGE_DIGEST hat Vorrang vor dem rekonstruierten Tag', () => {
+  assert.equal(
+    resolveImageRef({
+      env: { IMAGE_DIGEST: 'sha256:a9f5f7c9', COOLIFY_RESOURCE_UUID: 'uuid', SOURCE_COMMIT: SHA },
+    }),
+    'sha256:a9f5f7c9',
+  );
+});
+
+test('resolveImageRef: unter Coolify entsteht der Tag <resource-uuid>:<sha>', () => {
+  // So taggt Coolify nachweislich (`-t <uuid>:<sha>`); am 25.08.2026 gegen `docker ps`
+  // der Staging-App gegengeprueft.
+  assert.equal(
+    resolveImageRef({ env: { COOLIFY_RESOURCE_UUID: 'liydqvexwattbkkhigpluc1q', SOURCE_COMMIT: OTHER_SHA } }),
+    `liydqvexwattbkkhigpluc1q:${OTHER_SHA}`,
+  );
+});
+
+test('resolveImageRef: halbe Angaben ergeben keinen Bezeichner', () => {
+  assert.equal(resolveImageRef({ env: { COOLIFY_RESOURCE_UUID: 'uuid' } }), '');
+  assert.equal(resolveImageRef({ env: { SOURCE_COMMIT: SHA } }), '');
+  assert.equal(resolveImageRef({ env: {} }), '');
+});
+
+test('/health/live gibt den laufenden Commit samt Herkunft aus', async (t) => {
+  const before = {
+    GIT_COMMIT_SHA: process.env.GIT_COMMIT_SHA,
+    SOURCE_COMMIT: process.env.SOURCE_COMMIT,
+    COOLIFY_RESOURCE_UUID: process.env.COOLIFY_RESOURCE_UUID,
+  };
+  delete process.env.GIT_COMMIT_SHA;
+  process.env.SOURCE_COMMIT = OTHER_SHA;
+  process.env.COOLIFY_RESOURCE_UUID = 'liydqvexwattbkkhigpluc1q';
+
+  const restoreFetch = withFetchMock();
+  const server = await startServer();
+  t.after(async () => {
+    await server.close();
+    restoreFetch();
+    for (const [name, value] of Object.entries(before)) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  });
+
+  const response = await server.request('/health/live');
+  assert.equal(response.status, 200);
+  assert.equal(response.json.commit, OTHER_SHA, 'der laufende Commit steht in der Antwort');
+  assert.equal(response.json.commit_source, 'SOURCE_COMMIT');
+  assert.equal(response.json.image, `liydqvexwattbkkhigpluc1q:${OTHER_SHA}`);
 });
 
 test('/health/ready ist fail-closed, wenn Pflicht-Env fehlt', async () => {
