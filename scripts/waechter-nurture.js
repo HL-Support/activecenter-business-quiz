@@ -215,10 +215,72 @@ async function w2ErgebnisStattVorgang() {
   return { befunde, stunden, faellige: Number(u.n) };
 }
 
+/**
+ * W3 — Menschen, die STRUKTURELL nie eine Mail bekommen können.
+ *
+ * Sie sind schlimmer als ein Ausfall: Ein Ausfall endet, dieser Zustand nicht. Der Lead
+ * steht im System, sieht vollständig aus, wird bei jedem Lauf geprüft — und fällt jedes Mal
+ * an derselben Stelle heraus. Ohne diese Prüfung merkt das niemand, weil nichts kaputtgeht.
+ *
+ * Zwei bekannte Ursachen, beide am 26.08.2026 gemessen:
+ *
+ *  - **Kein Ziel** (`main_aspiration` leer): Die Mail-Variante wird aus dem Ziel gewählt.
+ *    Fehlt es, gibt es keine Vorlage — Übersprung `no_email_id:a2/de/`. Betroffen sind
+ *    Leads, die ihre Kontaktdaten hinterlassen haben, ohne das Quiz abzuschliessen:
+ *    kein Profil, kein Ziel, keine Variante. 13 von 1210.
+ *  - **Keine Absendezeit** (`form_submitted_at` leer): Die Phasenlogik braucht sie als
+ *    Bezugspunkt. Ohne sie wird die Person nie fällig und fällt still durch, ohne dass
+ *    auch nur ein Übersprung protokolliert wird.
+ *
+ * Bewusst WARNUNG statt Alarm: Der Zustand ist stabil und nicht dringend, aber er darf
+ * nicht unsichtbar bleiben. Wächst die Zahl, wird daraus eine Entscheidung — Rückfall-
+ * variante bauen oder die Datenlücke schliessen.
+ */
+async function w3StrukturellUnerreichbar() {
+  // 🔴 Der Tabellenkurzname `v` ist hier nicht Kosmetik: Ohne ihn vergleicht
+  // `e.lead_hash = lead_hash` die Spalte mit sich selbst, die Bedingung ist immer wahr,
+  // und die Prüfung meldet stillschweigend null Treffer. Genau die Fehlerklasse, gegen die
+  // dieser Wächter gebaut ist - beim ersten Entwurf am 26.08. selbst hineingetappt.
+  const r = await executeManagementQuery(`
+    select
+      count(*) filter (where v.main_aspiration is null or v.main_aspiration = '') as ohne_ziel,
+      count(*) filter (where v.form_submitted_at is null) as ohne_absendezeit
+    from public.v_lead_state_full v
+    where v.source_app = 'business_leads_quiz' and v.funnel_key = 'business'
+      and v.email_normalized is not null and v.first_name is not null
+      and v.cta_type is null
+      and not exists (select 1 from public.lead_events e
+        where e.lead_hash = v.lead_hash and e.event_name = 'nurture_sent')`);
+  const x = r[0];
+  const befunde = [];
+  if (Number(x.ohne_ziel) > 0) {
+    befunde.push({
+      stufe: 'WARNUNG',
+      name: 'Ohne Ziel — keine Mail-Variante möglich',
+      zeilen: Number(x.ohne_ziel),
+      text: `${x.ohne_ziel} Kontakte haben kein \`main_aspiration\` und können deshalb `
+        + 'keine Nurture-Mail bekommen (Übersprung `no_email_id`). Sie haben ihre Adresse '
+        + 'hinterlassen, ohne das Quiz abzuschliessen.',
+    });
+  }
+  if (Number(x.ohne_absendezeit) > 0) {
+    befunde.push({
+      stufe: 'WARNUNG',
+      name: 'Ohne Absendezeit — wird nie fällig',
+      zeilen: Number(x.ohne_absendezeit),
+      text: `${x.ohne_absendezeit} Kontakte haben kein \`form_submitted_at\`. Die `
+        + 'Phasenlogik findet keinen Bezugspunkt; sie fallen still durch, ohne dass ein '
+        + 'Übersprung protokolliert wird.',
+    });
+  }
+  return befunde;
+}
+
 (async () => {
   const w1 = await w1Kappungsnaehe();
   const w2 = await w2ErgebnisStattVorgang();
-  const alle = [...w1, ...w2.befunde];
+  const w3 = await w3StrukturellUnerreichbar();
+  const alle = [...w1, ...w2.befunde, ...w3];
   const still = process.argv.includes('--still');
 
   const jsonIndex = process.argv.indexOf('--json');
