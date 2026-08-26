@@ -29,6 +29,7 @@ const {
   normalizeAspirationKey,
   normalizeProfileCode,
 } = require('../server/coach-insights-link');
+const { melden: meldeFehler } = require('../server/fehlermeldung');
 function cleanEnvSecret(value) {
   return String(value || '')
     .replace(/\\n$/g, '')
@@ -907,6 +908,93 @@ async function resolveContactLeadForResume({ sessionHash, email, leadHash, fallb
   };
 }
 
+// Zuordnung der Frage-6-Optionen zu den kanonischen Barrieren.
+// 🔴 Sprachunabhaengig, weil die Optionsreihenfolge in src/lib/core.js fuer JEDE Sprache
+// fest [vehicle, community, confidence, opportunity] ist - uebersetzt werden nur die
+// Beschriftungen. lead_q6_opt_1 ist also in jeder Sprache "vehicle".
+const Q6_BARRIER_BY_OPT = {
+  lead_q6_opt_1: 'vehicle',
+  lead_q6_opt_2: 'community',
+  lead_q6_opt_3: 'confidence',
+  lead_q6_opt_4: 'opportunity',
+};
+
+/**
+ * Zieht die Quiz-Daten aus einem Typeform-foermigen form_response.
+ *
+ * 🔴 Warum diese Funktion existiert (26.08.2026): Der Opt-in-Aufruf traegt alle Antworten
+ * in seinem Paket, aber sie landeten nur im MySQL-JSON - PostgreSQL bekam Profil, Ziel und
+ * Antworten ausschliesslich ueber den fragilen Browser-Ereignisstrom. Fiel der aus
+ * (Fire-and-forget bis 23.08., offene Tabs mit altem Bundle), blieb der Kontakt ohne
+ * Profil und konnte NIE eine Nurture-Mail bekommen. 116 Menschen waren so unsichtbar.
+ *
+ * Dieselbe Funktion liest deshalb BEIDE Quellen: das live gebaute webhookPayload im
+ * Opt-in-Pfad und das gespeicherte form_response-JSON aus MySQL im Backfill. Ein Extraktor,
+ * ein Test, keine zweite Wahrheit.
+ *
+ * Die Antwortzeilen folgen dem Schema des Ereignispfads (question_ref '1'..'6',
+ * question_index 1-basiert), damit in lead_answers_current EINE Zeilenwelt existiert -
+ * am 26.08. an echten Zeilen des Ereignispfads verifiziert.
+ */
+function extractQuizAnswersFromFormResponse(formResponse) {
+  const answers = Array.isArray(formResponse?.answers) ? formResponse.answers : [];
+  const quizAnswers = [];
+  let barrier = null;
+  let profileLabel = null;
+  let aspirationLabel = null;
+
+  for (const answer of answers) {
+    const ref = safeString(answer?.field?.ref, 120);
+    if (!ref) continue;
+    if (ref === 'lead_profile_result') {
+      profileLabel = safeString(answer.text, 180) || null;
+      continue;
+    }
+    if (ref === 'lead_main_aspiration') {
+      aspirationLabel = safeString(answer.text, 180) || null;
+      continue;
+    }
+    const match = /^lead_q([1-6])_/.exec(ref);
+    if (!match || answer?.type !== 'choice') continue;
+    const nummer = Number(match[1]);
+    const answerRef = safeString(answer?.choice?.ref, 120) || null;
+    const kanonisch = ref === 'lead_q6_barrier' ? Q6_BARRIER_BY_OPT[answerRef] || null : null;
+    if (kanonisch) barrier = kanonisch;
+    quizAnswers.push({
+      question_index: nummer,
+      question_ref: String(nummer),
+      answer_ref: answerRef,
+      answer_text: safeString(answer?.choice?.label, 500) || null,
+      answer_value: kanonisch,
+    });
+  }
+
+  return { quizAnswers, barrier, profileLabel, aspirationLabel };
+}
+
+/**
+ * Schreibt die beim Opt-in mitgelieferten Antworten nach lead_answers_current.
+ * Idempotent ueber den Unique-Schluessel (lead_hash, question_ref) des RPCs.
+ * Ein Fehler hier darf das Opt-in NIE scheitern lassen - aber er darf auch nicht
+ * stumm bleiben: genau stumme Verluste haben den Vorfall drei Monate versteckt.
+ */
+async function persistQuizAnswers(leadHash, quizAnswers, lang, answeredAt) {
+  for (const antwort of quizAnswers) {
+    await supabaseRpc('upsert_answer_current', {
+      p_lead_hash: leadHash,
+      p_question_ref: antwort.question_ref,
+      p_question_index: antwort.question_index,
+      p_question_text: null,
+      p_answer_ref: antwort.answer_ref,
+      p_answer_text: antwort.answer_text,
+      p_answer_value: antwort.answer_value,
+      p_profile_delta: {},
+      p_lang: lang,
+      p_answered_at: answeredAt,
+    });
+  }
+}
+
 async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhookPayload, finalContext = null) {
   const hidden = {
     ...(submissionPayload?.hidden || {}),
@@ -934,6 +1022,16 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
     submissionPayload?.profile_code,
     submissionPayload?.profile_label
   );
+  // Quiz-Daten aus dem Paket, das nachweislich ankommt (26.08.2026): Antworten und
+  // Barriere reisen mit dem Opt-in und haengen damit nicht mehr am Ereignisstrom.
+  const quizData = extractQuizAnswersFromFormResponse(webhookPayload?.form_response);
+  const selectedBarrier = safeString(
+    (Array.isArray(submissionPayload?.selected_answers)
+      ? submissionPayload.selected_answers.find((a) => a && a.barrier)?.barrier
+      : '') || '',
+    60
+  );
+  const initialBarrier = selectedBarrier || quizData.barrier || null;
   const lang = normalizeLanguage(hidden.lang, submissionPayload?.lang, webhookPayload?.form_response?.language);
   const finalLead = finalContext?.found ? finalContext : null;
   const finalEmail = safeString(finalLead?.email || email, 180)?.toLowerCase() || email;
@@ -984,6 +1082,7 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
       main_aspiration: safeString(hidden.main_aspiration || submissionPayload?.main_aspiration, 80) || null,
       main_aspiration_label:
         safeString(hidden.main_aspiration_label || submissionPayload?.main_aspiration_label, 180) || null,
+      initial_barrier: initialBarrier,
       utm_source: safeTrackingString(attribution, 'utm_source', 120),
       utm_medium: safeTrackingString(attribution, 'utm_medium', 120),
       utm_campaign: safeTrackingString(attribution, 'utm_campaign', 180),
@@ -998,6 +1097,22 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
       last_event_at: submittedAt,
     })),
   });
+
+  // Antworten hinterher - nach dem lead_state-Upsert, damit der Kontakt auf jeden Fall
+  // steht. Ein Fehler hier blockiert das Opt-in nicht, wird aber gemeldet: Stumme
+  // Verluste haben genau diesen Datenpfad drei Monate lang unsichtbar gemacht.
+  if (quizData.quizAnswers.length) {
+    try {
+      await persistQuizAnswers(leadHash, quizData.quizAnswers, lang, submittedAt);
+    } catch (err) {
+      console.warn('persistQuizAnswers failed:', err.message);
+      meldeFehler(err, {
+        bereich: 'bridge',
+        route: 'forward_typeform_adapter/persistQuizAnswers',
+        level: 'warning',
+      });
+    }
+  }
 
   return {
     persisted: true,
@@ -4428,3 +4543,10 @@ module.exports = async function handler(req, res) {
 
   return res.status(400).json({ error: 'Unknown action' });
 };
+
+// Fuer Backfill-Skripte und Tests: derselbe Extraktor, der im Opt-in-Pfad laeuft.
+// Ein zweiter Parser waere eine zweite Wahrheit - genau das Muster, das den
+// Antwortverlust drei Monate lang versteckt hat.
+module.exports.extractQuizAnswersFromFormResponse = extractQuizAnswersFromFormResponse;
+module.exports.Q6_BARRIER_BY_OPT = Q6_BARRIER_BY_OPT;
+module.exports.normalizeBusinessProfile = normalizeBusinessProfile;
