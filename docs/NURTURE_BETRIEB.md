@@ -113,16 +113,28 @@ wird. Ein Wächter auf derselben Maschine fällt mit ihr aus.
 Damit alarmiert Better Stack in beiden Fällen, die wehtun — Störung gefunden **oder** der
 Wächter läuft nicht mehr. Damit wird auch der Wächter bewacht.
 
-**Er misst das Ergebnis, nicht den Vorgang:**
+**Er misst das Ergebnis, nicht den Vorgang — und zwar in der Semantik des Versands:**
 
 - **W1** — berührt eine Ergebnismenge die Zeilengrenze? Blätternde Abfragen werden
   ausdrücklich anders bewertet, sonst schriee er genau die Stellen an, die repariert sind.
-- **W2** — warten fällige Empfänger, während der Versand steht? Fällige allein sind nur eine
-  **Warnung** (ein Rückstand baut sich legitim ab); Alarm gibt es erst bei der **Kombination**
-  aus fälligen Empfängern und stehendem Versand.
+- **W2** — warten fällige Empfänger, während der Versand steht? Gezählt wird je **Mensch**
+  (E-Mail-Gruppe über alle Sitzungen), exakt wie der Workflow denkt. Die erste Fassung
+  zählte je Datensatz und meldete 81 Fällige, wo real 9 warteten — 21 hatten ihre Mail
+  unter einem anderen Hash derselben Person, 28 waren über Zweitsitzungen in höheren
+  Rängen. Fällige allein sind nur eine **Warnung**; Alarm gibt es erst bei der
+  **Kombination** aus fälligen Empfängern und stehendem Versand.
+- **W3** — strukturell Unerreichbare (kein Ziel → keine Mail-Variante; keine Absendezeit →
+  nie fällig). Gegen eine **Hash-Baseline** bekannter, begründeter Ausnahmen
+  (`scripts/waechter-nurture-baseline.json`): gewarnt wird nur bei **neuen** Fällen,
+  verschwundene Einträge werden zum Aufräumen gemeldet. Ohne Baseline wäre die Warnung
+  wegen 8 unheilbarer Altdatenfälle für immer an — und Dauergelb erzieht zum Wegsehen.
 
 Prüfen ohne Datenbankzugriff: `node scripts/waechter-nurture.js --selbsttest` — 8 Fälle,
 darunter ausdrücklich „der echte Vorfall wäre erkannt worden".
+
+🔴 **Grundsatz aus der Kalibrierung am 26.08.:** Ein Wächter, der eine andere Semantik
+misst als das System, das er bewacht, erzeugt Dauerwarnungen. Wer eine Prüfung ergänzt,
+übernimmt die Sicht des Workflows (Gruppierung, Ausschlüsse), nicht die der Tabelle.
 
 > Ein Wächter, den man nie hat anschlagen sehen, ist kein Wächter. Beide Wege wurden am
 > 26.08. end-to-end nachgewiesen, auch der Alarmweg mit einem erzwungenen Ausfall.

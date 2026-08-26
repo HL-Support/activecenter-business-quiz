@@ -123,6 +123,29 @@ Was dabei **wegfällt** (Vereinfachung, kein Umbau-Zusatz): der Rücklese-Umweg
 Bridge→MySQL→Readback→PG für Kontaktdaten, die Abhängigkeit des Profils vom
 Ereignisstrom, und die Sonderbehandlung „Kontakt ohne Profil" im Nurture.
 
+## 5b. Ergebnis der Umsetzung (26.08., Abend)
+
+Beide Massnahmen aus Abschnitt 4 sind umgesetzt und am echten System bewiesen:
+
+| Massnahme | Ergebnis |
+| --- | --- |
+| **Backfill** (PR #86, Skript `scripts/backfill-antworten.js`) | **343 Leads geheilt**: ohne Profil 116→8, ohne Ziel 9→8, ohne Barriere 51→8, ohne Antwortzeilen 343→11. Einzeltest mit Vorher/Nachher, dann voller Lauf. Nur NULL-Felder gefüllt, nie überschrieben. |
+| **Opt-in-Persistenz** (derselbe PR) | Der Opt-in-Pfad schreibt Barriere und alle sechs Antworten selbst nach PostgreSQL — **ein Extraktor** für Live-Pfad, Backfill und Tests (8 neue Testfälle). |
+| **Beweis am echten Verkehr** | Zwei Opt-ins am Abend des 26.08. (19:42, 18:27): beide **sofort** mit Profil, Ziel, Barriere und 6 Antworten. |
+
+Die 8 verbleibenden Fälle sind Altdaten und Fremd-Quiz-Einsendungen ohne heilbare Quelle —
+begründet je Hash in `scripts/waechter-nurture-baseline.json`; der Wächter (W3) meldet nur
+noch **neue** Fälle dieser Klasse.
+
+Zwei Fallen aus der Umsetzung, im Code dokumentiert: MySQLs `TO_BASE64` bricht alle
+76 Zeichen um (ohne `REPLACE` scheitert der Transport **still** mit „0 heilbar"), und die
+Kandidatensuche muss auch Leads erfassen, denen **nur** die Antwortzeilen fehlen.
+
+Die Nurture-Freigabe für die Geheilten kam von Markus („besser jetzt als gar nie"); die
+Versandbremse hat den Rückstand über den Tag sauber abgetragen (63→45→25→3→0 je Lauf).
+
+---
+
 ## 6. Offene Nebenbefunde
 
 1. **Alter Eingang „Landing Page Business" lebt** (7 Kontakte seit Juni, Tierprofil-Quiz,

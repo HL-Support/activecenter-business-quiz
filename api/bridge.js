@@ -1093,6 +1093,10 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
       event_source_url: safeTrackingString(attribution, 'event_source_url', 1000),
       lifecycle_stage: 'contact_known',
       mysql_survey_id: finalLead?.mysql_survey_id || undefined,
+      // Direkter Verweis auf die Kontaktkartei (Architektur Option C, 26.08.2026). Der
+      // Readback hatte den Wert immer in der Hand und warf ihn weg - Kartei-Joins und
+      // Loeschabgleiche liefen deshalb ueber den Umweg typeform_surveys.
+      mysql_contact_id: finalLead?.mysql_contact_id || undefined,
       sync_status: finalLead ? 'mysql_final_synced' : 'pending',
       last_event_at: submittedAt,
     })),

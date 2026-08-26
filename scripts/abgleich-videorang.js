@@ -49,6 +49,11 @@ const DB_SCHEMA = process.env.MYSQL_SCHEMA || 'prod_contacts_activesupport';
 // undeutbar; wer hier etwas ergaenzt, prueft die Vollstaendigkeit mit --json und der
 // Zeile "nicht_deutbar".
 const RANG_MUSTER = [
+  // Rang 4 = die Person hat nach den Videos die Interessensfrage beantwortet
+  // („Ja interessiert" / „Aktuell nicht interessant"). Muss VOR der Alle-3-Regel stehen,
+  // weil diese Texte mit „Alle 3 Videos angeschaut:" beginnen. Beim Vergleich mit
+  // PostgreSQL zaehlt Rang 4 wie 3 - PG kennt nur den Videofortschritt.
+  [/interessiert|interested|interessato|interessante|angeschaut:|watched:|guardati:/i, 4],
   [/alle 3|mind a 3|tutti e 3|all 3|3\/3|todos los 3|toutes les 3|les 3 /i, 3],
   [/(^|\s)2\/3/i, 2],
   [/(^|\s)1\/3|video informativo 1 |infovideo 1 |1 informationsvideo/i, 1],
@@ -62,7 +67,13 @@ function rangAusText(text) {
 }
 
 function mysqlLesen() {
-  const sql = `select hash, ifnull(points_result,'NULL') from typeform_surveys
+  // Seit dem 26.08. fuehrt MySQL BEIDE Formen: points_rank (Zahl, fuer Maschinen) und
+  // points_result (uebersetzter Fliesstext, fuer Menschen im CRM). Der n8n-Workflow
+  // schreibt beide im selben UPDATE. Die Zahl ist die Primaerquelle dieses Abgleichs;
+  // der Text wird weiterhin gedeutet, um Drift ZWISCHEN den beiden Spalten zu erkennen -
+  // laufen sie auseinander, schreibt jemand nur noch eine von beiden.
+  const sql = `select hash, ifnull(points_rank,'NULL'), ifnull(points_result,'NULL')
+               from typeform_surveys
                where hash like 'qz\\_%' and deleted_at is null;`;
   const out = execFileSync(
     SSH,
@@ -73,8 +84,11 @@ function mysqlLesen() {
   const map = new Map();
   for (const zeile of out.split('\n')) {
     if (!zeile.trim()) continue;
-    const [hash, ...rest] = zeile.split('\t');
-    map.set(hash, rest.join('\t'));
+    const [hash, rangRoh, ...rest] = zeile.split('\t');
+    map.set(hash, {
+      rang: rangRoh === 'NULL' ? null : Number(rangRoh),
+      text: rest.join('\t'),
+    });
   }
   return map;
 }
@@ -109,11 +123,22 @@ async function abgleichen() {
   const nichtDeutbar = [];
   const inBaseline = [];
 
-  for (const [hash, text] of mysql) {
-    const mv = rangAusText(text);
+  const spaltenDrift = [];
+
+  for (const [hash, zeile] of mysql) {
+    const ausText = rangAusText(zeile.text);
+    // Primaerquelle ist die Zahl; der gedeutete Text bleibt als Zweitmessung. Rang 4
+    // („interessiert/nicht interessiert beantwortet") existiert nur in MySQL - fuer den
+    // Vergleich mit PostgreSQL zaehlt er wie 3 (alle Videos gesehen).
+    const mv = zeile.rang !== null ? zeile.rang : ausText;
     if (mv === undefined) {
-      nichtDeutbar.push({ hash, text });
+      nichtDeutbar.push({ hash, text: zeile.text });
       continue;
+    }
+    // Drift ZWISCHEN den MySQL-Spalten: Zahl und Text muessen dieselbe Aussage tragen.
+    // Laufen sie auseinander, schreibt ein Pfad nur noch eine der beiden Formen.
+    if (zeile.rang !== null && ausText !== undefined && ausText !== null && zeile.rang !== ausText) {
+      spaltenDrift.push({ hash, zahl: zeile.rang, text_gedeutet: ausText, text: zeile.text });
     }
     if (!pg.has(hash)) {
       if (bekannt.fehlt_in_postgres[hash]) inBaseline.push({ hash, art: 'fehlt_in_postgres' });
@@ -121,10 +146,11 @@ async function abgleichen() {
       continue;
     }
     const pv = pg.get(hash);
-    if (pv === mv) gleich.push(hash);
-    else if (mv === null && pv === 0) gleichwertig.push(hash);
-    else if (bekannt.abweichend[hash]) inBaseline.push({ hash, art: 'abweichend', postgres: pv, mysql: mv });
-    else abweichend.push({ hash, postgres: pv, mysql: mv, mysql_text: text });
+    const mvVergleich = mv === 4 ? 3 : mv;
+    if (pv === mvVergleich) gleich.push(hash);
+    else if (mvVergleich === null && pv === 0) gleichwertig.push(hash);
+    else if (bekannt.abweichend[hash]) inBaseline.push({ hash, art: 'abweichend', postgres: pv, mysql: mvVergleich });
+    else abweichend.push({ hash, postgres: pv, mysql: mvVergleich, mysql_text: zeile.text });
   }
 
   // Eine Baseline, die auf behobene Faelle zeigt, verrottet still. Deshalb melden, was
@@ -143,6 +169,7 @@ async function abgleichen() {
     nichtDeutbar,
     inBaseline,
     baselineVeraltet,
+    spaltenDrift,
   };
 }
 
@@ -170,6 +197,15 @@ async function abgleichen() {
     console.log(`  In PostgreSQL nicht vorhanden   : ${e.fehltInPg.length}`);
     console.log(`  Rangtext nicht deutbar          : ${e.nichtDeutbar.length}`);
     console.log(`  Bekannt und akzeptiert          : ${e.inBaseline.length}  (siehe Baseline-Datei)`);
+    console.log(`  Drift Zahl/Text in MySQL        : ${e.spaltenDrift.length}`);
+    if (e.spaltenDrift.length) {
+      console.log('');
+      console.log('  🔴 points_rank und points_result tragen verschiedene Aussagen —');
+      console.log('     ein Schreibpfad aktualisiert nur noch eine der beiden Spalten:');
+      for (const s of e.spaltenDrift.slice(0, 6)) {
+        console.log(`     ${s.hash}  Zahl=${s.zahl}  Text→${s.text_gedeutet} (${String(s.text).slice(0, 40)})`);
+      }
+    }
     if (e.baselineVeraltet.length) {
       console.log('');
       console.log('  ⚠️  Baseline-Eintraege ohne Befund - vermutlich behoben, bitte austragen:');
