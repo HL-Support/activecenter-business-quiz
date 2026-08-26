@@ -1,0 +1,17 @@
+{
+  "_hinweis": "Bekannte, gepruefte und akzeptierte strukturell unerreichbare Kontakte. Der Waechter warnt NUR bei Faellen, die hier NICHT stehen. Ohne diese Liste waere die Warnung dauerhaft an - und eine dauerhaft gelbe Anzeige erzieht genauso zum Wegsehen wie eine rote. Faellt ein Eintrag weg (geheilt oder geloescht), meldet der Waechter ihn als veraltet - dann hier austragen. Die Eintraege muessen der Sicht der WAECHTER-Abfrage entsprechen (v_lead_state_full, ohne E-Mail-Filter) - beim ersten Abgleich am 26.08. wichen Zaehl- und Waechterabfrage genau darin voneinander ab.",
+  "_erhoben": "2026-08-26",
+  "ohne_ziel": {
+    "qz_54efb1ae78f14ee2819e9b56c631313a": "Markus (jam4you), 17.06. - MySQL-Zeile ohne lead_q-Antworten (Legacy-Einsendung). Keine Quelle zum Heilen.",
+    "qz_47079141953d4b65ace2f1de4ff87041": "Steffen, 20.06. - dieser Hash hat keine MySQL-Antworten; die Person hat einen Zweitdatensatz MIT Antworten und ist darueber erreichbar.",
+    "qz_442e0540873c4b2ba8c2281d091aedb4": "Ralf, 27.06. - MySQL-Zeile ohne lead_q-Antworten (Legacy-Einsendung). Keine Quelle zum Heilen.",
+    "qz_f997bdb3975848b6b4322e9cae19c0ad": "Can, 17.08. - alter Nebeneingang Landing Page Business (Tierprofil 'wal'). Anderes Schema, bewusst nicht gemappt; Eingang wird ignoriert, nichts verlinkt mehr darauf.",
+    "qz_79f691e54acd4aaaa2997cd8312bb61a": "Leonie, 14.05. - Altdatenreparatur (mysql_canonical_repair) ohne Ziel UND ohne Absendezeit. Keine Quizantworten rekonstruierbar.",
+    "qz_7f3b827d1a8a48f68040fc0a7e8aaad4": "contact@hl-support.biz, 24.06. - interner Testeintrag; die Waechter-Abfrage filtert bewusst nicht nach E-Mail-Mustern.",
+    "qz_jwtprobe0000000000000000000001": "Interne JWT-Diagnoseprobe aus dem Staging-Vergleich (24.08.), kein Mensch.",
+    "qz_smoke_resume_contract": "Interne Smoke-Test-Probe des Resume-Vertrags, kein Mensch."
+  },
+  "ohne_absendezeit": {
+    "qz_79f691e54acd4aaaa2997cd8312bb61a": "Leonie, 14.05. - siehe ohne_ziel; keine echte Einsendezeit rekonstruierbar."
+  }
+}
