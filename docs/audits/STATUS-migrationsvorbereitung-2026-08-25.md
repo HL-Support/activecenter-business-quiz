@@ -252,3 +252,80 @@ gegen Prod (übergangssichere Asserts) · outbox_parked/Altjob 117 · Vercel-Aut
 SSO-Previews + Webhook-Ausfall · Bridge-notify materialisierte Leads (keine „harmlosen"
 Proben; Bundle-Marker als Deploy-Detektor) · Test-Exitcodes nie pipen (+OneDrive-Locks)
 · Worktree-Isolation für parallele Agents · Service-Key-Klärung (gelöst, Gates).
+
+---
+
+## 8. Nachtrag 25.–26.08.: Cutover vollzogen, zwei Vorfälle gelöst, Datenpfad gehärtet
+
+### Phase 3 ist abgeschlossen
+
+Alle drei Domains laufen seit dem 25.08. abends auf Coolify (`167.233.251.217`), Vercel
+bleibt 7–14 Tage als Rückweg stehen. Der erste Umstellversuch der Werbedomain scheiterte
+(17 Minuten ohne gültiges Zertifikat, 0 Leads verloren); der zweite lief ohne
+Ausfallsekunde, weil das Zertifikat vorab über die DNS-Prüfung beschafft wurde.
+Vollständig: [cutover-protokoll-2026-08-25.md](cutover-vorbereitung/cutover-protokoll-2026-08-25.md),
+Rückrolldaten mit Record-ids in [cutover-vorbereitung/rueckrolldaten/](cutover-vorbereitung/rueckrolldaten/).
+
+Seither dazugekommen: **ZERT**-Prüfung im stündlichen Domain-Sweep (Zertifikats-Restlaufzeit,
+Schwelle 21 Tage) und der Hilfs-Router wieder aufgelöst — der App-Router holt sein
+Zertifikat selbst über den DNS-Prüfweg (`custom_labels`, überlebt Deploys nachweislich).
+
+### Vorfall Nurture-Stillstand (gelöst, PRs #83–#87)
+
+Der Versand hatte seit dem 06.08. **drei Wochen lang keinen neuen Kontakt angeschrieben**
+— 186 Menschen —, während der Workflow zwölfmal täglich `success` meldete. Zwei stille
+PostgREST-Zeilengrenzen (1000) plus aufsteigende Sortierung; eine unabhängige Zweitmeinung
+fand die zweite, gefährlichere Kappung (Versand-Historie → Geisterkandidaten, eingefrorene
+Zweitmails, Doppelversand-Schutz auf einer einzigen Schicht). Beide Abfragen blättern
+jetzt (eindeutiger Zweitschlüssel! Seite-1-Falle im Folgeknoten!), Bremse global 60/Lauf.
+Aufarbeitung: [2026-08-26-nurture-zeilengrenze-vorfall.md](2026-08-26-nurture-zeilengrenze-vorfall.md).
+
+Dazu ein **Nurture-Wächter** (stündlich :37 auf der App-Box, bewusst nicht auf der
+n8n-Box; Herzschlag umgekehrt wie beim Domain-Sweep; misst je **Mensch**, nicht je
+Datensatz; Hash-Baseline für bekannte Ausnahmen). `nurture_runs.sent_count` ist
+strukturell 0 (Lauf wird protokolliert, **bevor** Sendungen erfasst werden) — echte Zahlen
+liefert die Lese-Sicht `v_nurture_runs_wahr`. Betriebsregeln: [../NURTURE_BETRIEB.md](../NURTURE_BETRIEB.md).
+
+Ausserdem: Löschfilter — in der MySQL-Kartei gelöschte Kontakte bekommen keine Mails mehr
+(fail-closed; Anlass: 12 Mails an 6 Gelöschte, eine Selbstabmeldung als Folge).
+
+### Antwortverlust (gelöst, PR #86 + Backfill)
+
+116 Menschen hatten Opt-in ohne Quizdaten in PG — die Daten lagen aber vollständig im
+MySQL-JSON des Opt-in-Pakets. **Backfill: 343 Leads geheilt** (ohne Profil 116→8, ohne
+Barriere 51→8, ohne Antwortzeilen 343→11; Rest = Altdaten/Fremd-Quiz, begründet in
+`scripts/waechter-nurture-baseline.json`). Der Opt-in-Pfad persistiert seither Barriere
+und alle sechs Antworten selbst — **ein Extraktor** für Live-Pfad, Backfill und Tests. Am
+echten Verkehr bewiesen (zwei Opt-ins am Abend, beide sofort vollständig). Analyse und
+Phase-4-Zielbild („ein Aufruf, eine Transaktion, idempotent, Profil serverseitig"):
+[2026-08-26-antwortverlust-analyse-und-zielbild.md](2026-08-26-antwortverlust-analyse-und-zielbild.md).
+
+### Architekturentscheidung Datenhaltung (Markus, 26.08.)
+
+**Option C:** MySQL-Kartei = Wahrheit über die Person, PostgreSQL = Wahrheit über das
+Verhalten; Verbund über `lead_hash` (gemessen stabil, 1238/1239 eindeutig);
+PG-Kontaktfelder sind ein deklarierter **Opt-in-Schnappschuss**, keine gepflegte Kopie.
+Ausfallkopplung ist kein Kriterium (beide DBs auf `10.0.1.3`, gemessen). Der einzige
+Doppel-Schreibkanal (Videorang → `points_result`) hat einen täglichen Lese-Abgleich
+(`scripts/abgleich-videorang.js` mit Baseline).
+
+### Fahrplan-Ergänzungen für Phase 4–6
+
+- 🔴 Abnahmekriterium **„keine stille Zeilengrenze"** steht im Audit (Phase 4 Punkt 8) —
+  gilt auch für RPCs mit `SETOF`-Rückgabe, solange irgendein Verbraucher PostgREST spricht.
+- ✅ `lead_state.mysql_contact_id` (26.08. abends): Spalte angelegt, Readback persistiert
+  den Wert, Bestand über `mysql_survey_id` befüllt — **1156 Leads** tragen den direkten
+  Kartei-Verweis.
+- ✅ Numerische Rangspalte `points_rank` in `typeform_surveys` (26.08. abends): Spalte
+  angelegt (Sicherung 1248 Zeilen vorher), Bestand aus dem Text abgeleitet, der
+  n8n-Workflow schreibt seither **beide** Formen im selben UPDATE, und der Rang-Abgleich
+  nutzt die Zahl als Primärquelle plus eine neue Drift-Prüfung Zahl↔Text. Rang 4 =
+  Interessensfrage beantwortet (zählt im PG-Vergleich wie 3).
+- ✅ Direktverbindungs-/IPv6-Test `10.0.1.3` → Supabase (26.08., gemessen): IPv6 global
+  vorhanden, Direkthost über 5432 verbunden, Pooler als IPv4-Rückfallebene auf 5432 und
+  6543 erreichbar. Details im Beiblatt der
+  [Vercel-Abbau-Checkliste](cutover-vorbereitung/vercel-abbau-checkliste.md).
+- Vercel-Abbau: Checkliste liegt bereit (frühestens 01.09., empfohlen 08.09., nur mit
+  ausdrücklicher Freigabe — damit wird der Hosting-Rückweg bewusst aufgegeben).
+- Kein Kysely-Merge, solange Vercel der Rückweg ist (Weg 1, Entscheidung Markus 25.08.) —
+  Vercel kann die private DB nicht erreichen.
