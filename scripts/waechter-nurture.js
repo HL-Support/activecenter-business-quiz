@@ -164,21 +164,34 @@ if (process.argv.includes('--selbsttest')) selbsttest();
 async function w2ErgebnisStattVorgang() {
   const befunde = [];
 
-  // (a) Fällige Erstempfänger, die nichts bekommen haben. Fälligkeit wie im Workflow:
-  // 12 Stunden nach dem Absenden des Formulars, Rang 0, kein Abschluss-Klick, kein Testlead.
-  // Der Puffer von 6 Stunden verhindert Fehlalarme durch den Zwei-Stunden-Takt.
+  // (a) Fällige Erstempfänger, die nichts bekommen haben.
+  //
+  // 🔴 Gezählt wird je MENSCH (E-Mail-Gruppe über alle Sitzungen), nicht je Datensatz —
+  // exakt wie der Versand-Workflow denkt. Die erste Fassung zählte je lead_hash und
+  // meldete 81 Fällige, wo real 9 warteten: 21 hatten ihre Mail unter einem ANDEREN Hash
+  // derselben Person bekommen, 28 waren über Zweitsitzungen in höheren Rängen, 10 hatten
+  // den CTA geklickt, 8 waren markierte Testleads. Am 26.08. Fall für Fall nachverfolgt.
+  // Ein Wächter, der eine andere Semantik misst als das System, das er bewacht, erzeugt
+  // Dauerwarnungen — und die erziehen zum Wegsehen.
   const ueberfaellig = await executeManagementQuery(`
-    select count(*) as n, min(v.form_submitted_at) as aeltester
-    from public.v_lead_state_full v
-    where v.source_app = 'business_leads_quiz' and v.funnel_key = 'business'
-      and v.email_normalized is not null and v.first_name is not null
-      and v.cta_type is null
-      and coalesce(v.completed_rank, 0) = 0
-      and v.form_submitted_at < now() - interval '18 hours'
-      and not exists (select 1 from public.lead_events e
-        where e.lead_hash = v.lead_hash and e.event_name = 'nurture_sent')
-      and not exists (select 1 from public.lead_events e
-        where e.lead_hash = v.lead_hash and e.event_name = 'test_lead_marked')`);
+    with personen as (
+      select v.email_normalized as email,
+             max(coalesce(v.completed_rank, 0)) as rang,
+             bool_or(v.cta_type is not null) as cta,
+             bool_or(exists (select 1 from public.lead_events e
+               where e.lead_hash = v.lead_hash and e.event_name = 'test_lead_marked')) as testlead,
+             bool_or(exists (select 1 from public.lead_events e
+               where e.lead_hash = v.lead_hash and e.event_name = 'nurture_sent')) as je_mail,
+             min(v.form_submitted_at) as eingereicht
+      from public.v_lead_state_full v
+      where v.source_app = 'business_leads_quiz' and v.funnel_key = 'business'
+        and v.email_normalized is not null and v.first_name is not null
+      group by 1
+    )
+    select count(*) as n, min(eingereicht) as aeltester
+    from personen
+    where rang = 0 and not cta and not testlead and not je_mail
+      and eingereicht < now() - interval '18 hours'`);
   const u = ueberfaellig[0];
   // 🔴 Bewusst nur WARNUNG, nie Alarm: Solange ein Rückstand abgearbeitet wird, ist diese
   // Zahl legitim hoch und sinkt von selbst. Ein Alarm darauf wäre tagelang rot und würde
@@ -236,42 +249,70 @@ async function w2ErgebnisStattVorgang() {
  * nicht unsichtbar bleiben. Wächst die Zahl, wird daraus eine Entscheidung — Rückfall-
  * variante bauen oder die Datenlücke schliessen.
  */
+// Bekannte, geprüfte Ausnahmen: Altdaten und Legacy-Einsendungen, für die es nirgends
+// Antworten gibt. Ohne die Baseline wäre die W3-Warnung DAUERHAFT an — und eine dauerhaft
+// gelbe Anzeige erzieht genauso zum Wegsehen wie eine rote. Gewarnt wird nur bei NEUEN
+// Fällen; verschwundene Baseline-Einträge werden zum Aufräumen gemeldet.
+function w3BaselineLaden() {
+  const p = require('path').join(__dirname, 'waechter-nurture-baseline.json');
+  if (!fs.existsSync(p)) return { ohne_ziel: {}, ohne_absendezeit: {} };
+  const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+  return { ohne_ziel: j.ohne_ziel || {}, ohne_absendezeit: j.ohne_absendezeit || {} };
+}
+
 async function w3StrukturellUnerreichbar() {
   // 🔴 Der Tabellenkurzname `v` ist hier nicht Kosmetik: Ohne ihn vergleicht
   // `e.lead_hash = lead_hash` die Spalte mit sich selbst, die Bedingung ist immer wahr,
   // und die Prüfung meldet stillschweigend null Treffer. Genau die Fehlerklasse, gegen die
   // dieser Wächter gebaut ist - beim ersten Entwurf am 26.08. selbst hineingetappt.
   const r = await executeManagementQuery(`
-    select
-      count(*) filter (where v.main_aspiration is null or v.main_aspiration = '') as ohne_ziel,
-      count(*) filter (where v.form_submitted_at is null) as ohne_absendezeit
+    select v.lead_hash,
+      (v.main_aspiration is null or v.main_aspiration = '') as ohne_ziel,
+      (v.form_submitted_at is null) as ohne_absendezeit
     from public.v_lead_state_full v
     where v.source_app = 'business_leads_quiz' and v.funnel_key = 'business'
       and v.email_normalized is not null and v.first_name is not null
       and v.cta_type is null
+      and ((v.main_aspiration is null or v.main_aspiration = '') or v.form_submitted_at is null)
       and not exists (select 1 from public.lead_events e
         where e.lead_hash = v.lead_hash and e.event_name = 'nurture_sent')`);
-  const x = r[0];
+  const bekannt = w3BaselineLaden();
   const befunde = [];
-  if (Number(x.ohne_ziel) > 0) {
-    befunde.push({
-      stufe: 'WARNUNG',
-      name: 'Ohne Ziel — keine Mail-Variante möglich',
-      zeilen: Number(x.ohne_ziel),
-      text: `${x.ohne_ziel} Kontakte haben kein \`main_aspiration\` und können deshalb `
-        + 'keine Nurture-Mail bekommen (Übersprung `no_email_id`). Sie haben ihre Adresse '
-        + 'hinterlassen, ohne das Quiz abzuschliessen.',
-    });
+
+  const gefunden = { ohne_ziel: new Set(), ohne_absendezeit: new Set() };
+  for (const zeile of r) {
+    if (zeile.ohne_ziel) gefunden.ohne_ziel.add(zeile.lead_hash);
+    if (zeile.ohne_absendezeit) gefunden.ohne_absendezeit.add(zeile.lead_hash);
   }
-  if (Number(x.ohne_absendezeit) > 0) {
-    befunde.push({
-      stufe: 'WARNUNG',
-      name: 'Ohne Absendezeit — wird nie fällig',
-      zeilen: Number(x.ohne_absendezeit),
-      text: `${x.ohne_absendezeit} Kontakte haben kein \`form_submitted_at\`. Die `
-        + 'Phasenlogik findet keinen Bezugspunkt; sie fallen still durch, ohne dass ein '
-        + 'Übersprung protokolliert wird.',
-    });
+
+  const meldungen = [
+    ['ohne_ziel', 'Ohne Ziel — keine Mail-Variante möglich',
+      'haben kein `main_aspiration` und können keine Nurture-Mail bekommen.'],
+    ['ohne_absendezeit', 'Ohne Absendezeit — wird nie fällig',
+      'haben kein `form_submitted_at`; die Phasenlogik findet keinen Bezugspunkt.'],
+  ];
+  for (const [art, name, text] of meldungen) {
+    const neue = [...gefunden[art]].filter((h) => !bekannt[art][h]);
+    if (neue.length) {
+      befunde.push({
+        stufe: 'WARNUNG',
+        name,
+        zeilen: neue.length,
+        text: `${neue.length} NEUE Kontakte ${text} Nicht in der Baseline: `
+          + neue.slice(0, 5).join(', ') + (neue.length > 5 ? ' …' : ''),
+      });
+    }
+    const veraltet = Object.keys(bekannt[art]).filter((h) => !gefunden[art].has(h));
+    if (veraltet.length) {
+      befunde.push({
+        stufe: 'WARNUNG',
+        name: `Baseline veraltet (${art})`,
+        zeilen: veraltet.length,
+        text: `${veraltet.length} Baseline-Einträge ohne Befund — vermutlich geheilt, `
+          + 'bitte aus waechter-nurture-baseline.json austragen: '
+          + veraltet.slice(0, 5).join(', '),
+      });
+    }
   }
   return befunde;
 }
