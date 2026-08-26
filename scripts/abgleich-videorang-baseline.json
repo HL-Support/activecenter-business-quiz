@@ -1,0 +1,11 @@
+{
+  "_hinweis": "Bekannte, gepruefte und akzeptierte Ausnahmen des Videorang-Abgleichs. Alarm gibt es NUR bei Abweichungen, die hier NICHT stehen. Wer das weglaesst, baut eine Pruefung, die dauerhaft rot leuchtet - und eine dauerhaft rote Pruefung erzieht zum Wegsehen, sodass beim echten Fund niemand hinschaut. Aendert sich etwas absichtlich, hier nachziehen.",
+  "_erhoben": "2026-08-25",
+  "abweichend": {
+    "qz_21fc428e1c5d4c27bdf6c8878838445b": "Als Dublette gefuehrt (lifecycle_stage = merged_duplicate). Der Outbox-Worker ueberspringt solche Leads absichtlich und meldet 'merged_duplicate_no_mysql_sync' - der Rang darf hier NICHT nachgezogen werden, sonst wuerde die Kartei den Fortschritt einer zusammengefuehrten Zweitanmeldung anzeigen. Am 25.08.2026 geprueft: PostgreSQL 3, MySQL 1."
+  },
+  "fehlt_in_postgres": {
+    "qz_edaa5231c7a640dd8ff6e98d3e672718": "Am 23.07.2026 um 21:33 in der Kartei entstanden (Kontakt 3683092, Paul), in PostgreSQL kein lead_state. Ursache ungeklaert - der Funnel lief an dem Tag normal (42 Leads, 10 Kontakte). Nicht von einer echten Typeform-Einsendung unterscheidbar: Der Quiz-Adapter meldet sich unter derselben Formularkennung hC2yTcU8 und erzeugt dieselbe response_url-Struktur.",
+    "qz_3ef5499796f348a3958f00c949d2d0c2": "Gleicher Fall, 23.07.2026 um 23:15 (Kontakt 3683097, Katharina). Beide zusammen 0,17 % von 1181 Zeilen. Steigt diese Zahl, ist es kein Einzelfall mehr und gehoert untersucht."
+  }
+}
