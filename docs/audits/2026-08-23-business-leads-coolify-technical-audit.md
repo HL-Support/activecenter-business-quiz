@@ -361,6 +361,26 @@ Die Reihenfolge trennt Funktionsumbau, Hostingwechsel und Datenbankwechsel. Bei 
 5. Alt-/Neu-Lesevergleiche gegen dieselben Quelldaten fahren, jeweils mit Positiv- und Negativproben.
 6. Connection-Budget vor und nach jeder Gruppe messen. Der Umbau läuft bewusst erst im kontrollierten Coolify-Container, nicht in horizontal unberechenbaren Vercel-Serverless-Instanzen.
 7. Restgate: keine produktive Runtime-Referenz mehr auf `/rest/v1`, `SUPABASE_SERVICE_KEY`, Supabase-Management-API oder `auth.jwt()`.
+8. 🔴 **Abnahmekriterium „keine stille Zeilengrenze".** Jede abgelöste Leseabfrage muss
+   entweder nachweislich alle Treffer liefern oder ihre Begrenzung **selbst aussprechen**.
+   Konkret: kein `LIMIT` ohne begründenden Kommentar, und wo eine Obergrenze gilt, meldet
+   der Aufrufer, wenn die Trefferzahl sie berührt — denn dann wurde garantiert
+   abgeschnitten. Zusätzlich gilt: Wo eine Grenze zuschlagen kann, wird **absteigend nach
+   Aktualität** sortiert, damit der Schnitt die Erledigten trifft und nie die Neuen.
+
+   Warum das hier steht: Am 26.08.2026 hat genau diese Fehlerklasse den Nurture-Versand
+   drei Wochen lang stillgelegt. PostgREST deckelt serverseitig bei 1000 Zeilen
+   (`db-max-rows`); die Abfrage forderte 5000 an und sendete `Range: 0-4999` — beides
+   wirkungslos, ohne Fehler, ohne Warnung. Sortiert wurde aufsteigend, also fielen die
+   **neuen** Kontakte hinten raus. 186 Menschen bekamen nie eine Mail, während der Workflow
+   zwölfmal täglich `success` meldete. Vollständige Aufarbeitung:
+   [2026-08-26-nurture-zeilengrenze-vorfall.md](2026-08-26-nurture-zeilengrenze-vorfall.md).
+
+   Der direkte Treiber (`pg`/Kysely) kennt diese implizite Grenze nicht — er liefert, was
+   die Abfrage ergibt. Damit verschwindet die Fehlerklasse strukturell. Genau deshalb wird
+   sie hier als Kriterium festgehalten und nicht dem Zufall überlassen. Die neue Grenze
+   heisst dann Arbeitsspeicher: Wo Ergebnismengen wachsen können, wird bewusst begrenzt
+   oder gestreamt, statt stillschweigend alles zu laden.
 
 Der Codeumbau erfolgt vor dem Datenumzug. Ein selbst gehostetes PostgREST wäre ein später wieder abzureißendes Gerüst und ist ausgeschlossen.
 
