@@ -360,6 +360,18 @@ Doppel-Schreibkanal (Videorang → `points_result`) hat einen täglichen Lese-Ab
   **`activecenter-analytics` wird nicht übernommen** — Statistiken bei Bedarf neu; ihr
   Schreibzugriff auf `lead_events`/`system_alerts` endet vor dem Cutover
   (Schreibbarriere). **Stufe A des Phase-4-Designs: freigegeben.**
+- ✅ **Stufe A umgesetzt und live** (27.08. abends, PR #96): `submit_lead_complete`
+  schreibt Kontakt + 6 Antworten atomar/idempotent; isoliert am echten System bewiesen.
+- ✅ **landing-page-Formular abgeschaltet** (Commit `e8a32b2` dort; Live-Seite ohne
+  `<form>`, verlinkt aufs Quiz) — die tracking_*-Vorbedingung ist erfüllt.
+- ✅ **Phase-5-TESTIMPORT BESTANDEN** (27.08. nachmittags): selektiver Katalog-Export
+  (18 Tabellen, 6 Views, 20 Funktionen, 5 Trigger) in `business_leads_testimport` auf
+  dem Flotten-PG 18.6 importiert; Parität 356/356 Spalten · 65/65 Constraints · 86/86
+  Indexe · 6/6 Views · 20/20 Funktionen · 5/5 Trigger; Funktionsbeweis am echten Pfad
+  (Submit, Video-Rank, Outbox, init_lead). Zwei Funde behoben (FK-Reihenfolge nach
+  falscher 0-Messung; Identity-Spalten unsichtbar für pg_attrdef — falsches Grün, erst
+  der Funktionsbeweis fand es). Protokoll:
+  [cutover-vorbereitung/phase5-testimport/testimport-protokoll-2026-08-27.md](cutover-vorbereitung/phase5-testimport/testimport-protokoll-2026-08-27.md).
 
 ### Nachtrag 27.08.: Vorfall Anzeigen-Konversion (gelöst) — HTTP/3 am Proxy aus
 
