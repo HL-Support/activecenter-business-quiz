@@ -402,9 +402,22 @@ Doppel-Schreibkanal (Videorang → `points_result`) hat einen täglichen Lese-Ab
   und **bewiesen**: `leads_migrate` legt an (Eigentümer `leads_owner`), `leads_app` liest
   und schreibt automatisch, und alle vier Negativtests scheitern korrekt (kein CREATE,
   kein DROP, kein Blick nach `marathon`, kein neues Schema). Engstelle benannt:
-  37 nutzbare Verbindungen bei 3 GB RAM — **ab dem dritten Projekt PgBouncer**, nicht
-  `max_connections` hochdrehen. Offene Entscheidung für Markus: Datenbank `fitapp` →
-  neutraler Plattformname umbenennen, solange sie 11 MB hat.
+  37 nutzbare Verbindungen bei 4 GB RAM — **ab dem dritten Projekt PgBouncer**, nicht
+  `max_connections` hochdrehen.
+- ✅ **Datenbank umbenannt: `fitapp` → `hl_support`** (27.08., Markus). Korrektur meiner
+  Fehleinordnung: FitApp ist **kein Alt-Erbe**, sondern der Überbegriff der Fitness-App
+  (Marathon ist ein Bereich davon) — also ein **Projekt in** der Plattform, nicht die
+  Plattform. Ebenen jetzt: Datenbank `hl_support` → Schema je Projekt (`fitapp`, `leads`,
+  `kontakte`, `support`, `events`, `analysen`). Blast-Radius vorher geprüft: keine
+  Anwendung hing am Namen (Secrets + alle 23 Coolify-Apps); danach nachgemessen: pg_cron
+  läuft, `leads_app` verbindet, WAL-Archivierung arbeitet. pgBackRest-Stanza bleibt
+  `fitapp` (nur ein Etikett).
+- ✅ **Serverfrage beantwortet** (Rollenmodell §6b, gemessen): **kein Upgrade nötig** —
+  Last 0,06, Cache-Trefferquote 0,9998, echte PG-Daten ~18 MB. Verbindungen sind ein
+  Architektur-, kein Hardwarethema (Pooler). Der Engpass kommt in der **Übergangsphase**,
+  wenn die 1,5 GB MySQL auf derselben cx22-Maschine (2 Kerne, 4 GB) nach PostgreSQL
+  wandern: **vor der Kontakte-Migration auf cx32 gehen** (reversibel). Messbare Auslöser
+  statt Bauchgefühl: Trefferquote < 0,99, Last > 1,5, frei < 500 MB.
 - ✅ **Schreibbarriere 13.5.2 als Ablaufplan**:
   [cutover-vorbereitung/schreibbarriere-13.5.2.md](cutover-vorbereitung/schreibbarriere-13.5.2.md)
   — Rechte entziehen statt bitten, Stillstand **zweimal** messen, dann erst dumpen;

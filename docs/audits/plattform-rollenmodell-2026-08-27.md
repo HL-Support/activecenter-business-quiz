@@ -17,15 +17,15 @@ Grundlage: gemessener Ist-Zustand des Ziel-Clusters (27.08.), das
 | --- | --- |
 | Server | `10.0.1.3` / `91.99.76.104`, **3 GB RAM, 2 Kerne** |
 | PostgreSQL | 18.6, `data-checksums` an, SSL an, ICU en-US/UTF8 |
-| Datenbanken | `fitapp` (11 MB), `postgres`, `business_leads_testimport` (Testartefakt) |
-| Schemata in `fitapp` | `marathon`, `public` (3 Relationen), `cron`, `watchdog_canary` |
+| Datenbanken | `fitapp` (11 MB — seit 27.08. `hl_support`), `postgres`, `business_leads_testimport` (Testartefakt) |
+| Schemata darin | `marathon`, `public` (3 Relationen), `cron`, `watchdog_canary` |
 | Rollen | `postgres` (super), `fitapp_app` (LOGIN, **BYPASSRLS**), `authenticator`→`anon`+`service_role` (Supabase-Muster), `watchdog_canary` |
 | Verbindungen | `max_connections=40`, 3 für Superuser reserviert → **37 nutzbar**, aktuell 11 belegt |
 | Netzzugang | `pg_hba`: nur `10.0.1.5/32` (Coolify-Host) per `scram-sha-256`; sonst lokal |
 
-**Der Cluster ist praktisch Neuland** — `fitapp` ist fast leer, Marathon läuft weiterhin
-auf Supabase. Das ist der billigste Moment, das Modell richtig zu setzen; jede Woche
-später kostet Verbindungsstrings, Migrationen und Abstimmung.
+**Der Cluster ist praktisch Neuland** — die Plattform-Datenbank ist fast leer, Marathon
+läuft weiterhin auf Supabase. Das ist der billigste Moment, das Modell richtig zu setzen;
+jede Woche später kostet Verbindungsstrings, Migrationen und Abstimmung.
 
 ---
 
@@ -56,22 +56,43 @@ Was wir dafür in Kauf nehmen und wie wir es abfedern:
 
 ---
 
-## 3. Der Datenbankname `fitapp` ist ein Erbe — jetzt umbenennen
+## 3. Die Namenshierarchie: System → Projekt → Bereich
 
-`fitapp` war der Keim des zusammengeführten Fit-App-Produkts. Als Name der **Plattform**,
-in der Kontakte, Support, Events und Leads liegen, ist er irreführend: Jeder neue
-Entwickler und jeder Verbindungsstring behauptet dann, das Quiz läge in der Fitness-App.
+**Korrektur vom 27.08. (Markus):** `fitapp` war **kein Alt-Erbe**, sondern ein echter
+Produktname — nur auf der falschen Ebene. Die FitApp ist der **Überbegriff der
+Fitness-App**, zu der der Marathon gehört und später die ganze App. Sie ist damit ein
+**Projekt in** der Plattform, nicht die Plattform selbst.
 
-**Empfehlung: `ALTER DATABASE fitapp RENAME TO plattform;`** — heute, weil:
+Richtige Ebenen:
 
-- die Datenbank 11 MB hat und Marathon noch gar nicht umgezogen ist,
-- der Umbenennung nur **eine** Bedingung im Weg steht (keine offenen Verbindungen),
-- und jeder später hinzukommende Verbindungsstring die Kosten erhöht.
+```text
+Datenbank  hl_support        ← das Gesamtsystem
+   ├── Schema fitapp         ← Projekt Fit-App (Marathon ist ein Bereich davon, später mehr)
+   ├── Schema leads          ← Projekt Business-Leads-Quiz
+   ├── Schema kontakte       ← Projekt Kontakte
+   ├── Schema support        ← Projekt Support
+   ├── Schema events         ← Projekt Events
+   └── Schema analysen       ← Projekt Analysen
+```
 
-🔴 Diese Entscheidung gehört Markus. Sie ist die einzige in diesem Dokument, die
-bestehende Systeme (Marathon-Umbau) berührt — deshalb wird sie **nicht** mit dem
-Rollen-Rollout mitgeliefert, sondern getrennt entschieden. Ohne Umbenennung funktioniert
-alles Übrige unverändert.
+✅ **Umgesetzt am 27.08.:** `ALTER DATABASE fitapp RENAME TO hl_support`. Der Zeitpunkt war
+der günstigste überhaupt — die Datenbank trug 11 MB, **keine einzige Anwendung** hing am
+Namen (geprüft: Secrets, alle 23 Coolify-Anwendungen; die dortigen `FITAPP_*`-Variablen
+sind App-Einstellungen, keine Verbindungsstrings), und nur der pg_cron-Zeitplaner war
+verbunden.
+
+Mitgezogen: `cron.database_name` in der Cluster-Konfiguration (Datei jetzt
+`10-plattform.conf`, Vorversion gesichert unter `/root/10-fitapp.conf.bak-20260827`),
+sowie die Einträge `marathon_pg.database` und `leads_pg.database` in den Secrets.
+Danach nachgemessen: pg_cron-Job läuft, `leads_app` verbindet sich, WAL-Archivierung
+arbeitet weiter. Die pgBackRest-**Stanza** heißt weiterhin `fitapp` — sie ist nur ein
+Etikett für den Cluster und vom Datenbanknamen unabhängig; eine Umbenennung würde eine
+neue Vollsicherung erzwingen und bringt nichts.
+
+🔴 **Empfehlung an das FitApp-Projekt** (nicht von hier ausgeführt): Beim Marathon-Umzug
+das Schema `marathon` in `fitapp` überführen — Marathon ist ein **Bereich** der FitApp,
+kein gleichrangiges Projekt. Solange die Marathon-Daten auf Supabase liegen, kostet das
+fast nichts.
 
 ---
 
@@ -146,6 +167,50 @@ alles darf und niemand mehr sagen kann, wer was wirklich braucht.
 
 ---
 
+## 6b. Brauchen wir einen größeren Server? — gemessen, nicht geschätzt
+
+Kurz: **Für die Verbindungen nein — das ist Architektur. Für die Zielgröße irgendwann ja
+— aber nicht heute.**
+
+Die Maschine ist ein **cx22 (2 Kerne, 4 GB RAM, 40 GB Platte)** — die kleinste der Flotte.
+Auf ihr laufen **beide** Datenbanken: PostgreSQL *und* die MySQL-Bestände, die später
+ebenfalls hierher wandern sollen.
+
+| Messung (27.08.) | Wert | Bewertung |
+| --- | --- | --- |
+| Last (1/5/15 min) | 0,06 / 0,14 / 0,17 | die Maschine langweilt sich |
+| Cache-Trefferquote PostgreSQL | **0,9998** | praktisch alles aus dem Speicher; RAM reicht heute deutlich |
+| PostgreSQL-Daten gesamt | 251 MB | davon 233 MB die Testimport-Datenbank — echte Daten ~18 MB |
+| MySQL-Daten (dieselbe Maschine) | **1.519 MB** | `prod_contacts` 813 MB, `prod_activesupport` 466 MB, `prod_customers` 161 MB |
+| Speicherverbrauch | mysqld 1.387 MB · postgres ~540 MB | von 4 GB; 1,6 GB frei |
+
+**Warum die Verbindungen kein Hardwareproblem sind:** Jede PostgreSQL-Verbindung ist ein
+eigener Prozess und kostet Speicher — deshalb ist `max_connections=40` auf dieser Maschine
+richtig gewählt und *nicht* das, was man hochdreht. Ein Verbindungspooler (PgBouncer,
+Transaktionsmodus) lässt viele Anwendungssitzungen sich wenige echte Verbindungen teilen;
+sechs Projekte kommen damit mit ~20 echten Verbindungen aus. Das löst das Problem
+vollständig, ohne ein Byte mehr RAM.
+
+**Wo es später wirklich eng wird:** in der **Übergangsphase**. Wandern die MySQL-Bestände
+(1,5 GB) nach PostgreSQL, laufen beide Systeme eine Zeit lang nebeneinander — MySQL hält
+seine Daten weiter im Speicher, PostgreSQL braucht zusätzlich Platz für dieselben Daten.
+Das ist der Moment, in dem 4 GB knapp werden, nicht heute.
+
+**Empfehlung:**
+
+1. **Jetzt kein Upgrade.** Datenmenge und Last rechtfertigen es nicht.
+2. **Vor der Kontakte-Migration upgraden** (`prod_contacts` 813 MB + `prod_activesupport`
+   466 MB sind die schweren Brocken): `cx22 → cx32` verdoppelt auf 4 Kerne und 8 GB.
+   Bei Hetzner ist ein RAM-/CPU-Upgrade ein Neustart und **reversibel** — nur eine
+   Plattenvergrößerung ist endgültig.
+3. **Messbare Auslöser statt Bauchgefühl**: Cache-Trefferquote unter **0,99**, Last
+   dauerhaft über **1,5** (bei 2 Kernen), oder freier Speicher dauerhaft unter ~500 MB.
+4. **Feintuning erst danach.** `shared_buffers` (256 MB) und `effective_cache_size`
+   (768 MB) sind für 4 GB konservativ. Sie jetzt anzuheben, würde MySQL Speicher wegnehmen,
+   das sich dieselbe Maschine teilt — also erst nachziehen, wenn MySQL schrumpft.
+
+---
+
 ## 7. Verbindungen: die eigentliche Engstelle
 
 37 nutzbare Verbindungen, 11 belegt. Sechs Projekte mit je einem Verbindungspool passen
@@ -179,8 +244,9 @@ nie unbemerkt die Produktion blockiert.
 ## 8. Umsetzung für das Business-Leads-Quiz
 
 - Schemata: **`leads`** (heute `public`) und **`leads_analytics`** (heute
-  `analytics_internal`). Damit verschwindet das Quiz aus `public`, und der generische
-  Name `analytics_internal` blockiert nicht den künftigen Analysen-Projektnamen.
+  `analytics_internal`) in der Datenbank `hl_support`. Damit verschwindet das Quiz aus
+  `public`, und der generische Name `analytics_internal` blockiert nicht das künftige
+  Projekt „Analysen".
 - Rollen: `leads_owner`, `leads_migrate`, `leads_app`, `leads_read` nach §4.
 - Der Export der Phase 5 bekommt eine **Schema-Abbildung** `public→leads`,
   `analytics_internal→leads_analytics`; betroffen sind auch Funktionsrümpfe
