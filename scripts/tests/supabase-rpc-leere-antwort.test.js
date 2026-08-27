@@ -18,6 +18,19 @@ process.env.SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'test-key
 
 const { supabaseRpc } = require('../../api/bridge.js');
 
+function antwort(status, body) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    async text() {
+      return body;
+    },
+    async json() {
+      return JSON.parse(body);
+    },
+  };
+}
+
 function mitFetchStub(response, fn) {
   const original = globalThis.fetch;
   globalThis.fetch = async () => response;
@@ -27,27 +40,27 @@ function mitFetchStub(response, fn) {
 }
 
 test('void-RPC mit 204 und leerem Body liefert null statt Parse-Fehler', async () => {
-  await mitFetchStub(new Response(null, { status: 204 }), async () => {
+  await mitFetchStub(antwort(204, ''), async () => {
     assert.strictEqual(await supabaseRpc('upsert_answer_current', { p_lead_hash: 'x' }), null);
   });
 });
 
 test('200 mit leerem Body (aeltere PostgREST-Varianten) liefert ebenfalls null', async () => {
-  await mitFetchStub(new Response('', { status: 200 }), async () => {
+  await mitFetchStub(antwort(200, ''), async () => {
     assert.strictEqual(await supabaseRpc('upsert_answer_current', { p_lead_hash: 'x' }), null);
   });
 });
 
 test('RPC mit Rueckgabewert wird weiterhin geparst', async () => {
   const body = JSON.stringify([{ completed_rank: 3, rank_changed: true }]);
-  await mitFetchStub(new Response(body, { status: 200 }), async () => {
+  await mitFetchStub(antwort(200, body), async () => {
     const rows = await supabaseRpc('upsert_video_progress_monotonic', {});
     assert.deepStrictEqual(rows, [{ completed_rank: 3, rank_changed: true }]);
   });
 });
 
 test('Fehlstatus wirft weiterhin einen Fehler mit Status im Text', async () => {
-  await mitFetchStub(new Response('kaputt', { status: 500 }), async () => {
+  await mitFetchStub(antwort(500, 'kaputt'), async () => {
     await assert.rejects(
       () => supabaseRpc('upsert_answer_current', {}),
       /500/
