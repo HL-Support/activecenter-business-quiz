@@ -76,14 +76,48 @@ Zusätzlich von Hand: GlitchTip ohne offene Vorfälle, letzter Wächterlauf ohne
 ```bash
 node --env-file=.env.prod scripts/cutover.js barriere-an
 ```
-Schaltet den Quell-Cron-Job ab und entzieht Schreibrechte auf allen 18 Tabellen.
-`SELECT` bleibt — der Dump muss lesen können.
+
+Das Skript schaltet den Quell-Cron-Job ab (das geht) und **gibt das REVOKE-SQL zum
+Kopieren aus** (das geht nicht automatisch, siehe Kasten). `SELECT` bleibt erhalten —
+der Dump muss lesen können.
+
+> 🔴 **Warum die Barriere komplett von Hand läuft.** Gemessen am 27.08.: Die
+> Supabase-Management-API arbeitet in einer **read-only-Transaktion** und kann
+> **gar nichts** ändern — weder `REVOKE`/`GRANT` noch `cron.schedule`/`unschedule`
+> (die schreiben intern in `cron.job`).
+>
+> Ein erster Test schien `cron.unschedule` zu erlauben — das war eine **Fehldeutung**:
+> Der Testjob existierte nicht, der fachliche Fehler kam vor der read-only-Prüfung.
+> Die zweite Messung mit einem echten Job war eindeutig blockiert. (Genau deshalb wird
+> geprobt statt angenommen.)
+>
+> Die einzige Rolle mit direktem Zugang (`marathon_app`) ist nicht Eigentümerin der
+> Tabellen und darf ebenfalls kein `REVOKE`; ein `postgres`-Passwort wurde nie
+> beschafft.
+>
+> **Also: Der ausgegebene SQL-Block wird im Supabase-SQL-Editor eingefügt** (dort läuft
+> die Sitzung als `postgres`). Er enthält **beides** — Cron-Abschaltung und
+> Rechte-Entzug — und dauert zwei Minuten. Der Block liegt zusätzlich als
+> `cutover-belege/barriere-an.sql`.
+>
+> Das ist bewusst ein sichtbarer Handgriff statt eines Skripts, das den wichtigsten
+> Schritt still überspringt.
 
 **Direkt danach von Hand:** n8n-Workflows deaktivieren (mindestens
 `AC - Lead Sync Outbox Worker`, `AC - Quiz Nurture Email Sender`,
 `AC - Lead Post Processor`, `AC - Lead System Health Monitor`).
 
-**Rückweg jederzeit:** `node … scripts/cutover.js barriere-aus`
+**Rückweg jederzeit:** `node … scripts/cutover.js barriere-aus` — gibt den
+Rückweg-Block aus (GRANT **und** Cron-Job mit exakt dem ursprünglichen Namen
+`stats-logs-analytics-v2-current-day`). 🔴 Der Ausgangszustand hatte **vier verschiedene
+Rechte-Muster** (`cutover-belege/rechte-vor-dem-cutover.json`); das pauschale GRANT
+stellt den Schreibzugriff her, ebnet aber Feinheiten ein — bei Bedarf abgleichen.
+
+**Falls der Handgriff nicht möglich ist** (kein Dashboard-Zugang zur Hand): Die Barriere
+wird weich — App und n8n sind aus, der Stillstand wird trotzdem zweimal gemessen. Das
+ist schwächer als der erzwungene Entzug, aber nicht wertlos: Gemessen am 27.08. kamen
+**alle** Quiz-Schreibzugriffe von Coolify und n8n; ein dritter Schreiber ist nicht
+bekannt. Diese Abweichung dann **im Protokoll festhalten**.
 
 ### 2 · Stillstand beweisen (ca. 03:05, dauert 3 min)
 

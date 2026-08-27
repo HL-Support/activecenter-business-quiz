@@ -109,37 +109,61 @@ async function pruefen() {
   return offen.length ? 1 : 0;
 }
 
+// 🔴 Gemessen am 27.08.2026: Die Supabase-Management-API laeuft in einer READ-ONLY-
+// Transaktion. Sie kann GAR NICHTS aendern - weder REVOKE/GRANT ("cannot execute
+// REVOKE in a read-only transaction") noch cron.schedule/unschedule (die schreiben
+// intern in cron.job). Ein erster Test schien cron.unschedule zu erlauben; das war eine
+// Fehldeutung: Der Job existierte nicht, der fachliche Fehler kam VOR der
+// read-only-Pruefung. Zweite Messung mit echtem Job: ebenfalls blockiert.
+//
+// Die einzige Rolle mit direktem Zugang (marathon_app) ist nicht Eigentuemerin der
+// Tabellen und darf ebenfalls kein REVOKE; ein postgres-Passwort wurde nie beschafft.
+//
+// Deshalb fuehrt dieses Skript den Barriere-Teil NICHT aus, sondern gibt fertige
+// SQL-Bloecke aus, die ein Mensch im Supabase-SQL-Editor einfuegt (dort laeuft die
+// Sitzung als postgres). Lieber ein sichtbarer Handgriff als ein Skript, das den
+// wichtigsten Schritt still ueberspringt - oder, schlimmer, ihn zu tun VORGIBT.
+const CRON_JOBNAME = 'stats-logs-analytics-v2-current-day';
+
+function barriereSql(richtung) {
+  const liste = TABELLEN.map(([s, t]) => `  ${s}.${t}`).join(',\n');
+  if (richtung === 'entziehen') {
+    return `-- 1. Cron-Job abschalten (schreibt sonst alle 15 Minuten weiter):\n`
+      + `SELECT cron.unschedule('${CRON_JOBNAME}');\n\n`
+      + `-- 2. Schreibrechte entziehen (SELECT bleibt - der Dump muss lesen):\n`
+      + `REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON\n${liste}\nFROM anon, authenticated, service_role;`;
+  }
+  return `-- 1. Schreibrechte zurueckgeben:\n`
+    + `GRANT INSERT, UPDATE, DELETE ON\n${liste}\nTO anon, authenticated, service_role;\n\n`
+    + `-- 2. Cron-Job wieder einplanen (exakt der urspruengliche Name und Befehl):\n`
+    + `SELECT cron.schedule('${CRON_JOBNAME}', '*/15 * * * *',\n`
+    + `  $$select analytics_internal.refresh_event_daily(\n`
+    + `      (now() at time zone 'UTC')::date, (now() at time zone 'UTC')::date)$$);`;
+}
+
 async function barriereAn() {
   console.log('\n== Barriere setzen ==\n');
-  console.log('  🔴 Ab jetzt schlägt JEDER Schreibversuch auf die Quelle fehl.\n');
-
   const jobs = await executeManagementQuery(
-    "select jobid from cron.job where command like '%refresh_event_daily%'");
-  if (jobs.length === 1) {
-    await executeManagementQuery(`select cron.unschedule(${jobs[0].jobid})`);
-    console.log(`  Cron-Job #${jobs[0].jobid} abgeschaltet (schrieb alle 15 min).`);
-  }
-
-  const liste = TABELLEN.map(([s, t]) => `${s}.${t}`).join(', ');
-  await executeManagementQuery(
-    `REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON ${liste} FROM anon, authenticated, service_role`);
-  console.log(`  Schreibrechte auf ${TABELLEN.length} Tabellen entzogen (SELECT bleibt, der Dump liest).`);
-  console.log('\n  Jetzt: n8n-Workflows deaktivieren, dann "stillstand" laufen lassen.\n');
+    `select jobid, active from cron.job where jobname = '${CRON_JOBNAME}'`);
+  console.log(`  Cron-Job "${CRON_JOBNAME}": `
+    + (jobs.length ? `#${jobs[0].jobid}, aktiv=${jobs[0].active}` : 'nicht gefunden'));
+  console.log('\n  🔴 IM SUPABASE-SQL-EDITOR ausfuehren — die API darf nichts aendern:\n');
+  console.log(barriereSql('entziehen').split('\n').map((z) => '    ' + z).join('\n'));
+  console.log('\n  🔴 Danach VON HAND: n8n-Workflows deaktivieren.');
+  console.log('\n  Dann: scripts/cutover.js stillstand  (prueft, ob es gewirkt hat)\n');
+  belegSchreiben('barriere-an.sql', barriereSql('entziehen') + '\n');
   return 0;
 }
 
 async function barriereAus() {
   console.log('\n== RÜCKWEG: Barriere lösen ==\n');
-  const liste = TABELLEN.map(([s, t]) => `${s}.${t}`).join(', ');
-  await executeManagementQuery(
-    `GRANT INSERT, UPDATE, DELETE ON ${liste} TO anon, authenticated, service_role`);
-  console.log('  Schreibrechte zurückgegeben.');
-  await executeManagementQuery(
-    "select cron.schedule('refresh_event_daily-15min', '*/15 * * * *', "
-    + "$$select analytics_internal.refresh_event_daily((now() at time zone 'UTC')::date, "
-    + "(now() at time zone 'UTC')::date)$$)");
-  console.log('  Cron-Job wieder eingeplant.');
+  console.log('  🔴 IM SUPABASE-SQL-EDITOR ausfuehren:\n');
+  console.log(barriereSql('zurueckgeben').split('\n').map((z) => '    ' + z).join('\n'));
+  console.log('\n  Achtung: Der Ausgangszustand hatte VIER verschiedene Rechte-Muster');
+  console.log('  (Beleg: cutover-belege/rechte-vor-dem-cutover.json). Das pauschale GRANT');
+  console.log('  stellt den Schreibzugriff wieder her, ebnet aber Feinheiten ein.');
   console.log('\n  🔴 n8n-Workflows nicht vergessen zu reaktivieren.\n');
+  belegSchreiben('barriere-aus.sql', barriereSql('zurueckgeben') + '\n');
   return 0;
 }
 
