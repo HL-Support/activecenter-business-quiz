@@ -14,12 +14,17 @@
 // zwischen Export und Zaehlung ist erwartbar und wird ausgewiesen, nicht versteckt.
 // Der echte Cutover arbeitet mit Schreibruhe (13.5.2).
 //
+// SCHEMA-ABBILDUNG (seit 27.08. abends): Gelesen wird aus den QUELL-Schemata (public,
+// analytics_internal), geschrieben in die PLATTFORM-Schemata (leads, leads_analytics) -
+// dieselbe Abbildung wie im Schema-Export (phase5-schema-abbildung.js).
+//
 //   node --env-file=.env.prod scripts/phase5-datenprobe.js
 
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const { bildeSchemaAb } = require('./phase5-schema-abbildung.js');
 
 const BASE = String(process.env.SUPABASE_URL || '').trim();
 const KEY = String(process.env.SUPABASE_SERVICE_KEY || '').trim();
@@ -107,16 +112,18 @@ async function exportiere(tab) {
 // Identity-Tabellen aus dem Paritaets-Schnappschuss ableiten - Handflags drifteten
 // (refresh_runs.run_id ist GENERATED ALWAYS und fehlte in der ersten Liste).
 const paritaetPfad = path.join(__dirname, '..', 'docs', 'audits', 'cutover-vorbereitung',
-  'phase5-testimport', `paritaet-live-${new Date().toISOString().slice(0, 10)}.json`);
+  'phase5-testimport', `paritaet-live-${new Date().toISOString().slice(0, 10)}-leads.json`);
 const IDENTITY_TABELLEN = new Set(
   JSON.parse(fs.readFileSync(paritaetPfad, 'utf8')).spalten
     .filter((z) => z.identity === 'a' || z.identity === 'd')
-    .map((z) => `${z.schema}.${z.tabelle}`)
+    .map((z) => `${bildeSchemaAb(z.schema)}.${z.tabelle}`)
 );
 
 function sqlFuer(tab, zeilen) {
   const teile = [`\\set ON_ERROR_STOP on`, `BEGIN;`];
-  const voll = `${tab.schema}.${tab.t}`;
+  // Ziel ist das PLATTFORM-Schema; jsonb_populate_recordset ordnet die Quellspalten
+  // ueber die (identische) Zieltabellen-Definition zu.
+  const voll = `${bildeSchemaAb(tab.schema)}.${tab.t}`;
   const override = IDENTITY_TABELLEN.has(voll) ? ' OVERRIDING SYSTEM VALUE' : '';
   for (let i = 0; i < zeilen.length; i += 1000) {
     const chunk = JSON.stringify(zeilen.slice(i, i + 1000));
@@ -135,7 +142,7 @@ function sqlFuer(tab, zeilen) {
   for (const tab of TABELLEN) {
     const t0 = Date.now();
     const zeilen = await exportiere(tab);
-    const datei = path.join(tmp, `${tab.schema}.${tab.t}.sql`);
+    const datei = path.join(tmp, `${bildeSchemaAb(tab.schema)}.${tab.t}.sql`);
     fs.writeFileSync(datei, sqlFuer(tab, zeilen), 'utf8');
     bericht.push({ tabelle: `${tab.schema}.${tab.t}`, exportiert: zeilen.length, sekunden: ((Date.now() - t0) / 1000).toFixed(1) });
     console.log(`export ${tab.schema}.${tab.t}: ${zeilen.length} Zeilen (${bericht[bericht.length - 1].sekunden}s)`);
@@ -148,9 +155,9 @@ function sqlFuer(tab, zeilen) {
   // EINE SSH-Sitzung fuer den ganzen Import: die erste Fassung oeffnete je Tabelle eine
   // Verbindung (~20 in schneller Folge) und lief in eine Rate-Sperre des Servers.
   console.log('Leere Zieltabellen und importiere in FK-Reihenfolge (eine SSH-Sitzung) ...');
-  const leeren = 'TRUNCATE ' + TABELLEN.map((x) => `${x.schema}.${x.t}`).join(', ') + ' CASCADE;';
+  const leeren = 'TRUNCATE ' + TABELLEN.map((x) => `${bildeSchemaAb(x.schema)}.${x.t}`).join(', ') + ' CASCADE;';
   const importKette = TABELLEN.map((tab) =>
-    `sudo -u postgres psql -d ${DB} -q -v ON_ERROR_STOP=1 -f /tmp/phase5-daten/${tab.schema}.${tab.t}.sql && echo "import ${tab.schema}.${tab.t} ok"`
+    `sudo -u postgres psql -d ${DB} -q -v ON_ERROR_STOP=1 -f /tmp/phase5-daten/${bildeSchemaAb(tab.schema)}.${tab.t}.sql && echo "import ${bildeSchemaAb(tab.schema)}.${tab.t} ok"`
   ).join(' && ');
   execFileSync(SSH, ['-o', 'StrictHostKeyChecking=no', '-i', SSHKEY, HOST,
     `chown -R postgres /tmp/phase5-daten && sudo -u postgres psql -d ${DB} -c "${leeren}" && ${importKette}`],
@@ -178,7 +185,7 @@ function sqlFuer(tab, zeilen) {
   let befunde = 0;
   // Alle Testimport-Zaehlungen in EINER SSH-Sitzung.
   const zaehlSql = TABELLEN.map((tab) =>
-    `select '${tab.schema}.${tab.t}' as tabelle, count(*) as n from ${tab.schema}.${tab.t}`
+    `select '${bildeSchemaAb(tab.schema)}.${tab.t}' as tabelle, count(*) as n from ${bildeSchemaAb(tab.schema)}.${tab.t}`
   ).join(' union all ');
   const testZeilen = execFileSync(SSH, ['-o', 'StrictHostKeyChecking=no', '-i', SSHKEY, HOST,
     `sudo -u postgres psql -d ${DB} -tA -c "${zaehlSql}"`], { encoding: 'utf8' })
@@ -196,11 +203,11 @@ function sqlFuer(tab, zeilen) {
       });
       quelle = Number((kopf.headers.get('content-range') || '/-1').split('/')[1]);
     }
-    const test = testMap.get(`${tab.schema}.${tab.t}`);
+    const test = testMap.get(`${bildeSchemaAb(tab.schema)}.${tab.t}`);
     const exportiert = bericht.find((b) => b.tabelle === `${tab.schema}.${tab.t}`).exportiert;
     const status = test === exportiert ? (quelle === test ? 'OK      ' : 'DRIFT   ') : 'FEHLER  ';
     if (status === 'FEHLER  ') befunde += 1;
-    console.log(`  ${status} ${tab.schema}.${tab.t}: Quelle jetzt ${quelle} | exportiert ${exportiert} | importiert ${test}`);
+    console.log(`  ${status} ${tab.schema}.${tab.t} -> ${bildeSchemaAb(tab.schema)}.${tab.t}: Quelle jetzt ${quelle} | exportiert ${exportiert} | importiert ${test}`);
   }
 
   console.log(`\nGesamtdauer ${((Date.now() - start) / 60000).toFixed(1)} min (API-Weg, Obergrenze).`);

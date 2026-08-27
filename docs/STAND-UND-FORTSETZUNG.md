@@ -1,6 +1,6 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
-**Letzte Aktualisierung: 27.08.2026, abends.** Dieses Dokument ist der Einstieg für jede
+**Letzte Aktualisierung: 27.08.2026, spät abends (nach Schritt 1, Schema-Abbildung).** Dieses Dokument ist der Einstieg für jede
 neue Sitzung: Es beschreibt, wo das System steht, was zuletzt passiert ist, welche
 Entscheidungen gelten, welche Fallen bekannt sind — und wie es konkret weitergeht.
 Zeiten sind MESZ, sofern nicht anders angegeben.
@@ -62,7 +62,7 @@ Gelegenheit durch einen nur-Deploy-berechtigten ersetzen.
 | --- | --- | --- |
 | **Quelle (noch produktiv)** | Supabase `xlpiisbozpgmemxhtivj` | PostgreSQL **17.6**. Alle Lead-Daten liegen hier. |
 | **Ziel (Plattform)** | `10.0.1.3` / `91.99.76.104`, Datenbank **`hl_support`** | PostgreSQL **18.6**, cx22 (2 Kerne, 4 GB), ICU en-US/UTF8, `data-checksums` an |
-| **Testartefakt** | `business_leads_testimport` auf demselben Server | enthält **echte Kopien** der Quiz-Daten. Kein Spielplatz. Rückweg: `dropdb business_leads_testimport` |
+| **Testartefakt** | `business_leads_testimport` auf demselben Server | enthält **echte Kopien** der Quiz-Daten, seit dem Abbildungslauf (27.08. spät) in den **Plattform-Schemata** `leads`/`leads_analytics`. Kein Spielplatz. Rückweg: `dropdb business_leads_testimport` |
 | **Legacy-Kartei** | MySQL auf **derselben** Maschine `10.0.1.3` | `prod_contacts_activesupport` (813 MB) u. a., zusammen ~1,5 GB |
 
 Namenshierarchie der Plattform (Entscheidung Markus, 27.08.):
@@ -174,7 +174,7 @@ Wurf riss die Antwort-Schleife nach der **ersten** Antwort ab.
 | **Schreibbarriere 13.5.2** | ✅ als Ablaufplan; **noch nicht geprobt** |
 | **Phase 4 Stufe A** | ✅ live (`submit_lead_complete`) |
 | **Phase 4 Stufe B** (direkter Treiber) | ❌ offen — erst nach Vercel-Abbau (Vercel erreicht die private DB nicht) |
-| **Schema-Abbildung `public`→`leads`** | ❌ offen — **der nächste Schritt** |
+| **Schema-Abbildung `public`→`leads`** | ✅ bestanden (27.08. spät): Parität ohne Abweichung, `public` leer, alles gehört `leads_owner`, Funktionsbeweis grün, Datenprobe 171.708 Zeilen + 3/3 Prüfsummen — Protokoll im [Testimport-Protokoll](audits/cutover-vorbereitung/phase5-testimport/testimport-protokoll-2026-08-27.md) |
 | **Vercel-Abbau** | ⏳ technisch alles erfüllt; es fehlen die Datums-Tore (**ab 02.09.**), zwei Handprüfungen und Markus' Freigabe |
 | **Echter Cutover** | ❌ offen |
 
@@ -200,7 +200,8 @@ Alle Zugangsdaten liegen in `C:\Users\Markus\.agent-secrets\agent-secrets.json` 
 | Skript | Zweck |
 | --- | --- |
 | `scripts/objektmanifest-supabase.js` | Katalog-Inventar der Quelle (13.5.1) |
-| `scripts/phase5-schema-export.js` | selektive Schema-DDL der Migrieren-Liste aus dem **Live-Katalog** |
+| `scripts/phase5-schema-export.js` | selektive Schema-DDL der Migrieren-Liste aus dem **Live-Katalog**, seit 27.08. spät **abgebildet** auf `leads`/`leads_analytics` (beginnt mit `SET LOCAL ROLE leads_owner`) |
+| `scripts/phase5-schema-abbildung.js` | die **eine** Abbildung `public`→`leads`, `analytics_internal`→`leads_analytics` (mit Restkontrolle); Export, Vergleich und Datenprobe nutzen dasselbe Modul |
 | `scripts/phase5-testimport-vergleich.js` | Paritätsvergleich Quelle ↔ Testimport |
 | `scripts/phase5-datenprobe.js` | echte Daten in die Test-DB pumpen + Zählparität |
 | `scripts/vercel-abbau-vorbedingungen.js` | misst die Abbau-Tore |
@@ -239,29 +240,22 @@ Alle Zugangsdaten liegen in `C:\Users\Markus\.agent-secrets\agent-secrets.json` 
 
 ## 8. Fortsetzungsplan
 
-### Schritt 1 — Schema-Abbildung `public` → `leads` (nächster Schritt)
+### Schritt 1 — Schema-Abbildung `public` → `leads` — ✅ erledigt (27.08. spät)
 
-**Warum:** Auf der Plattform darf kein Projekt in `public` liegen (Rollenmodell §5).
-Das Quiz braucht `leads` + `leads_analytics`; die Schemata und Rollen **stehen bereits**.
+Alle vier Punkte umgesetzt und bewiesen (Details im
+[Testimport-Protokoll](audits/cutover-vorbereitung/phase5-testimport/testimport-protokoll-2026-08-27.md),
+Abschnitt „Schema-Abbildung"): eine Abbildung in `scripts/phase5-schema-abbildung.js`
+mit erzwungener Restkontrolle; Import unter `SET LOCAL ROLE leads_owner`; frische
+Test-DB; Parität 356/356/65/65/86/86/6/6/20/20/5/5 ohne Abweichung; `public` leer;
+alles gehört `leads_owner`; Funktionsbeweis grün (inkl. 6 Antwortzeilen und
+Outbox-Identity); Datenprobe 171.708 Zeilen mit 3/3 Inhalts-Prüfsummen.
 
-**Zu tun:**
-1. `scripts/phase5-schema-export.js` um eine Abbildung erweitern:
-   `public→leads`, `analytics_internal→leads_analytics`.
-   🔴 Betroffen sind auch **Funktionsrümpfe**: `SET search_path = public, pg_temp` und
-   qualifizierte Verweise wie `public.upsert_answer_current(...)`,
-   `analytics_internal.event_daily`. Kontrolliert ersetzen, nicht blind — das Wort
-   „public" kommt auch in anderen Zusammenhängen vor.
-2. Objekte müssen `leads_owner` gehören → Import mit `SET ROLE leads_owner;` beginnen.
-3. Frische Test-DB, importieren, **beide** Beweise wiederholen:
-   `phase5-testimport-vergleich.js` (mit angepasster Schema-Erwartung) **und** den
-   Funktionsbeweis (`submit_lead_complete`, `upsert_video_progress_monotonic`,
-   `v_lead_state_full`, `init_lead`).
-4. Danach die Datenprobe wiederholen (Zielschemata geändert).
+🔴 Für den echten Cutover heißt das: Schema **immer** über den abbildenden Export
+erzeugen — ein roher `pg_dump --schema-only` würde wieder `public` anlegen. Beim
+Prüfsummenvergleich Quelle↔Ziel Zeitzone fixieren und Text mit `COLLATE "C"`
+sortieren, sonst erzeugt die ICU-Sortierung des Ziels falsche Rot-Befunde.
 
-**Fertig, wenn:** Parität ohne Abweichung, Funktionsbeweis grün, und in der Test-DB
-existiert **kein** Quiz-Objekt mehr in `public`.
-
-### Schritt 2 — `activecenter-analytics` vom Schreiben trennen
+### Schritt 2 — `activecenter-analytics` vom Schreiben trennen (nächster Schritt)
 
 Entscheidung 8 ist getroffen, die Ausführung fehlt. Sie schreibt heute `lead_events`.
 Danach **messen**, dass keine neuen Ereignisse mit ihrer Signatur mehr ankommen — erst
