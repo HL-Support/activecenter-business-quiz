@@ -88,7 +88,7 @@ leer verifiziert), Ursache seit #60 serverseitig unmöglich.
 | --- | --- |
 | ~~Container-Smoke~~ **ERLEDIGT 25.08. auf Hetzner**: Build Exit 0 (355 MB, non-root, healthy), alle Proben grün, /health/ready mit echtem Supabase-HEAD (147 ms), SIGTERM-Drain 0.2 s Exit 0, fail-closed Env-Gate Exit 1 | — |
 | ~~Digest-Pin~~ **ERLEDIGT 25.08.**: node:24-slim@sha256:a9f5f7c9… (OCI-Index, alle 3 Stages) | — |
-| Coolify-Deploy-Pipeline (13.3.3/13.5.6: Digest-Promotion, Preview-App, CI-Gates vor Webhook) | Phase-3-Design |
+| Coolify-Deploy-Pipeline: ✅ **Stufe 1 seit 27.08.** (CI-Job `deploy`: nur nach grünen Gates, nur Runtime-Pfade, Deploy-Beweis über `/health/live`; roher Git-Webhook bleibt aus). Offen: Stufe 2 (13.5.6 Digest-Promotion, Preview-App) | Stufe 2 mit Hetzner-Zielpipeline |
 | Vercel-Nachlauf: Projekt/Env/Domains erst nach bewusst aufgegebenem Rollback entfernen (Phase 7) | Cutover + Beobachtungsfrist |
 | zzz-Vercel-Projekt endgültig löschen | Nachlauffrist (Empfehlung 6–12 Monate, Klickzahlen ~0) |
 
@@ -370,3 +370,10 @@ eine Fehldeutung — die Redundanz verdeckte den kaputten Pfad; Korrektur in
 Aufarbeitung samt Migrationspunkten (Helfer-Konsolidierung, isolierte Pfad-Beweise, „kein
 PostgREST im kritischen Pfad" bestätigt):
 [2026-08-27-void-rpc-teilverluste.md](2026-08-27-void-rpc-teilverluste.md).
+
+### Entscheidung 27.08. (Markus): Alter Eingang „Landing Page Business" bleibt vorerst
+
+Der Nebeneingang (Tierprofil-Quiz, `ref_id` 25851739) wird **bewusst behalten** und erst
+später abgebaut — keine Priorität. Erwartung: Er sollte praktisch keine Einträge mehr
+erzeugen; neue Kontakte daraus fallen weiter als Einzelfälle in W3/W5 auf (Baseline je
+Hash) und sind damit sichtbar, ohne Daueralarm.

@@ -97,3 +97,58 @@ jobs:
           name: e2e-debug
           path: e2e-artifacts/
           retention-days: 7
+
+  deploy:
+    # Deploy-Pipeline Stufe 1 (Audit 13.3.3: CI-Gates VOR dem Deploy). Ersetzt den rohen
+    # Git-Webhook, der bewusst aus ist: Deployt wird NUR nach gruenen Pflicht-Checks, NUR
+    # auf main, NUR wenn Runtime-Dateien betroffen sind - und der Erfolg wird ueber
+    # /health/live bewiesen statt angenommen. Stufe 2 (13.5.6, Digest-Promotion statt
+    # Neubau aus demselben Commit) folgt mit der Hetzner-Zielpipeline.
+    name: deploy
+    needs: [safety, e2e-queue]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Runtime-Aenderung erkennen
+        id: runtime
+        run: |
+          VORHER="${{ github.event.before }}"
+          if ! git cat-file -e "$VORHER" 2>/dev/null; then
+            VORHER="${{ github.sha }}~1"
+          fi
+          GEAENDERT=$(git diff --name-only "$VORHER" "${{ github.sha }}")
+          echo "$GEAENDERT"
+          if echo "$GEAENDERT" | grep -qE '^(api/|server/|src/|fonts/|Dockerfile|index\.html|berater-info\.html|translations\.js|video-config\.js|ac-track\.js|build\.js|package\.json|pnpm-lock\.yaml)'; then
+            echo "deploy=ja" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=nein" >> "$GITHUB_OUTPUT"
+            echo "Nur docs/scripts geaendert - kein Deploy noetig."
+          fi
+
+      - name: Coolify-Deploy anstossen
+        if: steps.runtime.outputs.deploy == 'ja'
+        run: |
+          ANTWORT=$(curl -fsS -X POST \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
+            "https://coolify.hl-support.biz/api/v1/deploy?uuid=yhoacszoiofuq6dg4mykyr7b")
+          echo "$ANTWORT"
+
+      - name: Deploy ueber /health/live beweisen
+        if: steps.runtime.outputs.deploy == 'ja'
+        run: |
+          for i in $(seq 1 40); do
+            COMMIT=$(curl -fsS -m 10 https://quiz.activecenter.info/health/live | grep -o '"commit":"[a-f0-9]*"' | cut -d'"' -f4 || true)
+            echo "Versuch $i: live=$COMMIT erwartet=${{ github.sha }}"
+            if [ "$COMMIT" = "${{ github.sha }}" ]; then
+              echo "Produktion traegt den gemergten Commit."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "Produktion hat den Commit nach 10 Minuten NICHT uebernommen." >&2
+          exit 1
