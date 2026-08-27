@@ -1,6 +1,6 @@
 # Phase-4-Design: Ein Aufruf, eine Transaktion — der kanonische Lead-Submit
 
-Stand: 27.08.2026 · Design, noch nicht umgesetzt · Grundlage:
+Stand: 27.08.2026 · **Stufe A umgesetzt und bewiesen (27.08. abends, §4/§5)** · Grundlage:
 [Antwortverlust-Zielbild §5](2026-08-26-antwortverlust-analyse-und-zielbild.md),
 Architekturentscheidung Option C (26.08.), Lehren aus dem
 [void-RPC-Vorfall](2026-08-27-void-rpc-teilverluste.md), Audit-Abnahmekriterium
@@ -49,12 +49,17 @@ Browser ── POST /api/lead/submit (Idempotenzschlüssel: lead_hash + form_res
 
 ## 4. Umsetzung in zwei Stufen
 
-**Stufe A — sofort möglich (noch auf Supabase):** Die gesamte Submit-Transaktion wird
-EINE Postgres-Funktion `submit_lead_complete(...)` (SECURITY DEFINER, service_role).
-Transport bleibt vorerst PostgREST (ein einziger RPC-Call), aber die Atomarität und
-Idempotenz sind gewonnen, und die Funktion ist exakt die, die später der direkte Treiber
-aufruft. Bridge-seitig ersetzt sie den 7-Call-Block in
-`persistBusinessSubmissionToLeadStateV2`.
+**Stufe A — ✅ umgesetzt 27.08.:** Die gesamte Submit-Transaktion ist EINE
+Postgres-Funktion `submit_lead_complete(p_state, p_answers, p_lang, p_answered_at)`
+(`supabase-submit-lead-complete.sql`; nur service_role). Transport bleibt vorerst
+PostgREST (ein einziger RPC-Call), aber Atomarität und Idempotenz sind gewonnen, und die
+Funktion ist exakt die, die später der direkte Treiber aufruft. Bridge-seitig ersetzt
+sie den 7-Call-Block in `persistBusinessSubmissionToLeadStateV2`; Fehler werden laut
+gemeldet (GlitchTip) und brechen NUR den PG-Teil ab, nie das Opt-in. Am echten System
+bewiesen (isolierter Testlead, danach aufgeräumt): Erstaufruf vollständig, Idempotenz,
+Merge-Semantik (mitgeliefertes null überschreibt, Rest bleibt), unbekannte Schlüssel
+laut, erzwungener Antwortfehler rollt auch den Kontakt zurück. Unit-Tests:
+`scripts/tests/submit-lead-complete.test.js`.
 
 **Stufe B — nach Vercel-Abbau und Phase-5-Umzug:** Der Container spricht die
 Hetzner-Datenbank mit direktem Treiber (`pg`; Kysely-Merge erst nach dem Abbau —
@@ -85,10 +90,15 @@ Sonderbehandlung „Kontakt ohne Profil" im Nurture, und die 7-Call-Sequenz des 
 Opt-in-Pfads (damit auch die W5-Fehlerklasse im Live-Pfad — W5 bleibt trotzdem, als
 Wächter über Altbestand und Regressionen).
 
-## 7. Offene Entscheidungen
+## 7. Entscheidungen (Markus, 27.08.)
 
-1. **Stufe A jetzt bauen** (empfohlen: ja — kleiner Umbau, sofortige Atomarität, kein
-   Wegwerf-Code, weil die Funktion in Stufe B identisch weiterlebt) oder direkt auf
-   Stufe B warten?
-2. Verhalten bei MySQL-Ausfall im Übergang: Outbox puffert (empfohlen, existiert) — die
-   heutige synchrone MySQL-Weiterleitung im Submit-Pfad entfällt dann bewusst.
+1. **Stufe A: freigegeben — wird gebaut.** Umfang der Stufe A bewusst minimal: exakt die
+   heutigen Schreibvorgänge (lead_state-Upsert + 6 Antworten) in EINER Transaktion,
+   idempotent; Ereignis- und Outbox-Erweiterung folgen mit Stufe B, damit Stufe A das
+   Systemverhalten (Mails, Sync) nicht verändert.
+2. **Legacy-MySQL über EINE Schnittstelle** (Muster aus dem Analysenprojekt/
+   Vital-Analyse: Daten bündeln, dann eine Schnittstelle zu `typeform_surveys`): Alles
+   Neue lebt im Quiz-Projekt, die Verbindung zur Legacy-MySQL läuft am Ende über einen
+   einzigen, kleinen Übergabepunkt statt vieler Einzelverbindungen. Die Outbox aus §3
+   ist genau dieser Übergabepunkt; die heutige synchrone MySQL-Weiterleitung im
+   Submit-Pfad entfällt mit Stufe B bewusst (Outbox puffert Ausfälle).

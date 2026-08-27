@@ -350,6 +350,16 @@ Doppel-Schreibkanal (Videorang → `points_result`) hat einen täglichen Lese-Ab
   lead_access_permissions, archive-Schema):
   [cutover-vorbereitung/phase5-objektauswahl-2026-08-27.md](cutover-vorbereitung/phase5-objektauswahl-2026-08-27.md).
   **Vor dem Testimport Manifest frisch erzeugen.**
+- ✅ **Alle 7 Phase-5-Fragen entschieden** (Markus + Klärungen, 27.08. nachmittags —
+  Details in der Objektauswahl §5): tracking_* zieht mit, das landing-page-Formular wird
+  **abgeschaltet** (Landing Page verlinkt direkt aufs Quiz; 🔴 Umbau vor dem Cutover
+  nötig); Business_Kalkulator wird mit umgestellt und zieht später auf Coolify;
+  Webhook-Verbund bleibt draußen, Legacy-MySQL künftig über **eine** Schnittstelle
+  (Analysen-Muster); `lead_access_permissions` und `rls_auto_enable` entfallen;
+  `archive` ist leer (0 Zeilen, nichts zu sichern); Legacy-Objekte ziehen mit.
+  **`activecenter-analytics` wird nicht übernommen** — Statistiken bei Bedarf neu; ihr
+  Schreibzugriff auf `lead_events`/`system_alerts` endet vor dem Cutover
+  (Schreibbarriere). **Stufe A des Phase-4-Designs: freigegeben.**
 
 ### Nachtrag 27.08.: Vorfall Anzeigen-Konversion (gelöst) — HTTP/3 am Proxy aus
 

@@ -151,29 +151,79 @@ Das Manifest meldet **3 Katalogfunde** außerhalb des Verbunds — alle drei sin
 
 ---
 
-## 5. Offene Fragen an Markus
+## 5. Entscheidungen (Markus, 27.08.) und Klärungen — alle 7 Fragen beantwortet
 
-1. **`tracking_*`**: Ziehen die drei Tracking-Tabellen mit — und wird `landing-page` im selben Zug umgestellt, oder bekommt sie eine eigene Ablage? (Ohne Entscheidung schreibt sie nach dem Cutover in die Altinstanz.)
-2. **`lead_contact_crm`**: Wird der `Business_Kalkulator` im selben Zug auf den neuen Zugriffsweg umgestellt (dann mitnehmen), oder bleibt die Tabelle bei ihm?
-3. **Webhook-Verbund** (`form_webhook_deliveries`, `webhook_*`, `system_alerts`, 9 Funktionen): eigenes Produkt mit eigenem Zielort — bestätigt? Dann fällt alles aus dem Quiz-Export.
-4. **`lead_access_permissions`**: darf entfallen (nie beschrieben, `auth.users`-FK), obwohl sie im v2-SQL steht?
-5. **`archive`-Schema**: bestätigen, dass die vier Tabellen HBA-Archiv sind (Namens-/FK-Indiz) und nicht mitziehen.
-6. **`rls_auto_enable`** und **`close_webhook_delivery_job`**: Herkunft/Aufrufer klären oder streichen.
-7. **`lead_migration_unresolved` / `quiz_sessions`**: als lebende Legacy-Objekte mitnehmen (Empfehlung) oder nur Altbestand archivieren?
+1. **`tracking_*`: mitmigrieren.** Der zweite Schreiber verschwindet: Das eigene
+   Business-Formular der `landing-page` wird **abgeschaltet**, die Landing Page verlinkt
+   künftig direkt auf das Business-Leads-Quiz. 🔴 Vorbedingung vor dem Cutover: Umbau in
+   der `landing-page` (Formular raus, Link rein) — sonst schreibt sie nach dem Umzug in
+   die Altinstanz. Gehört zusätzlich in die Schreibbarriere 13.5.2 als Nachweis.
+2. **`lead_contact_crm`: mitnehmen; `Business_Kalkulator` wird im selben Zug auf den
+   neuen Zugriffsweg umgestellt** und zieht perspektivisch ebenfalls auf den
+   Coolify-Server (genereller Kurs: alles Schritt für Schritt weg von Vercel und
+   Supabase). Im Ziel-Postgres wird sauber getrennt und sortiert (je Produkt eigener
+   Bereich), damit möglichst keine gemeinsam beschriebenen Objekte mehr existieren.
+3. **Webhook-Verbund: fällt aus dem Quiz-Export** (`form_webhook_deliveries`,
+   `webhook_*`-Tabellen und die 9 Webhook-Funktionen inkl.
+   `close_webhook_delivery_job`). Zielbild (Markus): den Legacy-MySQL-Weg nach dem
+   Muster des Analysenprojekts (Vital-Analyse) modernisieren — Daten erst **bündeln**,
+   dann über **eine einzige Schnittstelle** in die Legacy-MySQL (`typeform_surveys`)
+   schreiben, statt vieler Einzelverbindungen. Eigenes Vorhaben, nicht Teil des
+   Quiz-DB-Umzugs; deckt sich mit dem Phase-4-Zielbild (MySQL nur noch über die Outbox
+   → eine Schnittstelle).
+4. **`lead_access_permissions`: entfällt ersatzlos** (nie beschrieben, `auth.users`-FK).
+   Folgeaufgabe: auch aus `supabase-lead-system-v2.sql` streichen, damit der
+   Phase-5-Export sie nicht wieder anlegt. Damit verschwindet Katalogfund 3 vollständig.
+5. **`archive`-Schema: geklärt und erledigt** (27.08., rein lesend gemessen): alle vier
+   Tabellen haben **0 Zeilen** — es gibt nichts zu sichern. Strukturgleich mit `hba_*`,
+   bleibt als HBA-Altlast in der Quelle, kein Quiz-Export.
+6. **Geklärt per Funktionsdefinition** (27.08.): `rls_auto_enable` ist
+   Supabase-Instanz-Hygiene — der Event-Trigger `ensure_rls` schaltet RLS auf jeder neu
+   angelegten `public`-Tabelle ein. Zieht **nicht** mit (auf Hetzner gilt ein eigenes
+   Rollenmodell; Objekte entstehen dort aus versioniertem SQL).
+   `close_webhook_delivery_job` ist die Admin-Funktion des Webhook-Verbunds (schließt
+   failed/dead-Jobs mit Auditzeile in `webhook_delivery_actions`) — folgt dem
+   Webhook-Verbund, nicht dem Quiz.
+7. **`lead_migration_unresolved` und `quiz_sessions`: mitnehmen** (Empfehlung
+   angenommen) — als lebende Legacy-Objekte, Abbau später gemäß Audit P2.
+
+**Zusatzentscheidung `activecenter-analytics`:** Die alte Statistikseite wird **nicht
+übernommen**. Statistiken/Quoten werden bei Bedarf neu gebaut (einfacher als der Umzug
+der Altseite). Konsequenz für Phase 6: Ihr Schreibzugriff auf `lead_events` und
+`webhook_deliveries`/`system_alerts` muss **vor dem Cutover enden** (Schreibbarriere) —
+damit entfällt auch der wichtigste Fremdschreiber auf `lead_events`. Die beiden
+Analytics-RPCs (`analytics_dashboard_v2`, `analytics_events_page_v2`) und
+`analytics_internal` ziehen trotzdem mit: Sie sind im Quiz-Repo definiert und
+unabhängig von der Altseite nutzbar; `system_alerts` bleibt dagegen zurück.
 
 ---
 
-## 6. Zählung und Abgleich mit dem Manifest
+## 6. Zählung nach den Entscheidungen (Abgleich mit dem Manifest)
 
-Wichtig für Phase 6: „Migrieren" heißt nicht „isoliert umschaltbar" — `lead_events` hat mit `activecenter-analytics` und den Nurture-RPCs weitere aktive Schreiber (Inventar Risiko 2); Phase 6 Punkt 2 verbietet den isolierten Quiz-Cutover, solange diese nicht umgestellt sind.
+„Migrieren" heißt weiterhin nicht „isoliert umschaltbar" — aber mit dem Abschalten des
+landing-page-Formulars und dem Nicht-Übernehmen von `activecenter-analytics` sind die
+beiden kritischen Fremdschreiber terminierbar; übrig bleiben die Nurture-RPC-Schreiber
+(ziehen mit) und die Umstellung der `hl-support-analytics`-Lesezugriffe.
 
-| Objektart | Manifest gesamt | migrieren | fremd | offen |
+| Objektart | Manifest gesamt | migrieren | fremd/bleibt | entfällt |
 | --- | --- | --- | --- | --- |
-| Tabellen (public 40 + analytics_internal 2 + archive 4) | 46 | 12 | 14 | 20 |
+| Tabellen (public 40 + analytics_internal 2 + archive 4) | 46 | 18 | 27 | 1 (`lead_access_permissions`) |
 | Views (alle public) | 6 | 6 | 0 | 0 |
-| Funktionen | 31 | 19 | 2 | 10 |
-| Trigger | 6 | 5 | 0 | 1 |
-| Sequenzen (public 17 + analytics_internal 1) | 18 | 4 | 4 | 10 |
-| **Summe** | **107** | **46** | **20** | **41** |
+| Funktionen | 31 | 19 | 11 | 1 (`rls_auto_enable`) |
+| Trigger | 6 | 5 | 1 | 0 |
+| Sequenzen (public 17 + analytics_internal 1) | 18 | 9 | 8 | 1 |
+| **Summe** | **107** | **57** | **47** | **3** |
 
-Offene Sequenzen und der offene Trigger folgen jeweils ihrer Tabelle (tracking_* ×3, quiz_sessions, lead_migration_unresolved, lead_access_permissions, system_alerts inkl. Trigger, webhook_deliveries, webhook_delivery_actions, webhook_delivery_attempts). pg_cron: Job 1 wird auf dem Ziel neu angelegt, Job 2 zieht nicht mit. Die Zählung deckt die Verbund-Schemata des Manifests vollständig ab; fremde Schemata (`marathon` 39/2, `marathon_backup` 3, `auth` 23/1, `storage` 8, `cron` 2/2, `realtime` 3/1, `vault` 1, `supabase_migrations` 1, `extensions` 0/2 Views) sind laut Manifest „im Verbund: nein" und hier nur zur Abgrenzung genannt.
+Migrieren-Zugänge gegenüber Abschnitt 1: `tracking_sessions`, `tracking_events`,
+`tracking_video_progress`, `quiz_sessions`, `lead_migration_unresolved`,
+`lead_contact_crm` (+ zugehörige Sequenzen). Fremd/bleibt-Zugänge: `archive` (4),
+Webhook-Verbund (7 Tabellen, 9 Funktionen, 3 Sequenzen), `system_alerts` (+ Trigger,
++ Sequenz), `cron_runs`. pg_cron: Job 1 wird auf dem Ziel neu angelegt, Job 2 zieht
+nicht mit. Fremde Schemata (`marathon` 39/2, `marathon_backup` 3, `auth` 23/1,
+`storage` 8, `cron` 2/2, `realtime` 3/1, `vault` 1, `supabase_migrations` 1,
+`extensions` 0/2 Views) sind laut Manifest „im Verbund: nein" und hier nur zur
+Abgrenzung genannt.
+
+Hinweis: Mit Stufe A des Phase-4-Designs kommt eine weitere Verbund-Funktion
+`submit_lead_complete` hinzu (im frischen Manifest vor dem Testimport dann 32
+Funktionen, 20 davon migrieren).
