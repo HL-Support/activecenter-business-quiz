@@ -153,11 +153,12 @@ Das Manifest meldet **3 Katalogfunde** außerhalb des Verbunds — alle drei sin
 
 ## 5. Entscheidungen (Markus, 27.08.) und Klärungen — alle 7 Fragen beantwortet
 
-1. **`tracking_*`: mitmigrieren.** Der zweite Schreiber verschwindet: Das eigene
-   Business-Formular der `landing-page` wird **abgeschaltet**, die Landing Page verlinkt
-   künftig direkt auf das Business-Leads-Quiz. 🔴 Vorbedingung vor dem Cutover: Umbau in
-   der `landing-page` (Formular raus, Link rein) — sonst schreibt sie nach dem Umzug in
-   die Altinstanz. Gehört zusätzlich in die Schreibbarriere 13.5.2 als Nachweis.
+1. **`tracking_*`: mitmigrieren.** Der zweite Schreiber ist weg: Das eigene
+   Business-Formular der `landing-page` wurde **abgeschaltet** — ✅ umgesetzt und am
+   27.08. verifiziert (landing-page-Commit `e8a32b2` „Formular durch Erfolgs-Code-CTA
+   ersetzt, Weiterleitung zum Business-Leads-Quiz"; Live-Seite
+   `global-sce.com/markus/business-info` trägt kein `<form>` mehr und keinen alten
+   Eingang). In der Schreibbarriere 13.5.2 wird das nochmal als Messung nachgewiesen.
 2. **`lead_contact_crm`: mitnehmen; `Business_Kalkulator` wird im selben Zug auf den
    neuen Zugriffsweg umgestellt** und zieht perspektivisch ebenfalls auf den
    Coolify-Server (genereller Kurs: alles Schritt für Schritt weg von Vercel und
@@ -216,7 +217,10 @@ beiden kritischen Fremdschreiber terminierbar; übrig bleiben die Nurture-RPC-Sc
 
 Migrieren-Zugänge gegenüber Abschnitt 1: `tracking_sessions`, `tracking_events`,
 `tracking_video_progress`, `quiz_sessions`, `lead_migration_unresolved`,
-`lead_contact_crm` (+ zugehörige Sequenzen). Fremd/bleibt-Zugänge: `archive` (4),
+`lead_contact_crm` (+ zugehörige Sequenzen). Die Auswahl trägt 7 FKs, **alle innerhalb
+der Auswahl** (5× `lead_*` → `lead_state`, 2× `nurture_*` → `nurture_sequences`) —
+beim Testimport gemessen; kein FK zeigt nach draußen (der `auth.users`-FK entfällt mit
+`lead_access_permissions`). Fremd/bleibt-Zugänge: `archive` (4),
 Webhook-Verbund (7 Tabellen, 9 Funktionen, 3 Sequenzen), `system_alerts` (+ Trigger,
 + Sequenz), `cron_runs`. pg_cron: Job 1 wird auf dem Ziel neu angelegt, Job 2 zieht
 nicht mit. Fremde Schemata (`marathon` 39/2, `marathon_backup` 3, `auth` 23/1,

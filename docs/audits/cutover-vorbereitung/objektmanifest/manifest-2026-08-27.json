@@ -1,5 +1,5 @@
 {
-  "erzeugt": "2026-08-27T06:11:24.380Z",
+  "erzeugt": "2026-08-27T12:11:35.704Z",
   "verbund_schemata": [
     "public",
     "analytics_internal",
@@ -104,8 +104,8 @@
         "schema": "analytics_internal",
         "tabelle": "event_daily",
         "art": "normal",
-        "geschaetzte_zeilen": 9315,
-        "bytes_gesamt": 2957312,
+        "geschaetzte_zeilen": 9371,
+        "bytes_gesamt": 2990080,
         "rls_aktiv": false
       },
       {
@@ -113,7 +113,7 @@
         "tabelle": "refresh_runs",
         "art": "normal",
         "geschaetzte_zeilen": 3277,
-        "bytes_gesamt": 557056,
+        "bytes_gesamt": 565248,
         "rls_aktiv": false
       },
       {
@@ -169,7 +169,7 @@
         "tabelle": "cron_runs",
         "art": "normal",
         "geschaetzte_zeilen": 59911,
-        "bytes_gesamt": 24682496,
+        "bytes_gesamt": 24879104,
         "rls_aktiv": true
       },
       {
@@ -289,7 +289,7 @@
         "tabelle": "lead_answers_current",
         "art": "normal",
         "geschaetzte_zeilen": 9648,
-        "bytes_gesamt": 2375680,
+        "bytes_gesamt": 2449408,
         "rls_aktiv": true
       },
       {
@@ -305,7 +305,7 @@
         "tabelle": "lead_events",
         "art": "normal",
         "geschaetzte_zeilen": 105525,
-        "bytes_gesamt": 182984704,
+        "bytes_gesamt": 183443456,
         "rls_aktiv": true
       },
       {
@@ -320,7 +320,7 @@
         "schema": "public",
         "tabelle": "lead_profiles",
         "art": "normal",
-        "geschaetzte_zeilen": 714,
+        "geschaetzte_zeilen": 721,
         "bytes_gesamt": 753664,
         "rls_aktiv": true
       },
@@ -328,8 +328,8 @@
         "schema": "public",
         "tabelle": "lead_state",
         "art": "normal",
-        "geschaetzte_zeilen": 6045,
-        "bytes_gesamt": 12836864,
+        "geschaetzte_zeilen": 6064,
+        "bytes_gesamt": 12877824,
         "rls_aktiv": true
       },
       {
@@ -337,14 +337,14 @@
         "tabelle": "lead_sync_outbox",
         "art": "normal",
         "geschaetzte_zeilen": 2372,
-        "bytes_gesamt": 1171456,
+        "bytes_gesamt": 1187840,
         "rls_aktiv": true
       },
       {
         "schema": "public",
         "tabelle": "lead_video_progress",
         "art": "normal",
-        "geschaetzte_zeilen": 1851,
+        "geschaetzte_zeilen": 1864,
         "bytes_gesamt": 909312,
         "rls_aktiv": true
       },
@@ -352,7 +352,7 @@
         "schema": "public",
         "tabelle": "nurture_runs",
         "art": "normal",
-        "geschaetzte_zeilen": 251,
+        "geschaetzte_zeilen": 254,
         "bytes_gesamt": 4128768,
         "rls_aktiv": true
       },
@@ -376,8 +376,8 @@
         "schema": "public",
         "tabelle": "quiz_sessions",
         "art": "normal",
-        "geschaetzte_zeilen": 1279,
-        "bytes_gesamt": 720896,
+        "geschaetzte_zeilen": 1328,
+        "bytes_gesamt": 729088,
         "rls_aktiv": true
       },
       {
@@ -401,7 +401,7 @@
         "tabelle": "tracking_events",
         "art": "normal",
         "geschaetzte_zeilen": 21873,
-        "bytes_gesamt": 33751040,
+        "bytes_gesamt": 33775616,
         "rls_aktiv": true
       },
       {
@@ -475,7 +475,7 @@
         "sequenz": "refresh_runs_run_id_seq",
         "gehoert_zu_tabelle": null,
         "gehoert_zu_spalte": null,
-        "letzter_wert": 3522
+        "letzter_wert": 3546
       },
       {
         "schema": "public",
@@ -517,7 +517,7 @@
         "sequenz": "lead_events_event_id_seq",
         "gehoert_zu_tabelle": null,
         "gehoert_zu_spalte": null,
-        "letzter_wert": 110231
+        "letzter_wert": 110918
       },
       {
         "schema": "public",
@@ -531,21 +531,21 @@
         "sequenz": "lead_profiles_id_seq",
         "gehoert_zu_tabelle": "lead_profiles",
         "gehoert_zu_spalte": "id",
-        "letzter_wert": 11489
+        "letzter_wert": 11507
       },
       {
         "schema": "public",
         "sequenz": "lead_sync_outbox_id_seq",
         "gehoert_zu_tabelle": null,
         "gehoert_zu_spalte": null,
-        "letzter_wert": 2416
+        "letzter_wert": 2434
       },
       {
         "schema": "public",
         "sequenz": "quiz_sessions_id_seq",
         "gehoert_zu_tabelle": "quiz_sessions",
         "gehoert_zu_spalte": "id",
-        "letzter_wert": 1725
+        "letzter_wert": 1745
       },
       {
         "schema": "public",
@@ -559,21 +559,21 @@
         "sequenz": "tracking_events_id_seq",
         "gehoert_zu_tabelle": "tracking_events",
         "gehoert_zu_spalte": "id",
-        "letzter_wert": 24672
+        "letzter_wert": 24741
       },
       {
         "schema": "public",
         "sequenz": "tracking_sessions_id_seq",
         "gehoert_zu_tabelle": "tracking_sessions",
         "gehoert_zu_spalte": "id",
-        "letzter_wert": 24626
+        "letzter_wert": 24701
       },
       {
         "schema": "public",
         "sequenz": "tracking_video_progress_id_seq",
         "gehoert_zu_tabelle": "tracking_video_progress",
         "gehoert_zu_spalte": "id",
-        "letzter_wert": 12301
+        "letzter_wert": 12302
       },
       {
         "schema": "public",
@@ -2434,6 +2434,14 @@
         "sprache": "plpgsql",
         "security_definer": false,
         "quelltext_md5": "301a884953d37769916294bb60562e05"
+      },
+      {
+        "schema": "public",
+        "name": "submit_lead_complete",
+        "argumente": "p_state jsonb, p_answers jsonb, p_lang text, p_answered_at timestamp with time zone",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "5e08476912fe6adb446c8f29f2f213d5"
       },
       {
         "schema": "public",
