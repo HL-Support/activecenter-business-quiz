@@ -1,3 +1,8 @@
+> 🔴 **Einstieg für neue Sitzungen: [../STAND-UND-FORTSETZUNG.md](../STAND-UND-FORTSETZUNG.md)**
+> — dort stehen Systemlandschaft, geltende Entscheidungen, bekannte Fallen und der
+> Fortsetzungsplan. Dieses Dokument hier ist die **chronologische Aufzeichnung** mit allen
+> Beweisen und Nachträgen.
+
 # Gesamtstatus Migrationsvorbereitung — kanonisches Statusdokument
 
 Stand: 25.08.2026, nach Abschluss aller Vorbereitungsarbeiten für den Coolify-Umzug.
