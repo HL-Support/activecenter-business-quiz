@@ -1,0 +1,3116 @@
+{
+  "erzeugt": "2026-08-27T06:11:24.380Z",
+  "verbund_schemata": [
+    "public",
+    "analytics_internal",
+    "archive"
+  ],
+  "hinweis": "Audit 13.5.1 — vor dem Testimport der Phase 5 FRISCH erzeugen. Die DB beherbergt mehrere Apps; die Objekt-Auswahl trifft Phase 5 gegen das Verbraucher-Inventar.",
+  "ergebnisse": {
+    "schema_inventar": [
+      {
+        "schema": "analytics_internal",
+        "tabellen": 2,
+        "views": 0,
+        "sequenzen": 1
+      },
+      {
+        "schema": "archive",
+        "tabellen": 4,
+        "views": 0,
+        "sequenzen": 0
+      },
+      {
+        "schema": "auth",
+        "tabellen": 23,
+        "views": 0,
+        "sequenzen": 1
+      },
+      {
+        "schema": "cron",
+        "tabellen": 2,
+        "views": 0,
+        "sequenzen": 2
+      },
+      {
+        "schema": "extensions",
+        "tabellen": 0,
+        "views": 2,
+        "sequenzen": 0
+      },
+      {
+        "schema": "graphql",
+        "tabellen": 0,
+        "views": 0,
+        "sequenzen": 0
+      },
+      {
+        "schema": "graphql_public",
+        "tabellen": 0,
+        "views": 0,
+        "sequenzen": 0
+      },
+      {
+        "schema": "marathon",
+        "tabellen": 39,
+        "views": 0,
+        "sequenzen": 2
+      },
+      {
+        "schema": "marathon_backup",
+        "tabellen": 3,
+        "views": 0,
+        "sequenzen": 0
+      },
+      {
+        "schema": "pgbouncer",
+        "tabellen": 0,
+        "views": 0,
+        "sequenzen": 0
+      },
+      {
+        "schema": "public",
+        "tabellen": 40,
+        "views": 6,
+        "sequenzen": 17
+      },
+      {
+        "schema": "realtime",
+        "tabellen": 3,
+        "views": 0,
+        "sequenzen": 1
+      },
+      {
+        "schema": "storage",
+        "tabellen": 8,
+        "views": 0,
+        "sequenzen": 0
+      },
+      {
+        "schema": "supabase_migrations",
+        "tabellen": 1,
+        "views": 0,
+        "sequenzen": 0
+      },
+      {
+        "schema": "vault",
+        "tabellen": 1,
+        "views": 1,
+        "sequenzen": 0
+      }
+    ],
+    "tabellen": [
+      {
+        "schema": "analytics_internal",
+        "tabelle": "event_daily",
+        "art": "normal",
+        "geschaetzte_zeilen": 9315,
+        "bytes_gesamt": 2957312,
+        "rls_aktiv": false
+      },
+      {
+        "schema": "analytics_internal",
+        "tabelle": "refresh_runs",
+        "art": "normal",
+        "geschaetzte_zeilen": 3277,
+        "bytes_gesamt": 557056,
+        "rls_aktiv": false
+      },
+      {
+        "schema": "archive",
+        "tabelle": "lines_monthly_summary",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 16384,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "archive",
+        "tabelle": "monthly_metrics",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 16384,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "archive",
+        "tabelle": "persons",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 16384,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "archive",
+        "tabelle": "requalification_tracker",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 16384,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "app_config",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 32768,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "coach_access",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 32768,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "cron_runs",
+        "art": "normal",
+        "geschaetzte_zeilen": 59911,
+        "bytes_gesamt": 24682496,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "form_webhook_deliveries",
+        "art": "normal",
+        "geschaetzte_zeilen": 477,
+        "bytes_gesamt": 2195456,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_data_source_status",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 65536,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_lines_monthly_summary",
+        "art": "normal",
+        "geschaetzte_zeilen": 825,
+        "bytes_gesamt": 253952,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_monthly_metrics",
+        "art": "normal",
+        "geschaetzte_zeilen": 47317,
+        "bytes_gesamt": 14286848,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_persons",
+        "art": "normal",
+        "geschaetzte_zeilen": 2442,
+        "bytes_gesamt": 761856,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_recognition_entries",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 49152,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_recognition_runs",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 16384,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_requalification_tracker",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 16384,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_special_recognitions",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 49152,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_achievements",
+        "art": "normal",
+        "geschaetzte_zeilen": 185,
+        "bytes_gesamt": 131072,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_reviews",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 65536,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "landing_page",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 49152,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "landing_page_events",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 81920,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_access_permissions",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 24576,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_answers_current",
+        "art": "normal",
+        "geschaetzte_zeilen": 9648,
+        "bytes_gesamt": 2375680,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_contact_crm",
+        "art": "normal",
+        "geschaetzte_zeilen": 36,
+        "bytes_gesamt": 147456,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_events",
+        "art": "normal",
+        "geschaetzte_zeilen": 105525,
+        "bytes_gesamt": 182984704,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_migration_unresolved",
+        "art": "normal",
+        "geschaetzte_zeilen": 40,
+        "bytes_gesamt": 172032,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_profiles",
+        "art": "normal",
+        "geschaetzte_zeilen": 714,
+        "bytes_gesamt": 753664,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_state",
+        "art": "normal",
+        "geschaetzte_zeilen": 6045,
+        "bytes_gesamt": 12836864,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_sync_outbox",
+        "art": "normal",
+        "geschaetzte_zeilen": 2372,
+        "bytes_gesamt": 1171456,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "art": "normal",
+        "geschaetzte_zeilen": 1851,
+        "bytes_gesamt": 909312,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "art": "normal",
+        "geschaetzte_zeilen": 251,
+        "bytes_gesamt": 4128768,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_sequences",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 32768,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_subject_states",
+        "art": "normal",
+        "geschaetzte_zeilen": 913,
+        "bytes_gesamt": 770048,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "quiz_sessions",
+        "art": "normal",
+        "geschaetzte_zeilen": 1279,
+        "bytes_gesamt": 720896,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "sso_token_consumptions",
+        "art": "normal",
+        "geschaetzte_zeilen": 810,
+        "bytes_gesamt": 327680,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "system_alerts",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 81920,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_events",
+        "art": "normal",
+        "geschaetzte_zeilen": 21873,
+        "bytes_gesamt": 33751040,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_sessions",
+        "art": "normal",
+        "geschaetzte_zeilen": 1918,
+        "bytes_gesamt": 1179648,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_video_progress",
+        "art": "normal",
+        "geschaetzte_zeilen": 575,
+        "bytes_gesamt": 466944,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_connector_heartbeats",
+        "art": "normal",
+        "geschaetzte_zeilen": 1,
+        "bytes_gesamt": 32768,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_deliveries",
+        "art": "normal",
+        "geschaetzte_zeilen": 69,
+        "bytes_gesamt": 417792,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_actions",
+        "art": "normal",
+        "geschaetzte_zeilen": -1,
+        "bytes_gesamt": 49152,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_attempts",
+        "art": "normal",
+        "geschaetzte_zeilen": 51,
+        "bytes_gesamt": 98304,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "art": "normal",
+        "geschaetzte_zeilen": 54,
+        "bytes_gesamt": 303104,
+        "rls_aktiv": true
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_source_events",
+        "art": "normal",
+        "geschaetzte_zeilen": 51,
+        "bytes_gesamt": 245760,
+        "rls_aktiv": true
+      }
+    ],
+    "sequenzen": [
+      {
+        "schema": "analytics_internal",
+        "sequenz": "refresh_runs_run_id_seq",
+        "gehoert_zu_tabelle": null,
+        "gehoert_zu_spalte": null,
+        "letzter_wert": 3522
+      },
+      {
+        "schema": "public",
+        "sequenz": "coach_access_id_seq",
+        "gehoert_zu_tabelle": "coach_access",
+        "gehoert_zu_spalte": "id",
+        "letzter_wert": null
+      },
+      {
+        "schema": "public",
+        "sequenz": "hba_special_recognitions_id_seq",
+        "gehoert_zu_tabelle": null,
+        "gehoert_zu_spalte": null,
+        "letzter_wert": 2
+      },
+      {
+        "schema": "public",
+        "sequenz": "landing_page_events_id_seq",
+        "gehoert_zu_tabelle": "landing_page_events",
+        "gehoert_zu_spalte": "id",
+        "letzter_wert": 16
+      },
+      {
+        "schema": "public",
+        "sequenz": "landing_page_id_seq",
+        "gehoert_zu_tabelle": "landing_page",
+        "gehoert_zu_spalte": "id",
+        "letzter_wert": null
+      },
+      {
+        "schema": "public",
+        "sequenz": "lead_access_permissions_id_seq",
+        "gehoert_zu_tabelle": null,
+        "gehoert_zu_spalte": null,
+        "letzter_wert": null
+      },
+      {
+        "schema": "public",
+        "sequenz": "lead_events_event_id_seq",
+        "gehoert_zu_tabelle": null,
+        "gehoert_zu_spalte": null,
+        "letzter_wert": 110231
+      },
+      {
+        "schema": "public",
+        "sequenz": "lead_migration_unresolved_id_seq",
+        "gehoert_zu_tabelle": null,
+        "gehoert_zu_spalte": null,
+        "letzter_wert": 40
+      },
+      {
+        "schema": "public",
+        "sequenz": "lead_profiles_id_seq",
+        "gehoert_zu_tabelle": "lead_profiles",
+        "gehoert_zu_spalte": "id",
+        "letzter_wert": 11489
+      },
+      {
+        "schema": "public",
+        "sequenz": "lead_sync_outbox_id_seq",
+        "gehoert_zu_tabelle": null,
+        "gehoert_zu_spalte": null,
+        "letzter_wert": 2416
+      },
+      {
+        "schema": "public",
+        "sequenz": "quiz_sessions_id_seq",
+        "gehoert_zu_tabelle": "quiz_sessions",
+        "gehoert_zu_spalte": "id",
+        "letzter_wert": 1725
+      },
+      {
+        "schema": "public",
+        "sequenz": "system_alerts_id_seq",
+        "gehoert_zu_tabelle": null,
+        "gehoert_zu_spalte": null,
+        "letzter_wert": 10
+      },
+      {
+        "schema": "public",
+        "sequenz": "tracking_events_id_seq",
+        "gehoert_zu_tabelle": "tracking_events",
+        "gehoert_zu_spalte": "id",
+        "letzter_wert": 24672
+      },
+      {
+        "schema": "public",
+        "sequenz": "tracking_sessions_id_seq",
+        "gehoert_zu_tabelle": "tracking_sessions",
+        "gehoert_zu_spalte": "id",
+        "letzter_wert": 24626
+      },
+      {
+        "schema": "public",
+        "sequenz": "tracking_video_progress_id_seq",
+        "gehoert_zu_tabelle": "tracking_video_progress",
+        "gehoert_zu_spalte": "id",
+        "letzter_wert": 12301
+      },
+      {
+        "schema": "public",
+        "sequenz": "webhook_deliveries_id_seq",
+        "gehoert_zu_tabelle": "webhook_deliveries",
+        "gehoert_zu_spalte": "id",
+        "letzter_wert": 80
+      },
+      {
+        "schema": "public",
+        "sequenz": "webhook_delivery_actions_id_seq",
+        "gehoert_zu_tabelle": null,
+        "gehoert_zu_spalte": null,
+        "letzter_wert": 1
+      },
+      {
+        "schema": "public",
+        "sequenz": "webhook_delivery_attempts_id_seq",
+        "gehoert_zu_tabelle": null,
+        "gehoert_zu_spalte": null,
+        "letzter_wert": 53
+      }
+    ],
+    "constraints": [
+      {
+        "schema": "analytics_internal",
+        "tabelle": "analytics_internal.event_daily",
+        "name": "event_daily_distinct_leads_check",
+        "typ": "c",
+        "definition": "CHECK ((distinct_leads >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "analytics_internal",
+        "tabelle": "analytics_internal.event_daily",
+        "name": "event_daily_event_count_check",
+        "typ": "c",
+        "definition": "CHECK ((event_count >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "analytics_internal",
+        "tabelle": "analytics_internal.event_daily",
+        "name": "event_daily_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (event_day, event_name, source_app, funnel_key, member_id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "analytics_internal",
+        "tabelle": "analytics_internal.refresh_runs",
+        "name": "refresh_runs_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (run_id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "analytics_internal",
+        "tabelle": "analytics_internal.refresh_runs",
+        "name": "refresh_runs_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['complete'::text, 'failed'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.lines_monthly_summary",
+        "name": "lines_monthly_summary_firstline_distributor_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (firstline_distributor_id) REFERENCES archive.persons(distributor_id) ON DELETE CASCADE",
+        "verweist_auf": "archive.persons",
+        "verweist_auf_schema": "archive"
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.lines_monthly_summary",
+        "name": "lines_monthly_summary_firstline_distributor_id_month_year_key",
+        "typ": "u",
+        "definition": "UNIQUE (firstline_distributor_id, month, year)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.lines_monthly_summary",
+        "name": "lines_monthly_summary_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.monthly_metrics",
+        "name": "monthly_metrics_distributor_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (distributor_id) REFERENCES archive.persons(distributor_id) ON DELETE CASCADE",
+        "verweist_auf": "archive.persons",
+        "verweist_auf_schema": "archive"
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.monthly_metrics",
+        "name": "monthly_metrics_distributor_id_month_year_key",
+        "typ": "u",
+        "definition": "UNIQUE (distributor_id, month, year)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.monthly_metrics",
+        "name": "monthly_metrics_month_check",
+        "typ": "c",
+        "definition": "CHECK (((month >= 1) AND (month <= 12)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.monthly_metrics",
+        "name": "monthly_metrics_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.monthly_metrics",
+        "name": "monthly_metrics_year_check",
+        "typ": "c",
+        "definition": "CHECK ((year >= 2020))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.persons",
+        "name": "persons_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (distributor_id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.requalification_tracker",
+        "name": "requalification_tracker_distributor_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (distributor_id) REFERENCES archive.persons(distributor_id) ON DELETE CASCADE",
+        "verweist_auf": "archive.persons",
+        "verweist_auf_schema": "archive"
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.requalification_tracker",
+        "name": "requalification_tracker_distributor_id_year_key",
+        "typ": "u",
+        "definition": "UNIQUE (distributor_id, year)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "archive",
+        "tabelle": "archive.requalification_tracker",
+        "name": "requalification_tracker_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "app_config",
+        "name": "app_config_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (key)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "coach_access",
+        "name": "coach_access_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "coach_access",
+        "name": "coach_access_user_email_member_id_key",
+        "typ": "u",
+        "definition": "UNIQUE (user_email, member_id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "cron_runs",
+        "name": "cron_runs_job_check",
+        "typ": "c",
+        "definition": "CHECK ((job ~ '^[a-z0-9_-]{2,60}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "cron_runs",
+        "name": "cron_runs_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "cron_runs",
+        "name": "cron_runs_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['success'::text, 'failed'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "cron_runs",
+        "name": "cron_runs_system_check",
+        "typ": "c",
+        "definition": "CHECK ((system ~ '^[a-z0-9_-]{2,40}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "form_webhook_deliveries",
+        "name": "form_webhook_deliveries_attempt_count_check",
+        "typ": "c",
+        "definition": "CHECK ((attempt_count >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "form_webhook_deliveries",
+        "name": "form_webhook_deliveries_language_check",
+        "typ": "c",
+        "definition": "CHECK (((language IS NULL) OR (language ~ '^[a-z]{2}$'::text)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "form_webhook_deliveries",
+        "name": "form_webhook_deliveries_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "form_webhook_deliveries",
+        "name": "form_webhook_deliveries_project_key_check",
+        "typ": "c",
+        "definition": "CHECK ((project_key ~ '^[a-z0-9_]{2,50}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "form_webhook_deliveries",
+        "name": "form_webhook_deliveries_project_key_submission_id_key",
+        "typ": "u",
+        "definition": "UNIQUE (project_key, submission_id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "form_webhook_deliveries",
+        "name": "form_webhook_deliveries_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'success'::text, 'failed'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_data_source_status",
+        "name": "hba_data_source_status_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_data_source_status",
+        "name": "hba_data_source_status_source_type_check",
+        "typ": "c",
+        "definition": "CHECK ((source_type = ANY (ARRAY['team_level_pin_changers'::text, 'supervisor_volume'::text, 'non_supervisor_volume'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_data_source_status",
+        "name": "hba_data_source_status_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['complete'::text, 'partial'::text, 'missing'::text, 'not_started'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_lines_monthly_summary",
+        "name": "hba_lines_monthly_summary_firstline_distributor_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (firstline_distributor_id) REFERENCES hba_persons(distributor_id) ON DELETE CASCADE",
+        "verweist_auf": "hba_persons",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_lines_monthly_summary",
+        "name": "hba_lines_monthly_summary_firstline_distributor_id_month_ye_key",
+        "typ": "u",
+        "definition": "UNIQUE (firstline_distributor_id, month, year)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_lines_monthly_summary",
+        "name": "hba_lines_monthly_summary_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_monthly_metrics",
+        "name": "hba_monthly_metrics_distributor_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (distributor_id) REFERENCES hba_persons(distributor_id) ON DELETE CASCADE",
+        "verweist_auf": "hba_persons",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_monthly_metrics",
+        "name": "hba_monthly_metrics_distributor_id_month_year_key",
+        "typ": "u",
+        "definition": "UNIQUE (distributor_id, month, year)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_monthly_metrics",
+        "name": "hba_monthly_metrics_month_check",
+        "typ": "c",
+        "definition": "CHECK (((month >= 1) AND (month <= 12)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_monthly_metrics",
+        "name": "hba_monthly_metrics_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_monthly_metrics",
+        "name": "hba_monthly_metrics_year_check",
+        "typ": "c",
+        "definition": "CHECK ((year >= 2020))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_persons",
+        "name": "hba_persons_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (distributor_id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_recognition_entries",
+        "name": "hba_recognition_entries_category_check",
+        "typ": "c",
+        "definition": "CHECK ((category = ANY (ARRAY['vip'::text, 'success_builder'::text, 'supervisor'::text, 'club_2500'::text, 'club_5000'::text, 'excluded'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_recognition_entries",
+        "name": "hba_recognition_entries_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_recognition_entries",
+        "name": "hba_recognition_entries_recognition_run_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (recognition_run_id) REFERENCES hba_recognition_runs(id) ON DELETE SET NULL",
+        "verweist_auf": "hba_recognition_runs",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_recognition_runs",
+        "name": "hba_recognition_runs_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_recognition_runs",
+        "name": "hba_recognition_runs_source_kind_check",
+        "typ": "c",
+        "definition": "CHECK ((source_kind = ANY (ARRAY['team_level'::text, 'spvolrpt'::text, 'combined'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_requalification_tracker",
+        "name": "hba_requalification_tracker_distributor_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (distributor_id) REFERENCES hba_persons(distributor_id) ON DELETE CASCADE",
+        "verweist_auf": "hba_persons",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_requalification_tracker",
+        "name": "hba_requalification_tracker_distributor_id_year_key",
+        "typ": "u",
+        "definition": "UNIQUE (distributor_id, year)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_requalification_tracker",
+        "name": "hba_requalification_tracker_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_special_recognitions",
+        "name": "hba_special_recognitions_distributor_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (distributor_id) REFERENCES hba_persons(distributor_id) ON DELETE CASCADE",
+        "verweist_auf": "hba_persons",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_special_recognitions",
+        "name": "hba_special_recognitions_distributor_id_recognition_type_key",
+        "typ": "u",
+        "definition": "UNIQUE (distributor_id, recognition_type)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_special_recognitions",
+        "name": "hba_special_recognitions_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_achievements",
+        "name": "hba_supervisor_stage_achievements_distributor_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (distributor_id) REFERENCES hba_persons(distributor_id)",
+        "verweist_auf": "hba_persons",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_achievements",
+        "name": "hba_supervisor_stage_achievements_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_achievements",
+        "name": "hba_supervisor_stage_achievements_stage_check",
+        "typ": "c",
+        "definition": "CHECK ((stage = ANY (ARRAY['bronze'::text, 'silver'::text, 'gold'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_achievements",
+        "name": "hba_supervisor_stage_achievements_status_check",
+        "typ": "c",
+        "definition": "CHECK ((recognition_status = ANY (ARRAY['historical'::text, 'visible'::text, 'superseded'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_achievements",
+        "name": "hba_supervisor_stage_achievements_threshold_check",
+        "typ": "c",
+        "definition": "CHECK ((((stage = 'bronze'::text) AND (threshold_tv = (1000)::numeric)) OR ((stage = 'silver'::text) AND (threshold_tv = (1500)::numeric)) OR ((stage = 'gold'::text) AND (threshold_tv = (2000)::numeric))))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_achievements",
+        "name": "hba_supervisor_stage_achievements_unique_stage",
+        "typ": "u",
+        "definition": "UNIQUE (distributor_id, stage)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_achievements",
+        "name": "hba_supervisor_stage_achievements_window_check",
+        "typ": "c",
+        "definition": "CHECK (((window_start_month < window_end_month) AND (recognition_month > window_end_month)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_reviews",
+        "name": "hba_supervisor_stage_reviews_distributor_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (distributor_id) REFERENCES hba_persons(distributor_id)",
+        "verweist_auf": "hba_persons",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_reviews",
+        "name": "hba_supervisor_stage_reviews_months_check",
+        "typ": "c",
+        "definition": "CHECK (((supervisor_start_month = ((window_start_month + '1 mon'::interval))::date) AND (window_end_month = ((window_start_month + '2 mons'::interval))::date) AND (recognition_month = ((window_start_month + '3 mons'::interval))::date)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_reviews",
+        "name": "hba_supervisor_stage_reviews_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_reviews",
+        "name": "hba_supervisor_stage_reviews_review_status_check",
+        "typ": "c",
+        "definition": "CHECK ((review_status = ANY (ARRAY['pending'::text, 'confirmed'::text, 'rejected'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_reviews",
+        "name": "hba_supervisor_stage_reviews_stage_check",
+        "typ": "c",
+        "definition": "CHECK ((stage = ANY (ARRAY['bronze'::text, 'silver'::text, 'gold'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_reviews",
+        "name": "hba_supervisor_stage_reviews_threshold_check",
+        "typ": "c",
+        "definition": "CHECK ((((stage = 'bronze'::text) AND (threshold_tv = (1000)::numeric)) OR ((stage = 'silver'::text) AND (threshold_tv = (1500)::numeric)) OR ((stage = 'gold'::text) AND (threshold_tv = (2000)::numeric))))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_reviews",
+        "name": "hba_supervisor_stage_reviews_unique_window",
+        "typ": "u",
+        "definition": "UNIQUE (distributor_id, stage, window_start_month)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "landing_page",
+        "name": "landing_page_hash_key",
+        "typ": "u",
+        "definition": "UNIQUE (hash)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "landing_page",
+        "name": "landing_page_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "landing_page_events",
+        "name": "landing_page_events_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_access_permissions",
+        "name": "lead_access_permissions_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_access_permissions",
+        "name": "lead_access_permissions_role_check",
+        "typ": "c",
+        "definition": "CHECK ((role = ANY (ARRAY['admin'::text, 'coach'::text, 'referral'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_access_permissions",
+        "name": "lead_access_permissions_user_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id)",
+        "verweist_auf": "auth.users",
+        "verweist_auf_schema": "auth"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_answers_current",
+        "name": "lead_answers_current_lead_hash_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (lead_hash) REFERENCES lead_state(lead_hash) ON DELETE CASCADE",
+        "verweist_auf": "lead_state",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_answers_current",
+        "name": "lead_answers_current_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (lead_hash, question_ref)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_contact_crm",
+        "name": "lead_contact_crm_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (lead_hash)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_events",
+        "name": "lead_events_event_uid_key",
+        "typ": "u",
+        "definition": "UNIQUE (event_uid)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_events",
+        "name": "lead_events_lead_hash_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (lead_hash) REFERENCES lead_state(lead_hash) ON DELETE CASCADE",
+        "verweist_auf": "lead_state",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_events",
+        "name": "lead_events_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (event_id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_migration_unresolved",
+        "name": "lead_migration_unresolved_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_migration_unresolved",
+        "name": "lead_migration_unresolved_resolved_lead_hash_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (resolved_lead_hash) REFERENCES lead_state(lead_hash) ON DELETE SET NULL",
+        "verweist_auf": "lead_state",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_migration_unresolved",
+        "name": "lead_migration_unresolved_source_table_source_id_key",
+        "typ": "u",
+        "definition": "UNIQUE (source_table, source_id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_profiles",
+        "name": "lead_profiles_last_completed_video_step_check",
+        "typ": "c",
+        "definition": "CHECK (((last_completed_video_step >= 0) AND (last_completed_video_step <= 3)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_profiles",
+        "name": "lead_profiles_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_profiles",
+        "name": "lead_profiles_profile_key_key",
+        "typ": "u",
+        "definition": "UNIQUE (profile_key)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_state",
+        "name": "lead_state_client_seed_key",
+        "typ": "u",
+        "definition": "UNIQUE (client_seed)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_state",
+        "name": "lead_state_lead_hash_check",
+        "typ": "c",
+        "definition": "CHECK ((lead_hash ~ '^qz_[a-zA-Z0-9_]+$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_state",
+        "name": "lead_state_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (lead_hash)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_state",
+        "name": "lead_state_ref_type_check",
+        "typ": "c",
+        "definition": "CHECK ((ref_type = ANY (ARRAY['member'::text, 'referral_code'::text, 'campaign'::text, 'unknown'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_sync_outbox",
+        "name": "lead_sync_outbox_attempts_check",
+        "typ": "c",
+        "definition": "CHECK ((attempts >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_sync_outbox",
+        "name": "lead_sync_outbox_lead_hash_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (lead_hash) REFERENCES lead_state(lead_hash) ON DELETE CASCADE",
+        "verweist_auf": "lead_state",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_sync_outbox",
+        "name": "lead_sync_outbox_max_attempts_check",
+        "typ": "c",
+        "definition": "CHECK ((max_attempts > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_sync_outbox",
+        "name": "lead_sync_outbox_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_sync_outbox",
+        "name": "lead_sync_outbox_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'processing'::text, 'done'::text, 'failed'::text, 'dead'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "name": "lead_video_progress_duration_seconds_check",
+        "typ": "c",
+        "definition": "CHECK ((duration_seconds >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "name": "lead_video_progress_lead_hash_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (lead_hash) REFERENCES lead_state(lead_hash) ON DELETE CASCADE",
+        "verweist_auf": "lead_state",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "name": "lead_video_progress_max_playhead_percent_check",
+        "typ": "c",
+        "definition": "CHECK (((max_playhead_percent >= (0)::numeric) AND (max_playhead_percent <= (100)::numeric)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "name": "lead_video_progress_max_unique_watched_percent_check",
+        "typ": "c",
+        "definition": "CHECK (((max_unique_watched_percent >= (0)::numeric) AND (max_unique_watched_percent <= (100)::numeric)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "name": "lead_video_progress_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (lead_hash, video_step)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "name": "lead_video_progress_seek_count_check",
+        "typ": "c",
+        "definition": "CHECK ((seek_count >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "name": "lead_video_progress_unique_watched_seconds_check",
+        "typ": "c",
+        "definition": "CHECK ((unique_watched_seconds >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "name": "lead_video_progress_video_step_check",
+        "typ": "c",
+        "definition": "CHECK ((video_step = ANY (ARRAY[1, 2, 3])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "name": "nurture_runs_candidates_checked_check",
+        "typ": "c",
+        "definition": "CHECK ((candidates_checked >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "name": "nurture_runs_execution_id_check",
+        "typ": "c",
+        "definition": "CHECK (((length(TRIM(BOTH FROM execution_id)) >= 1) AND (length(TRIM(BOTH FROM execution_id)) <= 160)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "name": "nurture_runs_failed_count_check",
+        "typ": "c",
+        "definition": "CHECK ((failed_count >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "name": "nurture_runs_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "name": "nurture_runs_project_key_sequence_key_execution_id_key",
+        "typ": "u",
+        "definition": "UNIQUE (project_key, sequence_key, execution_id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "name": "nurture_runs_project_key_sequence_key_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (project_key, sequence_key) REFERENCES nurture_sequences(project_key, sequence_key) ON DELETE RESTRICT",
+        "verweist_auf": "nurture_sequences",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "name": "nurture_runs_sent_count_check",
+        "typ": "c",
+        "definition": "CHECK ((sent_count >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "name": "nurture_runs_skipped_count_check",
+        "typ": "c",
+        "definition": "CHECK ((skipped_count >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "name": "nurture_runs_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['running'::text, 'success'::text, 'failed'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_runs",
+        "name": "nurture_runs_telemetry_version_check",
+        "typ": "c",
+        "definition": "CHECK ((telemetry_version > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_sequences",
+        "name": "nurture_sequences_channel_check",
+        "typ": "c",
+        "definition": "CHECK ((channel = ANY (ARRAY['email'::text, 'sms'::text, 'whatsapp'::text, 'push'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_sequences",
+        "name": "nurture_sequences_expected_interval_minutes_check",
+        "typ": "c",
+        "definition": "CHECK (((expected_interval_minutes >= 5) AND (expected_interval_minutes <= 10080)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_sequences",
+        "name": "nurture_sequences_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (project_key, sequence_key)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_sequences",
+        "name": "nurture_sequences_project_key_check",
+        "typ": "c",
+        "definition": "CHECK ((project_key ~ '^[a-z0-9_]{2,50}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_sequences",
+        "name": "nurture_sequences_sequence_key_check",
+        "typ": "c",
+        "definition": "CHECK ((sequence_key ~ '^[a-z0-9_]{2,60}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_sequences",
+        "name": "nurture_sequences_telemetry_version_check",
+        "typ": "c",
+        "definition": "CHECK ((telemetry_version > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_subject_states",
+        "name": "nurture_subject_states_lead_hash_check",
+        "typ": "c",
+        "definition": "CHECK (((length(TRIM(BOTH FROM lead_hash)) >= 3) AND (length(TRIM(BOTH FROM lead_hash)) <= 160)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_subject_states",
+        "name": "nurture_subject_states_occurrence_count_check",
+        "typ": "c",
+        "definition": "CHECK ((occurrence_count > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_subject_states",
+        "name": "nurture_subject_states_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (project_key, sequence_key, lead_hash)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_subject_states",
+        "name": "nurture_subject_states_project_key_sequence_key_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (project_key, sequence_key) REFERENCES nurture_sequences(project_key, sequence_key) ON DELETE RESTRICT",
+        "verweist_auf": "nurture_sequences",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_subject_states",
+        "name": "nurture_subject_states_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['sent'::text, 'skipped'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "nurture_subject_states",
+        "name": "nurture_subject_states_telemetry_version_check",
+        "typ": "c",
+        "definition": "CHECK ((telemetry_version > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "quiz_sessions",
+        "name": "quiz_sessions_hash_key",
+        "typ": "u",
+        "definition": "UNIQUE (hash)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "quiz_sessions",
+        "name": "quiz_sessions_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "sso_token_consumptions",
+        "name": "sso_token_consumptions_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "system_alerts",
+        "name": "system_alerts_occurrence_count_check",
+        "typ": "c",
+        "definition": "CHECK ((occurrence_count > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "system_alerts",
+        "name": "system_alerts_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "system_alerts",
+        "name": "system_alerts_severity_check",
+        "typ": "c",
+        "definition": "CHECK ((severity = ANY (ARRAY['info'::text, 'warning'::text, 'critical'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "system_alerts",
+        "name": "system_alerts_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['open'::text, 'acknowledged'::text, 'resolved'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_events",
+        "name": "tracking_events_event_id_key",
+        "typ": "u",
+        "definition": "UNIQUE (event_id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_events",
+        "name": "tracking_events_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_sessions",
+        "name": "tracking_sessions_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_sessions",
+        "name": "tracking_sessions_session_hash_key",
+        "typ": "u",
+        "definition": "UNIQUE (session_hash)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_video_progress",
+        "name": "tracking_video_progress_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_video_progress",
+        "name": "tracking_video_progress_session_video_key_key",
+        "typ": "u",
+        "definition": "UNIQUE (session_video_key)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_connector_heartbeats",
+        "name": "webhook_connector_heartbeats_connector_key_check",
+        "typ": "c",
+        "definition": "CHECK ((connector_key ~ '^[a-z0-9_]{2,60}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_connector_heartbeats",
+        "name": "webhook_connector_heartbeats_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (connector_key)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_connector_heartbeats",
+        "name": "webhook_connector_heartbeats_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['ok'::text, 'failed'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_deliveries",
+        "name": "webhook_deliveries_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_actions",
+        "name": "webhook_delivery_actions_action_check",
+        "typ": "c",
+        "definition": "CHECK ((action = ANY (ARRAY['retry'::text, 'close'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_actions",
+        "name": "webhook_delivery_actions_actor_check",
+        "typ": "c",
+        "definition": "CHECK ((length(TRIM(BOTH FROM actor)) >= 3))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_actions",
+        "name": "webhook_delivery_actions_job_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (job_id) REFERENCES webhook_delivery_jobs(id) ON DELETE RESTRICT",
+        "verweist_auf": "webhook_delivery_jobs",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_actions",
+        "name": "webhook_delivery_actions_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_actions",
+        "name": "webhook_delivery_actions_reason_check",
+        "typ": "c",
+        "definition": "CHECK ((length(TRIM(BOTH FROM reason)) >= 3))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_attempts",
+        "name": "webhook_delivery_attempts_attempt_no_check",
+        "typ": "c",
+        "definition": "CHECK ((attempt_no > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_attempts",
+        "name": "webhook_delivery_attempts_duration_ms_check",
+        "typ": "c",
+        "definition": "CHECK (((duration_ms IS NULL) OR (duration_ms >= 0)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_attempts",
+        "name": "webhook_delivery_attempts_job_id_attempt_no_key",
+        "typ": "u",
+        "definition": "UNIQUE (job_id, attempt_no)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_attempts",
+        "name": "webhook_delivery_attempts_job_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (job_id) REFERENCES webhook_delivery_jobs(id) ON DELETE RESTRICT",
+        "verweist_auf": "webhook_delivery_jobs",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_attempts",
+        "name": "webhook_delivery_attempts_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_attempts",
+        "name": "webhook_delivery_attempts_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['success'::text, 'failed'::text, 'uncertain'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_attempts",
+        "name": "webhook_delivery_attempts_trigger_type_check",
+        "typ": "c",
+        "definition": "CHECK ((trigger_type = ANY (ARRAY['automatic'::text, 'manual'::text, 'recovery'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_attempts_check",
+        "typ": "c",
+        "definition": "CHECK ((attempts >= 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_connector_key_check",
+        "typ": "c",
+        "definition": "CHECK ((connector_key ~ '^[a-z0-9_]{2,60}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_dedupe_key_check",
+        "typ": "c",
+        "definition": "CHECK (((length(dedupe_key) >= 1) AND (length(dedupe_key) <= 240)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_event_type_check",
+        "typ": "c",
+        "definition": "CHECK ((event_type ~ '^[a-z0-9_-]{2,80}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_lease_seconds_check",
+        "typ": "c",
+        "definition": "CHECK (((lease_seconds >= 15) AND (lease_seconds <= 3600)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_max_attempts_check",
+        "typ": "c",
+        "definition": "CHECK ((max_attempts > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_payload_hash_check",
+        "typ": "c",
+        "definition": "CHECK ((payload_hash ~ '^[a-f0-9]{64}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_payload_version_check",
+        "typ": "c",
+        "definition": "CHECK ((payload_version > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_project_key_check",
+        "typ": "c",
+        "definition": "CHECK ((project_key ~ '^[a-z0-9_]{2,50}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_project_key_connector_key_dedupe_key_key",
+        "typ": "u",
+        "definition": "UNIQUE (project_key, connector_key, dedupe_key)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_source_event_id_fkey",
+        "typ": "f",
+        "definition": "FOREIGN KEY (source_event_id) REFERENCES webhook_source_events(id) ON DELETE RESTRICT",
+        "verweist_auf": "webhook_source_events",
+        "verweist_auf_schema": "public"
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_status_check",
+        "typ": "c",
+        "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'processing'::text, 'done'::text, 'failed'::text, 'dead'::text, 'needs_review'::text, 'closed'::text])))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_delivery_jobs",
+        "name": "webhook_delivery_jobs_target_key_check",
+        "typ": "c",
+        "definition": "CHECK ((target_key ~ '^[a-z0-9_]{2,80}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_source_events",
+        "name": "webhook_source_events_event_type_check",
+        "typ": "c",
+        "definition": "CHECK ((event_type ~ '^[a-z0-9_-]{2,80}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_source_events",
+        "name": "webhook_source_events_expected_job_count_check",
+        "typ": "c",
+        "definition": "CHECK ((expected_job_count > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_source_events",
+        "name": "webhook_source_events_payload_hash_check",
+        "typ": "c",
+        "definition": "CHECK ((payload_hash ~ '^[a-f0-9]{64}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_source_events",
+        "name": "webhook_source_events_payload_version_check",
+        "typ": "c",
+        "definition": "CHECK ((payload_version > 0))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_source_events",
+        "name": "webhook_source_events_pkey",
+        "typ": "p",
+        "definition": "PRIMARY KEY (id)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_source_events",
+        "name": "webhook_source_events_project_key_check",
+        "typ": "c",
+        "definition": "CHECK ((project_key ~ '^[a-z0-9_]{2,50}$'::text))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_source_events",
+        "name": "webhook_source_events_project_key_event_type_source_key_key",
+        "typ": "u",
+        "definition": "UNIQUE (project_key, event_type, source_key)",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      },
+      {
+        "schema": "public",
+        "tabelle": "webhook_source_events",
+        "name": "webhook_source_events_source_key_check",
+        "typ": "c",
+        "definition": "CHECK (((length(source_key) >= 1) AND (length(source_key) <= 200)))",
+        "verweist_auf": null,
+        "verweist_auf_schema": null
+      }
+    ],
+    "views": [
+      {
+        "schema": "public",
+        "name": "v_completion_metrics",
+        "art": "view",
+        "definition_md5": "e7950eb7fd7d1d52d9e7bde4ece785bc",
+        "definition_laenge": 495
+      },
+      {
+        "schema": "public",
+        "name": "v_funnel_analysis",
+        "art": "view",
+        "definition_md5": "de07dd78f5ded988860812ad30e349c8",
+        "definition_laenge": 790
+      },
+      {
+        "schema": "public",
+        "name": "v_lead_state_full",
+        "art": "view",
+        "definition_md5": "7a02ce4b0362a929b22905de5961cc4a",
+        "definition_laenge": 2233
+      },
+      {
+        "schema": "public",
+        "name": "v_nurture_runs_wahr",
+        "art": "view",
+        "definition_md5": "496f8e07b1d98bc5a6b662942a64b313",
+        "definition_laenge": 654
+      },
+      {
+        "schema": "public",
+        "name": "v_resume_metrics",
+        "art": "view",
+        "definition_md5": "cee7c6858386228a9793a58c24671e33",
+        "definition_laenge": 758
+      },
+      {
+        "schema": "public",
+        "name": "v_sync_dead_jobs",
+        "art": "view",
+        "definition_md5": "6330b7d8b2fe06bdf01e5b23d86168b2",
+        "definition_laenge": 333
+      }
+    ],
+    "funktionen": [
+      {
+        "schema": "analytics_internal",
+        "name": "refresh_event_daily",
+        "argumente": "p_from date, p_to date",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "d6bb4ae0473e23e406ebbe4dab77ee0a"
+      },
+      {
+        "schema": "public",
+        "name": "analytics_dashboard_v2",
+        "argumente": "p_from timestamp with time zone, p_to timestamp with time zone, p_member_id text",
+        "sprache": "sql",
+        "security_definer": false,
+        "quelltext_md5": "f4fd9fb7f786ca8bfcaac6846f870a3f"
+      },
+      {
+        "schema": "public",
+        "name": "analytics_events_page_v2",
+        "argumente": "p_from timestamp with time zone, p_berater_slug text, p_cursor_event_at timestamp with time zone, p_cursor_event_id bigint, p_page_size integer",
+        "sprache": "sql",
+        "security_definer": false,
+        "quelltext_md5": "86c75db5883f0e4079cfdea5cb0ae4c6"
+      },
+      {
+        "schema": "public",
+        "name": "claim_outbox_jobs",
+        "argumente": "worker_id text, batch_size integer",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "453cbaff005eb1fc5dd9ad090cea794c"
+      },
+      {
+        "schema": "public",
+        "name": "claim_webhook_delivery_jobs",
+        "argumente": "p_connector_key text, p_worker_id text, p_batch_size integer, p_lease_seconds integer",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "182739d8563c50e00281c327a5e458a8"
+      },
+      {
+        "schema": "public",
+        "name": "close_webhook_delivery_job",
+        "argumente": "p_job_id uuid, p_reason text, p_actor text",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "c67e5da0fb794917f8a446f781e53edd"
+      },
+      {
+        "schema": "public",
+        "name": "decide_hba_supervisor_stage_review",
+        "argumente": "p_review_id uuid, p_decision text, p_admin_secret text",
+        "sprache": "plpgsql",
+        "security_definer": true,
+        "quelltext_md5": "a7df491afe20b06e6f85b80047bb363c"
+      },
+      {
+        "schema": "public",
+        "name": "enqueue_lead_sync",
+        "argumente": "p_lead_hash text, p_sync_type text, p_context_data jsonb",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "d54edafcd7576e1ff9e27b8b45654435"
+      },
+      {
+        "schema": "public",
+        "name": "enqueue_webhook_event",
+        "argumente": "p_project_key text, p_event_type text, p_source_key text, p_payload jsonb, p_payload_version integer, p_payload_hash text, p_display_data jsonb, p_jobs jsonb",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "b81c673bcd6209aeb866e1b017087ae3"
+      },
+      {
+        "schema": "public",
+        "name": "init_lead",
+        "argumente": "p_client_seed uuid, p_lead_hash text, p_member_id text, p_organisation_id text, p_ref_id text, p_ref_type text, p_berater_slug text, p_source_app text, p_funnel_key text, p_lang text, p_country text, p_utm_source text, p_utm_medium text, p_utm_campaign text, p_utm_content text, p_fbclid text, p_fbc text, p_fbp text, p_event_source_url text, p_utm_campaign_id text, p_utm_adset_id text, p_utm_ad_id text, p_utm_term text",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "c42eac8046a355ecb9abee190c2dce5c"
+      },
+      {
+        "schema": "public",
+        "name": "mark_outbox_done",
+        "argumente": "p_job_id bigint, p_worker_id text, p_response_data jsonb",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "db1271507a4cd9d3c1f17278ac71ca54"
+      },
+      {
+        "schema": "public",
+        "name": "mark_outbox_failed",
+        "argumente": "p_job_id bigint, p_worker_id text, p_error text, p_response_data jsonb",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "b7f5eac32e6ac469429c61e3e7c07eb8"
+      },
+      {
+        "schema": "public",
+        "name": "mark_webhook_delivery_done",
+        "argumente": "p_job_id uuid, p_worker_id text, p_started_at timestamp with time zone, p_http_status integer, p_duration_ms integer, p_response_body text, p_trigger_type text",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "3d9d268f7e469839a44a49bad06d378b"
+      },
+      {
+        "schema": "public",
+        "name": "mark_webhook_delivery_failed",
+        "argumente": "p_job_id uuid, p_worker_id text, p_started_at timestamp with time zone, p_error text, p_http_status integer, p_duration_ms integer, p_response_body text, p_retryable boolean, p_uncertain boolean, p_trigger_type text",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "32f281cca92c79af2f3f2f15fde158f3"
+      },
+      {
+        "schema": "public",
+        "name": "nurture_events_page",
+        "argumente": "p_since timestamp with time zone, p_until timestamp with time zone, p_project_key text, p_sequence_key text, p_status text, p_phase text, p_limit integer, p_cursor_at timestamp with time zone, p_cursor_uid text",
+        "sprache": "sql",
+        "security_definer": false,
+        "quelltext_md5": "78574cd526eeca7f128aaef6de80f01c"
+      },
+      {
+        "schema": "public",
+        "name": "nurture_health_signals",
+        "argumente": "",
+        "sprache": "sql",
+        "security_definer": false,
+        "quelltext_md5": "620f600bedd95297b0dbb6de79ac7396"
+      },
+      {
+        "schema": "public",
+        "name": "nurture_overview",
+        "argumente": "p_since timestamp with time zone, p_until timestamp with time zone, p_project_key text, p_sequence_key text",
+        "sprache": "sql",
+        "security_definer": false,
+        "quelltext_md5": "2525bba7105bb59ffb3b8186fdf9ab14"
+      },
+      {
+        "schema": "public",
+        "name": "nurture_people_page",
+        "argumente": "p_since timestamp with time zone, p_until timestamp with time zone, p_project_key text, p_sequence_key text, p_journey text, p_limit integer, p_cursor_at timestamp with time zone, p_cursor_ref text",
+        "sprache": "sql",
+        "security_definer": false,
+        "quelltext_md5": "99fc07e665819fa974756b810cbd56a5"
+      },
+      {
+        "schema": "public",
+        "name": "record_nurture_failure",
+        "argumente": "p_project_key text, p_sequence_key text, p_workflow_id text, p_workflow_version_id text, p_execution_id text, p_error_code text, p_error_node text, p_error_message text, p_occurred_at timestamp with time zone",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "8fcb0ad4e1c849806d48ea042f7eda83"
+      },
+      {
+        "schema": "public",
+        "name": "record_nurture_run",
+        "argumente": "p_project_key text, p_sequence_key text, p_execution_id text, p_status text, p_started_at timestamp with time zone, p_finished_at timestamp with time zone, p_workflow_id text, p_workflow_version_id text, p_candidates_checked integer, p_sent_count integer, p_skipped_count integer, p_failed_count integer, p_error_code text, p_error_node text, p_telemetry_version integer",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "586bfc03afea118ce35ae08b4280c3c8"
+      },
+      {
+        "schema": "public",
+        "name": "record_nurture_sent",
+        "argumente": "p_project_key text, p_sequence_key text, p_event_uid text, p_lead_hash text, p_phase_key text, p_email_id text, p_subject text, p_language text, p_variant text, p_mautic_contact_id text, p_occurred_at timestamp with time zone, p_telemetry_version integer",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "fcbcea77f2ccfc7a30b1ca434f9695e0"
+      },
+      {
+        "schema": "public",
+        "name": "record_nurture_skip",
+        "argumente": "p_project_key text, p_sequence_key text, p_lead_hash text, p_reason_code text, p_phase_key text, p_occurred_at timestamp with time zone, p_telemetry_version integer",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "df9abafa2ac34ed5b2b5900a7cb96586"
+      },
+      {
+        "schema": "public",
+        "name": "record_webhook_connector_heartbeat",
+        "argumente": "p_connector_key text, p_worker_id text, p_status text, p_detail jsonb",
+        "sprache": "sql",
+        "security_definer": false,
+        "quelltext_md5": "867b4557328554c7a4518d12128f64b5"
+      },
+      {
+        "schema": "public",
+        "name": "retry_webhook_delivery_job",
+        "argumente": "p_job_id uuid, p_reason text, p_actor text",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "3de815128d3ed948cb921a6838ccfcb6"
+      },
+      {
+        "schema": "public",
+        "name": "rls_auto_enable",
+        "argumente": "",
+        "sprache": "plpgsql",
+        "security_definer": true,
+        "quelltext_md5": "99be20677b456ea8d3be47bdd44fb369"
+      },
+      {
+        "schema": "public",
+        "name": "set_hba_supervisor_stage_review_awt",
+        "argumente": "p_review_id uuid, p_awt_distributor_id text, p_awt_user_id text, p_awt_name text, p_awt_level_id integer, p_admin_secret text",
+        "sprache": "plpgsql",
+        "security_definer": true,
+        "quelltext_md5": "9f8744089473da989b2445c0a9dfa167"
+      },
+      {
+        "schema": "public",
+        "name": "set_updated_at",
+        "argumente": "",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "301a884953d37769916294bb60562e05"
+      },
+      {
+        "schema": "public",
+        "name": "upsert_answer_current",
+        "argumente": "p_lead_hash text, p_question_ref text, p_question_index integer, p_question_text text, p_answer_ref text, p_answer_text text, p_answer_value text, p_profile_delta jsonb, p_lang text, p_answered_at timestamp with time zone",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "6bc146475af679e366bf941c52a0abb5"
+      },
+      {
+        "schema": "public",
+        "name": "upsert_video_progress_monotonic",
+        "argumente": "p_lead_hash text, p_video_step integer, p_video_id text, p_unique_watched_percent numeric, p_playhead_percent numeric, p_unique_watched_seconds integer, p_event_at timestamp with time zone, p_lang text",
+        "sprache": "plpgsql",
+        "security_definer": false,
+        "quelltext_md5": "a041c8665119cbbfd0151a05bc2a52d8"
+      },
+      {
+        "schema": "public",
+        "name": "webhook_delivery_health_signals",
+        "argumente": "",
+        "sprache": "sql",
+        "security_definer": false,
+        "quelltext_md5": "29a99a40c55cb336dd46769e3bbd7879"
+      },
+      {
+        "schema": "public",
+        "name": "webhook_delivery_overview",
+        "argumente": "p_days integer, p_project text, p_connector text, p_event_type text, p_status text, p_limit integer, p_offset integer",
+        "sprache": "sql",
+        "security_definer": false,
+        "quelltext_md5": "c221d3069646d43dd20cc0f04831d3b0"
+      }
+    ],
+    "trigger": [
+      {
+        "schema": "public",
+        "tabelle": "lead_answers_current",
+        "name": "trg_lead_answers_current_updated_at",
+        "funktion": "set_updated_at",
+        "definition": "CREATE TRIGGER trg_lead_answers_current_updated_at BEFORE UPDATE ON public.lead_answers_current FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_migration_unresolved",
+        "name": "trg_lead_migration_unresolved_updated_at",
+        "funktion": "set_updated_at",
+        "definition": "CREATE TRIGGER trg_lead_migration_unresolved_updated_at BEFORE UPDATE ON public.lead_migration_unresolved FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_state",
+        "name": "trg_lead_state_updated_at",
+        "funktion": "set_updated_at",
+        "definition": "CREATE TRIGGER trg_lead_state_updated_at BEFORE UPDATE ON public.lead_state FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_sync_outbox",
+        "name": "trg_lead_sync_outbox_updated_at",
+        "funktion": "set_updated_at",
+        "definition": "CREATE TRIGGER trg_lead_sync_outbox_updated_at BEFORE UPDATE ON public.lead_sync_outbox FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "name": "trg_lead_video_progress_updated_at",
+        "funktion": "set_updated_at",
+        "definition": "CREATE TRIGGER trg_lead_video_progress_updated_at BEFORE UPDATE ON public.lead_video_progress FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      },
+      {
+        "schema": "public",
+        "tabelle": "system_alerts",
+        "name": "trg_system_alerts_updated_at",
+        "funktion": "set_updated_at",
+        "definition": "CREATE TRIGGER trg_system_alerts_updated_at BEFORE UPDATE ON public.system_alerts FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      }
+    ],
+    "extensions": [
+      {
+        "name": "pg_cron",
+        "version": "1.6.4",
+        "schema": "pg_catalog"
+      },
+      {
+        "name": "pg_stat_statements",
+        "version": "1.11",
+        "schema": "extensions"
+      },
+      {
+        "name": "pgcrypto",
+        "version": "1.3",
+        "schema": "extensions"
+      },
+      {
+        "name": "plpgsql",
+        "version": "1.0",
+        "schema": "pg_catalog"
+      },
+      {
+        "name": "supabase_vault",
+        "version": "0.3.1",
+        "schema": "vault"
+      },
+      {
+        "name": "uuid-ossp",
+        "version": "1.1",
+        "schema": "extensions"
+      }
+    ],
+    "grants": [
+      {
+        "schema": "analytics_internal",
+        "objekt": "event_daily",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwd/postgres}"
+      },
+      {
+        "schema": "analytics_internal",
+        "objekt": "refresh_runs",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=ar/postgres}"
+      },
+      {
+        "schema": "analytics_internal",
+        "objekt": "refresh_runs_run_id_seq",
+        "acl": "{postgres=rwU/postgres,service_role=rU/postgres}"
+      },
+      {
+        "schema": "archive",
+        "objekt": "lines_monthly_summary",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "archive",
+        "objekt": "monthly_metrics",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "archive",
+        "objekt": "persons",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "archive",
+        "objekt": "requalification_tracker",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "app_config",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "coach_access",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "coach_access_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "cron_runs",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "form_webhook_deliveries",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_data_source_status",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_lines_monthly_summary",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_monthly_metrics",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_persons",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_recognition_entries",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_recognition_runs",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_requalification_tracker",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_special_recognitions",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_special_recognitions_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_supervisor_stage_achievements",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "hba_supervisor_stage_reviews",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "landing_page",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "landing_page_events",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "landing_page_events_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "landing_page_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_access_permissions",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_access_permissions_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_answers_current",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_contact_crm",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_events",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_events_event_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_migration_unresolved",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_migration_unresolved_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_profiles",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_profiles_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_state",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_sync_outbox",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_sync_outbox_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "lead_video_progress",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "nurture_runs",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "nurture_sequences",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "nurture_subject_states",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "quiz_sessions",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "quiz_sessions_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "sso_token_consumptions",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "system_alerts",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "system_alerts_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "tracking_events",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "tracking_events_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "tracking_sessions",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "tracking_sessions_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "tracking_video_progress",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "tracking_video_progress_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "v_completion_metrics",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "v_funnel_analysis",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "v_lead_state_full",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "v_nurture_runs_wahr",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "v_resume_metrics",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "v_sync_dead_jobs",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "webhook_connector_heartbeats",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "webhook_deliveries",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "webhook_deliveries_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "webhook_delivery_actions",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "webhook_delivery_actions_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "webhook_delivery_attempts",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "webhook_delivery_attempts_id_seq",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "webhook_delivery_jobs",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "schema": "public",
+        "objekt": "webhook_source_events",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      }
+    ],
+    "rls_policies": [
+      {
+        "schema": "public",
+        "tabelle": "app_config",
+        "name": "app_config_admin_select",
+        "befehl": "SELECT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "coach_access",
+        "name": "Allow service role",
+        "befehl": "ALL",
+        "rollen": "{public}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_lines_monthly_summary",
+        "name": "Allow public read access to hba_lines_monthly_summary",
+        "befehl": "SELECT",
+        "rollen": "{anon,authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_monthly_metrics",
+        "name": "Allow public read access to hba_monthly_metrics",
+        "befehl": "SELECT",
+        "rollen": "{anon,authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_persons",
+        "name": "Allow public read access to hba_persons",
+        "befehl": "SELECT",
+        "rollen": "{anon,authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_requalification_tracker",
+        "name": "Allow public read access to hba_requalification_tracker",
+        "befehl": "SELECT",
+        "rollen": "{anon,authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_special_recognitions",
+        "name": "Allow public read access to hba_special_recognitions",
+        "befehl": "SELECT",
+        "rollen": "{anon,authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "hba_supervisor_stage_reviews",
+        "name": "Public can read Supervisor stage reviews",
+        "befehl": "SELECT",
+        "rollen": "{anon,authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_access_permissions",
+        "name": "lap_admin_select",
+        "befehl": "SELECT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_answers_current",
+        "name": "lac_select",
+        "befehl": "SELECT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_contact_crm",
+        "name": "lead_contact_crm_authenticated_member_insert",
+        "befehl": "INSERT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_contact_crm",
+        "name": "lead_contact_crm_authenticated_member_select",
+        "befehl": "SELECT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_contact_crm",
+        "name": "lead_contact_crm_authenticated_member_update",
+        "befehl": "UPDATE",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_contact_crm",
+        "name": "lead_contact_crm_service_role_all",
+        "befehl": "ALL",
+        "rollen": "{public}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_events",
+        "name": "le_select",
+        "befehl": "SELECT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_migration_unresolved",
+        "name": "lmu_admin_select",
+        "befehl": "SELECT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_profiles",
+        "name": "Allow service role",
+        "befehl": "ALL",
+        "rollen": "{public}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_state",
+        "name": "lead_state_select",
+        "befehl": "SELECT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_sync_outbox",
+        "name": "outbox_admin_select",
+        "befehl": "SELECT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "lead_video_progress",
+        "name": "lvp_select",
+        "befehl": "SELECT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "quiz_sessions",
+        "name": "Allow service role",
+        "befehl": "ALL",
+        "rollen": "{public}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "sso_token_consumptions",
+        "name": "sso_token_consumptions_service_role_all",
+        "befehl": "ALL",
+        "rollen": "{service_role}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "system_alerts",
+        "name": "system_alerts_admin_select",
+        "befehl": "SELECT",
+        "rollen": "{authenticated}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_events",
+        "name": "Allow service role",
+        "befehl": "ALL",
+        "rollen": "{public}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_sessions",
+        "name": "Allow service role",
+        "befehl": "ALL",
+        "rollen": "{public}"
+      },
+      {
+        "schema": "public",
+        "tabelle": "tracking_video_progress",
+        "name": "Allow service role",
+        "befehl": "ALL",
+        "rollen": "{public}"
+      }
+    ],
+    "fremdabhaengigkeiten": [],
+    "fremdverweise_in_code": [
+      {
+        "schema": "public",
+        "art": "funktion",
+        "name": "decide_hba_supervisor_stage_review",
+        "beispiel": "extensions.digest"
+      },
+      {
+        "schema": "public",
+        "art": "funktion",
+        "name": "set_hba_supervisor_stage_review_awt",
+        "beispiel": "extensions.digest"
+      }
+    ],
+    "spalten_defaults_fremd": [],
+    "pg_cron_jobs": [
+      {
+        "jobid": 1,
+        "jobname": "stats-logs-analytics-v2-current-day",
+        "schedule": "*/15 * * * *",
+        "command": "select analytics_internal.refresh_event_daily((now() at time zone 'UTC')::date, (now() at time zone 'UTC')::date);",
+        "active": true
+      },
+      {
+        "jobid": 2,
+        "jobname": "pgss-monatsreset",
+        "schedule": "15 3 1 * *",
+        "command": "select pg_stat_statements_reset()",
+        "active": true
+      }
+    ]
+  }
+}
