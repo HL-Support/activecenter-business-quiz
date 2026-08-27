@@ -1,0 +1,4793 @@
+{
+  "erzeugt": "2026-08-27T15:18:03.944Z",
+  "spalten": [
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "spalte": "event_day",
+      "attnum": 1,
+      "typ": "date",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "spalte": "event_name",
+      "attnum": 2,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "spalte": "source_app",
+      "attnum": 3,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "spalte": "funnel_key",
+      "attnum": 4,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "spalte": "member_id",
+      "attnum": 5,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "spalte": "event_count",
+      "attnum": 6,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "spalte": "distinct_leads",
+      "attnum": 7,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "spalte": "first_event_at",
+      "attnum": 8,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "spalte": "last_event_at",
+      "attnum": 9,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "spalte": "refreshed_at",
+      "attnum": 10,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "run_id",
+      "attnum": 1,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "a",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "range_start",
+      "attnum": 2,
+      "typ": "date",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "range_end",
+      "attnum": 3,
+      "typ": "date",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "source_event_count",
+      "attnum": 4,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "aggregate_event_count",
+      "attnum": 5,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "aggregate_row_count",
+      "attnum": 6,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "status",
+      "attnum": 7,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "source_min_event_at",
+      "attnum": 8,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "source_max_event_at",
+      "attnum": 9,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "completed_at",
+      "attnum": 10,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "spalte": "error_message",
+      "attnum": 11,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "app_config",
+      "spalte": "key",
+      "attnum": 1,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "app_config",
+      "spalte": "value",
+      "attnum": 2,
+      "typ": "jsonb",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "app_config",
+      "spalte": "updated_at",
+      "attnum": 3,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "app_config",
+      "spalte": "updated_by",
+      "attnum": 4,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "lead_hash",
+      "attnum": 1,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "question_ref",
+      "attnum": 2,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "question_index",
+      "attnum": 3,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "question_text",
+      "attnum": 4,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "answer_ref",
+      "attnum": 5,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "answer_text",
+      "attnum": 6,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "answer_value",
+      "attnum": 7,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "profile_delta",
+      "attnum": 8,
+      "typ": "jsonb",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'{}'::jsonb"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "lang",
+      "attnum": 9,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "answered_at",
+      "attnum": 10,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "created_at",
+      "attnum": 11,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "spalte": "updated_at",
+      "attnum": 12,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "lead_hash",
+      "attnum": 1,
+      "typ": "character varying(96)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "member_id",
+      "attnum": 2,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "berater_slug",
+      "attnum": 3,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "interested",
+      "attnum": 4,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "target_call_done",
+      "attnum": 5,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "wellness_check_done",
+      "attnum": 6,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "herbalife_registered",
+      "attnum": 7,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "notes",
+      "attnum": 8,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "created_at",
+      "attnum": 9,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "updated_at",
+      "attnum": 10,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "not_interested",
+      "attnum": 11,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "reminder_active",
+      "attnum": 12,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "reminder_at",
+      "attnum": 13,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "reminder_subject",
+      "attnum": 14,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "hom_done",
+      "attnum": 15,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "herbalife_registered_at",
+      "attnum": 16,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "support_signup_done",
+      "attnum": 17,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "subscription_done",
+      "attnum": 18,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "starter_video_1_done",
+      "attnum": 19,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "starter_video_2_done",
+      "attnum": 20,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "starter_video_3_done",
+      "attnum": 21,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "starter_video_4_done",
+      "attnum": 22,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "contact_list_done",
+      "attnum": 23,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "first_check_done",
+      "attnum": 24,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "manual_added",
+      "attnum": 25,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "linked_herbalife_id",
+      "attnum": 26,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "linked_user_id",
+      "attnum": 27,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "linked_name",
+      "attnum": 28,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "linked_email",
+      "attnum": 29,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "spalte": "linked_at",
+      "attnum": 30,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "event_id",
+      "attnum": 1,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "a",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "event_uid",
+      "attnum": 2,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "lead_hash",
+      "attnum": 3,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "event_name",
+      "attnum": 4,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "event_at",
+      "attnum": 5,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "member_id",
+      "attnum": 6,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "ref_id",
+      "attnum": 7,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "berater_slug",
+      "attnum": 8,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "source_app",
+      "attnum": 9,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "funnel_key",
+      "attnum": 10,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "video_step",
+      "attnum": 11,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "question_ref",
+      "attnum": 12,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "unique_watched_percent",
+      "attnum": 13,
+      "typ": "numeric(5,2)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "playhead_percent",
+      "attnum": 14,
+      "typ": "numeric(5,2)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "payload",
+      "attnum": 15,
+      "typ": "jsonb",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'{}'::jsonb"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "created_at",
+      "attnum": 16,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "spalte": "organisation_id",
+      "attnum": 17,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "id",
+      "attnum": 1,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "a",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "source_table",
+      "attnum": 2,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "source_id",
+      "attnum": 3,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "reason",
+      "attnum": 4,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "session_hash",
+      "attnum": 5,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "lead_hash_candidate",
+      "attnum": 6,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "payload",
+      "attnum": 7,
+      "typ": "jsonb",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'{}'::jsonb"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "resolved_at",
+      "attnum": 8,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "resolved_lead_hash",
+      "attnum": 9,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "created_at",
+      "attnum": 10,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "spalte": "updated_at",
+      "attnum": 11,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "id",
+      "attnum": 1,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "nextval('lead_profiles_id_seq'::regclass)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "profile_key",
+      "attnum": 2,
+      "typ": "character varying(96)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "session_hash",
+      "attnum": 3,
+      "typ": "character varying(96)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "lead_hash",
+      "attnum": 4,
+      "typ": "character varying(96)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "email_normalized",
+      "attnum": 5,
+      "typ": "character varying(160)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "email_hash",
+      "attnum": 6,
+      "typ": "character varying(96)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "first_name",
+      "attnum": 7,
+      "typ": "character varying(120)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "lang",
+      "attnum": 8,
+      "typ": "character varying(10)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'de'::character varying"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "country",
+      "attnum": 9,
+      "typ": "character varying(5)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "member_id",
+      "attnum": 10,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "berater_slug",
+      "attnum": 11,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "source_app",
+      "attnum": 12,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'business_leads_quiz'::character varying"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "funnel",
+      "attnum": 13,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'business'::character varying"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "success_code",
+      "attnum": 14,
+      "typ": "character varying(40)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "success_code_label",
+      "attnum": 15,
+      "typ": "character varying(100)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "main_aspiration",
+      "attnum": 16,
+      "typ": "character varying(60)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "main_aspiration_label",
+      "attnum": 17,
+      "typ": "character varying(120)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "initial_barrier",
+      "attnum": 18,
+      "typ": "character varying(60)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "lifecycle_stage",
+      "attnum": 19,
+      "typ": "character varying(40)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "'profiled'::character varying"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "next_step",
+      "attnum": 20,
+      "typ": "character varying(60)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "'watch_video_1'::character varying"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "last_completed_video_step",
+      "attnum": 21,
+      "typ": "smallint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "profiled_at",
+      "attnum": 22,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "video_1_watched_at",
+      "attnum": 23,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "video_2_watched_at",
+      "attnum": 24,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "video_3_watched_at",
+      "attnum": 25,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "interest_signaled_at",
+      "attnum": 26,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "product_info_sent_at",
+      "attnum": 27,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "info_call_booked_at",
+      "attnum": 28,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "info_call_done_at",
+      "attnum": 29,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "tags",
+      "attnum": 30,
+      "typ": "text[]",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "ARRAY[]::text[]"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "last_event_name",
+      "attnum": 31,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "last_event_at",
+      "attnum": 32,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "created_at",
+      "attnum": 33,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "spalte": "updated_at",
+      "attnum": 34,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "lead_hash",
+      "attnum": 1,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "client_seed",
+      "attnum": 2,
+      "typ": "uuid",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "member_id",
+      "attnum": 3,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "ref_id",
+      "attnum": 4,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "ref_type",
+      "attnum": 5,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'member'::text"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "berater_slug",
+      "attnum": 6,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "source_app",
+      "attnum": 7,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "funnel_key",
+      "attnum": 8,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "lang",
+      "attnum": 9,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "country",
+      "attnum": 10,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "utm_source",
+      "attnum": 11,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "utm_medium",
+      "attnum": 12,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "utm_campaign",
+      "attnum": 13,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "first_seen_at",
+      "attnum": 14,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "last_seen_at",
+      "attnum": 15,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "last_event_at",
+      "attnum": 16,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "first_name",
+      "attnum": 17,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "email",
+      "attnum": 18,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "email_normalized",
+      "attnum": 19,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "email_hash",
+      "attnum": 20,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "phone",
+      "attnum": 21,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "form_submitted_at",
+      "attnum": 22,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "profile_code",
+      "attnum": 23,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "profile_label",
+      "attnum": 24,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "main_aspiration",
+      "attnum": 25,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "main_aspiration_label",
+      "attnum": 26,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "initial_barrier",
+      "attnum": 27,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "lifecycle_stage",
+      "attnum": 28,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'new'::text"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "next_step",
+      "attnum": 29,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "cta_type",
+      "attnum": 30,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "cta_clicked_at",
+      "attnum": 31,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "mysql_survey_id",
+      "attnum": 32,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "mautic_contact_id",
+      "attnum": 33,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "sync_status",
+      "attnum": 34,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'pending'::text"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "tracking_missing",
+      "attnum": 35,
+      "typ": "boolean",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "migration_source",
+      "attnum": 36,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "migration_flags",
+      "attnum": 37,
+      "typ": "jsonb",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'{}'::jsonb"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "created_at",
+      "attnum": 38,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "updated_at",
+      "attnum": 39,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "organisation_id",
+      "attnum": 40,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "utm_content",
+      "attnum": 41,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "fbclid",
+      "attnum": 42,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "fbc",
+      "attnum": 43,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "fbp",
+      "attnum": 44,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "event_source_url",
+      "attnum": 45,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "utm_campaign_id",
+      "attnum": 46,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "utm_adset_id",
+      "attnum": 47,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "utm_ad_id",
+      "attnum": 48,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "utm_term",
+      "attnum": 49,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "spalte": "mysql_contact_id",
+      "attnum": 50,
+      "typ": "bigint",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "id",
+      "attnum": 1,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "a",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "lead_hash",
+      "attnum": 2,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "sync_type",
+      "attnum": 3,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "context_data",
+      "attnum": 4,
+      "typ": "jsonb",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'{}'::jsonb"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "status",
+      "attnum": 5,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'pending'::text"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "attempts",
+      "attnum": 6,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "max_attempts",
+      "attnum": 7,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "5"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "last_error",
+      "attnum": 8,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "next_attempt_at",
+      "attnum": 9,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "locked_at",
+      "attnum": 10,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "locked_by",
+      "attnum": 11,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "processed_at",
+      "attnum": 12,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "dead_at",
+      "attnum": 13,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "created_at",
+      "attnum": 14,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "updated_at",
+      "attnum": 15,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "spalte": "response_data",
+      "attnum": 16,
+      "typ": "jsonb",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'{}'::jsonb"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "lead_hash",
+      "attnum": 1,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "video_step",
+      "attnum": 2,
+      "typ": "integer",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "video_id",
+      "attnum": 3,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "max_unique_watched_percent",
+      "attnum": 4,
+      "typ": "numeric(5,2)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "max_playhead_percent",
+      "attnum": 5,
+      "typ": "numeric(5,2)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "unique_watched_seconds",
+      "attnum": 6,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "completed_at",
+      "attnum": 7,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "first_seen_at",
+      "attnum": 8,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "last_update_at",
+      "attnum": 9,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "duration_seconds",
+      "attnum": 10,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "seek_count",
+      "attnum": 11,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "watched_ranges",
+      "attnum": 12,
+      "typ": "jsonb",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'[]'::jsonb"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "unlocked_at",
+      "attnum": 13,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "migration_flags",
+      "attnum": 14,
+      "typ": "jsonb",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'{}'::jsonb"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "created_at",
+      "attnum": 15,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "spalte": "updated_at",
+      "attnum": 16,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "id",
+      "attnum": 1,
+      "typ": "uuid",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "gen_random_uuid()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "project_key",
+      "attnum": 2,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "sequence_key",
+      "attnum": 3,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "execution_id",
+      "attnum": 4,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "workflow_id",
+      "attnum": 5,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "workflow_version_id",
+      "attnum": 6,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "started_at",
+      "attnum": 7,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "finished_at",
+      "attnum": 8,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "status",
+      "attnum": 9,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "candidates_checked",
+      "attnum": 10,
+      "typ": "integer",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "sent_count",
+      "attnum": 11,
+      "typ": "integer",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "skipped_count",
+      "attnum": 12,
+      "typ": "integer",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "failed_count",
+      "attnum": 13,
+      "typ": "integer",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "error_code",
+      "attnum": 14,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "error_node",
+      "attnum": 15,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "telemetry_version",
+      "attnum": 16,
+      "typ": "integer",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "1"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "created_at",
+      "attnum": 17,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "spalte": "updated_at",
+      "attnum": 18,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "project_key",
+      "attnum": 1,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "sequence_key",
+      "attnum": 2,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "project_label",
+      "attnum": 3,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "sequence_label",
+      "attnum": 4,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "channel",
+      "attnum": 5,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "'email'::text"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "workflow_id",
+      "attnum": 6,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "expected_interval_minutes",
+      "attnum": 7,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "telemetry_version",
+      "attnum": 8,
+      "typ": "integer",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "1"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "active",
+      "attnum": 9,
+      "typ": "boolean",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "true"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "created_at",
+      "attnum": 10,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "spalte": "updated_at",
+      "attnum": 11,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "project_key",
+      "attnum": 1,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "sequence_key",
+      "attnum": 2,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "lead_hash",
+      "attnum": 3,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "status",
+      "attnum": 4,
+      "typ": "text",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "reason_code",
+      "attnum": 5,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "phase_key",
+      "attnum": 6,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "first_seen_at",
+      "attnum": 7,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "last_seen_at",
+      "attnum": 8,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "status_changed_at",
+      "attnum": 9,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "occurrence_count",
+      "attnum": 10,
+      "typ": "integer",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "1"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "last_event_uid",
+      "attnum": 11,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "telemetry_version",
+      "attnum": 12,
+      "typ": "integer",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "1"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "created_at",
+      "attnum": 13,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "spalte": "updated_at",
+      "attnum": 14,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "id",
+      "attnum": 1,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "nextval('quiz_sessions_id_seq'::regclass)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "hash",
+      "attnum": 2,
+      "typ": "character varying(64)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "herbalife_id",
+      "attnum": 3,
+      "typ": "character varying(50)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "berater_slug",
+      "attnum": 4,
+      "typ": "character varying(50)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "visited_at",
+      "attnum": 5,
+      "typ": "timestamp without time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "country",
+      "attnum": 6,
+      "typ": "character varying(5)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "device_type",
+      "attnum": 7,
+      "typ": "character varying(20)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "lang",
+      "attnum": 8,
+      "typ": "character varying(10)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "quiz_profile",
+      "attnum": 9,
+      "typ": "character varying(10)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "quiz_profile_name",
+      "attnum": 10,
+      "typ": "character varying(50)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "quiz_aspiration",
+      "attnum": 11,
+      "typ": "character varying(50)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "quiz_barrier",
+      "attnum": 12,
+      "typ": "character varying(50)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "quiz_completed_at",
+      "attnum": 13,
+      "typ": "timestamp without time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "form_first_name",
+      "attnum": 14,
+      "typ": "character varying(100)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "form_email",
+      "attnum": 15,
+      "typ": "character varying(100)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "form_submitted_at",
+      "attnum": 16,
+      "typ": "timestamp without time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "video1_watched_sec",
+      "attnum": 17,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "video1_max_pct",
+      "attnum": 18,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "video1_last_update",
+      "attnum": 19,
+      "typ": "timestamp without time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "video2_watched_sec",
+      "attnum": 20,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "video2_max_pct",
+      "attnum": 21,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "video2_last_update",
+      "attnum": 22,
+      "typ": "timestamp without time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "video3_watched_sec",
+      "attnum": 23,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "video3_max_pct",
+      "attnum": 24,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "0"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "video3_last_update",
+      "attnum": 25,
+      "typ": "timestamp without time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "cta_type",
+      "attnum": 26,
+      "typ": "character varying(50)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "cta_clicked_at",
+      "attnum": 27,
+      "typ": "timestamp without time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "created_at",
+      "attnum": 28,
+      "typ": "timestamp without time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "spalte": "updated_at",
+      "attnum": 29,
+      "typ": "timestamp without time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "id",
+      "attnum": 1,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "nextval('tracking_events_id_seq'::regclass)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "event_id",
+      "attnum": 2,
+      "typ": "character varying(96)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "session_hash",
+      "attnum": 3,
+      "typ": "character varying(96)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "lead_hash",
+      "attnum": 4,
+      "typ": "character varying(96)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "member_id",
+      "attnum": 5,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "berater_slug",
+      "attnum": 6,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "source_app",
+      "attnum": 7,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "funnel",
+      "attnum": 8,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "page_key",
+      "attnum": 9,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "lang",
+      "attnum": 10,
+      "typ": "character varying(10)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "country",
+      "attnum": 11,
+      "typ": "character varying(5)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "event_name",
+      "attnum": 12,
+      "typ": "character varying(80)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "event_at",
+      "attnum": 13,
+      "typ": "timestamp with time zone",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "step_index",
+      "attnum": 14,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "question_index",
+      "attnum": 15,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "video_step",
+      "attnum": 16,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "video_id",
+      "attnum": 17,
+      "typ": "character varying(120)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "progress_percent",
+      "attnum": 18,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "unique_watched_percent",
+      "attnum": 19,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "properties",
+      "attnum": 20,
+      "typ": "jsonb",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'{}'::jsonb"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "spalte": "created_at",
+      "attnum": 21,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "id",
+      "attnum": 1,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "nextval('tracking_sessions_id_seq'::regclass)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "session_hash",
+      "attnum": 2,
+      "typ": "character varying(96)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "lead_hash",
+      "attnum": 3,
+      "typ": "character varying(96)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "member_id",
+      "attnum": 4,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "berater_slug",
+      "attnum": 5,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "source_app",
+      "attnum": 6,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "funnel",
+      "attnum": 7,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "lang",
+      "attnum": 8,
+      "typ": "character varying(10)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "country",
+      "attnum": 9,
+      "typ": "character varying(5)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "device_type",
+      "attnum": 10,
+      "typ": "character varying(30)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "page_key",
+      "attnum": 11,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "first_seen_at",
+      "attnum": 12,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "last_event_at",
+      "attnum": 13,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "current_event",
+      "attnum": 14,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "quiz_profile",
+      "attnum": 15,
+      "typ": "character varying(40)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "quiz_profile_name",
+      "attnum": 16,
+      "typ": "character varying(100)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "main_aspiration",
+      "attnum": 17,
+      "typ": "character varying(60)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "main_aspiration_label",
+      "attnum": 18,
+      "typ": "character varying(120)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "quiz_barrier",
+      "attnum": 19,
+      "typ": "character varying(60)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "form_first_name",
+      "attnum": 20,
+      "typ": "character varying(120)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "form_email",
+      "attnum": 21,
+      "typ": "character varying(160)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "form_submitted_at",
+      "attnum": 22,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "final_cta_type",
+      "attnum": 23,
+      "typ": "character varying(60)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "final_cta_clicked_at",
+      "attnum": 24,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "created_at",
+      "attnum": 25,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "updated_at",
+      "attnum": 26,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "is_resume",
+      "attnum": 27,
+      "typ": "boolean",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "false"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "spalte": "initial_step",
+      "attnum": 28,
+      "typ": "text",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'intro'::text"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "id",
+      "attnum": 1,
+      "typ": "bigint",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": "nextval('tracking_video_progress_id_seq'::regclass)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "session_video_key",
+      "attnum": 2,
+      "typ": "character varying(140)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "session_hash",
+      "attnum": 3,
+      "typ": "character varying(96)",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "lead_hash",
+      "attnum": 4,
+      "typ": "character varying(96)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "member_id",
+      "attnum": 5,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "berater_slug",
+      "attnum": 6,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "source_app",
+      "attnum": 7,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "funnel",
+      "attnum": 8,
+      "typ": "character varying(80)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "lang",
+      "attnum": 9,
+      "typ": "character varying(10)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "country",
+      "attnum": 10,
+      "typ": "character varying(5)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "video_step",
+      "attnum": 11,
+      "typ": "integer",
+      "not_null": true,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "video_id",
+      "attnum": 12,
+      "typ": "character varying(120)",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "duration_seconds",
+      "attnum": 13,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "unique_watched_seconds",
+      "attnum": 14,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "unique_watched_percent",
+      "attnum": 15,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "max_playhead_percent",
+      "attnum": 16,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "seek_count",
+      "attnum": 17,
+      "typ": "integer",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "watched_ranges",
+      "attnum": 18,
+      "typ": "jsonb",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "'[]'::jsonb"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "first_seen_at",
+      "attnum": 19,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "unlocked_at",
+      "attnum": 20,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "completed_at",
+      "attnum": 21,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "last_update_at",
+      "attnum": 22,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": null
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "created_at",
+      "attnum": 23,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "spalte": "updated_at",
+      "attnum": 24,
+      "typ": "timestamp with time zone",
+      "not_null": false,
+      "identity": "",
+      "default_ausdruck": "now()"
+    }
+  ],
+  "constraints": [
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "name": "event_daily_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (event_day, event_name, source_app, funnel_key, member_id)"
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "name": "refresh_runs_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (run_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "app_config",
+      "name": "app_config_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (key)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "name": "lead_answers_current_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (lead_hash, question_ref)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "name": "lead_contact_crm_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (lead_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "lead_events_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (event_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "name": "lead_migration_unresolved_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "lead_profiles_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "lead_state_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (lead_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "name": "lead_sync_outbox_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "lead_video_progress_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (lead_hash, video_step)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "name": "nurture_sequences_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (project_key, sequence_key)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "name": "nurture_subject_states_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (project_key, sequence_key, lead_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "name": "quiz_sessions_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "name": "tracking_events_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "name": "tracking_sessions_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "name": "tracking_video_progress_pkey",
+      "typ": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "lead_events_event_uid_key",
+      "typ": "u",
+      "definition": "UNIQUE (event_uid)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "name": "lead_migration_unresolved_source_table_source_id_key",
+      "typ": "u",
+      "definition": "UNIQUE (source_table, source_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "lead_profiles_profile_key_key",
+      "typ": "u",
+      "definition": "UNIQUE (profile_key)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "lead_state_client_seed_key",
+      "typ": "u",
+      "definition": "UNIQUE (client_seed)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_project_key_sequence_key_execution_id_key",
+      "typ": "u",
+      "definition": "UNIQUE (project_key, sequence_key, execution_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "name": "quiz_sessions_hash_key",
+      "typ": "u",
+      "definition": "UNIQUE (hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "name": "tracking_events_event_id_key",
+      "typ": "u",
+      "definition": "UNIQUE (event_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "name": "tracking_sessions_session_hash_key",
+      "typ": "u",
+      "definition": "UNIQUE (session_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "name": "tracking_video_progress_session_video_key_key",
+      "typ": "u",
+      "definition": "UNIQUE (session_video_key)"
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "name": "event_daily_distinct_leads_check",
+      "typ": "c",
+      "definition": "CHECK ((distinct_leads >= 0))"
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "name": "event_daily_event_count_check",
+      "typ": "c",
+      "definition": "CHECK ((event_count >= 0))"
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "name": "refresh_runs_status_check",
+      "typ": "c",
+      "definition": "CHECK ((status = ANY (ARRAY['complete'::text, 'failed'::text])))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "lead_profiles_last_completed_video_step_check",
+      "typ": "c",
+      "definition": "CHECK (((last_completed_video_step >= 0) AND (last_completed_video_step <= 3)))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "lead_state_lead_hash_check",
+      "typ": "c",
+      "definition": "CHECK ((lead_hash ~ '^qz_[a-zA-Z0-9_]+$'::text))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "lead_state_ref_type_check",
+      "typ": "c",
+      "definition": "CHECK ((ref_type = ANY (ARRAY['member'::text, 'referral_code'::text, 'campaign'::text, 'unknown'::text])))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "name": "lead_sync_outbox_attempts_check",
+      "typ": "c",
+      "definition": "CHECK ((attempts >= 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "name": "lead_sync_outbox_max_attempts_check",
+      "typ": "c",
+      "definition": "CHECK ((max_attempts > 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "name": "lead_sync_outbox_status_check",
+      "typ": "c",
+      "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'processing'::text, 'done'::text, 'failed'::text, 'dead'::text])))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "lead_video_progress_duration_seconds_check",
+      "typ": "c",
+      "definition": "CHECK ((duration_seconds >= 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "lead_video_progress_max_playhead_percent_check",
+      "typ": "c",
+      "definition": "CHECK (((max_playhead_percent >= (0)::numeric) AND (max_playhead_percent <= (100)::numeric)))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "lead_video_progress_max_unique_watched_percent_check",
+      "typ": "c",
+      "definition": "CHECK (((max_unique_watched_percent >= (0)::numeric) AND (max_unique_watched_percent <= (100)::numeric)))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "lead_video_progress_seek_count_check",
+      "typ": "c",
+      "definition": "CHECK ((seek_count >= 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "lead_video_progress_unique_watched_seconds_check",
+      "typ": "c",
+      "definition": "CHECK ((unique_watched_seconds >= 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "lead_video_progress_video_step_check",
+      "typ": "c",
+      "definition": "CHECK ((video_step = ANY (ARRAY[1, 2, 3])))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_candidates_checked_check",
+      "typ": "c",
+      "definition": "CHECK ((candidates_checked >= 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_execution_id_check",
+      "typ": "c",
+      "definition": "CHECK (((length(TRIM(BOTH FROM execution_id)) >= 1) AND (length(TRIM(BOTH FROM execution_id)) <= 160)))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_failed_count_check",
+      "typ": "c",
+      "definition": "CHECK ((failed_count >= 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_sent_count_check",
+      "typ": "c",
+      "definition": "CHECK ((sent_count >= 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_skipped_count_check",
+      "typ": "c",
+      "definition": "CHECK ((skipped_count >= 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_status_check",
+      "typ": "c",
+      "definition": "CHECK ((status = ANY (ARRAY['running'::text, 'success'::text, 'failed'::text])))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_telemetry_version_check",
+      "typ": "c",
+      "definition": "CHECK ((telemetry_version > 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "name": "nurture_sequences_channel_check",
+      "typ": "c",
+      "definition": "CHECK ((channel = ANY (ARRAY['email'::text, 'sms'::text, 'whatsapp'::text, 'push'::text])))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "name": "nurture_sequences_expected_interval_minutes_check",
+      "typ": "c",
+      "definition": "CHECK (((expected_interval_minutes >= 5) AND (expected_interval_minutes <= 10080)))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "name": "nurture_sequences_project_key_check",
+      "typ": "c",
+      "definition": "CHECK ((project_key ~ '^[a-z0-9_]{2,50}$'::text))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "name": "nurture_sequences_sequence_key_check",
+      "typ": "c",
+      "definition": "CHECK ((sequence_key ~ '^[a-z0-9_]{2,60}$'::text))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "name": "nurture_sequences_telemetry_version_check",
+      "typ": "c",
+      "definition": "CHECK ((telemetry_version > 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "name": "nurture_subject_states_lead_hash_check",
+      "typ": "c",
+      "definition": "CHECK (((length(TRIM(BOTH FROM lead_hash)) >= 3) AND (length(TRIM(BOTH FROM lead_hash)) <= 160)))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "name": "nurture_subject_states_occurrence_count_check",
+      "typ": "c",
+      "definition": "CHECK ((occurrence_count > 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "name": "nurture_subject_states_status_check",
+      "typ": "c",
+      "definition": "CHECK ((status = ANY (ARRAY['sent'::text, 'skipped'::text])))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "name": "nurture_subject_states_telemetry_version_check",
+      "typ": "c",
+      "definition": "CHECK ((telemetry_version > 0))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "name": "lead_answers_current_lead_hash_fkey",
+      "typ": "f",
+      "definition": "FOREIGN KEY (lead_hash) REFERENCES lead_state(lead_hash) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "lead_events_lead_hash_fkey",
+      "typ": "f",
+      "definition": "FOREIGN KEY (lead_hash) REFERENCES lead_state(lead_hash) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "name": "lead_migration_unresolved_resolved_lead_hash_fkey",
+      "typ": "f",
+      "definition": "FOREIGN KEY (resolved_lead_hash) REFERENCES lead_state(lead_hash) ON DELETE SET NULL"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "name": "lead_sync_outbox_lead_hash_fkey",
+      "typ": "f",
+      "definition": "FOREIGN KEY (lead_hash) REFERENCES lead_state(lead_hash) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "lead_video_progress_lead_hash_fkey",
+      "typ": "f",
+      "definition": "FOREIGN KEY (lead_hash) REFERENCES lead_state(lead_hash) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_project_key_sequence_key_fkey",
+      "typ": "f",
+      "definition": "FOREIGN KEY (project_key, sequence_key) REFERENCES nurture_sequences(project_key, sequence_key) ON DELETE RESTRICT"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "name": "nurture_subject_states_project_key_sequence_key_fkey",
+      "typ": "f",
+      "definition": "FOREIGN KEY (project_key, sequence_key) REFERENCES nurture_sequences(project_key, sequence_key) ON DELETE RESTRICT"
+    }
+  ],
+  "indexe": [
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "name": "event_daily_member_day_idx",
+      "definition": "CREATE INDEX event_daily_member_day_idx ON analytics_internal.event_daily USING btree (member_id, event_day DESC)"
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "name": "event_daily_name_day_idx",
+      "definition": "CREATE INDEX event_daily_name_day_idx ON analytics_internal.event_daily USING btree (event_name, event_day DESC)"
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "name": "event_daily_pkey",
+      "definition": "CREATE UNIQUE INDEX event_daily_pkey ON analytics_internal.event_daily USING btree (event_day, event_name, source_app, funnel_key, member_id)"
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "name": "refresh_runs_pkey",
+      "definition": "CREATE UNIQUE INDEX refresh_runs_pkey ON analytics_internal.refresh_runs USING btree (run_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "app_config",
+      "name": "app_config_pkey",
+      "definition": "CREATE UNIQUE INDEX app_config_pkey ON public.app_config USING btree (key)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "name": "lead_answers_current_pkey",
+      "definition": "CREATE UNIQUE INDEX lead_answers_current_pkey ON public.lead_answers_current USING btree (lead_hash, question_ref)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "name": "lead_contact_crm_berater_slug_idx",
+      "definition": "CREATE INDEX lead_contact_crm_berater_slug_idx ON public.lead_contact_crm USING btree (berater_slug)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "name": "lead_contact_crm_linked_herbalife_id_idx",
+      "definition": "CREATE INDEX lead_contact_crm_linked_herbalife_id_idx ON public.lead_contact_crm USING btree (linked_herbalife_id) WHERE (linked_herbalife_id IS NOT NULL)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "name": "lead_contact_crm_manual_added_idx",
+      "definition": "CREATE INDEX lead_contact_crm_manual_added_idx ON public.lead_contact_crm USING btree (member_id, manual_added) WHERE (manual_added = true)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "name": "lead_contact_crm_member_id_idx",
+      "definition": "CREATE INDEX lead_contact_crm_member_id_idx ON public.lead_contact_crm USING btree (member_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "name": "lead_contact_crm_pkey",
+      "definition": "CREATE UNIQUE INDEX lead_contact_crm_pkey ON public.lead_contact_crm USING btree (lead_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "name": "lead_contact_crm_reminder_at_idx",
+      "definition": "CREATE INDEX lead_contact_crm_reminder_at_idx ON public.lead_contact_crm USING btree (reminder_at) WHERE (reminder_active = true)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "idx_le_lead_time",
+      "definition": "CREATE INDEX idx_le_lead_time ON public.lead_events USING btree (lead_hash, event_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "idx_le_member_time",
+      "definition": "CREATE INDEX idx_le_member_time ON public.lead_events USING btree (member_id, event_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "idx_le_name_time",
+      "definition": "CREATE INDEX idx_le_name_time ON public.lead_events USING btree (event_name, event_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "idx_le_organisation_time",
+      "definition": "CREATE INDEX idx_le_organisation_time ON public.lead_events USING btree (organisation_id, event_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "idx_le_question_time",
+      "definition": "CREATE INDEX idx_le_question_time ON public.lead_events USING btree (question_ref, event_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "idx_le_ref_time",
+      "definition": "CREATE INDEX idx_le_ref_time ON public.lead_events USING btree (ref_id, event_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "idx_le_video_time",
+      "definition": "CREATE INDEX idx_le_video_time ON public.lead_events USING btree (video_step, event_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "idx_lead_events_created_at_event_uid",
+      "definition": "CREATE INDEX idx_lead_events_created_at_event_uid ON public.lead_events USING btree (created_at DESC, event_uid)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "idx_lead_events_event_at_desc",
+      "definition": "CREATE INDEX idx_lead_events_event_at_desc ON public.lead_events USING btree (event_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "lead_events_event_uid_key",
+      "definition": "CREATE UNIQUE INDEX lead_events_event_uid_key ON public.lead_events USING btree (event_uid)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "name": "lead_events_pkey",
+      "definition": "CREATE UNIQUE INDEX lead_events_pkey ON public.lead_events USING btree (event_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "name": "idx_lmu_reason",
+      "definition": "CREATE INDEX idx_lmu_reason ON public.lead_migration_unresolved USING btree (reason, created_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "name": "idx_lmu_resolved_lead_hash",
+      "definition": "CREATE INDEX idx_lmu_resolved_lead_hash ON public.lead_migration_unresolved USING btree (resolved_lead_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "name": "idx_lmu_session",
+      "definition": "CREATE INDEX idx_lmu_session ON public.lead_migration_unresolved USING btree (session_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "name": "lead_migration_unresolved_pkey",
+      "definition": "CREATE UNIQUE INDEX lead_migration_unresolved_pkey ON public.lead_migration_unresolved USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "name": "lead_migration_unresolved_source_table_source_id_key",
+      "definition": "CREATE UNIQUE INDEX lead_migration_unresolved_source_table_source_id_key ON public.lead_migration_unresolved USING btree (source_table, source_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "idx_lead_profiles_email_hash",
+      "definition": "CREATE INDEX idx_lead_profiles_email_hash ON public.lead_profiles USING btree (email_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "idx_lead_profiles_lead_hash",
+      "definition": "CREATE INDEX idx_lead_profiles_lead_hash ON public.lead_profiles USING btree (lead_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "idx_lead_profiles_member_id",
+      "definition": "CREATE INDEX idx_lead_profiles_member_id ON public.lead_profiles USING btree (member_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "idx_lead_profiles_next_step",
+      "definition": "CREATE INDEX idx_lead_profiles_next_step ON public.lead_profiles USING btree (next_step)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "idx_lead_profiles_session_hash",
+      "definition": "CREATE INDEX idx_lead_profiles_session_hash ON public.lead_profiles USING btree (session_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "idx_lead_profiles_stage",
+      "definition": "CREATE INDEX idx_lead_profiles_stage ON public.lead_profiles USING btree (lifecycle_stage)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "idx_lead_profiles_success_code",
+      "definition": "CREATE INDEX idx_lead_profiles_success_code ON public.lead_profiles USING btree (success_code)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "lead_profiles_pkey",
+      "definition": "CREATE UNIQUE INDEX lead_profiles_pkey ON public.lead_profiles USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "name": "lead_profiles_profile_key_key",
+      "definition": "CREATE UNIQUE INDEX lead_profiles_profile_key_key ON public.lead_profiles USING btree (profile_key)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "idx_ls_email_hash",
+      "definition": "CREATE INDEX idx_ls_email_hash ON public.lead_state USING btree (email_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "idx_ls_email_norm",
+      "definition": "CREATE INDEX idx_ls_email_norm ON public.lead_state USING btree (email_normalized)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "idx_ls_last_event",
+      "definition": "CREATE INDEX idx_ls_last_event ON public.lead_state USING btree (last_event_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "idx_ls_lifecycle_created",
+      "definition": "CREATE INDEX idx_ls_lifecycle_created ON public.lead_state USING btree (lifecycle_stage, created_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "idx_ls_member_created",
+      "definition": "CREATE INDEX idx_ls_member_created ON public.lead_state USING btree (member_id, created_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "idx_ls_organisation_created",
+      "definition": "CREATE INDEX idx_ls_organisation_created ON public.lead_state USING btree (organisation_id, created_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "idx_ls_ref_created",
+      "definition": "CREATE INDEX idx_ls_ref_created ON public.lead_state USING btree (ref_id, created_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "idx_ls_utm_ad_id_created",
+      "definition": "CREATE INDEX idx_ls_utm_ad_id_created ON public.lead_state USING btree (utm_ad_id, form_submitted_at DESC) WHERE (utm_ad_id IS NOT NULL)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "idx_ls_utm_content_created",
+      "definition": "CREATE INDEX idx_ls_utm_content_created ON public.lead_state USING btree (utm_content, form_submitted_at DESC) WHERE (utm_content IS NOT NULL)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "lead_state_client_seed_key",
+      "definition": "CREATE UNIQUE INDEX lead_state_client_seed_key ON public.lead_state USING btree (client_seed)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "lead_state_pkey",
+      "definition": "CREATE UNIQUE INDEX lead_state_pkey ON public.lead_state USING btree (lead_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "name": "idx_lead_sync_outbox_lead_hash",
+      "definition": "CREATE INDEX idx_lead_sync_outbox_lead_hash ON public.lead_sync_outbox USING btree (lead_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "name": "idx_outbox_locked",
+      "definition": "CREATE INDEX idx_outbox_locked ON public.lead_sync_outbox USING btree (status, locked_at) WHERE (status = 'processing'::text)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "name": "idx_outbox_pending",
+      "definition": "CREATE INDEX idx_outbox_pending ON public.lead_sync_outbox USING btree (status, next_attempt_at) WHERE (status = ANY (ARRAY['pending'::text, 'failed'::text]))"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "name": "lead_sync_outbox_pkey",
+      "definition": "CREATE UNIQUE INDEX lead_sync_outbox_pkey ON public.lead_sync_outbox USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "idx_lvp_lead_step",
+      "definition": "CREATE INDEX idx_lvp_lead_step ON public.lead_video_progress USING btree (lead_hash, video_step)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "idx_lvp_step_pct",
+      "definition": "CREATE INDEX idx_lvp_step_pct ON public.lead_video_progress USING btree (video_step, max_unique_watched_percent)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "lead_video_progress_pkey",
+      "definition": "CREATE UNIQUE INDEX lead_video_progress_pkey ON public.lead_video_progress USING btree (lead_hash, video_step)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_pkey",
+      "definition": "CREATE UNIQUE INDEX nurture_runs_pkey ON public.nurture_runs USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_project_key_sequence_key_execution_id_key",
+      "definition": "CREATE UNIQUE INDEX nurture_runs_project_key_sequence_key_execution_id_key ON public.nurture_runs USING btree (project_key, sequence_key, execution_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_sequence_finished_idx",
+      "definition": "CREATE INDEX nurture_runs_sequence_finished_idx ON public.nurture_runs USING btree (project_key, sequence_key, finished_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "name": "nurture_runs_status_finished_idx",
+      "definition": "CREATE INDEX nurture_runs_status_finished_idx ON public.nurture_runs USING btree (status, finished_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "name": "nurture_sequences_pkey",
+      "definition": "CREATE UNIQUE INDEX nurture_sequences_pkey ON public.nurture_sequences USING btree (project_key, sequence_key)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "name": "nurture_subject_states_pkey",
+      "definition": "CREATE UNIQUE INDEX nurture_subject_states_pkey ON public.nurture_subject_states USING btree (project_key, sequence_key, lead_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "name": "nurture_subject_states_status_idx",
+      "definition": "CREATE INDEX nurture_subject_states_status_idx ON public.nurture_subject_states USING btree (project_key, sequence_key, status, last_seen_at DESC)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "name": "idx_quiz_sessions_created_at",
+      "definition": "CREATE INDEX idx_quiz_sessions_created_at ON public.quiz_sessions USING btree (created_at)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "name": "idx_quiz_sessions_hash",
+      "definition": "CREATE INDEX idx_quiz_sessions_hash ON public.quiz_sessions USING btree (hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "name": "idx_quiz_sessions_herbalife_id",
+      "definition": "CREATE INDEX idx_quiz_sessions_herbalife_id ON public.quiz_sessions USING btree (herbalife_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "name": "quiz_sessions_hash_key",
+      "definition": "CREATE UNIQUE INDEX quiz_sessions_hash_key ON public.quiz_sessions USING btree (hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "name": "quiz_sessions_pkey",
+      "definition": "CREATE UNIQUE INDEX quiz_sessions_pkey ON public.quiz_sessions USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "name": "idx_tracking_events_event_at",
+      "definition": "CREATE INDEX idx_tracking_events_event_at ON public.tracking_events USING btree (event_at)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "name": "idx_tracking_events_event_name",
+      "definition": "CREATE INDEX idx_tracking_events_event_name ON public.tracking_events USING btree (event_name)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "name": "idx_tracking_events_member_id",
+      "definition": "CREATE INDEX idx_tracking_events_member_id ON public.tracking_events USING btree (member_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "name": "idx_tracking_events_session_hash",
+      "definition": "CREATE INDEX idx_tracking_events_session_hash ON public.tracking_events USING btree (session_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "name": "idx_tracking_events_video",
+      "definition": "CREATE INDEX idx_tracking_events_video ON public.tracking_events USING btree (video_step, video_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "name": "tracking_events_event_id_key",
+      "definition": "CREATE UNIQUE INDEX tracking_events_event_id_key ON public.tracking_events USING btree (event_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "name": "tracking_events_pkey",
+      "definition": "CREATE UNIQUE INDEX tracking_events_pkey ON public.tracking_events USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "name": "idx_tracking_sessions_is_resume",
+      "definition": "CREATE INDEX idx_tracking_sessions_is_resume ON public.tracking_sessions USING btree (is_resume)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "name": "idx_tracking_sessions_last_event",
+      "definition": "CREATE INDEX idx_tracking_sessions_last_event ON public.tracking_sessions USING btree (last_event_at)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "name": "idx_tracking_sessions_lead_hash",
+      "definition": "CREATE INDEX idx_tracking_sessions_lead_hash ON public.tracking_sessions USING btree (lead_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "name": "idx_tracking_sessions_member_id",
+      "definition": "CREATE INDEX idx_tracking_sessions_member_id ON public.tracking_sessions USING btree (member_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "name": "idx_tracking_sessions_source_funnel",
+      "definition": "CREATE INDEX idx_tracking_sessions_source_funnel ON public.tracking_sessions USING btree (source_app, funnel)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "name": "tracking_sessions_pkey",
+      "definition": "CREATE UNIQUE INDEX tracking_sessions_pkey ON public.tracking_sessions USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "name": "tracking_sessions_session_hash_key",
+      "definition": "CREATE UNIQUE INDEX tracking_sessions_session_hash_key ON public.tracking_sessions USING btree (session_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "name": "idx_tracking_video_member_id",
+      "definition": "CREATE INDEX idx_tracking_video_member_id ON public.tracking_video_progress USING btree (member_id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "name": "idx_tracking_video_session_hash",
+      "definition": "CREATE INDEX idx_tracking_video_session_hash ON public.tracking_video_progress USING btree (session_hash)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "name": "idx_tracking_video_step",
+      "definition": "CREATE INDEX idx_tracking_video_step ON public.tracking_video_progress USING btree (video_step)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "name": "tracking_video_progress_pkey",
+      "definition": "CREATE UNIQUE INDEX tracking_video_progress_pkey ON public.tracking_video_progress USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "name": "tracking_video_progress_session_video_key_key",
+      "definition": "CREATE UNIQUE INDEX tracking_video_progress_session_video_key_key ON public.tracking_video_progress USING btree (session_video_key)"
+    }
+  ],
+  "sequenzen": [
+    {
+      "schema": "public",
+      "name": "quiz_sessions_id_seq",
+      "typ": "bigint",
+      "start_value": 1,
+      "increment_by": 1,
+      "min_value": 1,
+      "max_value": "9223372036854775807",
+      "cache_size": 1,
+      "cycle": false,
+      "gehoert_zu_tabelle": "quiz_sessions",
+      "gehoert_zu_spalte": "id"
+    },
+    {
+      "schema": "public",
+      "name": "tracking_sessions_id_seq",
+      "typ": "bigint",
+      "start_value": 1,
+      "increment_by": 1,
+      "min_value": 1,
+      "max_value": "9223372036854775807",
+      "cache_size": 1,
+      "cycle": false,
+      "gehoert_zu_tabelle": "tracking_sessions",
+      "gehoert_zu_spalte": "id"
+    },
+    {
+      "schema": "public",
+      "name": "tracking_events_id_seq",
+      "typ": "bigint",
+      "start_value": 1,
+      "increment_by": 1,
+      "min_value": 1,
+      "max_value": "9223372036854775807",
+      "cache_size": 1,
+      "cycle": false,
+      "gehoert_zu_tabelle": "tracking_events",
+      "gehoert_zu_spalte": "id"
+    },
+    {
+      "schema": "public",
+      "name": "tracking_video_progress_id_seq",
+      "typ": "bigint",
+      "start_value": 1,
+      "increment_by": 1,
+      "min_value": 1,
+      "max_value": "9223372036854775807",
+      "cache_size": 1,
+      "cycle": false,
+      "gehoert_zu_tabelle": "tracking_video_progress",
+      "gehoert_zu_spalte": "id"
+    },
+    {
+      "schema": "public",
+      "name": "lead_profiles_id_seq",
+      "typ": "bigint",
+      "start_value": 1,
+      "increment_by": 1,
+      "min_value": 1,
+      "max_value": "9223372036854775807",
+      "cache_size": 1,
+      "cycle": false,
+      "gehoert_zu_tabelle": "lead_profiles",
+      "gehoert_zu_spalte": "id"
+    }
+  ],
+  "views": [
+    {
+      "schema": "public",
+      "name": "v_nurture_runs_wahr",
+      "definition": " SELECT id,\n    project_key,\n    sequence_key,\n    execution_id,\n    status,\n    started_at AS protokolliert_am,\n    candidates_checked,\n    ( SELECT count(*) AS count\n           FROM lead_events e\n          WHERE e.event_name = 'nurture_sent'::text AND (e.payload ->> 'project_key'::text) = r.project_key AND e.event_at >= r.started_at AND e.event_at < COALESCE(( SELECT min(r2.started_at) AS min\n                   FROM nurture_runs r2\n                  WHERE r2.project_key = r.project_key AND r2.started_at > r.started_at), now() + '00:01:00'::interval)) AS gesendet_wahr,\n    sent_count AS gesendet_gemeldet\n   FROM nurture_runs r;"
+    },
+    {
+      "schema": "public",
+      "name": "v_sync_dead_jobs",
+      "definition": " SELECT id,\n    lead_hash,\n    sync_type,\n    context_data,\n    status,\n    attempts,\n    max_attempts,\n    last_error,\n    next_attempt_at,\n    locked_at,\n    locked_by,\n    processed_at,\n    dead_at,\n    created_at,\n    updated_at,\n    response_data\n   FROM lead_sync_outbox\n  WHERE status = 'dead'::text\n  ORDER BY dead_at DESC;"
+    },
+    {
+      "schema": "public",
+      "name": "v_funnel_analysis",
+      "definition": " SELECT berater_slug,\n    count(*) AS step_1_starts,\n    count(\n        CASE\n            WHEN current_event::text <> 'quiz_started'::text THEN 1\n            ELSE NULL::integer\n        END) AS step_2_questions,\n    count(\n        CASE\n            WHEN form_email IS NOT NULL THEN 1\n            ELSE NULL::integer\n        END) AS step_form_submits,\n    count(\n        CASE\n            WHEN current_event::text = 'quiz_completed'::text THEN 1\n            ELSE NULL::integer\n        END) AS completions,\n    round(100.0 * count(\n        CASE\n            WHEN current_event::text = 'quiz_completed'::text THEN 1\n            ELSE NULL::integer\n        END)::numeric / NULLIF(count(*), 0)::numeric, 1) AS completion_rate_pct\n   FROM tracking_sessions\n  GROUP BY berater_slug;"
+    },
+    {
+      "schema": "public",
+      "name": "v_resume_metrics",
+      "definition": " SELECT berater_slug,\n    count(\n        CASE\n            WHEN is_resume = true THEN 1\n            ELSE NULL::integer\n        END) AS total_resume_sessions,\n    count(\n        CASE\n            WHEN is_resume = true AND current_event::text = 'quiz_completed'::text THEN 1\n            ELSE NULL::integer\n        END) AS resume_completions,\n    round(100.0 * count(\n        CASE\n            WHEN is_resume = true AND current_event::text = 'quiz_completed'::text THEN 1\n            ELSE NULL::integer\n        END)::numeric / NULLIF(count(\n        CASE\n            WHEN is_resume = true THEN 1\n            ELSE NULL::integer\n        END), 0)::numeric, 1) AS resume_completion_rate_pct\n   FROM tracking_sessions\n  GROUP BY berater_slug;"
+    },
+    {
+      "schema": "public",
+      "name": "v_completion_metrics",
+      "definition": " SELECT berater_slug,\n    count(*) AS total_starts,\n    count(\n        CASE\n            WHEN current_event::text = 'quiz_completed'::text THEN 1\n            ELSE NULL::integer\n        END) AS total_completions,\n    round(100.0 * count(\n        CASE\n            WHEN current_event::text = 'quiz_completed'::text THEN 1\n            ELSE NULL::integer\n        END)::numeric / NULLIF(count(*), 0)::numeric, 1) AS completion_rate_pct\n   FROM tracking_sessions\n  GROUP BY berater_slug;"
+    },
+    {
+      "schema": "public",
+      "name": "v_lead_state_full",
+      "definition": " SELECT ls.lead_hash,\n    ls.client_seed,\n    ls.member_id,\n    ls.ref_id,\n    ls.ref_type,\n    ls.berater_slug,\n    ls.source_app,\n    ls.funnel_key,\n    ls.lang,\n    ls.country,\n    ls.utm_source,\n    ls.utm_medium,\n    ls.utm_campaign,\n    ls.first_seen_at,\n    ls.last_seen_at,\n    ls.last_event_at,\n    ls.first_name,\n    ls.email,\n    ls.email_normalized,\n    ls.email_hash,\n    ls.phone,\n    ls.form_submitted_at,\n    ls.profile_code,\n    ls.profile_label,\n    ls.main_aspiration,\n    ls.main_aspiration_label,\n    ls.initial_barrier,\n    ls.lifecycle_stage,\n    ls.next_step,\n    ls.cta_type,\n    ls.cta_clicked_at,\n    ls.mysql_survey_id,\n    ls.mautic_contact_id,\n    ls.sync_status,\n    ls.tracking_missing,\n    ls.migration_source,\n    ls.migration_flags,\n    ls.created_at,\n    ls.updated_at,\n    COALESCE(v1.max_unique_watched_percent, 0::numeric) AS video1_max_pct,\n    COALESCE(v1.unique_watched_seconds, 0) AS video1_watched_sec,\n    v1.completed_at AS video1_completed_at,\n    COALESCE(v2.max_unique_watched_percent, 0::numeric) AS video2_max_pct,\n    COALESCE(v2.unique_watched_seconds, 0) AS video2_watched_sec,\n    v2.completed_at AS video2_completed_at,\n    COALESCE(v3.max_unique_watched_percent, 0::numeric) AS video3_max_pct,\n    COALESCE(v3.unique_watched_seconds, 0) AS video3_watched_sec,\n    v3.completed_at AS video3_completed_at,\n        CASE\n            WHEN COALESCE(v3.max_unique_watched_percent, 0::numeric) >= 95::numeric THEN 3\n            WHEN COALESCE(v2.max_unique_watched_percent, 0::numeric) >= 95::numeric THEN 2\n            WHEN COALESCE(v1.max_unique_watched_percent, 0::numeric) >= 95::numeric THEN 1\n            ELSE 0\n        END AS completed_rank,\n    ls.organisation_id,\n    ls.utm_content,\n    ls.fbclid,\n    ls.fbc,\n    ls.fbp,\n    ls.event_source_url,\n    ls.utm_campaign_id,\n    ls.utm_adset_id,\n    ls.utm_ad_id,\n    ls.utm_term\n   FROM lead_state ls\n     LEFT JOIN lead_video_progress v1 ON v1.lead_hash = ls.lead_hash AND v1.video_step = 1\n     LEFT JOIN lead_video_progress v2 ON v2.lead_hash = ls.lead_hash AND v2.video_step = 2\n     LEFT JOIN lead_video_progress v3 ON v3.lead_hash = ls.lead_hash AND v3.video_step = 3;"
+    }
+  ],
+  "funktionen": [
+    {
+      "schema": "analytics_internal",
+      "name": "refresh_event_daily",
+      "definition": "CREATE OR REPLACE FUNCTION analytics_internal.refresh_event_daily(p_from date, p_to date)\n RETURNS jsonb\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\ndeclare\n  v_source_count bigint;\n  v_aggregate_count bigint;\n  v_row_count bigint;\n  v_min_at timestamptz;\n  v_max_at timestamptz;\nbegin\n  if p_from is null or p_to is null or p_from > p_to then\n    raise exception 'invalid analytics refresh range';\n  end if;\n\n  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext('analytics_internal.refresh_event_daily'));\n\n  select count(*), min(event_at), max(event_at)\n    into v_source_count, v_min_at, v_max_at\n    from public.lead_events\n   where event_at >= (p_from::timestamp at time zone 'UTC')\n     and event_at < ((p_to + 1)::timestamp at time zone 'UTC');\n\n  delete from analytics_internal.event_daily\n   where event_day between p_from and p_to;\n\n  insert into analytics_internal.event_daily (\n    event_day, event_name, source_app, funnel_key, member_id,\n    event_count, distinct_leads, first_event_at, last_event_at, refreshed_at\n  )\n  select\n    (event_at at time zone 'UTC')::date,\n    coalesce(event_name, ''),\n    coalesce(source_app, ''),\n    coalesce(funnel_key, ''),\n    coalesce(member_id, ''),\n    count(*)::bigint,\n    count(distinct lead_hash)::bigint,\n    min(event_at),\n    max(event_at),\n    pg_catalog.clock_timestamp()\n  from public.lead_events\n  where event_at >= (p_from::timestamp at time zone 'UTC')\n    and event_at < ((p_to + 1)::timestamp at time zone 'UTC')\n  group by 1,2,3,4,5;\n\n  select coalesce(sum(event_count), 0), count(*)\n    into v_aggregate_count, v_row_count\n    from analytics_internal.event_daily\n   where event_day between p_from and p_to;\n\n  if v_aggregate_count <> v_source_count then\n    raise exception 'analytics parity failure: source %, aggregate %', v_source_count, v_aggregate_count;\n  end if;\n\n  insert into analytics_internal.refresh_runs (\n    range_start, range_end, source_event_count, aggregate_event_count,\n    aggregate_row_count, status, source_min_event_at, source_max_event_at\n  ) values (\n    p_from, p_to, v_source_count, v_aggregate_count,\n    v_row_count, 'complete', v_min_at, v_max_at\n  );\n\n  return pg_catalog.jsonb_build_object(\n    'ok', true,\n    'range_start', p_from,\n    'range_end', p_to,\n    'source_event_count', v_source_count,\n    'aggregate_event_count', v_aggregate_count,\n    'aggregate_row_count', v_row_count\n  );\nend;\n$function$\n",
+      "argumente": "p_from date, p_to date"
+    },
+    {
+      "schema": "public",
+      "name": "analytics_dashboard_v2",
+      "definition": "CREATE OR REPLACE FUNCTION public.analytics_dashboard_v2(p_from timestamp with time zone, p_to timestamp with time zone, p_member_id text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE sql\n STABLE\n SET search_path TO ''\nAS $function$\n  select pg_catalog.jsonb_build_object(\n    'version', 2,\n    'from', p_from,\n    'to', p_to,\n    'member_id', p_member_id,\n    'event_count', coalesce(sum(d.event_count), 0),\n    'buckets', coalesce(\n      pg_catalog.jsonb_agg(\n        pg_catalog.jsonb_build_object(\n          'day', d.event_day,\n          'event_name', d.event_name,\n          'source_app', d.source_app,\n          'funnel_key', d.funnel_key,\n          'member_id', d.member_id,\n          'event_count', d.event_count,\n          'distinct_leads', d.distinct_leads\n        ) order by d.event_day, d.event_name, d.source_app, d.funnel_key, d.member_id\n      ),\n      '[]'::jsonb\n    )\n  )\n  from analytics_internal.event_daily d\n  where d.event_day >= (p_from at time zone 'UTC')::date\n    and d.event_day <= (p_to at time zone 'UTC')::date\n    and (p_member_id is null or d.member_id = p_member_id);\n$function$\n",
+      "argumente": "p_from timestamp with time zone, p_to timestamp with time zone, p_member_id text"
+    },
+    {
+      "schema": "public",
+      "name": "analytics_events_page_v2",
+      "definition": "CREATE OR REPLACE FUNCTION public.analytics_events_page_v2(p_from timestamp with time zone, p_berater_slug text DEFAULT NULL::text, p_cursor_event_at timestamp with time zone DEFAULT NULL::timestamp with time zone, p_cursor_event_id bigint DEFAULT NULL::bigint, p_page_size integer DEFAULT 1000)\n RETURNS SETOF lead_events\n LANGUAGE sql\n STABLE\n SET search_path TO ''\nAS $function$\n  select e.*\n  from public.lead_events e\n  where e.event_at >= p_from\n    and (p_berater_slug is null or e.berater_slug = p_berater_slug)\n    and (\n      p_cursor_event_at is null\n      or e.event_at < p_cursor_event_at\n      or (e.event_at = p_cursor_event_at and e.event_id < p_cursor_event_id)\n    )\n  order by e.event_at desc, e.event_id desc\n  limit least(greatest(coalesce(p_page_size, 1000), 1), 1000);\n$function$\n",
+      "argumente": "p_from timestamp with time zone, p_berater_slug text, p_cursor_event_at timestamp with time zone, p_cursor_event_id bigint, p_page_size integer"
+    },
+    {
+      "schema": "public",
+      "name": "claim_outbox_jobs",
+      "definition": "CREATE OR REPLACE FUNCTION public.claim_outbox_jobs(worker_id text, batch_size integer DEFAULT 10)\n RETURNS SETOF lead_sync_outbox\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nBEGIN\n  UPDATE public.lead_sync_outbox\n  SET\n    status = 'failed',\n    last_error = COALESCE(last_error, 'stale_lock_timeout'),\n    next_attempt_at = now() + interval '5 minutes',\n    locked_at = NULL,\n    locked_by = NULL,\n    updated_at = now()\n  WHERE status = 'processing'\n    AND locked_at < now() - interval '10 minutes';\n\n  RETURN QUERY\n  UPDATE public.lead_sync_outbox\n  SET\n    status = 'processing',\n    locked_at = now(),\n    locked_by = worker_id,\n    attempts = attempts + 1,\n    updated_at = now()\n  WHERE id IN (\n    SELECT id\n    FROM public.lead_sync_outbox\n    WHERE status IN ('pending','failed')\n      AND next_attempt_at <= now()\n      AND attempts < max_attempts\n    ORDER BY created_at\n    LIMIT batch_size\n    FOR UPDATE SKIP LOCKED\n  )\n  RETURNING *;\nEND;\n$function$\n",
+      "argumente": "worker_id text, batch_size integer"
+    },
+    {
+      "schema": "public",
+      "name": "enqueue_lead_sync",
+      "definition": "CREATE OR REPLACE FUNCTION public.enqueue_lead_sync(p_lead_hash text, p_sync_type text, p_context_data jsonb DEFAULT '{}'::jsonb)\n RETURNS bigint\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_id bigint;\nBEGIN\n  IF p_sync_type = 'coach_hot_lead_email' THEN\n    PERFORM pg_advisory_xact_lock(hashtext('coach_hot_lead_email:' || COALESCE(p_lead_hash, '')));\n\n    SELECT id INTO v_id\n    FROM public.lead_sync_outbox\n    WHERE lead_hash = p_lead_hash\n      AND sync_type = p_sync_type\n    ORDER BY created_at ASC\n    LIMIT 1;\n\n    IF v_id IS NOT NULL THEN\n      RETURN v_id;\n    END IF;\n  END IF;\n\n  INSERT INTO public.lead_sync_outbox (lead_hash, sync_type, context_data)\n  VALUES (p_lead_hash, p_sync_type, COALESCE(p_context_data, '{}'::jsonb))\n  RETURNING id INTO v_id;\n\n  RETURN v_id;\nEND;\n$function$\n",
+      "argumente": "p_lead_hash text, p_sync_type text, p_context_data jsonb"
+    },
+    {
+      "schema": "public",
+      "name": "init_lead",
+      "definition": "CREATE OR REPLACE FUNCTION public.init_lead(p_client_seed uuid, p_lead_hash text DEFAULT NULL::text, p_member_id text DEFAULT NULL::text, p_organisation_id text DEFAULT NULL::text, p_ref_id text DEFAULT NULL::text, p_ref_type text DEFAULT NULL::text, p_berater_slug text DEFAULT NULL::text, p_source_app text DEFAULT 'business_leads_quiz'::text, p_funnel_key text DEFAULT 'business'::text, p_lang text DEFAULT NULL::text, p_country text DEFAULT NULL::text, p_utm_source text DEFAULT NULL::text, p_utm_medium text DEFAULT NULL::text, p_utm_campaign text DEFAULT NULL::text, p_utm_content text DEFAULT NULL::text, p_fbclid text DEFAULT NULL::text, p_fbc text DEFAULT NULL::text, p_fbp text DEFAULT NULL::text, p_event_source_url text DEFAULT NULL::text, p_utm_campaign_id text DEFAULT NULL::text, p_utm_adset_id text DEFAULT NULL::text, p_utm_ad_id text DEFAULT NULL::text, p_utm_term text DEFAULT NULL::text)\n RETURNS TABLE(lead_hash text)\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\ndeclare\n  v_ref_id text;\n  v_ref_type text;\n  v_lead_hash text;\nbegin\n  if p_client_seed is null then\n    raise exception 'client_seed_required';\n  end if;\n\n  v_lead_hash := coalesce(nullif(p_lead_hash, ''), 'qz_' || replace(gen_random_uuid()::text, '-', ''));\n  v_ref_id := coalesce(nullif(p_ref_id, ''), nullif(p_member_id, ''));\n  v_ref_type := coalesce(nullif(p_ref_type, ''), case when v_ref_id is not null and v_ref_id <> p_member_id then 'referral_code' else 'member' end);\n\n  return query\n  insert into public.lead_state (\n    client_seed,\n    lead_hash,\n    member_id,\n    organisation_id,\n    ref_id,\n    ref_type,\n    berater_slug,\n    source_app,\n    funnel_key,\n    lang,\n    country,\n    utm_source,\n    utm_medium,\n    utm_campaign,\n    utm_content,\n    fbclid,\n    fbc,\n    fbp,\n    event_source_url,\n    utm_campaign_id,\n    utm_adset_id,\n    utm_ad_id,\n    utm_term,\n    first_seen_at,\n    last_seen_at\n  )\n  values (\n    p_client_seed,\n    v_lead_hash,\n    nullif(p_member_id, ''),\n    nullif(p_organisation_id, ''),\n    v_ref_id,\n    v_ref_type,\n    nullif(p_berater_slug, ''),\n    coalesce(nullif(p_source_app, ''), 'business_leads_quiz'),\n    coalesce(nullif(p_funnel_key, ''), 'business'),\n    nullif(p_lang, ''),\n    nullif(p_country, ''),\n    nullif(p_utm_source, ''),\n    nullif(p_utm_medium, ''),\n    nullif(p_utm_campaign, ''),\n    nullif(p_utm_content, ''),\n    nullif(p_fbclid, ''),\n    nullif(p_fbc, ''),\n    nullif(p_fbp, ''),\n    nullif(p_event_source_url, ''),\n    nullif(p_utm_campaign_id, ''),\n    nullif(p_utm_adset_id, ''),\n    nullif(p_utm_ad_id, ''),\n    nullif(p_utm_term, ''),\n    now(),\n    now()\n  )\n  on conflict (client_seed) do update set\n    last_seen_at = now(),\n    member_id = coalesce(public.lead_state.member_id, excluded.member_id),\n    organisation_id = coalesce(public.lead_state.organisation_id, excluded.organisation_id),\n    ref_id = coalesce(public.lead_state.ref_id, excluded.ref_id),\n    ref_type = coalesce(public.lead_state.ref_type, excluded.ref_type),\n    berater_slug = coalesce(public.lead_state.berater_slug, excluded.berater_slug),\n    source_app = coalesce(public.lead_state.source_app, excluded.source_app),\n    funnel_key = coalesce(public.lead_state.funnel_key, excluded.funnel_key),\n    lang = coalesce(public.lead_state.lang, excluded.lang),\n    country = coalesce(public.lead_state.country, excluded.country),\n    utm_source = coalesce(public.lead_state.utm_source, excluded.utm_source),\n    utm_medium = coalesce(public.lead_state.utm_medium, excluded.utm_medium),\n    utm_campaign = coalesce(public.lead_state.utm_campaign, excluded.utm_campaign),\n    utm_content = coalesce(public.lead_state.utm_content, excluded.utm_content),\n    fbclid = coalesce(public.lead_state.fbclid, excluded.fbclid),\n    fbc = coalesce(public.lead_state.fbc, excluded.fbc),\n    fbp = coalesce(public.lead_state.fbp, excluded.fbp),\n    event_source_url = coalesce(public.lead_state.event_source_url, excluded.event_source_url),\n    utm_campaign_id = coalesce(public.lead_state.utm_campaign_id, excluded.utm_campaign_id),\n    utm_adset_id = coalesce(public.lead_state.utm_adset_id, excluded.utm_adset_id),\n    utm_ad_id = coalesce(public.lead_state.utm_ad_id, excluded.utm_ad_id),\n    utm_term = coalesce(public.lead_state.utm_term, excluded.utm_term),\n    updated_at = now()\n  returning public.lead_state.lead_hash;\nend;\n$function$\n",
+      "argumente": "p_client_seed uuid, p_lead_hash text, p_member_id text, p_organisation_id text, p_ref_id text, p_ref_type text, p_berater_slug text, p_source_app text, p_funnel_key text, p_lang text, p_country text, p_utm_source text, p_utm_medium text, p_utm_campaign text, p_utm_content text, p_fbclid text, p_fbc text, p_fbp text, p_event_source_url text, p_utm_campaign_id text, p_utm_adset_id text, p_utm_ad_id text, p_utm_term text"
+    },
+    {
+      "schema": "public",
+      "name": "mark_outbox_done",
+      "definition": "CREATE OR REPLACE FUNCTION public.mark_outbox_done(p_job_id bigint, p_worker_id text, p_response_data jsonb DEFAULT '{}'::jsonb)\n RETURNS void\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nBEGIN\n  UPDATE public.lead_sync_outbox\n  SET\n    status = 'done',\n    response_data = COALESCE(p_response_data, '{}'::jsonb),\n    processed_at = now(),\n    locked_at = NULL,\n    locked_by = NULL,\n    last_error = NULL,\n    next_attempt_at = NULL,\n    updated_at = now()\n  WHERE id = p_job_id\n    AND status = 'processing'\n    AND (p_worker_id IS NULL OR locked_by = p_worker_id);\n\n  IF NOT FOUND THEN\n    RAISE EXCEPTION 'outbox_job_not_locked_by_worker';\n  END IF;\nEND;\n$function$\n",
+      "argumente": "p_job_id bigint, p_worker_id text, p_response_data jsonb"
+    },
+    {
+      "schema": "public",
+      "name": "mark_outbox_failed",
+      "definition": "CREATE OR REPLACE FUNCTION public.mark_outbox_failed(p_job_id bigint, p_worker_id text, p_error text, p_response_data jsonb DEFAULT '{}'::jsonb)\n RETURNS void\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nBEGIN\n  UPDATE public.lead_sync_outbox\n  SET\n    status = CASE WHEN attempts >= max_attempts THEN 'dead' ELSE 'failed' END,\n    last_error = left(COALESCE(p_error, 'unknown_outbox_error'), 2000),\n    response_data = COALESCE(p_response_data, '{}'::jsonb),\n    next_attempt_at = CASE\n      WHEN attempts >= max_attempts THEN NULL\n      WHEN attempts <= 1 THEN now() + interval '2 minutes'\n      WHEN attempts = 2 THEN now() + interval '5 minutes'\n      WHEN attempts = 3 THEN now() + interval '15 minutes'\n      ELSE now() + interval '60 minutes'\n    END,\n    dead_at = CASE WHEN attempts >= max_attempts THEN now() ELSE dead_at END,\n    locked_at = NULL,\n    locked_by = NULL,\n    updated_at = now()\n  WHERE id = p_job_id\n    AND status = 'processing'\n    AND (p_worker_id IS NULL OR locked_by = p_worker_id);\n\n  IF NOT FOUND THEN\n    RAISE EXCEPTION 'outbox_job_not_locked_by_worker';\n  END IF;\nEND;\n$function$\n",
+      "argumente": "p_job_id bigint, p_worker_id text, p_error text, p_response_data jsonb"
+    },
+    {
+      "schema": "public",
+      "name": "nurture_events_page",
+      "definition": "CREATE OR REPLACE FUNCTION public.nurture_events_page(p_since timestamp with time zone, p_until timestamp with time zone, p_project_key text DEFAULT NULL::text, p_sequence_key text DEFAULT NULL::text, p_status text DEFAULT NULL::text, p_phase text DEFAULT NULL::text, p_limit integer DEFAULT 50, p_cursor_at timestamp with time zone DEFAULT NULL::timestamp with time zone, p_cursor_uid text DEFAULT NULL::text)\n RETURNS TABLE(event_uid text, occurred_at timestamp with time zone, project_key text, sequence_key text, status text, event_type text, phase_key text, reason_code text, reason_category text, channel text, language text, template_ref text, subject_ref text, execution_ref text, source_family text)\n LANGUAGE sql\n STABLE\n SET search_path TO 'public', 'pg_temp'\nAS $function$\r\n  with normalized as (\r\n    select\r\n      coalesce(e.event_uid, e.event_id::text) as event_uid,\r\n      coalesce(e.event_at, e.created_at) as occurred_at,\r\n      e.lead_hash,\r\n      coalesce(e.payload->>'project_key', 'business_leads_quiz') as project_key,\r\n      coalesce(e.payload->>'sequence_key', 'video_nurture') as sequence_key,\r\n      case e.event_name\r\n        when 'nurture_sent' then 'sent'\r\n        when 'nurture_skipped' then 'skipped'\r\n        when 'nurture_resume_opened' then 'resumed'\r\n        else 'failed'\r\n      end as status,\r\n      e.event_name as event_type,\r\n      nullif(upper(coalesce(e.payload->>'phase', e.payload->>'acn_phase')), '') as phase_key,\r\n      nullif(coalesce(e.payload->>'reason', e.payload->>'error_code'), '') as reason_code,\r\n      case\r\n        when lower(coalesce(e.payload->>'reason', '')) ~ '(dnc|unsub|already|stopp|complete|cta)' then 'expected_policy'\r\n        when lower(coalesce(e.payload->>'reason', '')) ~ '(unsupported|language|no_email|no_coach|no_mautic|missing_required)' then 'technical_configuration'\r\n        when e.event_name in ('nurture_error', 'n8n_error') then 'technical_failure'\r\n        else 'unknown'\r\n      end as reason_category,\r\n      'email'::text as channel,\r\n      coalesce(nullif(e.payload->>'language', ''), 'unknown') as language,\r\n      nullif(coalesce(e.payload->>'email_id', e.payload->>'acn_email', e.payload->>'email'), '') as template_ref,\r\n      case when e.lead_hash is null then null else left(e.lead_hash, 14) end as subject_ref,\r\n      nullif(coalesce(e.payload->>'execution_id', e.payload->>'acn_run'), '') as execution_ref,\r\n      case\r\n        when e.payload ? 'backfill_source' then 'backfill:' || (e.payload->>'backfill_source')\r\n        when e.payload ? 'pilot_batch' then 'pilot:' || (e.payload->>'pilot_batch')\r\n        else coalesce(nullif(e.payload->>'source', ''), 'current')\r\n      end as source_family\r\n    from public.lead_events e\r\n    where e.event_name in ('nurture_sent', 'nurture_skipped', 'nurture_resume_opened', 'nurture_error', 'n8n_error')\r\n      and coalesce(e.event_at, e.created_at) >= p_since\r\n      and coalesce(e.event_at, e.created_at) < p_until\r\n  ), filtered as (\r\n    select n.*,\r\n      row_number() over (\r\n        partition by n.project_key, n.sequence_key, n.lead_hash, n.status, n.reason_code, n.phase_key\r\n        order by n.occurred_at desc, n.event_uid desc\r\n      ) as skip_rank\r\n    from normalized n\r\n    where (p_project_key is null or n.project_key = p_project_key)\r\n      and (p_sequence_key is null or n.sequence_key = p_sequence_key)\r\n      and (p_status is null or n.status = p_status)\r\n      and (p_phase is null or n.phase_key = upper(p_phase))\r\n  )\r\n  select\r\n    n.event_uid, n.occurred_at, n.project_key, n.sequence_key, n.status,\r\n    n.event_type, n.phase_key, n.reason_code, n.reason_category, n.channel,\r\n    n.language, n.template_ref, n.subject_ref, n.execution_ref, n.source_family\r\n  from filtered n\r\n  where (n.status <> 'skipped' or n.skip_rank = 1)\r\n    and (p_cursor_at is null or (n.occurred_at, n.event_uid) < (p_cursor_at, p_cursor_uid))\r\n  order by n.occurred_at desc, n.event_uid desc\r\n  limit greatest(10, least(coalesce(p_limit, 50), 100));\r\n$function$\n",
+      "argumente": "p_since timestamp with time zone, p_until timestamp with time zone, p_project_key text, p_sequence_key text, p_status text, p_phase text, p_limit integer, p_cursor_at timestamp with time zone, p_cursor_uid text"
+    },
+    {
+      "schema": "public",
+      "name": "nurture_health_signals",
+      "definition": "CREATE OR REPLACE FUNCTION public.nurture_health_signals()\n RETURNS jsonb\n LANGUAGE sql\n STABLE\n SET search_path TO 'public', 'pg_temp'\nAS $function$\r\n  with latest_run as (\r\n    select project_key, sequence_key, status, coalesce(finished_at, started_at) as ran_at,\r\n      error_code, error_node\r\n    from public.nurture_runs\r\n    order by coalesce(finished_at, started_at) desc limit 1\r\n  ), latest_signal as (\r\n    select max(signal_at) as event_at from (\r\n      select max(coalesce(event_at, created_at)) as signal_at\r\n      from public.lead_events\r\n      where event_name in ('nurture_sent', 'nurture_skipped', 'nurture_resume_opened')\r\n      union all\r\n      select max(last_seen_at) from public.nurture_subject_states\r\n    ) signals\r\n  ), failures as (\r\n    select count(*)::integer as count\r\n    from public.lead_events\r\n    where event_name in ('nurture_error', 'n8n_error')\r\n      and coalesce(event_at, created_at) >= now() - interval '24 hours'\r\n  )\r\n  select jsonb_build_object(\r\n    'missing_run_telemetry', case when (select ran_at from latest_run) is null then 1 else 0 end,\r\n    'run_overdue', case when coalesce((select ran_at from latest_run), '-infinity'::timestamptz) < now() - interval '4 hours' then 1 else 0 end,\r\n    'recent_failures', (select count from failures),\r\n    'signal_stale', case when coalesce((select event_at from latest_signal), '-infinity'::timestamptz) < now() - interval '4 hours' then 1 else 0 end,\r\n    'latest_run_at', (select ran_at from latest_run),\r\n    'latest_run_status', (select status from latest_run),\r\n    'latest_error_code', (select error_code from latest_run),\r\n    'latest_error_node', (select error_node from latest_run),\r\n    'latest_signal_at', (select event_at from latest_signal)\r\n  );\r\n$function$\n",
+      "argumente": ""
+    },
+    {
+      "schema": "public",
+      "name": "nurture_overview",
+      "definition": "CREATE OR REPLACE FUNCTION public.nurture_overview(p_since timestamp with time zone, p_until timestamp with time zone, p_project_key text DEFAULT NULL::text, p_sequence_key text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE sql\n STABLE\n SET search_path TO 'public', 'pg_temp'\nAS $function$\r\n  with normalized as (\r\n    select\r\n      coalesce(e.event_uid, e.event_id::text) as event_uid,\r\n      coalesce(e.event_at, e.created_at) as occurred_at,\r\n      e.lead_hash,\r\n      coalesce(e.payload->>'project_key', 'business_leads_quiz') as project_key,\r\n      coalesce(e.payload->>'sequence_key', 'video_nurture') as sequence_key,\r\n      e.event_name as event_type,\r\n      case e.event_name\r\n        when 'nurture_sent' then 'sent'\r\n        when 'nurture_skipped' then 'skipped'\r\n        when 'nurture_resume_opened' then 'resumed'\r\n        when 'video_unlocked' then 'continued'\r\n        when 'video_completed' then 'continued'\r\n        when 'video_continue_click' then 'continued'\r\n        when 'cta_clicked' then 'continued'\r\n        when 'result_cta_click' then 'continued'\r\n        else 'failed'\r\n      end as status,\r\n      nullif(upper(coalesce(e.payload->>'phase', e.payload->>'acn_phase')), '') as phase_key,\r\n      nullif(coalesce(e.payload->>'reason', e.payload->>'error_code'), '') as reason_code,\r\n      case\r\n        when lower(coalesce(e.payload->>'reason', '')) ~ '(dnc|unsub|already|stopp|complete|cta)' then 'expected_policy'\r\n        when lower(coalesce(e.payload->>'reason', '')) ~ '(unsupported|language|no_email|no_coach|no_mautic|missing_required)' then 'technical_configuration'\r\n        when e.event_name in ('nurture_error', 'n8n_error') then 'technical_failure'\r\n        else 'unknown'\r\n      end as reason_category,\r\n      coalesce(nullif(e.payload->>'language', ''), 'unknown') as language,\r\n      coalesce(e.payload->>'backfill_source', e.payload->>'pilot_batch') as source_family\r\n    from public.lead_events e\r\n    where e.event_name in (\r\n      'nurture_sent', 'nurture_skipped', 'nurture_resume_opened', 'nurture_error', 'n8n_error',\r\n      'video_unlocked', 'video_completed', 'video_continue_click', 'cta_clicked', 'result_cta_click'\r\n    )\r\n      and coalesce(e.event_at, e.created_at) < p_until\r\n  ), filtered as (\r\n    select * from normalized\r\n    where (p_project_key is null or project_key = p_project_key)\r\n      and (p_sequence_key is null or sequence_key = p_sequence_key)\r\n  ), ranged as (\r\n    select * from filtered where occurred_at >= p_since\r\n  ), sent_events as (\r\n    select * from ranged where event_type = 'nurture_sent' and lead_hash is not null\r\n  ), sent_people as (\r\n    select project_key, sequence_key, lead_hash,\r\n      count(*)::bigint as send_count,\r\n      min(occurred_at) as first_sent_at,\r\n      max(occurred_at) as last_sent_at\r\n    from sent_events group by 1, 2, 3\r\n  ), attributed_returns_ranked as (\r\n    select r.event_uid, r.occurred_at, r.project_key, r.sequence_key, r.lead_hash, r.phase_key,\r\n      s.occurred_at as sent_at,\r\n      row_number() over (partition by r.event_uid order by s.occurred_at desc, s.event_uid desc) as attribution_rank\r\n    from filtered r\r\n    join sent_events s on s.project_key = r.project_key\r\n      and s.sequence_key = r.sequence_key and s.lead_hash = r.lead_hash\r\n      and r.occurred_at >= s.occurred_at\r\n      and r.occurred_at <= s.occurred_at + interval '7 days'\r\n    where r.event_type = 'nurture_resume_opened'\r\n  ), attributed_returns as (\r\n    select * from attributed_returns_ranked where attribution_rank = 1\r\n  ), attributed_continuations_ranked as (\r\n    select c.event_uid, c.occurred_at, c.project_key, c.sequence_key, c.lead_hash, c.phase_key,\r\n      r.event_uid as return_event_uid,\r\n      row_number() over (partition by c.event_uid order by r.occurred_at desc, r.event_uid desc) as attribution_rank\r\n    from filtered c\r\n    join attributed_returns r on r.project_key = c.project_key\r\n      and r.sequence_key = c.sequence_key and r.lead_hash = c.lead_hash\r\n      and c.occurred_at >= r.occurred_at\r\n      and c.occurred_at <= r.sent_at + interval '7 days'\r\n    where c.event_type in ('video_unlocked', 'video_completed', 'video_continue_click', 'cta_clicked', 'result_cta_click')\r\n  ), attributed_continuations as (\r\n    select * from attributed_continuations_ranked where attribution_rank = 1\r\n  ), returned_people as (\r\n    select project_key, sequence_key, lead_hash, count(*)::bigint as return_count\r\n    from attributed_returns group by 1, 2, 3\r\n  ), continued_people as (\r\n    select project_key, sequence_key, lead_hash, count(*)::bigint as continuation_count\r\n    from attributed_continuations group by 1, 2, 3\r\n  ), skip_reasons as (\r\n    select coalesce(reason_code, 'unknown') as reason, reason_category,\r\n      count(distinct lead_hash)::bigint as people,\r\n      count(*)::bigint as observations,\r\n      greatest(count(*) - count(distinct lead_hash), 0)::bigint as repeats\r\n    from ranged where status = 'skipped'\r\n    group by 1, 2 order by count(distinct lead_hash) desc, 1\r\n  ), phases as (\r\n    select coalesce(phase_key, 'UNKNOWN') as phase, status,\r\n      count(distinct lead_hash)::bigint as people, count(*)::bigint as observations\r\n    from ranged where status in ('sent', 'skipped', 'resumed')\r\n    group by 1, 2 order by 1, 2\r\n  ), registered as (\r\n    select s.*,\r\n      (select max(coalesce(r.finished_at, r.started_at)) from public.nurture_runs r\r\n       where r.project_key = s.project_key and r.sequence_key = s.sequence_key) as last_run_at,\r\n      (select r.status from public.nurture_runs r\r\n       where r.project_key = s.project_key and r.sequence_key = s.sequence_key\r\n       order by coalesce(r.finished_at, r.started_at) desc limit 1) as last_run_status\r\n    from public.nurture_sequences s\r\n    where s.active\r\n      and (p_project_key is null or s.project_key = p_project_key)\r\n      and (p_sequence_key is null or s.sequence_key = p_sequence_key)\r\n  )\r\n  select jsonb_build_object(\r\n    'range', jsonb_build_object('since', p_since, 'until', p_until),\r\n    'people_funnel', jsonb_build_object(\r\n      'recipients', (select count(*) from sent_people),\r\n      'returners', (select count(*) from returned_people),\r\n      'continuers', (select count(*) from continued_people),\r\n      'return_rate', coalesce(round(100.0 * (select count(*) from returned_people) / nullif((select count(*) from sent_people), 0), 1), 0),\r\n      'continuation_rate', coalesce(round(100.0 * (select count(*) from continued_people) / nullif((select count(*) from sent_people), 0), 1), 0),\r\n      'return_to_continuation_rate', coalesce(round(100.0 * (select count(*) from continued_people) / nullif((select count(*) from returned_people), 0), 1), 0)\r\n    ),\r\n    'activity', jsonb_build_object(\r\n      'send_events', (select count(*) from sent_events),\r\n      'return_click_events', (select count(*) from attributed_returns),\r\n      'continuation_events', (select count(*) from attributed_continuations),\r\n      'skip_observations', (select count(*) from ranged where status = 'skipped'),\r\n      'failure_events', (select count(*) from ranged where status = 'failed')\r\n    ),\r\n    'kpis', jsonb_build_object(\r\n      'total_people', (select count(*) from sent_people),\r\n      'sent_people', (select count(*) from sent_people),\r\n      'returned_people', (select count(*) from returned_people),\r\n      'continued_people', (select count(*) from continued_people),\r\n      'skipped_people', (select count(distinct lead_hash) from ranged where status = 'skipped'),\r\n      'sent', (select count(*) from sent_events),\r\n      'skipped', (select count(distinct lead_hash) from ranged where status = 'skipped'),\r\n      'resumed', (select count(*) from returned_people),\r\n      'failed', (select count(*) from ranged where status = 'failed')\r\n    ),\r\n    'freshness', jsonb_build_object(\r\n      'latest_event_at', (select max(occurred_at) from ranged),\r\n      'latest_sent_at', (select max(occurred_at) from sent_events),\r\n      'latest_resume_at', (select max(occurred_at) from attributed_returns)\r\n    ),\r\n    'skip_reasons', coalesce((select jsonb_agg(jsonb_build_object(\r\n      'reason', reason, 'category', reason_category, 'count', people,\r\n      'people', people, 'observations', observations, 'repeats', repeats\r\n    ) order by people desc, reason) from skip_reasons), '[]'::jsonb),\r\n    'phases', coalesce((select jsonb_agg(jsonb_build_object(\r\n      'phase', phase, 'status', status, 'count', people,\r\n      'people', people, 'observations', observations\r\n    ) order by phase, status) from phases), '[]'::jsonb),\r\n    'sequences', coalesce((select jsonb_agg(jsonb_build_object(\r\n      'projectKey', project_key, 'sequenceKey', sequence_key,\r\n      'projectLabel', project_label, 'sequenceLabel', sequence_label,\r\n      'channel', channel, 'workflowId', workflow_id,\r\n      'expectedIntervalMinutes', expected_interval_minutes,\r\n      'telemetryVersion', telemetry_version,\r\n      'lastRunAt', last_run_at, 'lastRunStatus', last_run_status\r\n    ) order by project_label, sequence_label) from registered), '[]'::jsonb)\r\n  );\r\n$function$\n",
+      "argumente": "p_since timestamp with time zone, p_until timestamp with time zone, p_project_key text, p_sequence_key text"
+    },
+    {
+      "schema": "public",
+      "name": "nurture_people_page",
+      "definition": "CREATE OR REPLACE FUNCTION public.nurture_people_page(p_since timestamp with time zone, p_until timestamp with time zone, p_project_key text DEFAULT NULL::text, p_sequence_key text DEFAULT NULL::text, p_journey text DEFAULT NULL::text, p_limit integer DEFAULT 50, p_cursor_at timestamp with time zone DEFAULT NULL::timestamp with time zone, p_cursor_ref text DEFAULT NULL::text)\n RETURNS TABLE(subject_ref text, journey_state text, send_count bigint, first_sent_at timestamp with time zone, last_sent_at timestamp with time zone, return_count bigint, first_returned_at timestamp with time zone, last_returned_at timestamp with time zone, continuation_count bigint, first_continued_at timestamp with time zone, last_continued_at timestamp with time zone, phases text[], last_activity_at timestamp with time zone)\n LANGUAGE sql\n STABLE\n SET search_path TO 'public', 'pg_temp'\nAS $function$\r\n  with normalized as (\r\n    select\r\n      coalesce(e.event_uid, e.event_id::text) as event_uid,\r\n      coalesce(e.event_at, e.created_at) as occurred_at,\r\n      e.lead_hash,\r\n      coalesce(e.payload->>'project_key', 'business_leads_quiz') as project_key,\r\n      coalesce(e.payload->>'sequence_key', 'video_nurture') as sequence_key,\r\n      e.event_name as event_type,\r\n      nullif(upper(coalesce(e.payload->>'phase', e.payload->>'acn_phase')), '') as phase_key\r\n    from public.lead_events e\r\n    where e.event_name in (\r\n      'nurture_sent', 'nurture_resume_opened',\r\n      'video_unlocked', 'video_completed', 'video_continue_click', 'cta_clicked', 'result_cta_click'\r\n    )\r\n      and e.lead_hash is not null\r\n      and coalesce(e.event_at, e.created_at) < p_until\r\n  ), filtered as (\r\n    select * from normalized\r\n    where (p_project_key is null or project_key = p_project_key)\r\n      and (p_sequence_key is null or sequence_key = p_sequence_key)\r\n  ), sent_events as (\r\n    select * from filtered\r\n    where event_type = 'nurture_sent' and occurred_at >= p_since\r\n  ), sent_people as (\r\n    select project_key, sequence_key, lead_hash,\r\n      count(*)::bigint as send_count,\r\n      min(occurred_at) as first_sent_at,\r\n      max(occurred_at) as last_sent_at,\r\n      array_remove(array_agg(distinct phase_key order by phase_key), null) as phases\r\n    from sent_events group by 1, 2, 3\r\n  ), returns_ranked as (\r\n    select r.event_uid, r.occurred_at, r.project_key, r.sequence_key, r.lead_hash,\r\n      s.occurred_at as sent_at,\r\n      row_number() over (partition by r.event_uid order by s.occurred_at desc, s.event_uid desc) as attribution_rank\r\n    from filtered r\r\n    join sent_events s on s.project_key = r.project_key\r\n      and s.sequence_key = r.sequence_key and s.lead_hash = r.lead_hash\r\n      and r.occurred_at >= s.occurred_at\r\n      and r.occurred_at <= s.occurred_at + interval '7 days'\r\n    where r.event_type = 'nurture_resume_opened'\r\n  ), attributed_returns as (\r\n    select * from returns_ranked where attribution_rank = 1\r\n  ), return_people as (\r\n    select project_key, sequence_key, lead_hash,\r\n      count(*)::bigint as return_count,\r\n      min(occurred_at) as first_returned_at,\r\n      max(occurred_at) as last_returned_at\r\n    from attributed_returns group by 1, 2, 3\r\n  ), continuations_ranked as (\r\n    select c.event_uid, c.occurred_at, c.project_key, c.sequence_key, c.lead_hash,\r\n      row_number() over (partition by c.event_uid order by r.occurred_at desc, r.event_uid desc) as attribution_rank\r\n    from filtered c\r\n    join attributed_returns r on r.project_key = c.project_key\r\n      and r.sequence_key = c.sequence_key and r.lead_hash = c.lead_hash\r\n      and c.occurred_at >= r.occurred_at\r\n      and c.occurred_at <= r.sent_at + interval '7 days'\r\n    where c.event_type in ('video_unlocked', 'video_completed', 'video_continue_click', 'cta_clicked', 'result_cta_click')\r\n  ), attributed_continuations as (\r\n    select * from continuations_ranked where attribution_rank = 1\r\n  ), continuation_people as (\r\n    select project_key, sequence_key, lead_hash,\r\n      count(*)::bigint as continuation_count,\r\n      min(occurred_at) as first_continued_at,\r\n      max(occurred_at) as last_continued_at\r\n    from attributed_continuations group by 1, 2, 3\r\n  ), journeys as (\r\n    select\r\n      left(s.lead_hash, 14) as subject_ref,\r\n      case when c.lead_hash is not null then 'continued'\r\n        when r.lead_hash is not null then 'returned' else 'sent' end as journey_state,\r\n      s.send_count, s.first_sent_at, s.last_sent_at,\r\n      coalesce(r.return_count, 0)::bigint as return_count,\r\n      r.first_returned_at, r.last_returned_at,\r\n      coalesce(c.continuation_count, 0)::bigint as continuation_count,\r\n      c.first_continued_at, c.last_continued_at,\r\n      s.phases,\r\n      greatest(s.last_sent_at, coalesce(r.last_returned_at, s.last_sent_at), coalesce(c.last_continued_at, s.last_sent_at)) as last_activity_at\r\n    from sent_people s\r\n    left join return_people r using (project_key, sequence_key, lead_hash)\r\n    left join continuation_people c using (project_key, sequence_key, lead_hash)\r\n  )\r\n  select j.* from journeys j\r\n  where (p_journey is null or j.journey_state = p_journey)\r\n    and (p_cursor_at is null or (j.last_activity_at, j.subject_ref) < (p_cursor_at, p_cursor_ref))\r\n  order by j.last_activity_at desc, j.subject_ref desc\r\n  limit greatest(1, least(coalesce(p_limit, 50), 100));\r\n$function$\n",
+      "argumente": "p_since timestamp with time zone, p_until timestamp with time zone, p_project_key text, p_sequence_key text, p_journey text, p_limit integer, p_cursor_at timestamp with time zone, p_cursor_ref text"
+    },
+    {
+      "schema": "public",
+      "name": "record_nurture_failure",
+      "definition": "CREATE OR REPLACE FUNCTION public.record_nurture_failure(p_project_key text, p_sequence_key text, p_workflow_id text, p_workflow_version_id text, p_execution_id text, p_error_code text, p_error_node text, p_error_message text, p_occurred_at timestamp with time zone DEFAULT now())\n RETURNS text\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\r\ndeclare\r\n  v_event_uid text;\r\nbegin\r\n  v_event_uid := 'nurture_error:' || p_workflow_id || ':' || p_execution_id;\r\n\r\n  insert into public.lead_events (\r\n    event_uid, lead_hash, event_name, event_at, source_app, funnel_key, payload, created_at\r\n  ) values (\r\n    v_event_uid, null, 'nurture_error', coalesce(p_occurred_at, now()), 'n8n', p_project_key,\r\n    jsonb_build_object(\r\n      'project_key', p_project_key,\r\n      'sequence_key', p_sequence_key,\r\n      'workflow_id', p_workflow_id,\r\n      'workflow_version_id', p_workflow_version_id,\r\n      'execution_id', p_execution_id,\r\n      'error_code', left(coalesce(p_error_code, 'workflow_failed'), 120),\r\n      'error_node', left(coalesce(p_error_node, 'unknown'), 160),\r\n      'message', left(coalesce(p_error_message, 'Workflow failed'), 500),\r\n      'telemetry_version', 1\r\n    ),\r\n    now()\r\n  )\r\n  on conflict (event_uid) do nothing;\r\n\r\n  perform public.record_nurture_run(\r\n    p_project_key, p_sequence_key, p_execution_id, 'failed', coalesce(p_occurred_at, now()),\r\n    coalesce(p_occurred_at, now()), p_workflow_id, p_workflow_version_id,\r\n    0, 0, 0, 1, left(coalesce(p_error_code, 'workflow_failed'), 120),\r\n    left(coalesce(p_error_node, 'unknown'), 160), 1\r\n  );\r\n  return v_event_uid;\r\nend;\r\n$function$\n",
+      "argumente": "p_project_key text, p_sequence_key text, p_workflow_id text, p_workflow_version_id text, p_execution_id text, p_error_code text, p_error_node text, p_error_message text, p_occurred_at timestamp with time zone"
+    },
+    {
+      "schema": "public",
+      "name": "record_nurture_run",
+      "definition": "CREATE OR REPLACE FUNCTION public.record_nurture_run(p_project_key text, p_sequence_key text, p_execution_id text, p_status text, p_started_at timestamp with time zone, p_finished_at timestamp with time zone DEFAULT NULL::timestamp with time zone, p_workflow_id text DEFAULT NULL::text, p_workflow_version_id text DEFAULT NULL::text, p_candidates_checked integer DEFAULT 0, p_sent_count integer DEFAULT 0, p_skipped_count integer DEFAULT 0, p_failed_count integer DEFAULT 0, p_error_code text DEFAULT NULL::text, p_error_node text DEFAULT NULL::text, p_telemetry_version integer DEFAULT 1)\n RETURNS nurture_runs\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\r\ndeclare\r\n  v_run public.nurture_runs;\r\nbegin\r\n  if p_status not in ('running', 'success', 'failed') then\r\n    raise exception 'invalid_nurture_run_status';\r\n  end if;\r\n\r\n  insert into public.nurture_runs (\r\n    project_key, sequence_key, execution_id, workflow_id, workflow_version_id,\r\n    started_at, finished_at, status, candidates_checked, sent_count,\r\n    skipped_count, failed_count, error_code, error_node, telemetry_version\r\n  ) values (\r\n    p_project_key, p_sequence_key, p_execution_id, p_workflow_id, p_workflow_version_id,\r\n    p_started_at, p_finished_at, p_status, greatest(coalesce(p_candidates_checked, 0), 0),\r\n    greatest(coalesce(p_sent_count, 0), 0), greatest(coalesce(p_skipped_count, 0), 0),\r\n    greatest(coalesce(p_failed_count, 0), 0), left(p_error_code, 120),\r\n    left(p_error_node, 160), greatest(coalesce(p_telemetry_version, 1), 1)\r\n  )\r\n  on conflict (project_key, sequence_key, execution_id) do update set\r\n    workflow_id = coalesce(excluded.workflow_id, public.nurture_runs.workflow_id),\r\n    workflow_version_id = coalesce(excluded.workflow_version_id, public.nurture_runs.workflow_version_id),\r\n    started_at = least(public.nurture_runs.started_at, excluded.started_at),\r\n    finished_at = coalesce(excluded.finished_at, public.nurture_runs.finished_at),\r\n    status = excluded.status,\r\n    candidates_checked = excluded.candidates_checked,\r\n    sent_count = excluded.sent_count,\r\n    skipped_count = excluded.skipped_count,\r\n    failed_count = excluded.failed_count,\r\n    error_code = excluded.error_code,\r\n    error_node = excluded.error_node,\r\n    telemetry_version = excluded.telemetry_version,\r\n    updated_at = now()\r\n  returning * into v_run;\r\n  return v_run;\r\nend;\r\n$function$\n",
+      "argumente": "p_project_key text, p_sequence_key text, p_execution_id text, p_status text, p_started_at timestamp with time zone, p_finished_at timestamp with time zone, p_workflow_id text, p_workflow_version_id text, p_candidates_checked integer, p_sent_count integer, p_skipped_count integer, p_failed_count integer, p_error_code text, p_error_node text, p_telemetry_version integer"
+    },
+    {
+      "schema": "public",
+      "name": "record_nurture_sent",
+      "definition": "CREATE OR REPLACE FUNCTION public.record_nurture_sent(p_project_key text, p_sequence_key text, p_event_uid text, p_lead_hash text, p_phase_key text, p_email_id text DEFAULT NULL::text, p_subject text DEFAULT NULL::text, p_language text DEFAULT NULL::text, p_variant text DEFAULT NULL::text, p_mautic_contact_id text DEFAULT NULL::text, p_occurred_at timestamp with time zone DEFAULT now(), p_telemetry_version integer DEFAULT 2)\n RETURNS text\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\r\ndeclare\r\n  v_at timestamptz := coalesce(p_occurred_at, now());\r\n  v_phase text := nullif(lower(trim(p_phase_key)), '');\r\nbegin\r\n  if p_event_uid is null or length(trim(p_event_uid)) < 3 then\r\n    raise exception 'invalid_nurture_event_uid';\r\n  end if;\r\n  if p_lead_hash is null or length(trim(p_lead_hash)) < 3 then\r\n    raise exception 'invalid_nurture_lead_hash';\r\n  end if;\r\n\r\n  insert into public.lead_events (\r\n    event_uid, lead_hash, event_name, event_at, source_app, funnel_key, payload, created_at\r\n  ) values (\r\n    p_event_uid, p_lead_hash, 'nurture_sent', v_at, 'business_leads_quiz', 'business',\r\n    jsonb_strip_nulls(jsonb_build_object(\r\n      'project_key', p_project_key,\r\n      'sequence_key', p_sequence_key,\r\n      'phase', v_phase,\r\n      'email_id', nullif(trim(p_email_id), ''),\r\n      'subject', nullif(p_subject, ''),\r\n      'email_subject', nullif(p_subject, ''),\r\n      'language', nullif(lower(trim(p_language)), ''),\r\n      'variant', nullif(p_variant, ''),\r\n      'source', 'mautic',\r\n      'mautic_contact_id', nullif(trim(p_mautic_contact_id), ''),\r\n      'telemetry_version', greatest(coalesce(p_telemetry_version, 2), 1)\r\n    )),\r\n    now()\r\n  )\r\n  on conflict (event_uid) do nothing;\r\n\r\n  insert into public.nurture_subject_states (\r\n    project_key, sequence_key, lead_hash, status, reason_code, phase_key,\r\n    first_seen_at, last_seen_at, status_changed_at, occurrence_count,\r\n    last_event_uid, telemetry_version\r\n  ) values (\r\n    p_project_key, p_sequence_key, p_lead_hash, 'sent', null, upper(v_phase),\r\n    v_at, v_at, v_at, 1, p_event_uid, greatest(coalesce(p_telemetry_version, 2), 1)\r\n  )\r\n  on conflict (project_key, sequence_key, lead_hash) do update set\r\n    status = 'sent', reason_code = null, phase_key = excluded.phase_key,\r\n    first_seen_at = case when public.nurture_subject_states.status = 'sent'\r\n      then public.nurture_subject_states.first_seen_at else excluded.first_seen_at end,\r\n    last_seen_at = greatest(public.nurture_subject_states.last_seen_at, excluded.last_seen_at),\r\n    status_changed_at = case when public.nurture_subject_states.status = 'sent'\r\n      then public.nurture_subject_states.status_changed_at else excluded.status_changed_at end,\r\n    occurrence_count = case when public.nurture_subject_states.status = 'sent'\r\n      then public.nurture_subject_states.occurrence_count + 1 else 1 end,\r\n    last_event_uid = excluded.last_event_uid,\r\n    telemetry_version = excluded.telemetry_version,\r\n    updated_at = now();\r\n\r\n  return p_event_uid;\r\nend;\r\n$function$\n",
+      "argumente": "p_project_key text, p_sequence_key text, p_event_uid text, p_lead_hash text, p_phase_key text, p_email_id text, p_subject text, p_language text, p_variant text, p_mautic_contact_id text, p_occurred_at timestamp with time zone, p_telemetry_version integer"
+    },
+    {
+      "schema": "public",
+      "name": "record_nurture_skip",
+      "definition": "CREATE OR REPLACE FUNCTION public.record_nurture_skip(p_project_key text, p_sequence_key text, p_lead_hash text, p_reason_code text, p_phase_key text DEFAULT NULL::text, p_occurred_at timestamp with time zone DEFAULT now(), p_telemetry_version integer DEFAULT 2)\n RETURNS jsonb\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\r\ndeclare\r\n  v_existing public.nurture_subject_states;\r\n  v_state public.nurture_subject_states;\r\n  v_state_changed boolean;\r\n  v_at timestamptz := coalesce(p_occurred_at, now());\r\n  v_reason text := left(coalesce(nullif(trim(p_reason_code), ''), 'unknown'), 160);\r\n  v_phase text := nullif(upper(trim(p_phase_key)), '');\r\n  v_event_uid text;\r\nbegin\r\n  if p_lead_hash is null or length(trim(p_lead_hash)) < 3 then\r\n    raise exception 'invalid_nurture_lead_hash';\r\n  end if;\r\n\r\n  select * into v_existing\r\n  from public.nurture_subject_states\r\n  where project_key = p_project_key\r\n    and sequence_key = p_sequence_key\r\n    and lead_hash = p_lead_hash\r\n  for update;\r\n\r\n  v_state_changed := not found\r\n    or v_existing.status <> 'skipped'\r\n    or v_existing.reason_code is distinct from v_reason\r\n    or v_existing.phase_key is distinct from v_phase;\r\n\r\n  v_event_uid := 'nurture_skip_state:' || left(md5(\r\n    p_project_key || ':' || p_sequence_key || ':' || p_lead_hash || ':' || v_reason || ':' ||\r\n    coalesce(v_phase, '') || ':' || v_at::text\r\n  ), 32);\r\n\r\n  insert into public.nurture_subject_states (\r\n    project_key, sequence_key, lead_hash, status, reason_code, phase_key,\r\n    first_seen_at, last_seen_at, status_changed_at, occurrence_count,\r\n    last_event_uid, telemetry_version\r\n  ) values (\r\n    p_project_key, p_sequence_key, p_lead_hash, 'skipped', v_reason, v_phase,\r\n    v_at, v_at, v_at, 1, v_event_uid, greatest(coalesce(p_telemetry_version, 2), 1)\r\n  )\r\n  on conflict (project_key, sequence_key, lead_hash) do update set\r\n    status = excluded.status,\r\n    reason_code = excluded.reason_code,\r\n    phase_key = excluded.phase_key,\r\n    first_seen_at = case\r\n      when public.nurture_subject_states.status = excluded.status\r\n        and public.nurture_subject_states.reason_code is not distinct from excluded.reason_code\r\n        and public.nurture_subject_states.phase_key is not distinct from excluded.phase_key\r\n      then public.nurture_subject_states.first_seen_at else excluded.first_seen_at end,\r\n    last_seen_at = greatest(public.nurture_subject_states.last_seen_at, excluded.last_seen_at),\r\n    status_changed_at = case\r\n      when public.nurture_subject_states.status = excluded.status\r\n        and public.nurture_subject_states.reason_code is not distinct from excluded.reason_code\r\n        and public.nurture_subject_states.phase_key is not distinct from excluded.phase_key\r\n      then public.nurture_subject_states.status_changed_at else excluded.status_changed_at end,\r\n    occurrence_count = case\r\n      when public.nurture_subject_states.status = excluded.status\r\n        and public.nurture_subject_states.reason_code is not distinct from excluded.reason_code\r\n        and public.nurture_subject_states.phase_key is not distinct from excluded.phase_key\r\n      then public.nurture_subject_states.occurrence_count + 1 else 1 end,\r\n    last_event_uid = case when v_state_changed then excluded.last_event_uid else public.nurture_subject_states.last_event_uid end,\r\n    telemetry_version = excluded.telemetry_version,\r\n    updated_at = now()\r\n  returning * into v_state;\r\n\r\n  if v_state_changed then\r\n    insert into public.lead_events (\r\n      event_uid, lead_hash, event_name, event_at, source_app, funnel_key, payload, created_at\r\n    ) values (\r\n      v_event_uid, p_lead_hash, 'nurture_skipped', v_at, 'business_leads_quiz', 'business',\r\n      jsonb_build_object(\r\n        'project_key', p_project_key,\r\n        'sequence_key', p_sequence_key,\r\n        'reason', v_reason,\r\n        'phase', v_phase,\r\n        'state_transition', true,\r\n        'telemetry_version', greatest(coalesce(p_telemetry_version, 2), 1)\r\n      ),\r\n      now()\r\n    )\r\n    on conflict (event_uid) do nothing;\r\n  end if;\r\n\r\n  return jsonb_build_object(\r\n    'state_changed', v_state_changed,\r\n    'event_uid', case when v_state_changed then v_event_uid else null end,\r\n    'occurrence_count', v_state.occurrence_count,\r\n    'status', v_state.status,\r\n    'reason_code', v_state.reason_code\r\n  );\r\nend;\r\n$function$\n",
+      "argumente": "p_project_key text, p_sequence_key text, p_lead_hash text, p_reason_code text, p_phase_key text, p_occurred_at timestamp with time zone, p_telemetry_version integer"
+    },
+    {
+      "schema": "public",
+      "name": "set_updated_at",
+      "definition": "CREATE OR REPLACE FUNCTION public.set_updated_at()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nBEGIN\n  NEW.updated_at = now();\n  RETURN NEW;\nEND;\n$function$\n",
+      "argumente": ""
+    },
+    {
+      "schema": "public",
+      "name": "submit_lead_complete",
+      "definition": "CREATE OR REPLACE FUNCTION public.submit_lead_complete(p_state jsonb, p_answers jsonb DEFAULT '[]'::jsonb, p_lang text DEFAULT NULL::text, p_answered_at timestamp with time zone DEFAULT now())\n RETURNS jsonb\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_lead_hash text := p_state->>'lead_hash';\n  v_unknown text[];\n  v_insert_cols text;\n  v_select_cols text;\n  v_update_set text;\n  v_answer jsonb;\n  v_written int := 0;\nBEGIN\n  IF v_lead_hash IS NULL OR v_lead_hash !~ '^qz_[a-zA-Z0-9_]+$' THEN\n    RAISE EXCEPTION 'lead_hash_required';\n  END IF;\n\n  -- Unbekannte Schluessel sind ein LAUTER Fehler - exakt wie beim bisherigen\n  -- PostgREST-Upsert. Stilles Verwerfen wuerde Drift zwischen Code und Schema verstecken.\n  SELECT array_agg(t.k) INTO v_unknown\n  FROM jsonb_object_keys(p_state) AS t(k)\n  WHERE NOT EXISTS (\n    SELECT 1 FROM information_schema.columns c\n    WHERE c.table_schema = 'public' AND c.table_name = 'lead_state' AND c.column_name = t.k\n  );\n  IF v_unknown IS NOT NULL THEN\n    RAISE EXCEPTION 'unknown_lead_state_columns: %', array_to_string(v_unknown, ', ');\n  END IF;\n\n  -- merge-duplicates-Semantik wie bisher: genau die MITGELIEFERTEN Schluessel schreiben\n  -- (auch ein mitgeliefertes null ueberschreibt), alle anderen Spalten bleiben unberuehrt.\n  SELECT\n    string_agg(format('%I', c.column_name), ', ' ORDER BY c.ordinal_position),\n    string_agg(format('r.%I', c.column_name), ', ' ORDER BY c.ordinal_position),\n    string_agg(format('%I = EXCLUDED.%I', c.column_name, c.column_name), ', '\n      ORDER BY c.ordinal_position) FILTER (WHERE c.column_name <> 'lead_hash')\n  INTO v_insert_cols, v_select_cols, v_update_set\n  FROM information_schema.columns c\n  WHERE c.table_schema = 'public' AND c.table_name = 'lead_state'\n    AND p_state ? c.column_name;\n\n  EXECUTE format(\n    'INSERT INTO public.lead_state (%s) '\n    || 'SELECT %s FROM jsonb_populate_record(NULL::public.lead_state, $1) AS r '\n    || 'ON CONFLICT (lead_hash) DO UPDATE SET %s',\n    v_insert_cols, v_select_cols, coalesce(v_update_set, 'lead_hash = EXCLUDED.lead_hash')\n  ) USING p_state;\n\n  -- Antworten ueber die bestehende, idempotente Fassung (Unique lead_hash+question_ref) -\n  -- ein zweiter Schreibweg waere eine zweite Wahrheit. Alles im selben Transaktionsklammer:\n  -- scheitert eine Antwort, wird auch der lead_state-Upsert zurueckgerollt.\n  FOR v_answer IN SELECT value FROM jsonb_array_elements(coalesce(p_answers, '[]'::jsonb)) LOOP\n    PERFORM public.upsert_answer_current(\n      v_lead_hash,\n      v_answer->>'question_ref',\n      NULLIF(v_answer->>'question_index', '')::int,\n      NULL,\n      v_answer->>'answer_ref',\n      v_answer->>'answer_text',\n      v_answer->>'answer_value',\n      '{}'::jsonb,\n      p_lang,\n      p_answered_at\n    );\n    v_written := v_written + 1;\n  END LOOP;\n\n  RETURN jsonb_build_object(\n    'persisted', true,\n    'lead_hash', v_lead_hash,\n    'answers_written', v_written\n  );\nEND;\n$function$\n",
+      "argumente": "p_state jsonb, p_answers jsonb, p_lang text, p_answered_at timestamp with time zone"
+    },
+    {
+      "schema": "public",
+      "name": "upsert_answer_current",
+      "definition": "CREATE OR REPLACE FUNCTION public.upsert_answer_current(p_lead_hash text, p_question_ref text, p_question_index integer DEFAULT NULL::integer, p_question_text text DEFAULT NULL::text, p_answer_ref text DEFAULT NULL::text, p_answer_text text DEFAULT NULL::text, p_answer_value text DEFAULT NULL::text, p_profile_delta jsonb DEFAULT '{}'::jsonb, p_lang text DEFAULT NULL::text, p_answered_at timestamp with time zone DEFAULT now())\n RETURNS void\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nBEGIN\n  IF p_lead_hash IS NULL OR p_question_ref IS NULL THEN\n    RAISE EXCEPTION 'lead_hash_and_question_ref_required';\n  END IF;\n\n  INSERT INTO public.lead_answers_current (\n    lead_hash,\n    question_ref,\n    question_index,\n    question_text,\n    answer_ref,\n    answer_text,\n    answer_value,\n    profile_delta,\n    lang,\n    answered_at\n  )\n  VALUES (\n    p_lead_hash,\n    p_question_ref,\n    p_question_index,\n    p_question_text,\n    p_answer_ref,\n    p_answer_text,\n    p_answer_value,\n    COALESCE(p_profile_delta, '{}'::jsonb),\n    p_lang,\n    COALESCE(p_answered_at, now())\n  )\n  ON CONFLICT (lead_hash, question_ref) DO UPDATE SET\n    question_index = EXCLUDED.question_index,\n    question_text = EXCLUDED.question_text,\n    answer_ref = EXCLUDED.answer_ref,\n    answer_text = EXCLUDED.answer_text,\n    answer_value = EXCLUDED.answer_value,\n    profile_delta = EXCLUDED.profile_delta,\n    lang = EXCLUDED.lang,\n    answered_at = EXCLUDED.answered_at,\n    updated_at = now()\n  WHERE EXCLUDED.answered_at >= public.lead_answers_current.answered_at;\nEND;\n$function$\n",
+      "argumente": "p_lead_hash text, p_question_ref text, p_question_index integer, p_question_text text, p_answer_ref text, p_answer_text text, p_answer_value text, p_profile_delta jsonb, p_lang text, p_answered_at timestamp with time zone"
+    },
+    {
+      "schema": "public",
+      "name": "upsert_video_progress_monotonic",
+      "definition": "CREATE OR REPLACE FUNCTION public.upsert_video_progress_monotonic(p_lead_hash text, p_video_step integer, p_video_id text DEFAULT NULL::text, p_unique_watched_percent numeric DEFAULT 0, p_playhead_percent numeric DEFAULT 0, p_unique_watched_seconds integer DEFAULT 0, p_event_at timestamp with time zone DEFAULT now(), p_lang text DEFAULT NULL::text)\n RETURNS TABLE(completed_rank integer, rank_changed boolean)\n LANGUAGE plpgsql\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_before_rank int;\n  v_after_rank int;\n  v_completed_before boolean;\n  v_pct numeric;\nBEGIN\n  IF p_lead_hash IS NULL OR p_video_step NOT IN (1,2,3) THEN\n    RAISE EXCEPTION 'valid_lead_hash_and_video_step_required';\n  END IF;\n\n  SELECT v.completed_rank INTO v_before_rank\n  FROM public.v_lead_state_full v\n  WHERE v.lead_hash = p_lead_hash;\n  v_before_rank := COALESCE(v_before_rank, 0);\n\n  SELECT completed_at IS NOT NULL INTO v_completed_before\n  FROM public.lead_video_progress\n  WHERE lead_hash = p_lead_hash AND video_step = p_video_step;\n  v_completed_before := COALESCE(v_completed_before, false);\n\n  v_pct := LEAST(100, GREATEST(0, COALESCE(p_unique_watched_percent, 0)));\n\n  INSERT INTO public.lead_video_progress (\n    lead_hash,\n    video_step,\n    video_id,\n    duration_seconds,\n    max_unique_watched_percent,\n    max_playhead_percent,\n    unique_watched_seconds,\n    completed_at,\n    first_seen_at,\n    last_update_at\n  )\n  VALUES (\n    p_lead_hash,\n    p_video_step,\n    NULLIF(p_video_id, ''),\n    0,\n    v_pct,\n    LEAST(100, GREATEST(0, COALESCE(p_playhead_percent, 0))),\n    GREATEST(0, COALESCE(p_unique_watched_seconds, 0)),\n    CASE WHEN v_pct >= 95 THEN COALESCE(p_event_at, now()) END,\n    COALESCE(p_event_at, now()),\n    COALESCE(p_event_at, now())\n  )\n  ON CONFLICT (lead_hash, video_step) DO UPDATE SET\n    video_id = COALESCE(public.lead_video_progress.video_id, EXCLUDED.video_id),\n    duration_seconds = GREATEST(\n      public.lead_video_progress.duration_seconds,\n      EXCLUDED.duration_seconds\n    ),\n    max_unique_watched_percent = GREATEST(\n      public.lead_video_progress.max_unique_watched_percent,\n      EXCLUDED.max_unique_watched_percent\n    ),\n    max_playhead_percent = GREATEST(\n      public.lead_video_progress.max_playhead_percent,\n      EXCLUDED.max_playhead_percent\n    ),\n    unique_watched_seconds = GREATEST(\n      public.lead_video_progress.unique_watched_seconds,\n      EXCLUDED.unique_watched_seconds\n    ),\n    seek_count = GREATEST(\n      public.lead_video_progress.seek_count,\n      EXCLUDED.seek_count\n    ),\n    completed_at = COALESCE(\n      public.lead_video_progress.completed_at,\n      CASE\n        WHEN GREATEST(\n          public.lead_video_progress.max_unique_watched_percent,\n          EXCLUDED.max_unique_watched_percent\n        ) >= 95 THEN COALESCE(p_event_at, now())\n      END\n    ),\n    last_update_at = COALESCE(p_event_at, now());\n\n  UPDATE public.lead_state\n  SET last_event_at = GREATEST(COALESCE(last_event_at, COALESCE(p_event_at, now())), COALESCE(p_event_at, now()))\n  WHERE lead_hash = p_lead_hash;\n\n  SELECT v.completed_rank INTO v_after_rank\n  FROM public.v_lead_state_full v\n  WHERE v.lead_hash = p_lead_hash;\n  v_after_rank := COALESCE(v_after_rank, 0);\n\n  IF v_after_rank > v_before_rank AND v_after_rank > 0 THEN\n    PERFORM public.enqueue_lead_sync(\n      p_lead_hash,\n      'mysql_rank_update',\n      jsonb_build_object('rank', v_after_rank, 'lang', p_lang, 'reason', 'video_progress')\n    );\n  END IF;\n\n  RETURN QUERY SELECT v_after_rank, v_after_rank > v_before_rank;\nEND;\n$function$\n",
+      "argumente": "p_lead_hash text, p_video_step integer, p_video_id text, p_unique_watched_percent numeric, p_playhead_percent numeric, p_unique_watched_seconds integer, p_event_at timestamp with time zone, p_lang text"
+    }
+  ],
+  "trigger": [
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "name": "trg_lead_answers_current_updated_at",
+      "definition": "CREATE TRIGGER trg_lead_answers_current_updated_at BEFORE UPDATE ON public.lead_answers_current FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "name": "trg_lead_migration_unresolved_updated_at",
+      "definition": "CREATE TRIGGER trg_lead_migration_unresolved_updated_at BEFORE UPDATE ON public.lead_migration_unresolved FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "name": "trg_lead_state_updated_at",
+      "definition": "CREATE TRIGGER trg_lead_state_updated_at BEFORE UPDATE ON public.lead_state FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "name": "trg_lead_sync_outbox_updated_at",
+      "definition": "CREATE TRIGGER trg_lead_sync_outbox_updated_at BEFORE UPDATE ON public.lead_sync_outbox FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "name": "trg_lead_video_progress_updated_at",
+      "definition": "CREATE TRIGGER trg_lead_video_progress_updated_at BEFORE UPDATE ON public.lead_video_progress FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    }
+  ]
+}

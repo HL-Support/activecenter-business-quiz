@@ -112,6 +112,45 @@ Aufgeräumt: Dumpdateien, die zweite Test-DB `business_leads_dumpprobe` und die
 `.pgpass`-Datei auf dem Server sind entfernt. Für den echten Cutover wird die
 Zugangsdatei aus den Secrets neu erzeugt.
 
+## Schema-Abbildung `public` → `leads` (27.08. spät abends) — bestanden
+
+Schritt 1 des Fortsetzungsplans (STAND-UND-FORTSETZUNG §8): Auf der Plattform darf kein
+Projekt in `public` liegen (Rollenmodell §5). Der gesamte Testimport wurde deshalb mit
+**abgebildeten Schemata** wiederholt: `public` → `leads`, `analytics_internal` →
+`leads_analytics`.
+
+**Wie abgebildet wird:** Eine einzige Implementierung in
+`scripts/phase5-schema-abbildung.js` (Export, Vergleich und Datenprobe nutzen dasselbe
+Modul — doppelte Helfer driften, Falle 1). Ersetzt werden nur die drei im Katalog
+tatsächlich vorkommenden Formen: qualifizierte Verweise (`public.lead_state`, auch in
+Funktionsrümpfen und dynamischem SQL), `SET search_path TO 'public', 'pg_temp'` und die
+information_schema-Filter `table_schema = 'public'`. Danach erzwingt eine
+**Restkontrolle**, dass kein Quellschema-Token übrig ist — ein unbekanntes Vorkommen
+ist ein harter Fehler, keine stille Annahme. Trockentest gegen den Export vom 27.08.:
+einziger Rest war die alte `CREATE SCHEMA analytics_internal`-Kopfzeile, die der neue
+Export ersetzt.
+
+**Ablauf und Beweise** (frische Test-DB, `dropdb` + `createdb` mit identischer
+ICU-Locale en-US/UTF8 wie `hl_support`; Artefakte mit Suffix `-leads`, die
+unabgebildeten Artefakte des ersten Laufs bleiben als Beweis unangetastet):
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| **Import** | `schema-2026-08-27-leads.sql`, MD5-geprüft, eine Transaktion, beginnt mit `SET LOCAL ROLE leads_owner` und `SET LOCAL search_path TO leads, leads_analytics` (Rollenmodell-Vertrag) |
+| **Parität** | 356/356 Spalten, 65/65 Constraints, 86/86 Indexe, 6/6 Views, 20/20 Funktionen, 5/5 Trigger — **keine Abweichung** gegen die abgebildete Quelle. Der Vergleich setzt auf der Test-DB `search_path = leads`, damit `pg_get_*` dort genauso (un)qualifiziert druckt wie die Quell-Sitzung mit `public` |
+| **`public` leer** | kein Quiz-Objekt (Tabelle/View/Sequenz) in `public` — Fertig-Kriterium erfüllt; wird vom Vergleichs-Skript jetzt mitgeprüft |
+| **Eigentum** | alle Objekte in `leads`/`leads_analytics` gehören `leads_owner` (Relationen und Funktionen) — beweist, dass der Import wirklich unter `SET ROLE` lief; ebenfalls mitgeprüft |
+| **Funktionsbeweis** | `init_lead` (Hash erzeugt), `submit_lead_complete` (Kontakt + **6 Antworten** atomar, W5-Kriterium), `upsert_video_progress_monotonic` (`completed_rank` 1, Outbox-Job id 1 über Identity), `v_lead_state_full`; Umlaut-Rückweg als Hex verifiziert (`c3a4 c3b6 c3bc c39f` = äöüß) |
+| **Datenprobe** | **171.708 Zeilen**, alle 18 Tabellen `exportiert == importiert`; nur `lead_events` (+14) und `lead_sync_outbox` (+1) zeigen erwarteten Live-Drift (Quelle lief weiter). Zähler auf max+1000 |
+| **Inhalt** | 3/3 Prüfsummen identisch auf driftfreien Tabellen (`quiz_sessions`, `lead_contact_crm`, `tracking_video_progress`): MD5 über `row_to_json`, Zeitzone beidseitig UTC fixiert, Textsortierung `COLLATE "C"` (ICU-Ziel vs. Quelle sortiert sonst anders — das wäre ein falscher Rot-Befund des Transports gewesen) |
+
+Damit gilt für den echten Cutover: Export **immer** über
+`scripts/phase5-schema-export.js` (bildet ab und beweist Restfreiheit); ein roher
+`pg_dump --schema-only` würde wieder `public` erzeugen. Die **Daten**-Übertragung per
+`pg_dump --data-only` bleibt der schnelle Weg, braucht dann aber ein Umschreiben der
+`search_path`-/Schema-Angaben oder den Restore über die abgebildete DDL plus
+`--data-only`-Import je Tabelle — das legt der Cutover-Plan fest.
+
 ## Was der Testimport bewusst NICHT abdeckt (Rest bis zum echten Umzug)
 
 | Offen | Gehört zu |
