@@ -1,11 +1,29 @@
 # Cutover-Checkliste — Supabase → Plattform-Datenbank
 
-**Stand: 27.08.2026, 20:45 MESZ.** Dieses Dokument wird in der Cutover-Nacht von oben
-nach unten abgearbeitet. Jeder Schritt nennt seinen Nachweis und seinen Rückweg.
+**Stand: 27.08.2026, 22:00 MESZ · Ausführung geplant für ~03:00 MESZ.**
+
+Dieses Dokument wird in der Cutover-Nacht von oben nach unten abgearbeitet. Es ist so
+geschrieben, dass es **ohne Vorwissen** funktioniert — eine neue Sitzung fängt hier an
+und braucht nichts weiter als dieses Dokument.
+
+Jeder Schritt nennt seinen Nachweis und seinen Rückweg.
 
 > 🔴 Regel für die ganze Nacht: **Kein Schritt ohne Nachweis.** Wenn eine Prüfung nicht
 > grün ist, wird nicht weitergegangen — es wird zurückgerollt. Der Rückweg kostet das
 > Fenster, nicht die Daten.
+>
+> 🔴 **Zeiten immer in MESZ prüfen.** Die Datenbank-Zeitstempel sind **UTC** (also zwei
+> Stunden früher). Am 27.08. wurde 18:xx UTC einmal als Lokalzeit gelesen und der
+> Cutover fast zur Hauptverkehrszeit gestartet. Vor dem Start gilt:
+> `node --env-file=.env.prod scripts/cutover.js pruefen` **und** die Uhrzeit
+> gegenprüfen. Gemessen über sieben Tage: 04 Uhr trägt **1** Ereignis, 19 Uhr **643**.
+
+## Ablauf in einem Satz
+
+`pruefen` → `cutover-n8n.js aus` → `barriere-an` → `stillstand` → `uebertragen` →
+`nachweisen` → Coolify-Variable → Wächter → pg_cron → `cutover-n8n.js an`.
+Alles liegt bereit; für keinen Schritt ist ein Handgriff im Supabase- oder
+n8n-Dashboard nötig.
 
 ---
 
@@ -23,6 +41,10 @@ nach unten abgearbeitet. Jeder Schritt nennt seinen Nachweis und seinen Rückweg
 | Rechtestand der Quelle | ✅ gesichert in `cutover-belege/rechte-vor-dem-cutover.json` |
 | n8n-Netzweg | ✅ Rolle `leads_n8n`, `pg_hba` + Firewall offen, vom n8n-Server bewiesen |
 | n8n-Nurture-Sender | ⏸ bleibt beim Cutover **aus**, Umbau am Folgetag (Entscheidung 27.08.) |
+| n8n-Werkzeug | ✅ `scripts/cutover-n8n.js` (`stand` / `aus` / `an`) — sichert den Ist-Zustand selbst |
+| **Barriere** | ✅ **läuft automatisch** — `postgres`-Direktzugang beschafft, Trockenlauf bestanden |
+| Coolify-Zugangsdaten | ✅ `LEADS_DB_*` gesetzt, **nur `LEADS_DB_MODUS` fehlt** |
+| Wächter-Zugangsdaten | ✅ `LEADS_PG_*` in der `.env`, **nur `WAECHTER_QUELLE` fehlt** |
 
 ---
 
@@ -111,9 +133,14 @@ einen Fehler, wenn `service_role` noch schreiben dürfte.
 > `arwdDxtm`) — das große `D` hätte dauerhaft gefehlt, ohne dass es jemand bemerkt.
 > Korrigiert.
 
-**Direkt danach von Hand:** n8n-Workflows deaktivieren (mindestens
-`AC - Lead Sync Outbox Worker`, `AC - Quiz Nurture Email Sender`,
-`AC - Lead Post Processor`, `AC - Lead System Health Monitor`).
+**Vorher** (Reihenfolge zählt — erst die Schreiber stoppen, dann die Rechte entziehen):
+
+```bash
+node scripts/cutover-n8n.js aus
+```
+Schaltet Outbox-Worker, Nurture-Sender, Post-Processor, Health-Monitor, Keep-Alive und
+Error-Alert ab — und **sichert den Ist-Zustand vorher selbst** nach
+`cutover-belege/n8n-stand-vor-cutover.json`. Meldet Exitcode 1, wenn einer noch läuft.
 
 **Rückweg jederzeit:** `node … scripts/cutover.js barriere-aus` — gibt den
 Rückweg-Block aus (GRANT **und** Cron-Job mit exakt dem ursprünglichen Namen
@@ -214,9 +241,12 @@ unvollständig — der Wächter zeigt das also an, ohne dass man extra danach su
 # pg_cron auf dem Ziel
 scp plattform-cron-leads.sql root@91.99.76.104:/tmp/ && ssh … psql -d hl_support -f /tmp/…
 ```
-n8n-Workflows wieder aktivieren, die **keinen** direkten Supabase-Zugriff haben
-(Outbox-Worker, Post-Processor, Health-Monitor). Der Nurture-Sender bleibt nach
-Entscheidung B aus.
+```bash
+node scripts/cutover-n8n.js an
+```
+Stellt **den gesicherten Zustand** wieder her, nicht pauschal alles auf aktiv — sonst
+liefe ein Workflow los, der vorher bewusst aus war. Der **Nurture-Sender bleibt
+bewusst aus** (Umbau am Folgetag); das Skript sagt das ausdrücklich.
 
 **Vercel stilllegen** (Deployment pausieren) — verhindert, dass ein alter Link in die
 tote Datenbank schreibt. Umkehrbar.
@@ -240,3 +270,41 @@ vollständig, weil im Fenster niemand geschrieben hat. Genau dafür ist die Barr
 Nach Schritt 5 ist der Rückweg `LEADS_DB_MODUS=postgrest` + Redeploy + `barriere-aus`
 + n8n reaktivieren. Was in der Zwischenzeit in die neue Datenbank geschrieben wurde,
 müsste dann nachgezogen werden — deshalb: **Schritt 5 erst, wenn Schritt 4 grün ist.**
+
+---
+
+## Für eine Sitzung ohne Vorwissen — alles an einem Ort
+
+**Zugänge** (alle in `agent-secrets.json` unter `C:/Users/Markus/.agent-secrets/`):
+
+| Zweck | Eintrag |
+| --- | --- |
+| Quelle lesen (Management-API, **read-only**) | `.env.prod` → `SUPABASE_ACCESS_TOKEN` |
+| Quelle **ändern** (Barriere) | `supabase.postgres*` — Session-Pooler, Port 5432 |
+| Quelle dumpen (BYPASSRLS) | `marathon_supabase_app` |
+| Ziel-DB, App-Rolle | `leads_pg.appUser` / `appPassword` |
+| Ziel-DB, n8n-Rolle | `leads_pg.n8nUser` / `n8nPassword` |
+| Coolify deployen | `coolify.deployToken` (nur Deploy) · `coolify.apiToken` (Wartung) |
+| n8n | `n8n.apiKey` |
+| SSH DB-Server | `root@91.99.76.104`, Key `id_rsa` |
+| SSH App-/Wächter-Box | `root@167.233.251.217`, dieselbe Key-Datei |
+
+**Die drei Fallen, die diesen Cutover kosten könnten:**
+
+1. **Zeitzone.** Datenbank-Zeitstempel sind UTC, MESZ ist zwei Stunden später. Am 27.08.
+   wurde das einmal verwechselt und der Cutover fast zur Hauptverkehrszeit gestartet.
+   Vor dem Start die Lokalzeit gegenprüfen.
+2. **`SUPABASE_*` in Coolify stehen lassen.** Sie zu entfernen liegt nahe, wäre aber ein
+   stiller Teilausfall. Die Bridge-Guards sind seit dem Audit modusbewusst, aber die
+   Variablen kosten nichts — also stehen lassen.
+3. **Der Wächter muss `Quelle: plattform` melden.** Steht dort weiter `supabase`,
+   bewacht er die alte Datenbank und meldet zufrieden „alles ruhig".
+
+**Wenn etwas schiefgeht:** `scripts/cutover.js barriere-aus` · `scripts/cutover-n8n.js an` ·
+`LEADS_DB_MODUS` in Coolify entfernen · Redeploy. Bis Schritt 4 kostet ein Abbruch **nur
+das Fenster** — die Quelle ist unverändert, weil niemand hineinschreiben konnte.
+
+**Was am Folgetag ansteht:** Nurture-Sender umbauen (6 Nodes auf `leads_n8n`),
+`AC - Error Alert` mitnehmen, Test-DB löschen (`dropdb business_leads_testimport` —
+enthält 1.236 echte E-Mail-Adressen), `pgss-monatsreset` reparieren. Vollständig in
+[STAND-UND-FORTSETZUNG.md](../../STAND-UND-FORTSETZUNG.md) §8b.

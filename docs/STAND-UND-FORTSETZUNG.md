@@ -505,10 +505,10 @@ Dokumentation übernommen. Reihenfolge: nach Dringlichkeit.
 
 | # | Punkt | Beleg / Stand |
 | --- | --- | --- |
-| 1 | **Barriere-SQL von Hand** im Supabase-Editor — die Management-API ist read-only und kann weder `REVOKE` noch `cron.schedule` | zweifach gemessen; Block liegt fertig unter `cutover-belege/barriere-an.sql` |
-| 2 | **n8n-Workflows deaktivieren** (mind. Outbox-Worker, Nurture-Sender, Post-Processor, Health-Monitor) | von Hand, n8n-API |
-| 3 | **`LEADS_DB_*` in Coolify setzen** + Redeploy. 🔴 `SUPABASE_*` **stehen lassen** | Werte in Secrets `leads_pg`; kein neuer Build nötig (Treiber liegt im Image) |
-| 4 | **Wächter umstellen** (`WAECHTER_QUELLE=plattform` + `LEADS_PG_*` in die `.env`) | Dateien und Treiber liegen auf der Box, Sicherungen angelegt |
+| 1 | ~~Barriere-SQL von Hand~~ → ✅ **läuft automatisch** (`cutover.js barriere-an`) | `postgres`-Direktzugang beschafft, Trockenlauf bestanden; dabei fand sich, dass der Rückweg **TRUNCATE** nicht zurückgab |
+| 2 | ~~n8n von Hand deaktivieren~~ → ✅ **Werkzeug da** (`cutover-n8n.js aus`/`an`) | sichert den Ist-Zustand selbst; `an` stellt genau ihn wieder her, nicht pauschal alles |
+| 3 | **Nur noch `LEADS_DB_MODUS=direkt`** + Redeploy. 🔴 `SUPABASE_*` **stehen lassen** | die übrigen `LEADS_DB_*` sind am 27.08. gesetzt und im Container nachgemessen |
+| 4 | **Nur noch `WAECHTER_QUELLE=plattform`** in die `.env` | `LEADS_PG_*` stehen dort bereits; Dateien, Treiber und Sicherungen liegen auf der Box |
 | 5 | **pg_cron auf dem Ziel anlegen** — erst **nach** dem Datenumzug | `plattform-cron-leads.sql` |
 | 6 | **Vercel stilllegen** (Deployment pausieren, umkehrbar) | verhindert Split-Brain über `businessleadsquiz.vercel.app` (HTTP 200, DNS-unabhängig) |
 
