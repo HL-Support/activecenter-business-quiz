@@ -1,7 +1,8 @@
 # Phase-5-Testimport: Protokoll
 
-Stand: 27.08.2026 nachmittags · **Gate bestanden** · Ziel: `business_leads_testimport`
-auf dem Flotten-PostgreSQL 18.6 (`10.0.1.3`, ICU en-US/UTF8 wie `fitapp`)
+Stand: 27.08.2026 · **Gate bestanden — Schema UND Daten** · Ziel:
+`business_leads_testimport` auf dem Flotten-PostgreSQL 18.6 (`10.0.1.3`, ICU
+en-US/UTF8 wie `fitapp`)
 
 ## Was gemacht wurde
 
@@ -48,15 +49,45 @@ Dazu ein PG18-Katalogartefakt: NOT-NULL erscheint dort als benannte Constraints
 (`contype='n'`, neu seit PG17) — im Vergleich ausgefiltert, da der Spaltenvergleich
 NotNull bereits je Spalte prüft.
 
+## Datenprobe (27.08. abends) — ebenfalls bestanden
+
+Schema beweist Definitionen, nicht Daten. Deshalb wurden anschliessend die **echten
+Daten** aller 18 Tabellen in dieselbe Test-DB gepumpt (`scripts/phase5-datenprobe.js`;
+Quelle rein lesend, blätternd über den Primärschlüssel, Ziel wird vorher geleert).
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| **Menge** | **171.260 Zeilen** exportiert → importiert, je Tabelle **exportiert == importiert**. 16 von 18 Tabellen auch deckungsgleich mit dem Quellstand *zum Zählzeitpunkt*; die zwei `analytics_internal`-Tabellen zeigen erwarteten **Drift** (+21/+1), weil der pg_cron-Job alle 15 min weiterschreibt — die Quelle lief bewusst ohne Schreibstopp. |
+| **Inhalt** | **6 von 6 Prüfsummen identisch** (MD5 über sortierte Werte, Quelle vs. Ziel): `quiz_sessions`, `lead_contact_crm`, `tracking_video_progress`, Antworten vor dem 01.08., `lead_events`-JSON-Payloads vor dem 01.08. — und eine gezielte **Umlaut-/Akzent-Probe** (`ä ö ü ß à è é ì ò ù`). Damit sind Unicode, JSON, Zahlen und Zeitstempel bewiesen, nicht nur die Zeilenzahl. |
+| **Identity/Sequenzen** | Generalprobe des Cutover-Schritts: alle 9 Zähler auf `max+1000` gesetzt; ein anschliessender echter INSERT bekam `event_id 112059` — **kollisionsfrei**. |
+| **Referenzielle Integrität** | Ein verwaistes `lead_events`-Insert wurde vom FK **abgewiesen**; `DELETE` auf `lead_state` räumte per CASCADE korrekt ab (108.175 → 108.174). |
+| **Funktionen auf echten Daten** | `submit_lead_complete`, `upsert_video_progress_monotonic` (erzeugte Outbox-Job 3439), `v_lead_state_full` (Rang 1) — alle korrekt gegen den vollen Bestand. |
+| **Dauer** | 5,2 min über den API-Weg. 🔴 **Keine Cutover-Messung**: Ohne DB-Passwort gibt es kein `pg_dump`/`COPY`; die echte Übertragung wird deutlich schneller sein. Der Wert ist eine Obergrenze. |
+
+Drei Funde der Datenprobe, alle behoben:
+
+1. **PostgREST liefert `analytics_internal` gar nicht aus** (`PGRST106`, nur
+   `public`/`graphql_public`/`marathon`) — die beiden Analytics-Tabellen laufen jetzt
+   über die Management-API.
+2. **`refresh_runs.run_id` ist `GENERATED ALWAYS`** und fehlte in der handgepflegten
+   Identity-Liste. Die Liste wird nicht mehr von Hand geführt, sondern aus dem
+   Paritäts-Schnappschuss abgeleitet — Handflags driften, gemessene nicht.
+3. **Der DB-Server sperrt schnelle SSH-Folgen** (~20 Verbindungen in Folge → Timeout für
+   Minuten). Import und Zählung laufen jetzt in **einer** Sitzung.
+
 ## Was der Testimport bewusst NICHT abdeckt (Rest bis zum echten Umzug)
 
 | Offen | Gehört zu |
 | --- | --- |
-| Datenimport + Sequenz-/Identity-Stände auf `max(id)+Puffer` | Phase 6 (Cutover) |
+| Übertragung per `pg_dump`/`COPY` samt echter Zeitmessung (braucht das Supabase-DB-Passwort) | Phase 6 (Cutover) |
 | Rollenmodell (App-Rolle statt service_role/RLS) + Grants | Phase 5/6, eigenes SQL |
 | pg_cron-Job `refresh_event_daily` (alle 15 min) auf dem Ziel | Phase 6, versioniertes SQL |
 | Schreibbarriere 13.5.2 (activecenter-analytics, hl-support-analytics-Leser, n8n) | Phase 6 |
 | App-Verbindung (Stufe B: direkter Treiber; nur von `10.0.1.5` erreichbar per UFW/pg_hba) | nach Vercel-Abbau |
+
+🔴 Die Test-DB `business_leads_testimport` enthält echte Kontaktdaten (Kopie vom
+27.08.). Sie ist kein Spielplatz für Löschtests; Rückweg ist
+`dropdb business_leads_testimport`.
 
 Artefakte: `schema-2026-08-27.sql` (der Import), `paritaet-live-2026-08-27.json`
 (Quell-Schnappschuss), beide Skripte unter `scripts/`. Vor dem ECHTEN Umzug: Manifest
