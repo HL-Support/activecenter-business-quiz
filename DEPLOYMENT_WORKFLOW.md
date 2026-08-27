@@ -12,37 +12,42 @@ auf Vercel. Die alte Preview→Promote-Anleitung steht unten als Rückweg-Wissen
 | Domains | `quiz.activecenter.info`, `business.activecenter.info`, `business.eaglesfit.ch` |
 | Nachweis | `GET /health/live` → `commit` (Quelle `SOURCE_COMMIT`) |
 
-## 🔴 Merge auf main deployt NICHT
+## Deploy-Pipeline Stufe 1 (seit 27.08.): CI deployt nach grünen Gates
 
-Der Git-Webhook/Auto-Deploy ist **bewusst deaktiviert**, bis die Deploy-Pipeline aus dem
-Audit steht (13.3.3/13.5.6: Digest-Promotion, Preview-App, **CI-Gates vor dem Webhook**).
-Beleg: alle Deployments seit dem Cutover tragen `webhook=false`. Ein alter Stand in
-Produktion ist deshalb **kein Ausfall-Indiz**, sondern der Normalzustand nach einem Merge.
+Der **rohe Git-Webhook bleibt aus** (er würde ungeprüft bauen). Stattdessen deployt der
+CI-Job `deploy` in `.github/workflows/activecenter-safety.yml`:
 
-## Ablauf für einen Produktions-Deploy
+- nur bei Push auf `main` (Branch Protection erzwingt davor grüne PR-Checks),
+- nur **nach** grünen Jobs `safety` und `e2e-queue` im selben Lauf,
+- nur wenn **Runtime-Dateien** betroffen sind (`api/`, `server/`, `src/`, `fonts/`,
+  `Dockerfile`, `index.html`, `berater-info.html`, `translations.js`, `video-config.js`,
+  `ac-track.js`, `build.js`, `package.json`, `pnpm-lock.yaml`) — reine `docs/`- oder
+  `scripts/`-Merges deployen nicht,
+- und er **beweist** den Deploy: `/health/live` muss innerhalb von 10 Minuten den
+  gemergten Commit tragen, sonst ist der Lauf rot.
 
-1. PR gegen `main`; die Pflicht-Checks (`safety`, `e2e-queue`) müssen grün sein.
-   Branch Protection erzwingt das — direkte Pushes auf `main` ohne grüne Checks gibt es
-   nicht.
-2. Nach dem Merge den Deploy **bewusst anstossen** (nur nötig, wenn Runtime-Code betroffen
-   ist: `api/`, `server/`, `src/`, `index.html`, `translations.js`, `video-config.js`,
-   `Dockerfile`; reine `docs/`- oder `scripts/`-Merges brauchen keinen Deploy):
+Zugang: GitHub-Actions-Secret `COOLIFY_API_TOKEN` (gesetzt 27.08.; bei Gelegenheit durch
+einen nur-Deploy-berechtigten Token ersetzen). Ein roter `deploy`-Job heisst: Produktion
+läuft nachweislich auf dem alten Stand — Ursache im Actions-Log, Fallback unten.
 
-   ```bash
-   # Token: agent-secrets → coolify.apiToken; Basis: https://coolify.hl-support.biz/api/v1
-   curl -X POST -H "Authorization: Bearer <token>" \
-     "https://coolify.hl-support.biz/api/v1/deploy?uuid=yhoacszoiofuq6dg4mykyr7b"
-   ```
+**Stufe 2 (offen, Audit 13.5.6):** Digest-Promotion — Produktion übernimmt exakt das in
+Preview getestete Image statt aus demselben Commit neu zu bauen; dazu Preview-App. Kommt
+mit der Hetzner-Zielpipeline.
 
-   Alternativ über die Coolify-Oberfläche (App → Deploy).
-3. Nachweis führen — **mehrfach über Zeit**, eine Messung ist kein Beweis:
+## Fallback: manueller Deploy
 
-   ```bash
-   curl -s https://quiz.activecenter.info/health/live   # commit == gemergter SHA?
-   ```
+Wenn die CI nicht verfügbar ist oder ein Deploy ohne Merge nötig wird:
 
-   Deploys sind ausfallfrei (Rolling mit Healthcheck, am 25.08. gemessen); eine
-   Router-Umkonfiguration (Domain-Änderung) ist davon ausgenommen.
+```bash
+# Token: agent-secrets → coolify.apiToken; Basis: https://coolify.hl-support.biz/api/v1
+curl -X POST -H "Authorization: Bearer <token>" \
+  "https://coolify.hl-support.biz/api/v1/deploy?uuid=yhoacszoiofuq6dg4mykyr7b"
+```
+
+Alternativ über die Coolify-Oberfläche (App → Deploy). Nachweis immer über
+`/health/live` — **mehrfach über Zeit**, eine Messung ist kein Beweis. Deploys sind
+ausfallfrei (Rolling mit Healthcheck, am 25.08. gemessen); eine Router-Umkonfiguration
+(Domain-Änderung) ist davon ausgenommen.
 
 ## Was sonst noch Kopien hat (nach einem Merge prüfen)
 

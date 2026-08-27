@@ -25,9 +25,9 @@
 
 - Production laeuft auf **Coolify** (`167.233.251.217`, App `business-leads-prod`,
   Dockerfile-Build, `server/app-server.js` liefert `dist/` + `api/` + `/health/live`).
-- 🔴 **Merge auf `main` deployt NICHT** — Auto-Deploy ist bewusst aus. Deploy manuell per
-  Coolify-API, Nachweis ueber `/health/live`-Commit: siehe
-  [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md).
+- Deploys macht der CI-Job `deploy` nach gruenen Gates (nur Runtime-Pfade, Nachweis ueber
+  `/health/live`); der rohe Git-Webhook bleibt aus. docs/scripts-Merges deployen nicht.
+  Details und manueller Fallback: [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md).
 - Vercel ist nur noch Hosting-Rueckweg bis zum Abbau (dort gilt weiter
   `"outputDirectory": "dist"` aus `vercel.json`).
 - `index.html` ist die Shell und laedt `/video-config.js` und `/translations.js` vor `/assets/app.js`.
@@ -62,8 +62,9 @@
 - `npm run verify`
 - `npm test` (163 Vertrags-/Verhaltenstests; CI verlangt sie ohnehin)
 - Aenderungen per PR gegen `main`; Merge erst mit gruenen Checks (`safety`, `e2e-queue`).
-- Nach dem Merge von Runtime-Code: Deploy **manuell** anstossen und ueber `/health/live`
-  nachweisen — Ablauf in [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md).
+- Nach dem Merge von Runtime-Code deployt der CI-Job `deploy` und beweist es ueber
+  `/health/live` — den Job-Ausgang pruefen, nicht annehmen. Ablauf/Fallback in
+  [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md).
 - Kopien nachziehen, wenn betroffen: Nurture-Waechter auf `167.233.251.217`
   (docs/NURTURE_BETRIEB.md §4), n8n-Workflows nur ueber die API (Skill
   `n8n-workflow-update`).

@@ -1,10 +1,19 @@
 const crypto = require('crypto');
 
+// Entfernt ein literales '\n' am Ende und Whitespace. Anlass: der produktive JWT_SECRET
+// endete auf Backslash+n (Env-Altlast) - dieselbe Falle darf keinen Supabase-Key treffen.
+// Fuer saubere Werte ist das ein No-op.
+function cleanEnvSecret(value) {
+  return String(value || '')
+    .replace(/\\n$/g, '')
+    .trim();
+}
+
 // Kein Fallback auf eine feste Projekt-URL (Markus, 21.07.2026): Ein stiller Fallback wuerde
 // nach einem Wechsel des Supabase-Projekts weiter in die ALTE Datenbank schreiben, ohne dass
 // irgendwo ein Fehler auftaucht. Fehlt die Variable, greifen die vorhandenen Schutzabfragen.
 const SUPABASE_URL = String(process.env.SUPABASE_URL || '').trim();
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_KEY = cleanEnvSecret(process.env.SUPABASE_SERVICE_KEY);
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 90;
 
 function nowIso() {
@@ -247,7 +256,12 @@ async function supabaseRequest(path, options = {}) {
 
 async function supabaseJson(path, options = {}) {
   const response = await supabaseRequest(path, options);
-  return response.status === 204 ? null : response.json();
+  // void-RPCs und return=minimal antworten ohne Body - der Schreibvorgang ist dann schon
+  // verbucht, es gibt nur nichts zu parsen. Deckt 204 UND leere 200er ab (Vorfall 27.08.2026,
+  // Regressionstests in scripts/tests/supabase-rpc-leere-antwort.test.js).
+  if (response.status === 204) return null;
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
 }
 
 async function supabaseRpc(functionName, body = {}) {
@@ -387,6 +401,7 @@ function eventUid(event) {
 
 module.exports = {
   allowedCorsOrigin,
+  cleanEnvSecret,
   deterministicBucket,
   eventUid,
   generateLeadHash,

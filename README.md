@@ -8,8 +8,10 @@ Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
 
 - Projekt: `business_leads_quiz`
 - Domains: `https://quiz.activecenter.info`, `https://business.activecenter.info`, `https://business.eaglesfit.ch`
-- Deploy: **manuell** ueber die Coolify-API — Merge auf `main` deployt NICHT automatisch.
-  Ablauf und Nachweis: [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md)
+- Deploy: der CI-Job `deploy` deployt Runtime-Aenderungen auf `main` **nach gruenen
+  Checks** und beweist den Deploy ueber `/health/live`; reine docs/scripts-Merges deployen
+  nicht. Der rohe Git-Webhook bleibt aus. Details und manueller Fallback:
+  [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md)
 - Vercel (Projekt-ID `prj_REvfRPD2XJO5nBgpKBqUnVFKpJur`) ist nur noch der Hosting-Rueckweg
   bis zum freigegebenen Abbau (Checkliste in `docs/audits/cutover-vorbereitung/`)
 
@@ -118,12 +120,13 @@ Wichtig: `landing-page/_system/db-bridge.php` enthaelt einen aktualisierten Mirr
 
 ## Deploy
 
-Produktion laeuft auf Coolify; deployt wird **manuell nach gruener CI** — der komplette
-Ablauf (Coolify-API-Aufruf, `/health/live`-Nachweis, Kopien wie der Nurture-Waechter,
-Vercel-Rueckweg) steht in [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md).
+Produktion laeuft auf Coolify; deployt wird durch den CI-Job `deploy` **nach gruenen
+Gates** (Stufe 1 der Deploy-Pipeline, seit 27.08.) — der komplette Ablauf, der manuelle
+Fallback und die Kopien-Fallen (Nurture-Waechter, n8n) stehen in
+[DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md).
 
-Kurzform: PR → Checks gruen → Merge → `POST /api/v1/deploy?uuid=yhoacszoiofuq6dg4mykyr7b`
-(Coolify) → `/health/live` zeigt den gemergten Commit.
+Kurzform: PR → Checks gruen → Merge → CI deployt (nur Runtime-Pfade) → CI beweist den
+Deploy ueber `/health/live`.
 
 ## Relevante Dateien
 

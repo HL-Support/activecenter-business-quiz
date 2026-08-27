@@ -20,7 +20,17 @@ const { Buffer } = require('buffer');
 const jwt = require('jsonwebtoken');
 // allowedCorsOrigin kommt seit P0-4 aus derselben Quelle wie fuer die lead-Routen; der Import
 // aus server/lead-system.js bestand fuer sendMetaCAPIEvent bereits und ist zyklusfrei.
-const { allowedCorsOrigin, sendMetaCAPIEvent } = require('../server/lead-system');
+// Seit dem void-RPC-Vorfall (27.08.2026) kommen auch die Supabase-Zugriffshelfer von dort:
+// Die Bridge hielt eigene Kopien, die Kopien drifteten (fehlender 204-Guard), und der
+// kritische Pfad benutzte die kaputte Fassung. Eine Implementierung, zwei Aufrufer.
+const {
+  allowedCorsOrigin,
+  cleanEnvSecret,
+  sendMetaCAPIEvent,
+  supabaseJson: sharedSupabaseJson,
+  supabaseRequest: sharedSupabaseRequest,
+  supabaseRpc: sharedSupabaseRpc,
+} = require('../server/lead-system');
 // Seit Phase 1 (/berater-info) gibt es genau EINEN Erzeuger fuer Coach-Insights-Links.
 // Die frueheren lokalen Kopien in dieser Datei und im Outbox-Worker waren nicht
 // deckungsgleich (Inventur 2026-08-24, Befund D-2).
@@ -30,11 +40,6 @@ const {
   normalizeProfileCode,
 } = require('../server/coach-insights-link');
 const { melden: meldeFehler } = require('../server/fehlermeldung');
-function cleanEnvSecret(value) {
-  return String(value || '')
-    .replace(/\\n$/g, '')
-    .trim();
-}
 
 const BRIDGE_URL = process.env.BRIDGE_URL || 'https://ac-reconnect.com/db-bridge.php';
 const HBA_READ_BRIDGE_URL =
@@ -340,31 +345,21 @@ function decodeResumeKey(key) {
   return Number(fromBase62(encodedId));
 }
 
+// Bridge-Vertrag seit jeher: Ohne konfiguriertes Supabase KEIN Fehler, sondern null -
+// Aufrufer pruefen 'response ?'. Die Implementierung selbst liegt kanonisch in
+// server/lead-system.js (dort wirft fehlende Konfiguration); hier bleibt nur der Guard.
 async function supabaseRequest(path, options = {}) {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     return null;
   }
-
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    ...options,
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      ...(options.headers || {}),
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    throw new Error(`Supabase ${path} failed: ${response.status} ${text}`);
-  }
-
-  return response;
+  return sharedSupabaseRequest(path, options);
 }
 
 async function supabaseJson(path, options = {}) {
-  const response = await supabaseRequest(path, options);
-  return response ? response.json() : null;
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    return null;
+  }
+  return sharedSupabaseJson(path, options);
 }
 
 function sleep(ms) {
@@ -1802,19 +1797,12 @@ function leadHashOf(payload) {
 }
 
 async function supabaseRpc(functionName, body = {}) {
-  const response = await supabaseRequest(`rpc/${functionName}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Prefer: 'return=representation',
-    },
-    body: JSON.stringify(body),
-  });
-  // RPCs mit RETURNS void (upsert_answer_current) antworten mit leerem Body - der
-  // Schreibvorgang ist dann bereits verbucht, nur gibt es nichts zu parsen.
-  if (!response || response.status === 204) return null;
-  const text = await response.text();
-  return text ? JSON.parse(text) : null;
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    return null;
+  }
+  // Der Leere-Antwort-Guard fuer void-RPCs (Vorfall 27.08.2026) lebt in der kanonischen
+  // Fassung in server/lead-system.js - Regressionstests halten ihn dort fest.
+  return sharedSupabaseRpc(functionName, body);
 }
 
 async function ensureLeadStateForCanonicalMirror(leadHash, payload, eventAt) {
