@@ -170,8 +170,22 @@ LEADS_DB_BENUTZER=leads_app
 LEADS_DB_PASSWORT=…
 ```
 
+> 🔴 **`SUPABASE_URL` und `SUPABASE_SERVICE_KEY` BLEIBEN GESETZT.** Sie zu entfernen
+> liegt nahe („die alte Datenbank ist doch weg"), wäre aber ein stiller Teilausfall:
+> `api/bridge.js` hatte an **vier** Stellen Guards, die ohne diese Variablen `null`
+> zurückgeben, während die übrigen Routen über den Treiber weiterlaufen — betroffen war
+> auch `supabaseRpc`, also der Pfad von `submit_lead_complete`.
+>
+> Im Audit vom 27.08. gefunden und behoben (die Guards kennen jetzt den direkten Modus,
+> `scripts/tests/bridge-transport-guard.test.js` hält es zu). Trotzdem: **Variablen
+> stehen lassen.** Sie kosten nichts und decken den Rückweg ab.
+
 Dann Redeploy. **Nachweis:** `/health/live` trägt den Commit, `/health/ready` antwortet
 200, und ein echter Funnel-Durchlauf erzeugt eine Zeile in `leads.lead_state`.
+
+🔴 **Kein neuer Build nötig:** Nachgemessen am 27.08. — `postgres.js` und die
+Stufe-B-Dateien liegen bereits im laufenden Image, und der Produktions-Container kann
+sich als `leads_app` an `hl_support` anmelden. Der Redeploy setzt nur die Variablen.
 
 **Rückweg:** `LEADS_DB_MODUS=postgrest` und Redeploy — die alte Datenbank ist
 unverändert und vollständig, weil im Fenster niemand geschrieben hat.

@@ -1,6 +1,6 @@
 # Nurture-Versand — Betriebsregeln
 
-Stand 26.08.2026 · Kanonische Fassung. Das Verzeichnis `Leads_quiz_Nurture` ist **kein
+Stand 28.08.2026 (§4b und W4/W5 vom 27.08.) · Kanonische Fassung. Das Verzeichnis `Leads_quiz_Nurture` ist **kein
 Git-Repository**; die dortige `README.md` verweist hierher, damit diese Regeln versioniert
 sind und einen Versehensfall überleben.
 
@@ -68,7 +68,7 @@ hinten aus der Liste.
 Erkennungsregel für jede PostgREST-Abfrage: **Kommen genau so viele Zeilen zurück wie die
 Obergrenze, wurde garantiert abgeschnitten.** Das ist die einzige verlässliche Erkennung.
 
-Mit Phase 4 (Kysely/`pg`) verschwindet diese Fehlerklasse strukturell — der direkte Treiber
+Mit Phase 4 Stufe B (direkter Treiber `postgres.js`, seit 27.08. gebaut) verschwindet diese Fehlerklasse strukturell — der direkte Treiber
 kennt keine implizite Grenze. Als Abnahmekriterium festgehalten im Audit, Phase 4 Punkt 8.
 
 ---
@@ -197,7 +197,7 @@ Erstempfänger, 4 Stunden seit der letzten Sendung, dieselbe Warnung, Exitcode 0
 
 Drei Dinge, die dabei auffielen und ohne Probe am Umzugstag Ärger gemacht hätten:
 
-1. **Der Netzweg steht.** `pg_hba` lässt nur `10.0.1.5` auf `10.0.1.3:5432` — und der
+1. **Der Netzweg steht.** `pg_hba` lässt `10.0.1.5` (Coolify) und seit 27.08. `10.0.1.4` (n8n, nur Rolle `leads_n8n` auf `hl_support`) auf `10.0.1.3:5432` — und der
    Wächter-Host **ist** `10.0.1.5`. Gemessen, nicht angenommen.
 2. **Die Typen unterscheiden sich.** Die Management-API liefert Zeitstempel als
    ISO-String, der Treiber als `Date`. Eine Ausgabe mit `String(wert).slice(0, 10)`

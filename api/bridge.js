@@ -31,6 +31,7 @@ const {
   supabaseRequest: sharedSupabaseRequest,
   supabaseRpc: sharedSupabaseRpc,
 } = require('../server/lead-system');
+const dbTransport = require('../server/db-transport');
 // Seit Phase 1 (/berater-info) gibt es genau EINEN Erzeuger fuer Coach-Insights-Links.
 // Die frueheren lokalen Kopien in dieser Datei und im Outbox-Worker waren nicht
 // deckungsgleich (Inventur 2026-08-24, Befund D-2).
@@ -348,15 +349,27 @@ function decodeResumeKey(key) {
 // Bridge-Vertrag seit jeher: Ohne konfiguriertes Supabase KEIN Fehler, sondern null -
 // Aufrufer pruefen 'response ?'. Die Implementierung selbst liegt kanonisch in
 // server/lead-system.js (dort wirft fehlende Konfiguration); hier bleibt nur der Guard.
+//
+// 🔴 Der Guard darf NUR fuer den PostgREST-Weg gelten. Im direkten Modus (Phase 4
+// Stufe B) ist Supabase belanglos - griffe er trotzdem, wuerden alle 28 Bridge-Zugriffe
+// still `null` liefern, waehrend die uebrigen Routen ueber den Treiber weiterlaufen.
+// Ein stiller Teilausfall also, ausgeloest allein dadurch, dass jemand beim Cutover die
+// nicht mehr benoetigten SUPABASE_*-Variablen entfernt. Genau diese Fehlerklasse hat
+// das Projekt schon dreimal getroffen; gefunden im Audit vom 27.08.2026.
+function transportFehlt() {
+  if (dbTransport.istDirekt()) return false;
+  return !SUPABASE_URL || !SUPABASE_KEY;
+}
+
 async function supabaseRequest(path, options = {}) {
-  if (!SUPABASE_URL || !SUPABASE_KEY) {
+  if (transportFehlt()) {
     return null;
   }
   return sharedSupabaseRequest(path, options);
 }
 
 async function supabaseJson(path, options = {}) {
-  if (!SUPABASE_URL || !SUPABASE_KEY) {
+  if (transportFehlt()) {
     return null;
   }
   return sharedSupabaseJson(path, options);
@@ -1777,7 +1790,10 @@ function leadHashOf(payload) {
 }
 
 async function supabaseRpc(functionName, body = {}) {
-  if (!SUPABASE_URL || !SUPABASE_KEY) {
+  // 🔴 Derselbe Guard wie oben - und hier haengt der KRITISCHE Pfad dran
+  // (submit_lead_complete, upsert_video_progress_monotonic). Ohne Modusprueffung wuerde
+  // ein Lead-Submit im direkten Modus still `null` liefern statt zu schreiben.
+  if (transportFehlt()) {
     return null;
   }
   // Der Leere-Antwort-Guard fuer void-RPCs (Vorfall 27.08.2026) lebt in der kanonischen
@@ -1990,7 +2006,7 @@ async function mirrorLegacyTrackingToLeadSystemV2(payload) {
 
 async function writeToSupabaseAsync(payload) {
   try {
-    if (!SUPABASE_URL || !SUPABASE_KEY) return;
+    if (transportFehlt()) return;
     if (!payload.hash) return;
 
     await writeTrackingEvent(payload);
