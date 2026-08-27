@@ -173,7 +173,7 @@ Wurf riss die Antwort-Schleife nach der **ersten** Antwort ab.
 | **Plattform-Rollenmodell** | ✅ entworfen, ausgerollt, **Grenzen bewiesen** (4 Negativtests) |
 | **Schreibbarriere 13.5.2** | ✅ als Ablaufplan; **noch nicht geprobt** |
 | **Phase 4 Stufe A** | ✅ live (`submit_lead_complete`) |
-| **Phase 4 Stufe B** (direkter Treiber) | ❌ offen — erst nach Vercel-Abbau (Vercel erreicht die private DB nicht) |
+| **Phase 4 Stufe B** (direkter Treiber) | ✅ **gebaut und bewiesen** (27.08.): echter App-Code im direkten Modus gegen die Test-DB, **10/10 Proben** — noch **nicht** umgeschaltet (Standard bleibt PostgREST) |
 | **Schema-Abbildung `public`→`leads`** | ✅ bestanden (27.08. spät): Parität ohne Abweichung, `public` leer, alles gehört `leads_owner`, Funktionsbeweis grün, Datenprobe 171.708 Zeilen + 3/3 Prüfsummen — Protokoll im [Testimport-Protokoll](audits/cutover-vorbereitung/phase5-testimport/testimport-protokoll-2026-08-27.md) |
 | **Vercel-Abbau** | ⏳ **Freigabe von Markus liegt vor** (27.08.). Gemessen 12/14 Toren erfüllt; offen sind die zwei Datums-Tore (**01.09.** bzw. **03.09.**, weil der letzte Hosting-Vorfall vom 27.08. datiert) und zwei Handprüfungen |
 | **Wächter-Umstellung** | ✅ vorbereitet und bewiesen (27.08.): Datenquelle umschaltbar, beide Modi liefern identische Befunde — Ablauf in [NURTURE_BETRIEB.md §4b](NURTURE_BETRIEB.md) |
@@ -331,12 +331,50 @@ einmal **ohne** echten Cutover proben: Rechte entziehen, Schreibversuch muss sch
 Stillstand zweimal messen, Rechte zurückgeben. Damit ist der Ablauf am Umzugstag Routine
 statt Premiere.
 
-### Schritt 5 — Phase 4 Stufe B (direkter Treiber)
+### Schritt 5 — Phase 4 Stufe B (direkter Treiber) — ✅ gebaut und bewiesen (27.08.)
 
 Der Container spricht `hl_support` mit direktem Treiber als `leads_app`,
 `search_path = leads, leads_analytics`. `submit_lead_complete` bleibt unverändert —
 dieselbe Funktion, anderer Transportweg. PostgREST verlässt damit den kritischen Pfad;
 die Outbox wird der **einzige** Übergabepunkt zur Legacy-MySQL (Entscheidung 3).
+
+**Wie es gebaut ist.** Alle rund 30 Aufrufstellen laufen seit der Konsolidierung durch
+**eine** Funktion (`supabaseRequest` in `server/lead-system.js`). Dort sitzt die Weiche:
+
+| `LEADS_DB_MODUS` | Weg |
+| --- | --- |
+| `postgrest` (Standard) | Supabase über HTTP — unverändert |
+| `direkt` | Plattform-DB mit `postgres.js`, Schema `leads` |
+
+Im direkten Modus übersetzt `server/postgrest-nach-sql.js` den PostgREST-Aufruf in SQL
+und `server/db-transport.js` liefert ein Objekt zurück, das sich **wie eine
+HTTP-Antwort verhält** (`ok`, `status`, `json()`, `text()`). Damit bleibt der Vertrag
+für die Aufrufer Zeile für Zeile derselbe — kein Grosseingriff im kritischen Pfad.
+
+🔴 Zwei Entwurfsentscheidungen, die Fehlerklassen ausschliessen:
+
+1. **Der Übersetzer rät nie.** Was er nicht sicher versteht, wirft. Ein still
+   verlorener Filter liefert zu viele Zeilen, ein falsch geratener Konflikt-Zweig
+   überschreibt Daten — beides fällt im Betrieb nicht auf. Ein `PATCH` ohne Filter
+   ist verboten, `on_conflict` ohne `resolution` ebenso.
+2. **Es gibt genau EINEN Schalter.** Eine Teilumstellung (RPCs direkt, Tabellen über
+   HTTP) hiesse, gleichzeitig in zwei Datenbanken zu schreiben. Ein Test hält fest,
+   dass `istDirekt()` genau einmal geprüft wird.
+
+**Bewiesen am 27.08.** mit dem **echten App-Code** im Container `node:24-alpine` auf der
+Coolify-Box gegen `business_leads_testimport` — **10 von 10**: Lesen mit
+`select`/`limit`; `submit_lead_complete` mit Kontakt und **6 Antworten atomar**;
+Umlaute per Hex verifiziert; `upsert_video_progress_monotonic` mit Rang 1;
+`v_lead_state_full`; **`merge-duplicates`-Upsert setzt nur das mitgelieferte Feld** und
+lässt den Rest unberührt; `PATCH` mit Filter; leere Treffermenge als `[]`; Probezeile
+danach wieder entfernt (0 Reste nachgemessen).
+
+**Was noch fehlt, bevor umgeschaltet werden kann:**
+
+- `DELETE` ist im Übersetzer bewusst noch nicht abgedeckt (kommt im Runtime-Code nicht
+  vor) — vor dem Umschalten prüfen, ob das so bleibt.
+- Die Zugangsdaten (`LEADS_DB_*`) müssen in die Coolify-Umgebung.
+- Umgeschaltet wird erst **beim Cutover**, gemeinsam mit dem Datenumzug.
 
 Netzweg **steht bereits**: Der Coolify-Host ist im internen Netz `10.0.1.5` — genau die
 IP, die `pg_hba` auf `10.0.1.3:5432` zulässt. Am 27.08. gemessen (der Wächter läuft auf
