@@ -1,0 +1,95 @@
+{
+  "gesichert_am": "2026-08-27T17:34:21.692Z",
+  "tabellen": [
+    {
+      "schema": "analytics_internal",
+      "tabelle": "event_daily",
+      "acl": "postgres=arwdDxtm/postgres\nservice_role=arwd/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "analytics_internal",
+      "tabelle": "refresh_runs",
+      "acl": "postgres=arwdDxtm/postgres\nservice_role=ar/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "app_config",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_answers_current",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_contact_crm",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_events",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_migration_unresolved",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_profiles",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_state",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_sync_outbox",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "lead_video_progress",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_runs",
+      "acl": "postgres=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_sequences",
+      "acl": "postgres=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "nurture_subject_states",
+      "acl": "postgres=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "quiz_sessions",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_events",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_sessions",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    },
+    {
+      "schema": "public",
+      "tabelle": "tracking_video_progress",
+      "acl": "postgres=arwdDxtm/postgres\nanon=arwdDxtm/postgres\nauthenticated=arwdDxtm/postgres\nservice_role=arwdDxtm/postgres\nmarathon_app=r/postgres"
+    }
+  ]
+}
