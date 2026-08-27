@@ -10,7 +10,11 @@ alte Eintrag zielgenau wiederhergestellt wird und nicht geraten werden muss.
 | `dns-rollback-quiz.json` | `quiz.activecenter.info` | `CNAME 2940e78cbc83cdf4.vercel-dns-017.com` |
 | `dns-rollback-business.json` | `business.activecenter.info` | `CNAME 12b0f53f0226bb49.vercel-dns-017.com` |
 
-Zone `activecenter.info`: `0b43ccb0e932d3bb314941e9e57c5d00` ·
+🔴 **Zwei Zonen, nicht eine.** Zone `activecenter.info`: `0b43ccb0e932d3bb314941e9e57c5d00`
+(für `business.` und `quiz.`) — **`business.eaglesfit.ch` liegt in der Zone
+`eaglesfit.ch` (`05ad960f…`, siehe `../aufrufer-inventar-2026-08-25.md` §4.1).**
+Wer unter Zeitdruck nur die erste Zone öffnet, findet den dritten Eintrag nicht.
+Ursprüngliche Angabe: Zone `activecenter.info`: `0b43ccb0e932d3bb314941e9e57c5d00` ·
 alle Einträge TTL 60, **nicht** proxied.
 
 ## Rückrollung

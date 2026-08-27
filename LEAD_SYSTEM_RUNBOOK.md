@@ -1,7 +1,7 @@
 # Lead System v2 Runbook
 
 Abhaengigkeitskarte: `docs/DEPENDENCY_MAP.md` · Bridge-Vertraege: `docs/BRIDGE_CONTRACTS.md`
-· Hosting/Deploy: `DEPLOYMENT_WORKFLOW.md` (seit 25.08.2026 Coolify, Deploy manuell).
+· Hosting/Deploy: `DEPLOYMENT_WORKFLOW.md` (seit 25.08.2026 Coolify, Deploy ueber die CI (Job `deploy`, seit 27.08.); Handweg nur als Fallback).
 
 ## Production Source Of Truth
 
@@ -114,7 +114,7 @@ Minimum checks:
 - every old `tracking_sessions.lead_hash` exists in `lead_state`
 - every resolvable old `tracking_video_progress` row has equal-or-higher progress in `lead_video_progress`
 - every MySQL rank is less than or equal to `v_lead_state_full.completed_rank`
-- one-time backfill script: `node scripts/backfill-points-result-v2.js`; use `APPLY_POINTS_RESULT_BACKFILL=1` only after the dry-run report is checked.
+- one-time backfill script: `node scripts/backfill-antworten.js   # (backfill-points-result-v2.js existiert nicht mehr)`; use `APPLY_POINTS_RESULT_BACKFILL=1` only after the dry-run report is checked.
 - every resolvable old tracking event exists in `lead_events`
 - unresolvable old events are stored in `lead_migration_unresolved`
 

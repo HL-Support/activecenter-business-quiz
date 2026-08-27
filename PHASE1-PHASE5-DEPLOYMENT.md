@@ -1,3 +1,18 @@
+> 🔴 **HISTORISCH — Stand 25.04.2026. NICHT als Anleitung verwenden.**
+>
+> Dieses Dokument beschreibt das **alte** Tracking-System und die **Vercel**-Ära.
+> Es widerspricht dem heutigen Stand in mehreren Punkten: `ac_`-Präfix statt `qz_`,
+> Deploy über das Vercel-Dashboard, `tracking_*` als Wahrheit statt `lead_*`.
+>
+> 🔴 **Namenskollision beachten:** „Phase 4" und „Phase 5" meinen hier Dashboard-
+> Endpunkte bzw. Go-Live. In allen aktuellen Dokumenten heißt **Phase 4** = direkter
+> Datenbanktreiber und **Phase 5** = Vorbereitung des Datenbank-Umzugs. Wer nach
+> „Phase 4" sucht und hier landet, liest das Falsche.
+>
+> Aktueller Stand: [docs/STAND-UND-FORTSETZUNG.md](docs/STAND-UND-FORTSETZUNG.md)
+
+---
+
 # Tracking System Redesign - Complete Implementation Guide
 ## Phases 1-5 Deployment Checklist
 

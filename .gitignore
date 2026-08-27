@@ -23,3 +23,7 @@ __pycache__/
 
 .env*.local
 e2e-artifacts/
+
+# Laufberichte des Backfills - lokale Arbeitsartefakte mit lead_hash-Werten,
+# gehoeren nicht ins Repo (versehentlich mitcommittet am 27.08., sofort entfernt).
+backfill-antworten-*-bericht.json

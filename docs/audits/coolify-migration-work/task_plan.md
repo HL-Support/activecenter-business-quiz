@@ -1,3 +1,8 @@
+> 🔴 **HISTORISCH — Planungsstand 23.08.2026.** Der Hosting-Cutover ist am 25.08.
+> erfolgt; Protokoll in `docs/audits/cutover-vorbereitung/cutover-protokoll-2026-08-25.md`.
+
+---
+
 # Task Plan: Business Leads Funnel Technical Audit and Coolify Migration
 
 ## Goal

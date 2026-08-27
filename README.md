@@ -94,7 +94,7 @@ Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
 5. Die PHP-Bridge speichert/loggt den Forwarding-Versuch und sendet serverseitig an `https://contacts.hl-support.biz/webhook/typeform`.
 6. HL-Support speichert das empfangene `form_response` in der Datenbankspalte `form_response` und liest daraus spaeter Fragen, Antworten, Profil und Hauptziel aus.
 
-Wichtig: `landing-page/_system/db-bridge.php` enthaelt einen aktualisierten Mirror desselben Business-Leads-Adapters. Dieser Mirror sollte auf dem Server als `https://ac-reconnect.com/db-bridge.php` aktualisiert werden, damit auch andere Webseiten den zentralen Adapter nutzen koennen. Fuer `quiz.activecenter.info` ist das aber nicht mehr blockierend, weil die Vercel-API das Payload bereits korrekt baut.
+Wichtig: `landing-page/_system/db-bridge.php` enthaelt einen aktualisierten Mirror desselben Business-Leads-Adapters. Dieser Mirror sollte auf dem Server als `https://ac-reconnect.com/db-bridge.php` aktualisiert werden, damit auch andere Webseiten den zentralen Adapter nutzen koennen. Fuer `quiz.activecenter.info` ist das aber nicht mehr blockierend, weil die Projekt-API (`api/bridge.js`, seit 25.08. im Coolify-Container) das Payload bereits korrekt baut.
 
 ## Form-Response-Kompatibilitaet
 

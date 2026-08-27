@@ -1,3 +1,13 @@
+> 🔴 **HISTORISCH — Messstand 23.08.2026.**
+>
+> Mehrere Befunde sind überholt: `api/init-quiz-db.js` ist entfernt (PR #55),
+> `package.json` hat inzwischen `engines`/`packageManager`, das Repo
+> `business-schulung` existiert nicht mehr (heute `src/berater-info/`).
+>
+> Aktueller Stand: [../../STAND-UND-FORTSETZUNG.md](../../STAND-UND-FORTSETZUNG.md)
+
+---
+
 # Findings: Business Leads Funnel and Coolify Migration
 
 ## Requirements

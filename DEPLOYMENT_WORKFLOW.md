@@ -57,7 +57,7 @@ ausfallfrei (Rolling mit Healthcheck, am 25.08. gemessen); eine Router-Umkonfigu
 
 ## Vercel (Rückweg bis zum Abbau)
 
-Vercel bleibt bis zum freigegebenen Abbau (frühestens 02.09., Checkliste
+Vercel bleibt bis zum freigegebenen Abbau (frühestens 01.09. (zweites Tor: 03.09.), Checkliste
 [docs/audits/cutover-vorbereitung/vercel-abbau-checkliste.md](docs/audits/cutover-vorbereitung/vercel-abbau-checkliste.md))
 vollständig lauffähig als Hosting-Rückweg; der DNS-unabhängige Eingang
 `businessleadsquiz.vercel.app` liefert weiter den Vercel-Stand. Der alte Weg dorthin:

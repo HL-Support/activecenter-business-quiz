@@ -1,6 +1,7 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
-**Letzte Aktualisierung: 27.08.2026, spät abends (nach Schritt 1, Schema-Abbildung).** Dieses Dokument ist der Einstieg für jede
+**Letzte Aktualisierung: 28.08.2026, nachts — nach dem vollständigen Audit.**
+Alle Zahlen in diesem Dokument sind am 27.08. abends **neu gemessen**, nicht übernommen. Dieses Dokument ist der Einstieg für jede
 neue Sitzung: Es beschreibt, wo das System steht, was zuletzt passiert ist, welche
 Entscheidungen gelten, welche Fallen bekannt sind — und wie es konkret weitergeht.
 Zeiten sind MESZ, sofern nicht anders angegeben.
@@ -32,8 +33,8 @@ Events, Kontakte, Support.
 | Läuft auf | **Coolify**, Server `167.233.251.217` (cx33), App `business-leads-prod`, UUID `yhoacszoiofuq6dg4mykyr7b` |
 | Domains | `quiz.activecenter.info`, `business.activecenter.info`, `business.eaglesfit.ch` |
 | Laufzeit | Docker, `server/app-server.js` liefert `dist/` + `api/` + `/health/live` + `/health/ready` |
-| Aktueller Stand | Commit `48469a6` (Stufe A) |
-| Vercel | nur noch **Rückweg** bis zum Abbau; vierter Eingang `businessleadsquiz.vercel.app` lebt DNS-unabhängig |
+| Aktueller Stand | Commit `5e640fe` (Stufe B gebaut, **nicht** aktiv) — nachgemessen 27.08. 23:00 |
+| Vercel | nur noch **Rückweg** bis zum Abbau; vierter Eingang `businessleadsquiz.vercel.app` lebt DNS-unabhängig (HTTP 200), wird aber **nicht benutzt** (gemessen: alle Schreibzugriffe kommen von Coolify) |
 
 ### Deploy (seit 27.08., Stufe 1 der Pipeline)
 
@@ -53,8 +54,12 @@ curl -X POST -H "Authorization: Bearer <coolify.apiToken>" \
 curl -s https://quiz.activecenter.info/health/live   # mehrfach über Zeit prüfen
 ```
 
-🔴 GitHub-Secret `COOLIFY_API_TOKEN` trägt derzeit den **vollen** Coolify-Token — bei
-Gelegenheit durch einen nur-Deploy-berechtigten ersetzen.
+✅ **Erledigt am 27.08.:** Das GitHub-Secret `COOLIFY_API_TOKEN` trägt jetzt den Token
+`github-deploy-only` mit `["deploy"]` statt `["*"]`. Nachgemessen: `POST /deploy` kommt
+durch, `GET /applications|servers|projects|teams` → **403**. Der volle Token
+(`agent-desktop`) bleibt für Wartung, liegt aber **nicht** mehr in GitHub. Der Fallback
+oben nutzt weiterhin den vollen Token aus `agent-secrets.json` (`coolify.apiToken`);
+für reines Deployen genügt `coolify.deployToken`.
 
 ### Datenbanken
 
@@ -63,18 +68,30 @@ Gelegenheit durch einen nur-Deploy-berechtigten ersetzen.
 | **Quelle (noch produktiv)** | Supabase `xlpiisbozpgmemxhtivj` | PostgreSQL **17.6**. Alle Lead-Daten liegen hier. |
 | **Ziel (Plattform)** | `10.0.1.3` / `91.99.76.104`, Datenbank **`hl_support`** | PostgreSQL **18.6**, cx22 (2 Kerne, 4 GB), ICU en-US/UTF8, `data-checksums` an |
 | **Testartefakt** | `business_leads_testimport` auf demselben Server | enthält **echte Kopien** der Quiz-Daten, seit dem Abbildungslauf (27.08. spät) in den **Plattform-Schemata** `leads`/`leads_analytics`. Kein Spielplatz. Rückweg: `dropdb business_leads_testimport` |
-| **Legacy-Kartei** | MySQL auf **derselben** Maschine `10.0.1.3` | `prod_contacts_activesupport` (813 MB) u. a., zusammen ~1,5 GB |
+| **Legacy-Kartei** | MySQL auf **derselben** Maschine `10.0.1.3` | `prod_contacts_activesupport` u. a.; das MySQL-Datenverzeichnis misst **3,1 GB** und `mysqld` hält **1,6 GB RAM** (gemessen 27.08. — ältere Angaben von „~1,5 GB" waren zu niedrig) |
 
 Namenshierarchie der Plattform (Entscheidung Markus, 27.08.):
 
 ```text
 Datenbank  hl_support        ← das Gesamtsystem
    ├── Schema fitapp         ← Projekt Fit-App (Marathon ist ein Bereich davon)
-   ├── Schema leads          ← Projekt Business-Leads-Quiz      (angelegt, noch leer)
-   ├── Schema leads_analytics←   dessen Auswertungsteil          (angelegt, noch leer)
+   ├── Schema leads          ← Projekt Business-Leads-Quiz
+   │                            16 Tabellen + 6 Views + 8 Sequenzen — STRUKTUR steht,
+   │                            Daten kommen beim Cutover (27.08. nachgemessen: 0 Zeilen)
+   ├── Schema leads_analytics←   dessen Auswertungsteil: 2 Tabellen + 1 Sequenz, 0 Zeilen
    ├── Schema kontakte / support / events / analysen   ← folgen später
    └── Schema marathon       ← bestehend; Empfehlung: beim FitApp-Umzug nach `fitapp`
 ```
+
+**Rollen auf der Plattform** (nachgemessen 27.08., **keine** mit `BYPASSRLS`):
+
+| Rolle | Anmeldung | Verbindungen | wofür |
+| --- | --- | --- | --- |
+| `leads_owner` | nein | — | Eigentümerin aller Objekte |
+| `leads_read` | nein | — | Lesegruppe |
+| `leads_migrate` | ja | 2 | Migrationen (immer mit `SET ROLE leads_owner`) |
+| `leads_app` | ja | 8 | die laufende Anwendung |
+| `leads_n8n` | ja | 4 | n8n (seit 27.08., eigener Topf) |
 
 ### Wächter (Überwachung)
 
@@ -92,12 +109,27 @@ sowohl eine Störung als auch ein ausgefallener Wächter.
 | **W5** | **neu 27.08.**: Opt-ins mit weniger als 6 Antwortzeilen (Teilverluste) |
 
 🔴 Der Wächter läuft **nicht** aus dem Repo. Nach jeder Änderung an
-`waechter-nurture.js`, der Baseline oder `stats-logs-baseline.js` muss die Serverkopie
+`waechter-nurture.js`, der Baseline, `stats-logs-baseline.js` **oder seit 27.08. auch
+`waechter-datenquelle.js` / `phase5-schema-abbildung.js`** muss die Serverkopie
 nachgezogen werden — Ablauf in [NURTURE_BETRIEB.md](NURTURE_BETRIEB.md) §4.
+
+**Umschaltbar seit 27.08.** (`WAECHTER_QUELLE=supabase|plattform`): Nach dem Cutover
+befragt derselbe Wächter die neue Datenbank, ohne dass am Umzugstag am
+Überwachungswerkzeug selbst operiert wird. Bewiesen: beide Modi liefern identische
+Befunde. Der Modus steht im Protokollkopf — wer das Protokoll liest, sieht sofort,
+welche Datenbank gemeint war. Ablauf in [NURTURE_BETRIEB.md](NURTURE_BETRIEB.md) §4b.
+
+**Stand 27.08. 23:00 (nachgemessen):** Neue Dateien und `node_modules/postgres` liegen
+auf der Box, Sicherungen (`*.bak-vor-cutover-20260827`) sind angelegt, der Lauf im
+Supabase-Modus ist unverändert grün (Herzschlag gesendet). Die `.env` trägt noch **nur**
+`SUPABASE_*` — die `LEADS_PG_*`-Werte kommen beim Cutover dazu.
 
 ---
 
-## 3. Was am 27.08.2026 passiert ist (13 Commits, PRs #89–#101)
+## 3. Was am 27.08.2026 passiert ist (25 Commits, PRs #89–#113)
+
+Ein außergewöhnlich dichter Tag. Die Reihenfolge ist chronologisch; jeder Punkt nennt
+seinen Beleg.
 
 ### Vormittag: ein aktiver Datenverlust
 
@@ -106,40 +138,47 @@ Ursache: `upsert_answer_current` ist `RETURNS void`, PostgREST antwortet mit **l
 Body**, und die Bridge-Kopie von `supabaseRpc` parste ihn trotzdem als JSON. Der erste
 Wurf riss die Antwort-Schleife nach der **ersten** Antwort ab.
 
-- **PR #91** — Guard gegen leere Antworten + 4 Regressionstests. Deployt.
-- **PR #92** — Wächter **W5**; Serverkopie aktualisiert.
-- **Geheilt**: 6 Leads (der akute Fall + 5 unsichtbare Teilverluste aus Mai–August), je
-  einzeln verifiziert. Aufarbeitung: [void-rpc-teilverluste](audits/2026-08-27-void-rpc-teilverluste.md).
+- **#91** Guard gegen leere Antworten + 4 Regressionstests · **#92** Wächter **W5**
+- **Geheilt**: 6 Leads (akuter Fall + 5 unsichtbare Teilverluste aus Mai–August)
 - 🔴 **Wichtigste Lehre**: Der „Beweis am echten Verkehr" vom 26.08. war eine
   Fehldeutung — der parallele Ereignisstrom hatte den kaputten Rettungspfad verdeckt.
-  **Der Beweis eines Pfads muss den Pfad isoliert messen.** Korrektur steht als §5c in
-  der [Antwortverlust-Analyse](audits/2026-08-26-antwortverlust-analyse-und-zielbild.md).
+  **Der Beweis eines Pfads muss den Pfad isoliert messen.**
+  ([Aufarbeitung](audits/2026-08-27-void-rpc-teilverluste.md))
 
 ### Mittag: Doku, Konsolidierung, Pipeline
 
-- **PR #93** — gesamte Doku auf die Coolify-Realität gebracht.
-- **PR #94** — die doppelten Supabase-Helfer konsolidiert (bridge.js delegiert an
-  `server/lead-system.js`) **und** Deploy-Pipeline Stufe 1 gebaut.
-- **PR #95** — Phase-4-Design und Phase-5-Objektauswahl.
+**#93** Doku auf die Coolify-Realität · **#94** doppelte Supabase-Helfer konsolidiert
+(`bridge.js` delegiert an `server/lead-system.js`) **und** Deploy-Pipeline Stufe 1 ·
+**#95** Phase-4-Design und Phase-5-Objektauswahl.
 
 ### Nachmittag: Stufe A und der Phase-5-Beweis
 
-- **PR #96** — **Stufe A**: `submit_lead_complete` schreibt Kontakt **und** alle sechs
-  Antworten in **einer** Transaktion (vorher 7 Einzel-Calls). Live.
-- **PR #97** — **Testimport**: selektiver Katalog-Export → `business_leads_testimport` auf
-  PG18. Parität 356/356 Spalten, 65/65 Constraints, 86/86 Indexe, 6/6 Views, 20/20
-  Funktionen, 5/5 Trigger. Plus Funktionsbeweis.
-- **PR #98** — **Datenprobe**: 171.260 echte Zeilen; 6/6 Inhalts-Prüfsummen identisch
-  (inkl. Umlaut- und JSON-Probe).
-- **PR #99** — **pg_dump-Generalprobe**: der echte Weg dauert **24 Sekunden**
-  (10,2 s Dump/124 MB + 14,1 s Restore).
+**#96 Stufe A** — `submit_lead_complete` schreibt Kontakt **und** alle sechs Antworten in
+**einer** Transaktion (vorher 7 Einzel-Calls). Live. · **#97 Testimport** (Parität
+356/356 Spalten, 65/65 Constraints, 86/86 Indexe, 6/6 Views, 20/20 Funktionen, 5/5
+Trigger) · **#98 Datenprobe** (171.260 Zeilen, 6/6 Prüfsummen) · **#99 pg_dump-Probe**
+(**24 Sekunden**: 10,2 s Dump/124 MB + 14,1 s Restore).
 
 ### Abend: Plattform-Architektur
 
-- **PR #100** — **Rollenmodell** für alle Projekte + **Schreibbarriere**.
-- **PR #101** — Datenbank `fitapp` → **`hl_support`** umbenannt, Serverfrage beantwortet.
+**#100** Rollenmodell + Schreibbarriere · **#101** Datenbank `fitapp` → **`hl_support`** ·
+**#102** dieses Einstiegsdokument.
 
----
+### Später Abend bis Nacht: Schritt 1, 2 und Stufe B
+
+| PR | Was | Beweis |
+| --- | --- | --- |
+| **#103** | **Schema-Abbildung `public`→`leads`** — eine Implementierung mit erzwungener Restkontrolle | Parität ohne Abweichung, `public` leer, alles gehört `leads_owner`, Funktionsbeweis grün, Datenprobe 171.708 Zeilen, Export **byte-identisch reproduzierbar** |
+| **#104** | **Fremdschreiber-Messwerkzeug** (`scripts/fremdschreiber-messen.js`) | Datenseite **und** Transportseite getrennt; 🔴 `source_app` verrät den Schreiber **nicht**, Herkunfts-IPs taugen nicht als Schlüssel (59 IPs in 24 h) |
+| **#105** | **`activecenter-analytics` schreibt nicht mehr in den Leadkern** (dort PR #2, live als `637b71a`) | **Zwei** Pfade geschlossen, nicht einer: Dashboard-Knopf (410 Gone) **und** Wartungsskript (Riegel). Produktion geprüft, nicht die SSO-geschützte Preview |
+| **#106** | Stand der Vercel-Abbau-Tore | 12/14; der n8n-„Fehler" ist ein **korrekt abgewiesener Fremdaufruf** von `global-sce.com` mit `ac_`-Hash |
+| **#107** | **Wächter umschaltbar** (`WAECHTER_QUELLE`) | beide Modi identisch; 3 Funde: Netzweg, **Typ-Unterschied** (`2026-06-11` vs. `Thu Jun 11`), **Grants gelten je Datenbank** |
+| **#108** | **`COOLIFY_API_TOKEN` auf nur-Deploy** | über die Coolify-Datenbank angelegt (die API kann das nicht); bewiesen **ohne** echten Deploy: POST → 404, alles andere → 403 |
+| **#109** | **Phase 4 Stufe B** — direkter Treiber | **10/10** mit echtem App-Code gegen die Test-DB; 26 Regressionstests; Standard bleibt PostgREST |
+| **#110** | **Ziel-DB `hl_support` aufgebaut** | Parität grün; `public`-Prüfung **präzisiert statt aufgeweicht** |
+| **#111** | Cutover-Werkzeuge + Checkliste | Schema-Umschreiber gegen die **Datenzeilen-Falle** geprüft; n8n-Befund |
+| **#112** | **Barriere läuft von Hand** | Die Management-API ist **read-only** — mein Skript hätte den wichtigsten Schritt nur *vorgetäuscht* |
+| **#113** | **n8n-Netzweg** (Rolle `leads_n8n`) | vom n8n-Server bewiesen; Gegenproben: andere DB verweigert, DDL verweigert |
 
 ## 4. Geltende Entscheidungen (alle von Markus, 27.08.)
 
@@ -175,7 +214,7 @@ Wurf riss die Antwort-Schleife nach der **ersten** Antwort ab.
 | **Phase 4 Stufe A** | ✅ live (`submit_lead_complete`) |
 | **Phase 4 Stufe B** (direkter Treiber) | ✅ **gebaut und bewiesen** (27.08.): echter App-Code im direkten Modus gegen die Test-DB, **10/10 Proben** — noch **nicht** umgeschaltet (Standard bleibt PostgREST) |
 | **Schema-Abbildung `public`→`leads`** | ✅ bestanden (27.08. spät): Parität ohne Abweichung, `public` leer, alles gehört `leads_owner`, Funktionsbeweis grün, Datenprobe 171.708 Zeilen + 3/3 Prüfsummen — Protokoll im [Testimport-Protokoll](audits/cutover-vorbereitung/phase5-testimport/testimport-protokoll-2026-08-27.md) |
-| **Vercel-Abbau** | ⏳ **Freigabe von Markus liegt vor** (27.08.). Gemessen 12/14 Toren erfüllt; offen sind die zwei Datums-Tore (**01.09.** bzw. **03.09.**, weil der letzte Hosting-Vorfall vom 27.08. datiert) und zwei Handprüfungen |
+| **Vercel-Abbau** | ⏳ **Freigabe von Markus liegt vor** (27.08.). Gemessen **11/14** Toren erfüllt; offen sind die zwei Datums-Tore (**01.09.** bzw. **03.09.**, weil der letzte Hosting-Vorfall vom 27.08. datiert) und das n8n-Tor. Die zwei Handprüfungen zählen getrennt |
 | **Wächter-Umstellung** | ✅ vorbereitet und bewiesen (27.08.): Datenquelle umschaltbar, beide Modi liefern identische Befunde — Ablauf in [NURTURE_BETRIEB.md §4b](NURTURE_BETRIEB.md) |
 | **Echter Cutover** | ❌ offen |
 
@@ -207,6 +246,12 @@ Alle Zugangsdaten liegen in `C:\Users\Markus\.agent-secrets\agent-secrets.json` 
 | `scripts/phase5-testimport-vergleich.js` | Paritätsvergleich Quelle ↔ Testimport |
 | `scripts/phase5-datenprobe.js` | echte Daten in die Test-DB pumpen + Zählparität |
 | `scripts/vercel-abbau-vorbedingungen.js` | misst die Abbau-Tore |
+| `scripts/cutover.js` | **der Cutover selbst**, in Einzelschritten: `pruefen` · `barriere-an` · `stillstand` · `uebertragen` · `nachweisen` · `barriere-aus` |
+| `scripts/cutover-schema-umschreiben.py` | hebt den `pg_dump` auf die Zielschemata — zustandsbehaftet, fasst COPY-Daten nie an |
+| `scripts/stufe-b-beweis.js` | fährt den echten App-Pfad im direkten Modus gegen eine Test-DB (10 Proben) |
+| `scripts/waechter-datenquelle.js` | Umschaltstelle des Wächters (`WAECHTER_QUELLE`) |
+| `plattform-rolle-n8n.sql` | Rolle `leads_n8n` + Netzweg-Anleitung (idempotent) |
+| `plattform-cron-leads.sql` | pg_cron-Job auf dem Ziel (**nach** dem Datenumzug anlegen) |
 | `scripts/fremdschreiber-messen.js` | wer schreibt außer der App in den Leadkern — Datenseite (Signatur) **und** Transportseite (Edge-Logs); Vorbereitung und Abnahme der Schreibbarriere |
 | `scripts/backfill-antworten.js` | heilt fehlende Antwortzeilen aus dem MySQL-JSON |
 | `scripts/waechter-nurture.js` | W1–W5 (`--selbsttest` läuft ohne Datenbank) |
@@ -292,12 +337,16 @@ Reihenfolge in [vercel-abbau-checkliste.md](audits/cutover-vorbereitung/vercel-a
 
 ✅ **Markus' Freigabe liegt seit dem 27.08. vor.**
 
-**Stand der Tore am 27.08. abends** (gemessen): 12 von 14 erfüllt — alle drei Domains
+**Stand der Tore am 27.08. abends** (gemessen): **11 von 14** erfüllt — alle drei Domains
 erreichbar, ohne Alt-Svc, Zertifikate 87 Tage Rest; Nurture frisch und erfolgreich;
-Werbe-Besucher konvertieren (58 Besucher, 5 Opt-ins in 48 h). Offen sind nur:
+Werbe-Besucher konvertieren (58 Besucher, 5 Opt-ins in 48 h). Offen sind **drei**:
 
-1. die beiden **Datums-Tore** (01.09. bzw. **03.09.**),
-2. das Tor **„n8n Quiz-Workflows ohne Fehl-Läufe (7 Tage)"**.
+1. Tor „frühestens 01.09."
+2. Tor „7 ruhige Tage seit dem letzten Vorfall" → erfüllt ab **03.09.**
+3. Tor „n8n Quiz-Workflows ohne Fehl-Läufe (7 Tage)"
+
+Die **zwei Handprüfungen** (GlitchTip, Wächter-Protokolle) zählen ausdrücklich **nicht**
+zu den 14 — das Skript weist sie getrennt als „nicht messbar" aus.
 
 🔴 **Warum die Datums-Tore nicht einfach vorgezogen werden sollten:** Das zweite misst
 „7 ruhige Tage seit dem letzten Hosting-Vorfall" — und der letzte Vorfall ist der
@@ -421,6 +470,22 @@ Nachweise (Zeilen, Prüfsummen, 0 Waisen, Sequenzen, Funktionsbeweis) → umscha
 n8n-Workflows umstellen, und 🔴 **die Wächter auf die neue Quelle umstellen** — sonst
 bewachen sie weiter die alte Datenbank und melden „alles ruhig".
 
+### 🔴 Offener Defekt (aus dem Audit vom 27.08.)
+
+**`pgss-monatsreset` auf dem Plattform-Server zeigt auf die Datenbank `fitapp`** — die es
+seit der Umbenennung (PR #101) nicht mehr gibt. Vorhandene Datenbanken: `hl_support`,
+`business_leads_testimport`, `postgres`. Letzter erfolgreicher Lauf: **19.08.2026**; der
+nächste wäre am **01.09. um 3:15 UTC** und liefe ins Leere.
+
+Betrifft nicht das Quiz (Instanzhygiene, `pg_stat_statements_reset`), gehört aber
+korrigiert — am besten zusammen mit dem Cutover:
+
+```sql
+SELECT cron.unschedule('pgss-monatsreset');
+SELECT cron.schedule('pgss-monatsreset', '15 3 1 * *', $$select pg_stat_statements_reset()$$);
+-- Danach prüfen: select jobid, jobname, database from cron.job;
+```
+
 ### Schritt 7 — Nachlauf
 
 - Verbindungspooler (PgBouncer), sobald das **dritte** Projekt kommt.
@@ -428,6 +493,62 @@ bewachen sie weiter die alte Datenbank und melden „alles ruhig".
 - `supabase-lead-system-v2.sql` bereinigen (`lead_access_permissions` streichen).
 - Empfehlung ans FitApp-Projekt: Schema `marathon` → `fitapp`.
 - Alter Eingang „Landing Page Business" abbauen (Entscheidung 12: später).
+
+---
+
+## 8b. Offene Punkte — lückenlos, mit Beleg
+
+Erhoben im Audit vom 27./28.08.2026. Jeder Punkt wurde **gemessen**, nicht aus der
+Dokumentation übernommen. Reihenfolge: nach Dringlichkeit.
+
+### Vor dem Cutover
+
+| # | Punkt | Beleg / Stand |
+| --- | --- | --- |
+| 1 | **Barriere-SQL von Hand** im Supabase-Editor — die Management-API ist read-only und kann weder `REVOKE` noch `cron.schedule` | zweifach gemessen; Block liegt fertig unter `cutover-belege/barriere-an.sql` |
+| 2 | **n8n-Workflows deaktivieren** (mind. Outbox-Worker, Nurture-Sender, Post-Processor, Health-Monitor) | von Hand, n8n-API |
+| 3 | **`LEADS_DB_*` in Coolify setzen** + Redeploy. 🔴 `SUPABASE_*` **stehen lassen** | Werte in Secrets `leads_pg`; kein neuer Build nötig (Treiber liegt im Image) |
+| 4 | **Wächter umstellen** (`WAECHTER_QUELLE=plattform` + `LEADS_PG_*` in die `.env`) | Dateien und Treiber liegen auf der Box, Sicherungen angelegt |
+| 5 | **pg_cron auf dem Ziel anlegen** — erst **nach** dem Datenumzug | `plattform-cron-leads.sql` |
+| 6 | **Vercel stilllegen** (Deployment pausieren, umkehrbar) | verhindert Split-Brain über `businessleadsquiz.vercel.app` (HTTP 200, DNS-unabhängig) |
+
+### Am Folgetag
+
+| # | Punkt | Warum |
+| --- | --- | --- |
+| 7 | **Nurture-Sender umbauen** — 6 Nodes von HTTP auf Postgres (`leads_n8n`) | Netzweg steht seit 27.08.; der Umbau wird *einfacher*, weil die Blätterungslogik entfällt |
+| 8 | **`AC - Error Alert` umstellen** (RPC `record_nurture_failure`) | 🔴 der **Alarmkanal** — zeigt sonst auf die alte Instanz |
+| 9 | `Supabase Keep-Alive` und `AC - Quiz Video Inactivity Checker` (inaktiv) | dieselbe Credential, dieselbe alte Instanz |
+| 10 | **Wächter W2 wird anschlagen**, solange der Versand steht | gewollt; dem Bereitschaftshabenden muss es bekannt sein |
+
+### Danach
+
+| # | Punkt | Stand |
+| --- | --- | --- |
+| 11 | **Vercel endgültig abbauen** | freigegeben; Tore **11/14**, offen: 01.09., 03.09. und das n8n-Tor (löst sich am 03.09. selbst) |
+| 12 | **Test-DB `business_leads_testimport` löschen** | 🔴 enthält **1.236 echte E-Mail-Adressen**. Nach dem Cutover gibt es keinen Grund, eine Kopie personenbezogener Daten zu behalten: `dropdb business_leads_testimport` |
+| 13 | **`pgss-monatsreset` reparieren** | zeigt auf die Datenbank `fitapp`, die es nicht mehr gibt (siehe Schritt 7) |
+| 14 | **Outbox-Worker-Secret aus dem Query-String** | `api/lead-outbox-worker.js:65` akzeptiert `req.query?.secret`; Query-Strings landen in Zugriffsprotokollen (Audit 13.2.2, zu Recht offen) |
+| 15 | `supabase-lead-system-v2.sql` bereinigen (`lead_access_permissions` streichen) | Entscheidung 4 |
+| 16 | **PgBouncer**, sobald das dritte Projekt kommt · **cx32** vor der Kontakte-Migration | RAM ist der Engpass, nicht die Platte |
+| 17 | Alten Eingang „Landing Page Business" abbauen · Empfehlung an FitApp: Schema `marathon` → `fitapp` | Entscheidung 12 |
+
+### Dokumentation — im Audit gefunden und bereits korrigiert
+
+72 Befunde aus zwei unabhängigen Prüfungen. Behoben: der **Bridge-Guard-Bug** (vier
+Stellen, siehe unten), die gefährliche „doppelte Helfer"-Anweisung in `AGENTS.md`,
+veraltete Commit- und Testzahlen, die Tore-Zählung, „Kysely" statt `postgres.js`, ein
+totes Skript im Runbook, die fehlende Verlinkung der Cutover-Checkliste, sowie
+Historisch-Banner auf sechs überholten Dokumenten (darunter
+`PHASE1-PHASE5-DEPLOYMENT.md` mit seiner **Phase-4/5-Namenskollision**).
+
+🔴 **Der wichtigste Fund war kein Doku-Fehler, sondern ein echter Bug:**
+`api/bridge.js` prüfte an **vier** Stellen `SUPABASE_URL`/`SUPABASE_SERVICE_KEY` und gab
+ohne sie `null` zurück — ohne den direkten Modus zu kennen. Wer beim Cutover die nicht
+mehr benötigten Supabase-Variablen entfernt hätte, hätte einen **stillen Teilausfall**
+erzeugt: 28 Bridge-Zugriffe liefern `null`, die übrigen Routen laufen weiter. Betroffen
+war auch `supabaseRpc` — der Pfad von `submit_lead_complete`. Behoben und durch
+`scripts/tests/bridge-transport-guard.test.js` zugehalten.
 
 ---
 
@@ -484,6 +605,8 @@ Kontakte-Projekt, nicht hierher.
 
 | Thema | Dokument |
 | --- | --- |
+| 🔴 **Cutover-Nacht: Ablauf Schritt für Schritt** | [audits/cutover-vorbereitung/CUTOVER-CHECKLISTE.md](audits/cutover-vorbereitung/CUTOVER-CHECKLISTE.md) |
+| Audit-Messungen 27.08. abends (alles neu gemessen) | [audits/cutover-vorbereitung/cutover-belege/audit-27-08-2026-abend.md](audits/cutover-vorbereitung/cutover-belege/audit-27-08-2026-abend.md) |
 | **Gesamtstatus der Migration** | [audits/STATUS-migrationsvorbereitung-2026-08-25.md](audits/STATUS-migrationsvorbereitung-2026-08-25.md) |
 | Plattform-Rollenmodell, Serverfrage | [audits/plattform-rollenmodell-2026-08-27.md](audits/plattform-rollenmodell-2026-08-27.md) |
 | Objektauswahl + alle 7 Entscheidungen | [audits/cutover-vorbereitung/phase5-objektauswahl-2026-08-27.md](audits/cutover-vorbereitung/phase5-objektauswahl-2026-08-27.md) |

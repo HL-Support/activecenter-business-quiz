@@ -84,5 +84,5 @@ npm run guard:deploy
 
 Build und Verify immer nacheinander ausfuehren. Der Build erstellt `dist/`; parallele Pruefungen koennen sonst unvollstaendige Dateien lesen.
 
-Der eigentliche Produktions-Deploy (Coolify, manuell, `/health/live`-Nachweis) steht in
+Der eigentliche Produktions-Deploy (Coolify über den CI-Job `deploy` seit 27.08.; manueller POST nur als Fallback, `/health/live`-Nachweis) steht in
 [../DEPLOYMENT_WORKFLOW.md](../DEPLOYMENT_WORKFLOW.md).

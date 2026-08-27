@@ -1,6 +1,6 @@
 # Business Leads Quiz: Bridge-Vertraege
 
-Stand: 13.07.2026
+Stand: 28.08.2026 (Coolify seit 25.08.; forward_typeform_adapter schreibt seit 27.08. Kontakt und alle sechs Antworten atomar über submit_lead_complete)
 
 `/api/bridge` ist die projekteigene API-Bridge des Business Leads Quiz (seit 25.08.2026 im Coolify-Container, zuvor Vercel). Sie ist eine oeffentliche Systemgrenze: Browser, Smoke-Tests und der aktive n8n-Nurture-Workflow greifen darauf zu. Deshalb duerfen Action-Namen, Pflichtfelder und Antwortfelder nicht still geaendert werden.
 

@@ -66,7 +66,7 @@ der Fortsetzungsplan. Wer hier weiterarbeitet, faengt dort an.
 - `npm install`
 - `npm run build`
 - `npm run verify`
-- `npm test` (163 Vertrags-/Verhaltenstests; CI verlangt sie ohnehin)
+- `npm test` (211 Vertrags-/Verhaltenstests (Stand 28.08.2026); CI verlangt sie ohnehin)
 - Aenderungen per PR gegen `main`; Merge erst mit gruenen Checks (`safety`, `e2e-queue`).
 - Nach dem Merge von Runtime-Code deployt der CI-Job `deploy` und beweist es ueber
   `/health/live` — den Job-Ausgang pruefen, nicht annehmen. Ablauf/Fallback in
@@ -74,9 +74,15 @@ der Fortsetzungsplan. Wer hier weiterarbeitet, faengt dort an.
 - Kopien nachziehen, wenn betroffen: Nurture-Waechter auf `167.233.251.217`
   (docs/NURTURE_BETRIEB.md §4), n8n-Workflows nur ueber die API (Skill
   `n8n-workflow-update`).
-- Supabase-Zugriffe: `api/bridge.js` und `server/lead-system.js` halten (noch) doppelte
-  Helfer — Aenderungen immer in BEIDEN Fassungen pruefen (Vorfall 27.08.,
-  docs/audits/2026-08-27-void-rpc-teilverluste.md).
+- 🔴 Datenbank-Zugriffe: Es gibt genau EINE Implementierung in `server/lead-system.js`.
+  `api/bridge.js` delegiert seit PR #94 dorthin und haelt nur noch Transport-Guards.
+  NIE eine zweite Fassung einfuehren — die Drift zwischen zwei Kopien war die Ursache
+  des void-RPC-Datenverlusts (docs/audits/2026-08-27-void-rpc-teilverluste.md).
+- 🔴 Der Transportweg ist umschaltbar (`LEADS_DB_MODUS=postgrest|direkt`, Phase 4
+  Stufe B). Wer einen Guard baut, der `SUPABASE_URL`/`SUPABASE_SERVICE_KEY` prueft,
+  MUSS `dbTransport.istDirekt()` beruecksichtigen — sonst liefert der Aufruf im direkten
+  Modus still `null`. Im Audit vom 27.08. an vier Stellen gefunden und behoben;
+  `scripts/tests/bridge-transport-guard.test.js` haelt es zu.
 - Vercel-Preview/Promote (`deploy:preview`, `promote:prod`) ist nur noch der Rueckweg bis
   zum Vercel-Abbau; nie direkt `npx vercel deploy --prod`.
 
