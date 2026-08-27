@@ -283,11 +283,35 @@ Gemessen mit `scripts/fremdschreiber-messen.js`, dann geschlossen und live
 
 ### Schritt 3 — Vercel-Abbau (ab 02.09., nach Freigabe) — jetzt an der Reihe
 
-`node --env-file=.env.prod scripts/vercel-abbau-vorbedingungen.js` erneut laufen lassen
-(am 27.08. war alles erfüllt außer den zwei Datums-Toren), die zwei Handprüfungen machen
-(GlitchTip ohne offene Hosting-Vorfälle, Wächter-Protokolle ohne neuen ALARM), dann
-Markus' ausdrückliche Freigabe einholen — **der Abbau gibt den Hosting-Rückweg auf**.
+`node --env-file=.env.prod scripts/vercel-abbau-vorbedingungen.js` erneut laufen lassen,
+die zwei Handprüfungen machen (GlitchTip ohne offene Hosting-Vorfälle,
+Wächter-Protokolle ohne neuen ALARM), dann Markus' ausdrückliche Freigabe einholen —
+**der Abbau gibt den Hosting-Rückweg auf**.
 Reihenfolge in [vercel-abbau-checkliste.md](audits/cutover-vorbereitung/vercel-abbau-checkliste.md).
+
+**Stand der Tore am 27.08. abends** (gemessen): 12 von 14 erfüllt — alle drei Domains
+erreichbar, ohne Alt-Svc, Zertifikate 87 Tage Rest; Nurture frisch und erfolgreich;
+Werbe-Besucher konvertieren (58 Besucher, 5 Opt-ins in 48 h). Offen sind nur:
+
+1. die beiden **Datums-Tore** (frühestens 01.09. bzw. 02.09.),
+2. das Tor **„n8n Quiz-Workflows ohne Fehl-Läufe (7 Tage)"**.
+
+🔴 Zu Punkt 2 — **kein Defekt, kein Handlungsbedarf**: Der eine Fehllauf
+(Workflow `Update "Result" by hash`, 27.08. 13:09 MESZ) ist ein **korrekt abgewiesener
+Fremdaufruf**. Der Node heißt `Code - Require Update Secret` und meldete
+`unauthorized_update_result`; der Schutz hat also funktioniert. Der Aufruf kam aus einem
+echten Chrome-Browser von `https://www.global-sce.com` mit einem **`ac_`-Hash** — er
+gehört damit **nicht** zum Business-Leads-Quiz (dessen Hashes beginnen mit `qz_`).
+Die regulären Aufrufe dieses Workflows kommen vom Outbox-Worker (`user-agent: node`,
+kein Origin, `qz_`-Hash, mit `job_id`); von 63 Läufen waren **62 erfolgreich**.
+
+Das Tor löst sich **von selbst**: Es prüft ein 7-Tage-Fenster, der Einzelfall fällt am
+**03.09.** heraus — also praktisch zeitgleich mit den Datums-Toren. Das Tor deshalb
+**nicht** aufweichen; ein Tor, das man bei Unbequemlichkeit lockert, ist wertlos.
+
+Nebenbefund für ein **anderes** Projekt: Falls auf `global-sce.com` ein Frontend diesen
+Webhook noch ohne Secret aufruft, geht dort jedes Ergebnis verloren. Einzelfall in der
+n8n-Historie (die nur bis 26.08. zurückreicht) — beobachten, nicht hier lösen.
 
 ### Schritt 4 — Trockenlauf der Schreibbarriere
 
