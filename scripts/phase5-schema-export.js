@@ -46,8 +46,6 @@ const FUNKTIONEN = [
   ['public', 'analytics_dashboard_v2'], ['public', 'analytics_events_page_v2'],
   ['public', 'submit_lead_complete'], ['analytics_internal', 'refresh_event_daily'],
 ];
-const TRIGGER_TABELLEN = TABELLEN.map(([s, t]) => `${s}.${t}`);
-
 const inListe = (paare) => paare.map(([s, t]) => `('${s}','${t}')`).join(',');
 
 async function main() {
