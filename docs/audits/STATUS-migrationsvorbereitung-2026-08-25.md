@@ -340,6 +340,16 @@ Doppel-Schreibkanal (Videorang → `points_result`) hat einen täglichen Lese-Ab
   **Vor dem Testimport frisch erzeugen.**
 - Kein Kysely-Merge, solange Vercel der Rückweg ist (Weg 1, Entscheidung Markus 25.08.) —
   Vercel kann die private DB nicht erreichen.
+- ✅ **Phase-4-Design** (27.08.): kanonischer Lead-Submit „ein Aufruf, eine Transaktion",
+  zweistufig (Stufe A `submit_lead_complete` als PG-Funktion sofort möglich, Stufe B
+  direkter Treiber nach dem Umzug), Abnahmekriterien aus den Vorfällen (isolierter
+  Pfadbeweis!): [2026-08-27-phase4-design-lead-submit.md](2026-08-27-phase4-design-lead-submit.md).
+- ✅ **Phase-5-Objektauswahl** (27.08., gegen Manifest + Verbraucher-Inventar): 107 Objekte
+  im Verbund → 46 migrieren, 20 fremd, 41 offen mit konkreten Entscheidungsfragen
+  (tracking_*/landing-page, lead_contact_crm/Kalkulator, Webhook-Verbund,
+  lead_access_permissions, archive-Schema):
+  [cutover-vorbereitung/phase5-objektauswahl-2026-08-27.md](cutover-vorbereitung/phase5-objektauswahl-2026-08-27.md).
+  **Vor dem Testimport Manifest frisch erzeugen.**
 
 ### Nachtrag 27.08.: Vorfall Anzeigen-Konversion (gelöst) — HTTP/3 am Proxy aus
 
