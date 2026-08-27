@@ -317,11 +317,50 @@ async function w3StrukturellUnerreichbar() {
   return befunde;
 }
 
+/**
+ * W4 — Konvertieren die ANZEIGEN-Besucher noch?
+ *
+ * Anlass (27.08.2026): Nach dem Hosting-Cutover kamen die Werbe-Besucher (Instagram/
+ * Facebook-In-App-Browser) weiter an, spielten das Quiz komplett — und ab dem Formular
+ * erreichte kein einziger Klick mehr den Server. 0 von 49 an einem Tag, waehrend
+ * Nicht-Werbe-Besucher normal konvertierten. Meta bekam daraufhin keine Lead-Signale mehr
+ * und drosselte die Auslieferung von ~800 auf ~60 Impressionen. Mutmasslicher Ausloeser
+ * war das HTTP/3-Angebot des neuen Proxys (Alt-Svc h3), das exakt WebKit-Clients nach der
+ * Tipp-Pause im Formular traf; seit dem Abschalten laeuft der echte In-App-Submit wieder.
+ *
+ * Die Pruefung ist bewusst ein VERHAELTNIS, kein Absolutwert: Werbe-Besucher da, aber
+ * keine Opt-ins daraus = Alarm. Ohne Werbe-Besucher (Kampagne aus) schweigt sie.
+ */
+async function w4AnzeigenKonversion() {
+  const r = await executeManagementQuery(`
+    select
+      count(*) filter (where fbclid is not null) as werbebesucher,
+      count(*) filter (where fbclid is not null and form_submitted_at is not null) as werbe_optins
+    from public.lead_state
+    where created_at > now() - interval '24 hours'`);
+  const x = r[0];
+  const besucher = Number(x.werbebesucher);
+  const optins = Number(x.werbe_optins);
+  if (besucher >= 15 && optins === 0) {
+    return [{
+      stufe: 'ALARM',
+      name: 'Werbe-Besucher konvertieren nicht',
+      zeilen: besucher,
+      text: `${besucher} Besucher mit Werbe-Attribution in 24 h, aber KEIN einziges `
+        + 'Opt-in daraus. Genau dieses Bild hatte der Vorfall vom 25.-27.08.: Funnel '
+        + 'gesund, Anzeigen liefern, Formular-Klicks erreichen den Server nie. Zuerst '
+        + 'pruefen: Antwort-Kopfzeilen (Alt-Svc/Protokolle) gegen den letzten guten Stand.',
+    }];
+  }
+  return [];
+}
+
 (async () => {
   const w1 = await w1Kappungsnaehe();
   const w2 = await w2ErgebnisStattVorgang();
   const w3 = await w3StrukturellUnerreichbar();
-  const alle = [...w1, ...w2.befunde, ...w3];
+  const w4 = await w4AnzeigenKonversion();
+  const alle = [...w1, ...w2.befunde, ...w3, ...w4];
   const still = process.argv.includes('--still');
 
   const jsonIndex = process.argv.indexOf('--json');
