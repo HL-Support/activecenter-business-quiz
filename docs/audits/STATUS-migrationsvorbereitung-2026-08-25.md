@@ -329,3 +329,17 @@ Doppel-Schreibkanal (Videorang → `points_result`) hat einen täglichen Lese-Ab
   ausdrücklicher Freigabe — damit wird der Hosting-Rückweg bewusst aufgegeben).
 - Kein Kysely-Merge, solange Vercel der Rückweg ist (Weg 1, Entscheidung Markus 25.08.) —
   Vercel kann die private DB nicht erreichen.
+
+### Nachtrag 27.08.: Vorfall Anzeigen-Konversion (gelöst) — HTTP/3 am Proxy aus
+
+Werbe-Besucher (IG/FB-In-App-Browser) konvertierten seit dem Cutover nicht mehr —
+**0 von 49** am 26.08., Formular-Klicks erreichten den Server nie; normale Browser und
+alle E2E liefen durch. Einziger Netz-Unterschied zu Vercel: der neue Proxy bewarb
+HTTP/3 (`Alt-Svc: h3`). **07:13 abgeschaltet** (Sicherung
+`/data/coolify/proxy/backups/docker-compose.yml.vor-h3-aus-20260827`); **07:32** Beweis am
+echten Gerät: Markus' eigener Anzeigen-Klick lief komplett durch die Pipeline.
+Meta-Auslieferung brach als **Folge** der fehlenden Lead-Signale ein (808 → 64
+Impressionen) und braucht nach Wiedereinsetzen der Konversionen Stunden bis einen Tag.
+Dauerhaft: Wächter-Prüfung **W4** (Werbe-Besucher ohne ein einziges Opt-in → ALARM);
+HTTP/3 bleibt aus, bis es am echten iOS-/IG-Gerät getestet ist. Vollständige Kette:
+[2026-08-27-anzeigenkonversion-http3.md](2026-08-27-anzeigenkonversion-http3.md).

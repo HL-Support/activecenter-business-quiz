@@ -128,6 +128,13 @@ Wächter läuft nicht mehr. Damit wird auch der Wächter bewacht.
   (`scripts/waechter-nurture-baseline.json`): gewarnt wird nur bei **neuen** Fällen,
   verschwundene Einträge werden zum Aufräumen gemeldet. Ohne Baseline wäre die Warnung
   wegen 8 unheilbarer Altdatenfälle für immer an — und Dauergelb erzieht zum Wegsehen.
+- **W4** — konvertieren Werbe-Besucher? Kommen in 24 h ≥ 15 Besucher mit
+  Werbe-Attribution (`fbclid`), aber **kein einziges** Opt-in daraus → ALARM. Ein
+  Verhältnis, kein Absolutwert: bei pausierter Kampagne schweigt die Prüfung. Hintergrund
+  ist der Vorfall vom 26./27.08. (0/49 Anzeigen-Konversionen nach dem Cutover, Ursache
+  HTTP/3-Ankündigung des neuen Proxys —
+  [Vorfallsdoku](audits/2026-08-27-anzeigenkonversion-http3.md)). Erste Prüfrichtung im
+  Alarmfall: Antwort-Kopfzeilen (`Alt-Svc`/Protokolle) gegen den letzten guten Stand.
 
 Prüfen ohne Datenbankzugriff: `node scripts/waechter-nurture.js --selbsttest` — 8 Fälle,
 darunter ausdrücklich „der echte Vorfall wäre erkannt worden".
