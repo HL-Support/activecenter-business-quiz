@@ -27,7 +27,9 @@ const { bildeSchemaAb, bildeDefinitionAb } = require('./phase5-schema-abbildung.
 const SSH = 'C:/Windows/System32/OpenSSH/ssh.exe';
 const HOST = 'root@91.99.76.104';
 const KEY = 'C:/Users/Markus/.ssh/id_rsa';
-const DB = 'business_leads_testimport';
+// Zieldatenbank einstellbar: der Testimport beweist das Verfahren, hl_support ist das
+// echte Ziel. Vor dem Cutover MUSS der Vergleich gegen hl_support gruen sein.
+const DB = process.env.ZIEL_DB || 'business_leads_testimport';
 
 const livePfad = process.argv[2] || path.join(__dirname, '..', 'docs', 'audits',
   'cutover-vorbereitung', 'phase5-testimport', `paritaet-live-${new Date().toISOString().slice(0, 10)}-leads.json`);
@@ -146,15 +148,22 @@ function vergleiche(art, liveZeilen, testZeilen, schluessel, wert) {
   alle.push(...vergleiche('Trigger', live.trigger, test.trigger,
     ['schema', 'tabelle', 'name'], (z) => bildeDefinitionAb(z.definition)));
 
-  // Fertig-Kriterium Schritt 1 (STAND-UND-FORTSETZUNG §8): kein Quiz-Objekt mehr in
-  // public. Funktionen sind ausgenommen relkind-seitig ohnehin (pgcrypto legt nur
-  // Funktionen an, keine Relationen).
+  // Fertig-Kriterium Schritt 1 (STAND-UND-FORTSETZUNG §8): kein QUIZ-Objekt mehr in
+  // public. Bewusst nicht "public ist leer": In der echten Ziel-DB hl_support liegen
+  // dort legitime Fremdobjekte (pg_stat_statements-Views der Extension, cron_runs der
+  // Plattform). Geprüft werden deshalb genau die Namen der Migrieren-Liste - sonst
+  // meldete die Prüfung Fremdes und man gewöhnte sich an, sie zu übergehen.
+  const quizNamen = [...new Set([
+    ...live.spalten.map((z) => z.tabelle),
+    ...live.views.map((z) => z.name),
+  ])];
   const inPublic = remoteJson(`select json_agg(x) from (
     select c.relname as name, c.relkind::text as art
     from pg_class c join pg_namespace n on n.oid = c.relnamespace
-    where n.nspname = 'public' and c.relkind in ('r','p','v','m','S')
+    where n.nspname = 'public' and c.relkind in ('r','p','v','m')
+      and c.relname in (${quizNamen.map((n) => `'${n}'`).join(',')})
     order by c.relname) x`) || [];
-  for (const o of inPublic) alle.push(`PUBLIC NICHT LEER: ${o.name} (relkind ${o.art})`);
+  for (const o of inPublic) alle.push(`QUIZ-OBJEKT IN PUBLIC: ${o.name} (relkind ${o.art})`);
 
   // Rollenmodell-Vertrag: alles in leads/leads_analytics gehoert leads_owner -
   // beweist, dass der Import wirklich unter SET ROLE lief.
@@ -181,11 +190,11 @@ function vergleiche(art, liveZeilen, testZeilen, schluessel, wert) {
 
   console.log(`\nParitaetsvergleich Quelle -> ${DB} (live/test): ${zaehlung.join(' · ')}\n`);
   if (!alle.length) {
-    console.log('  Keine Abweichungen - der Testimport ist definitionsgleich zur abgebildeten Quelle (leads/leads_analytics), public ist leer, alles gehoert leads_owner.');
+    console.log('  Keine Abweichungen - der Testimport ist definitionsgleich zur abgebildeten Quelle (leads/leads_analytics), kein Quiz-Objekt in public, alles gehoert leads_owner.');
   } else {
     for (const b of alle) console.log('  ' + b);
     console.log(`\n  ${alle.length} Befund(e).`);
   }
   process.exit(alle.some((b) => b.startsWith('FEHLT') || b.startsWith('NUR')
-    || b.startsWith('PUBLIC NICHT LEER') || b.startsWith('FREMDES EIGENTUM')) ? 1 : 0);
+    || b.startsWith('QUIZ-OBJEKT IN PUBLIC') || b.startsWith('FREMDES EIGENTUM')) ? 1 : 0);
 })();
