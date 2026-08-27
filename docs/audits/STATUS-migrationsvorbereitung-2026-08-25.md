@@ -372,6 +372,16 @@ Doppel-Schreibkanal (Videorang → `points_result`) hat einen täglichen Lese-Ab
   falscher 0-Messung; Identity-Spalten unsichtbar für pg_attrdef — falsches Grün, erst
   der Funktionsbeweis fand es). Protokoll:
   [cutover-vorbereitung/phase5-testimport/testimport-protokoll-2026-08-27.md](cutover-vorbereitung/phase5-testimport/testimport-protokoll-2026-08-27.md).
+- ✅ **Phase-5-DATENPROBE bestanden** (27.08. abends): **171.260 echte Zeilen** aller 18
+  Tabellen in die Test-DB gepumpt — je Tabelle exportiert == importiert, **6/6
+  Inhalts-Prüfsummen identisch** (inkl. Umlaut-/Akzent- und JSON-Payload-Probe),
+  Identity-Zähler auf `max+1000` (echter INSERT kollisionsfrei), FK-Abweisung und
+  CASCADE bewiesen, RPCs gegen den vollen Bestand korrekt. Drift nur in den zwei
+  `analytics_internal`-Tabellen (pg_cron schreibt weiter, Quelle lief ohne Schreibstopp).
+  Dauer 5,2 min über den API-Weg — **Obergrenze, keine Cutover-Messung** (ohne
+  DB-Passwort kein `pg_dump`/`COPY`). Drei Funde behoben: PostgREST verbirgt
+  `analytics_internal`, `refresh_runs.run_id` ist GENERATED ALWAYS (Identity-Liste jetzt
+  gemessen statt handgepflegt), DB-Server sperrt schnelle SSH-Folgen (eine Sitzung).
 
 ### Nachtrag 27.08.: Vorfall Anzeigen-Konversion (gelöst) — HTTP/3 am Proxy aus
 
