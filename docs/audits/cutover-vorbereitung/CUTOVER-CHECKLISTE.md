@@ -86,31 +86,30 @@ Zusätzlich von Hand: GlitchTip ohne offene Vorfälle, letzter Wächterlauf ohne
 node --env-file=.env.prod scripts/cutover.js barriere-an
 ```
 
-Das Skript schaltet den Quell-Cron-Job ab (das geht) und **gibt das REVOKE-SQL zum
-Kopieren aus** (das geht nicht automatisch, siehe Kasten). `SELECT` bleibt erhalten —
-der Dump muss lesen können.
+Das Skript schaltet den Cron-Job ab und entzieht die Schreibrechte auf allen 18
+Tabellen — beides selbst, kein Handgriff nötig. `SELECT` bleibt erhalten, der Dump muss
+lesen können. Anschließend zeigt es die Rechte auf `lead_state` als Nachweis und meldet
+einen Fehler, wenn `service_role` noch schreiben dürfte.
 
-> 🔴 **Warum die Barriere komplett von Hand läuft.** Gemessen am 27.08.: Die
-> Supabase-Management-API arbeitet in einer **read-only-Transaktion** und kann
-> **gar nichts** ändern — weder `REVOKE`/`GRANT` noch `cron.schedule`/`unschedule`
-> (die schreiben intern in `cron.job`).
+> ✅ **Läuft seit 27.08. automatisch.** Das Skript setzt die Barriere selbst — über
+> einen Direktzugang als `postgres` (Eigentümerin der Tabellen).
 >
-> Ein erster Test schien `cron.unschedule` zu erlauben — das war eine **Fehldeutung**:
-> Der Testjob existierte nicht, der fachliche Fehler kam vor der read-only-Prüfung.
-> Die zweite Messung mit einem echten Job war eindeutig blockiert. (Genau deshalb wird
-> geprobt statt angenommen.)
+> Vorgeschichte: Die Management-API ist **read-only** und kann weder `REVOKE`/`GRANT`
+> noch `cron.schedule`. Das ursprüngliche `postgres`-Passwort war nie beschafft; es
+> wurde an fünf Orten gesucht (Secrets samt sieben Sicherungen, alle `.env` im
+> Workspace, Coolify-Box, n8n-Box) und nirgends gefunden. Zweimal gemessen: **null**
+> aktive Verbindungen als `postgres`. Daraufhin über
+> `PATCH /v1/projects/<ref>/database/password` **neu gesetzt** und in
+> `agent-secrets.json` (`supabase.postgres*`) hinterlegt.
 >
-> Die einzige Rolle mit direktem Zugang (`marathon_app`) ist nicht Eigentümerin der
-> Tabellen und darf ebenfalls kein `REVOKE`; ein `postgres`-Passwort wurde nie
-> beschafft.
+> 🔴 Zugang **nur über den Session-Pooler** (Port 5432) — `db.<ref>.supabase.co` ist
+> IPv6-only und von den Containern nicht erreichbar.
 >
-> **Also: Der ausgegebene SQL-Block wird im Supabase-SQL-Editor eingefügt** (dort läuft
-> die Sitzung als `postgres`). Er enthält **beides** — Cron-Abschaltung und
-> Rechte-Entzug — und dauert zwei Minuten. Der Block liegt zusätzlich als
-> `cutover-belege/barriere-an.sql`.
->
-> Das ist bewusst ein sichtbarer Handgriff statt eines Skripts, das den wichtigsten
-> Schritt still überspringt.
+> **Trockenlauf bestanden** (an einer selbst angelegten Testtabelle, nie an echten
+> Daten): `arwdDxtm` → nach `REVOKE` → `rxtm` → nach `GRANT` zurück. Dabei ein Fehler
+> im Rückweg gefunden: Das `GRANT` gab **TRUNCATE nicht zurück** (`arwdxtm` statt
+> `arwdDxtm`) — das große `D` hätte dauerhaft gefehlt, ohne dass es jemand bemerkt.
+> Korrigiert.
 
 **Direkt danach von Hand:** n8n-Workflows deaktivieren (mindestens
 `AC - Lead Sync Outbox Worker`, `AC - Quiz Nurture Email Sender`,
@@ -122,11 +121,11 @@ Rückweg-Block aus (GRANT **und** Cron-Job mit exakt dem ursprünglichen Namen
 Rechte-Muster** (`cutover-belege/rechte-vor-dem-cutover.json`); das pauschale GRANT
 stellt den Schreibzugriff her, ebnet aber Feinheiten ein — bei Bedarf abgleichen.
 
-**Falls der Handgriff nicht möglich ist** (kein Dashboard-Zugang zur Hand): Die Barriere
-wird weich — App und n8n sind aus, der Stillstand wird trotzdem zweimal gemessen. Das
-ist schwächer als der erzwungene Entzug, aber nicht wertlos: Gemessen am 27.08. kamen
-**alle** Quiz-Schreibzugriffe von Coolify und n8n; ein dritter Schreiber ist nicht
-bekannt. Diese Abweichung dann **im Protokoll festhalten**.
+**Falls der Direktzugang klemmt:** Die Barriere wird weich — n8n aus, Stillstand
+trotzdem zweimal messen, und nach dem Umschalten die alte Datenbank auf Zeilen prüfen,
+die im Fenster entstanden sind. Schwächer als der Entzug, aber nicht wertlos: Gemessen
+am 27.08. kamen **alle** Quiz-Schreibzugriffe von Coolify und n8n. Abweichung dann
+**im Protokoll festhalten**.
 
 ### 2 · Stillstand beweisen (ca. 03:05, dauert 3 min)
 

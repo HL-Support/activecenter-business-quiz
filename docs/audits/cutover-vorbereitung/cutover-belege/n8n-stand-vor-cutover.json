@@ -1,0 +1,45 @@
+{
+  "gesichert_am": "2026-08-27T19:10:36.010Z",
+  "workflows": {
+    "RqKSRTgFv8mv04H2": {
+      "name": "AC - Quiz Nurture Email Sender",
+      "active": true
+    },
+    "9RZdrLxfA8IRhd55": {
+      "name": "AC - Lead Post Processor - Business Leads Quiz",
+      "active": true
+    },
+    "ALLHYLRwkvujkuFJ": {
+      "name": "AC - Lead Sync Outbox Worker - Business Leads Quiz",
+      "active": true
+    },
+    "m52uJBbSQUFUA2Dm": {
+      "name": "AC - Lead System Health Monitor - Business Leads Quiz",
+      "active": true
+    },
+    "BLQLWW8oN8M4BSe1": {
+      "name": "AC - Quiz Nightly Data Sync (MySQL → Mautic)",
+      "active": true
+    },
+    "7Xg6NsE5H3UWgSNc": {
+      "name": "Update \"Result\" by hash",
+      "active": true
+    },
+    "MdCOqTBLoaJzkgDM": {
+      "name": "[SWEEP] Domain-Sweep Alarm",
+      "active": true
+    },
+    "CODeVYeZ_63C-DoT4Z8SN": {
+      "name": "Supabase Keep-Alive",
+      "active": true
+    },
+    "vSpXIyOUK9WIlvxi": {
+      "name": "AC - Error Alert (Postmark)",
+      "active": true
+    },
+    "ie2WEc1RmFhN5LQf": {
+      "name": "AC - Quiz Video Inactivity Checker",
+      "active": false
+    }
+  }
+}
