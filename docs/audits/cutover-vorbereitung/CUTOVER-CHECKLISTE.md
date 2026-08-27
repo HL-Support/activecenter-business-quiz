@@ -21,42 +21,51 @@ nach unten abgearbeitet. Jeder Schritt nennt seinen Nachweis und seinen Rückweg
 | Schema-Umschreiber | ✅ `scripts/cutover-schema-umschreiben.py`, gegen Datenzeilen-Falle geprüft |
 | pg_cron-SQL fürs Ziel | ✅ `plattform-cron-leads.sql` |
 | Rechtestand der Quelle | ✅ gesichert in `cutover-belege/rechte-vor-dem-cutover.json` |
-| **n8n** | 🔴 **offene Entscheidung, siehe unten** |
+| n8n-Netzweg | ✅ Rolle `leads_n8n`, `pg_hba` + Firewall offen, vom n8n-Server bewiesen |
+| n8n-Nurture-Sender | ⏸ bleibt beim Cutover **aus**, Umbau am Folgetag (Entscheidung 27.08.) |
 
 ---
 
-## 🔴 Die eine offene Entscheidung: n8n
+## n8n — Netzweg steht, Umbau folgt morgen
 
-**Gemessen:** Der n8n-Server ist im internen Netz `10.0.1.4`. Die Plattform-Datenbank
-lässt laut `pg_hba` nur `10.0.1.5` zu, und die Firewall blockt zusätzlich —
-**n8n erreicht die neue Datenbank nicht.**
+**Der Netzweg ist geöffnet** (27.08., 22:20). Die ursprüngliche Sorge war überzogen:
+n8n durfte auf derselben Maschine **längst MySQL** (Port 3306 für `10.0.1.4` offen),
+nur der Postgres-Port war zu. Und sicherheitlich ist der neue Weg ein **Gewinn**:
+Heute trägt n8n den Supabase-`service_role`-Schlüssel — Vollzugriff auf alles unter
+Umgehung sämtlicher Zeilenregeln. Die neue Rolle darf deutlich weniger.
 
-Von sieben Workflows brauchen **sechs gar nichts**: Sie sprechen entweder MySQL/Mautic
-oder gehen über App-Endpunkte (`/api/bridge`, `/api/lead-outbox-worker`,
-`/api/lead-system-health`) — dort wechselt die Datenbank app-seitig, die URL bleibt.
+| | |
+| --- | --- |
+| Rolle | `leads_n8n` — nur DML in `leads`/`leads_analytics`, kein DDL, kein BYPASSRLS, CONNECTION LIMIT 4, `statement_timeout` 30 s |
+| `pg_hba` | `host hl_support leads_n8n 10.0.1.4/32 scram-sha-256` — eng: nur diese Datenbank, diese Rolle, diese Adresse |
+| Firewall | `ufw allow from 10.0.1.4 to any port 5432` |
+| SQL | `plattform-rolle-n8n.sql` (idempotent, Rückweg im Kopf) |
 
-Betroffen ist **ein** Workflow: **AC - Quiz Nurture Email Sender** mit sechs direkten
-Supabase-Aufrufen (`v_lead_state_full`, `lead_events`, `tracking_sessions` lesend;
-`record_nurture_skip`, `record_nurture_sent`, `record_nurture_run` als RPC).
+**Bewiesen vom n8n-Server aus:** Verbindung steht, `search_path` stimmt. Gegenproben:
+Zugriff auf eine **andere Datenbank wird verweigert** (`no pg_hba.conf entry`), **DDL
+wird verweigert** (`permission denied for schema leads`).
 
-| Weg | Preis | Aufwand heute Nacht |
-| --- | --- | --- |
-| **A — Netzweg öffnen** (`pg_hba` + UFW für `10.0.1.4`) und die 6 Nodes auf Postgres-Nodes umstellen | zweite Maschine mit DB-Zugang; die 26-Node-Logik muss stimmen | hoch, riskant unter Zeitdruck |
-| **B — Nurture-Sender nach dem Cutover aus lassen**, danach in Ruhe umbauen | **kein Nurture-Versand**, bis der Umbau steht (1–2 Tage) | keiner |
-| **C — Cutover verschieben**, bis n8n umgebaut ist | Zeitplan | — |
+### Was heute Nacht gilt
 
-**Empfehlung: B.** Der Versand ruht bewusst und überwacht statt still — genau der
-Unterschied zum Vorfall vom 26.08., wo drei Wochen lang niemand etwas merkte. Wächter
-W2 wird korrekt Alarm schlagen (fällige Empfänger + stehender Versand); das ist
-gewollt und muss dem Bereitschaftshabenden bekannt sein.
+Der **Nurture-Sender bleibt beim Cutover aus** — seine sechs Supabase-Nodes müssen von
+HTTP auf Postgres umgebaut werden, und das ist Arbeit für einen wachen Kopf, nicht für
+halb vier. **Reparatur am Folgetag** (Entscheidung Markus, 27.08.).
 
-**Drei weitere Supabase-Verbraucher außerhalb der sieben** (aus dem Instanz-Scan):
+Der Umbau wird dabei eher *einfacher*: Die Blätterungslogik (`$pageCount * 1000`,
+max. 20 Seiten) entfällt, weil ein direkter Treiber keine 1000-Zeilen-Grenze kennt —
+genau die Fehlerklasse, die den Vorfall vom 26.08. verursacht hat, verschwindet
+strukturell.
+
+🔴 In der Zwischenzeit schlägt Wächter W2 korrekt an (fällige Empfänger + stehender
+Versand). Das ist gewollt und muss dem Bereitschaftshabenden bekannt sein.
+
+### Drei Verbraucher außerhalb der sieben
+
 `Supabase Keep-Alive` (aktiv), **`AC - Error Alert (Postmark)`** (aktiv, RPC
-`record_nurture_failure` — das ist der Alarmkanal!), `AC - Quiz Video Inactivity
-Checker` (inaktiv). Sie zeigen nach dem Cutover weiter auf die alte Instanz.
-🔴 Besonders der Error-Alert: Fällt er aus, verliert man Fehlermeldungen genau dann,
-wenn man sie braucht. Vor dem Cutover entscheiden, ob er mit umzieht oder bewusst
-auf der alten Instanz bleibt.
+`record_nurture_failure` — der Alarmkanal!), `AC - Quiz Video Inactivity Checker`
+(inaktiv). Sie zeigen nach dem Cutover weiter auf die alte Instanz. 🔴 Besonders der
+Error-Alert: Fällt er aus, verliert man Fehlermeldungen genau dann, wenn man sie
+braucht. Gehört mit dem Nurture-Sender zusammen umgestellt.
 
 ---
 
