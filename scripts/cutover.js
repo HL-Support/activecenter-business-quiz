@@ -133,37 +133,69 @@ function barriereSql(richtung) {
       + `-- 2. Schreibrechte entziehen (SELECT bleibt - der Dump muss lesen):\n`
       + `REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON\n${liste}\nFROM anon, authenticated, service_role;`;
   }
-  return `-- 1. Schreibrechte zurueckgeben:\n`
-    + `GRANT INSERT, UPDATE, DELETE ON\n${liste}\nTO anon, authenticated, service_role;\n\n`
+  // 🔴 TRUNCATE muss mit zurueck. Im Trockenlauf am 27.08. gemessen: Die Rechte lauten
+  // vorher "arwdDxtm", nach REVOKE "rxtm" - und ein GRANT ohne TRUNCATE stellt nur
+  // "arwdxtm" her. Das grosse D fehlt dann dauerhaft, ohne dass es jemand bemerkt.
+  //
+  // Der Ausgangszustand hatte VIER verschiedene Muster (Beleg
+  // cutover-belege/rechte-vor-dem-cutover.json). Dieses pauschale GRANT stellt den
+  // Schreibzugriff her; wer den exakten Zustand braucht, gleicht gegen den Beleg ab.
+  return `-- 1. Schreibrechte zurueckgeben (TRUNCATE nicht vergessen - siehe Kommentar):\n`
+    + `GRANT INSERT, UPDATE, DELETE, TRUNCATE ON\n${liste}\nTO anon, authenticated, service_role;\n\n`
     + `-- 2. Cron-Job wieder einplanen (exakt der urspruengliche Name und Befehl):\n`
     + `SELECT cron.schedule('${CRON_JOBNAME}', '*/15 * * * *',\n`
     + `  $$select analytics_internal.refresh_event_daily(\n`
     + `      (now() at time zone 'UTC')::date, (now() at time zone 'UTC')::date)$$);`;
 }
 
+// Seit 27.08. gibt es einen Direktzugang als `postgres` (Eigentuemerin der Tabellen).
+// Das Passwort wurde neu gesetzt, weil das urspruengliche nie beschafft war - vorher an
+// fuenf Orten gesucht und zweimal gemessen, dass die Rolle niemand nutzt.
+// Zugang NUR ueber den Session-Pooler: db.<ref>.supabase.co ist IPv6-only, und die
+// Coolify-Container haben kein IPv6.
+function quellSql(sql) {
+  const s = JSON.parse(fs.readFileSync('C:/Users/Markus/.agent-secrets/agent-secrets.json', 'utf8')).supabase;
+  if (!s.postgresPassword) {
+    throw new Error('supabase.postgresPassword fehlt in agent-secrets.json - '
+      + 'ohne den Direktzugang laesst sich die Barriere nicht setzen.');
+  }
+  const befehl = `export PGPASSWORD='${s.postgresPassword}'; `
+    + `psql -h ${s.postgresHost} -p ${s.postgresPort} -U ${s.postgresUser} -d postgres -v ON_ERROR_STOP=1 -tA`;
+  return ssh(befehl, { input: sql + '\n' });
+}
+
 async function barriereAn() {
   console.log('\n== Barriere setzen ==\n');
-  const jobs = await executeManagementQuery(
-    `select jobid, active from cron.job where jobname = '${CRON_JOBNAME}'`);
-  console.log(`  Cron-Job "${CRON_JOBNAME}": `
-    + (jobs.length ? `#${jobs[0].jobid}, aktiv=${jobs[0].active}` : 'nicht gefunden'));
-  console.log('\n  🔴 IM SUPABASE-SQL-EDITOR ausfuehren — die API darf nichts aendern:\n');
-  console.log(barriereSql('entziehen').split('\n').map((z) => '    ' + z).join('\n'));
-  console.log('\n  🔴 Danach VON HAND: n8n-Workflows deaktivieren.');
-  console.log('\n  Dann: scripts/cutover.js stillstand  (prueft, ob es gewirkt hat)\n');
-  belegSchreiben('barriere-an.sql', barriereSql('entziehen') + '\n');
-  return 0;
+  console.log('  🔴 Ab jetzt schlaegt JEDER Schreibversuch auf die Quelle fehl.\n');
+  const sql = barriereSql('entziehen');
+  belegSchreiben('barriere-an.sql', sql + '\n');
+  const ausgabe = quellSql(sql);
+  console.log(ausgabe.split('\n').filter(Boolean).map((z) => '  ' + z).join('\n'));
+
+  // Nachweis, dass es gewirkt hat: die Rechte einer Auswahl-Tabelle zeigen.
+  const nachher = quellSql(
+    "select array_to_string(relacl, ' | ') from pg_class where oid = 'public.lead_state'::regclass;");
+  console.log('\n  Rechte auf lead_state jetzt:\n    ' + nachher.trim());
+  const nurLesen = !/service_role=[^/]*[awd]/.test(nachher);
+  console.log(`\n  ${nurLesen ? 'OK — service_role darf nicht mehr schreiben.' : '🔴 service_role hat noch Schreibrechte!'}`);
+  console.log('\n  🔴 Jetzt VON HAND: n8n-Workflows deaktivieren.');
+  console.log('  Dann: scripts/cutover.js stillstand\n');
+  return nurLesen ? 0 : 1;
 }
 
 async function barriereAus() {
   console.log('\n== RÜCKWEG: Barriere lösen ==\n');
-  console.log('  🔴 IM SUPABASE-SQL-EDITOR ausfuehren:\n');
-  console.log(barriereSql('zurueckgeben').split('\n').map((z) => '    ' + z).join('\n'));
-  console.log('\n  Achtung: Der Ausgangszustand hatte VIER verschiedene Rechte-Muster');
-  console.log('  (Beleg: cutover-belege/rechte-vor-dem-cutover.json). Das pauschale GRANT');
-  console.log('  stellt den Schreibzugriff wieder her, ebnet aber Feinheiten ein.');
+  const sql = barriereSql('zurueckgeben');
+  belegSchreiben('barriere-aus.sql', sql + '\n');
+  const ausgabe = quellSql(sql);
+  console.log(ausgabe.split('\n').filter(Boolean).map((z) => '  ' + z).join('\n'));
+
+  const nachher = quellSql(
+    "select array_to_string(relacl, ' | ') from pg_class where oid = 'public.lead_state'::regclass;");
+  console.log('\n  Rechte auf lead_state jetzt:\n    ' + nachher.trim());
+  console.log('\n  Abgleich gegen den Ausgangszustand: cutover-belege/rechte-vor-dem-cutover.json');
+  console.log('  (dort stehen VIER verschiedene Muster - das pauschale GRANT ebnet Feinheiten ein)');
   console.log('\n  🔴 n8n-Workflows nicht vergessen zu reaktivieren.\n');
-  belegSchreiben('barriere-aus.sql', barriereSql('zurueckgeben') + '\n');
   return 0;
 }
 
