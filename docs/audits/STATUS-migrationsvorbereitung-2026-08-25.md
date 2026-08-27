@@ -325,8 +325,19 @@ Doppel-Schreibkanal (Videorang → `points_result`) hat einen täglichen Lese-Ab
   vorhanden, Direkthost über 5432 verbunden, Pooler als IPv4-Rückfallebene auf 5432 und
   6543 erreichbar. Details im Beiblatt der
   [Vercel-Abbau-Checkliste](cutover-vorbereitung/vercel-abbau-checkliste.md).
-- Vercel-Abbau: Checkliste liegt bereit (frühestens 01.09., empfohlen 08.09., nur mit
-  ausdrücklicher Freigabe — damit wird der Hosting-Rückweg bewusst aufgegeben).
+- Vercel-Abbau: Checkliste liegt bereit (frühestens 01.09., empfohlen 08.09.). Markus hat
+  am 27.08. **bedingt freigegeben** („wenn alles getestet und richtig ist") — die
+  Vorbedingungen misst jetzt `scripts/vercel-abbau-vorbedingungen.js` (27.08.: alles
+  erfüllt außer den zwei Datums-Toren; wegen des h3-Vorfalls frühestens **02.09.**).
+  GlitchTip und Wächter-Protokolle bleiben Handprüfungen.
+- ✅ Objektmanifest 13.5.1 (27.08., `scripts/objektmanifest-supabase.js`, Ablage
+  `cutover-vorbereitung/objektmanifest/`): Verbund = `public` + `analytics_internal` +
+  `archive`; die DB trägt daneben fremde Apps (u.a. `marathon` mit 39 Tabellen), auch
+  `public` selbst ist gemischt (HBA-Objekte) — Auswahl in Phase 5 gegen das
+  Verbraucher-Inventar. Katalogtest: 3 Fundstellen (2× `extensions.digest`/pgcrypto in
+  HBA-Funktionen, 1× FK auf `auth.users`). pg_cron-Job `analytics_internal.
+  refresh_event_daily` alle 15 min → gehört in die Schreibbarriere 13.5.2.
+  **Vor dem Testimport frisch erzeugen.**
 - Kein Kysely-Merge, solange Vercel der Rückweg ist (Weg 1, Entscheidung Markus 25.08.) —
   Vercel kann die private DB nicht erreichen.
 
