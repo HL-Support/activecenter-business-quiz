@@ -2,7 +2,7 @@
 
 Stand: 13.07.2026
 
-`/api/bridge` ist die projektspezifische Vercel-Bridge des Business Leads Quiz. Sie ist trotzdem eine oeffentliche Systemgrenze: Browser, Smoke-Tests und der aktive n8n-Nurture-Workflow greifen darauf zu. Deshalb duerfen Action-Namen, Pflichtfelder und Antwortfelder nicht still geaendert werden.
+`/api/bridge` ist die projekteigene API-Bridge des Business Leads Quiz (seit 25.08.2026 im Coolify-Container, zuvor Vercel). Sie ist eine oeffentliche Systemgrenze: Browser, Smoke-Tests und der aktive n8n-Nurture-Workflow greifen darauf zu. Deshalb duerfen Action-Namen, Pflichtfelder und Antwortfelder nicht still geaendert werden.
 
 Die maschinenlesbare Liste liegt in `scripts/lib/bridge-contracts.js`. `npm test` prueft, dass jede dokumentierte Action weiter existiert und dass jeder Browser-Aufruf dokumentiert ist.
 
@@ -36,4 +36,4 @@ Wichtig: `generate_resume_token` wird extern vom aktiven n8n-Workflow `RqKSRTgFv
 
 ## Nicht Teil dieses Vertrags
 
-Die zentrale PHP-Bridge auf dem Laravel-Server ist ein separates System. Die lokale Vercel-Bridge darf nicht durch eine reduzierte Kopie ersetzt werden, solange externe Aufrufer und Proxy-Aktionen nicht vollstaendig migriert und parallel getestet wurden.
+Die zentrale PHP-Bridge auf dem Laravel-Server ist ein separates System. Die projekteigene Bridge darf nicht durch eine reduzierte Kopie ersetzt werden, solange externe Aufrufer und Proxy-Aktionen nicht vollstaendig migriert und parallel getestet wurden.

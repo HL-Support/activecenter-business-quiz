@@ -99,7 +99,7 @@ leer verifiziert), Ursache seit #60 serverseitig unmöglich.
 | `server/*.js` in die verify.js-Syntax-Dateiliste aufnehmen (2 Zeilen) | P0-5-Bericht |
 | Latenter Bug `normalizeResumeProfileCode` (bridge-`safeString` gibt null → stiller Fallback auf resumeTarget result bei Leads ohne Profil/Quiz-Daten) | P0-4-Bericht; eigenes Ticket |
 | `quiz_form_submit` (Altbestand) aus Allowlist prüfen/entfernen | P2-Bereinigung |
-| Auto-Deploy-Governance: Merge auf main = Prod-Deploy widerspricht DEPLOYMENT_WORKFLOW.md — entscheiden: Auto-Deploy aus oder Doku anpassen (entschärft sich mit Coolify) | Memory/24.08. |
+| ~~Auto-Deploy-Governance~~ **ENTSCHIEDEN (bestätigt 27.08.)**: Auto-Deploy/Git-Webhook auf Coolify ist **bewusst aus**, bis die Deploy-Pipeline steht (13.3.3/13.5.6: CI-Gates VOR dem Webhook). Deploys manuell per Coolify-API, Nachweis über `/health/live`-Commit. DEPLOYMENT_WORKFLOW.md entsprechend neu geschrieben (27.08.) | Memory/24.08.; Beleg: alle Deployments seit Cutover `webhook=false` |
 | hu-Schulungstexte: fachliche Sichtprüfung durch Markus steht formal aus (3 Beispiele im Chat gezeigt) | Phase 1 |
 | Outlook-Classic-Rendering der Result-Mail (Emoji/Badges; kosmetisch) | 24.08., mit P1-Mail-Arbeit bündeln |
 | Dritte Domain `business.eaglesfit.ch` in Audit-§10-Domainliste ergänzen | Nebenbefund 24.08. |
@@ -354,3 +354,19 @@ Impressionen) und braucht nach Wiedereinsetzen der Konversionen Stunden bis eine
 Dauerhaft: Wächter-Prüfung **W4** (Werbe-Besucher ohne ein einziges Opt-in → ALARM);
 HTTP/3 bleibt aus, bis es am echten iOS-/IG-Gerät getestet ist. Vollständige Kette:
 [2026-08-27-anzeigenkonversion-http3.md](2026-08-27-anzeigenkonversion-http3.md).
+
+### Nachtrag 27.08. (2): Vorfall void-RPC-Teilverluste (gelöst, PRs #91/#92)
+
+Die Opt-in-Persistenz aus PR #86 riss bei jedem Opt-in nach der **ersten** Antwort ab
+(leerer Body der void-RPC `upsert_answer_current` wurde als JSON geparst; die Bridge-Kopie
+von `supabaseRpc` hatte den 204-Guard nicht, die Fassung in `server/lead-system.js` schon
+— **duplizierte Helfer driften**). 11 von 12 Opt-ins rettete der parallele Ereignisstrom;
+1 Lead verlor real die Antworten 2–6. Die Breitenmessung fand zusätzlich 5 bis dahin
+unsichtbare Alt-Teilverluste (Mai–August). **Fix deployt (PR #91), 6 Leads aus MySQL
+geheilt, Backfill erkennt jetzt Teilverluste, Wächter W5 prüft jedes Opt-in auf 6
+Antwortzeilen (PR #92, Serverkopie live).** Der Abnahme-„Beweis" vom 26.08. abends war
+eine Fehldeutung — die Redundanz verdeckte den kaputten Pfad; Korrektur in
+[2026-08-26-antwortverlust-analyse-und-zielbild.md](2026-08-26-antwortverlust-analyse-und-zielbild.md) §5c.
+Aufarbeitung samt Migrationspunkten (Helfer-Konsolidierung, isolierte Pfad-Beweise, „kein
+PostgREST im kritischen Pfad" bestätigt):
+[2026-08-27-void-rpc-teilverluste.md](2026-08-27-void-rpc-teilverluste.md).

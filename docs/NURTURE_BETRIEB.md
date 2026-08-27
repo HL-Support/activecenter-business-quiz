@@ -147,6 +147,25 @@ Wächter läuft nicht mehr. Damit wird auch der Wächter bewacht.
 Prüfen ohne Datenbankzugriff: `node scripts/waechter-nurture.js --selbsttest` — 8 Fälle,
 darunter ausdrücklich „der echte Vorfall wäre erkannt worden".
 
+🔴 **Der Wächter läuft als Dateikopie, nicht aus dem Repo.** Wer
+`scripts/waechter-nurture.js`, die Baseline oder `scripts/stats-logs-baseline.js` ändert,
+muss die Kopie auf dem Server nachziehen — sonst wacht in Produktion der alte Stand:
+
+```bash
+# 1. Sicherung der Server-Kopie (Rückweg)
+ssh root@167.233.251.217 "cp /opt/waechter-nurture/waechter-nurture.js{,.bak-$(date +%Y%m%d)} \
+  && cp /opt/waechter-nurture/waechter-nurture-baseline.json{,.bak-$(date +%Y%m%d)}"
+# 2. Geänderte Dateien aus dem gemergten main-Stand kopieren
+scp scripts/waechter-nurture.js scripts/waechter-nurture-baseline.json \
+  root@167.233.251.217:/opt/waechter-nurture/
+# 3. Manueller Lauf als Nachweis (Exit 0 pingt den Herzschlag)
+ssh root@167.233.251.217 "/opt/waechter-nurture/lauf.sh"
+```
+
+Zugang: `id_rsa` (der Key hat eine Passphrase — Agent/Askpass nötig, sonst scheitert er
+still als `Permission denied`). 🔴 Fehlversuche sparsam dosieren: fail2ban sperrt die IP
+nach wenigen Versuchen für ~55 Minuten (`Connection refused`).
+
 🔴 **Grundsatz aus der Kalibrierung am 26.08.:** Ein Wächter, der eine andere Semantik
 misst als das System, das er bewacht, erzeugt Dauerwarnungen. Wer eine Prüfung ergänzt,
 übernimmt die Sicht des Workflows (Gruppierung, Ausschlüsse), nicht die der Tabelle.

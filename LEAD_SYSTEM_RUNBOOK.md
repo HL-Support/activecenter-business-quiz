@@ -1,6 +1,7 @@
 # Lead System v2 Runbook
 
-Detailarchitektur: `LEAD_SYSTEM_V2_ARCHITECTURE.md`.
+Abhaengigkeitskarte: `docs/DEPENDENCY_MAP.md` · Bridge-Vertraege: `docs/BRIDGE_CONTRACTS.md`
+· Hosting/Deploy: `DEPLOYMENT_WORKFLOW.md` (seit 25.08.2026 Coolify, Deploy manuell).
 
 ## Production Source Of Truth
 
