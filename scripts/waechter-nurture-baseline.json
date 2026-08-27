@@ -13,5 +13,20 @@
   },
   "ohne_absendezeit": {
     "qz_79f691e54acd4aaaa2997cd8312bb61a": "Leonie, 14.05. - siehe ohne_ziel; keine echte Einsendezeit rekonstruierbar."
+  },
+  "antworten_unvollstaendig": {
+    "_hinweis": "Opt-ins mit weniger als 6 Antwortzeilen (W5). Erhoben 27.08.2026, nach der Heilung von 6 Teilverlusten per backfill-antworten.js. Alles hier ist gemessen NICHT heilbar: der Backfill-Lauf vom 27.08. fand fuer diese Hashes keinen vollen 6er-Satz im MySQL-JSON.",
+    "qz_mo70n5f454aa53qh": "12.05. - alte Hash-Generation (Fire-and-forget-Aera), 0 Zeilen, MySQL traegt keinen vollen Satz.",
+    "qz_mo9twwp3nr9k5uoa": "13.05. - alte Hash-Generation (Fire-and-forget-Aera), 0 Zeilen, MySQL traegt keinen vollen Satz.",
+    "qz_62af8564ac3943e0afed5c22f9fe6033": "19.05. - 5 Zeilen; Rest auch in MySQL nicht vorhanden (Teilverlust der Fire-and-forget-Aera).",
+    "qz_55104c4f6d51452a9affecdb67bd58e8": "16.06. - 5 Zeilen; Rest auch in MySQL nicht vorhanden.",
+    "qz_54efb1ae78f14ee2819e9b56c631313a": "17.06. - Legacy-Einsendung ohne lead_q-Antworten, siehe ohne_ziel.",
+    "qz_47079141953d4b65ace2f1de4ff87041": "20.06. - keine MySQL-Antworten; Person ueber Zweitdatensatz erreichbar, siehe ohne_ziel.",
+    "qz_7f3b827d1a8a48f68040fc0a7e8aaad4": "24.06. - interner Testeintrag (hl-support.biz), siehe ohne_ziel.",
+    "qz_442e0540873c4b2ba8c2281d091aedb4": "27.06. - Legacy-Einsendung ohne lead_q-Antworten, siehe ohne_ziel.",
+    "qz_smoke_resume_contract": "Interne Smoke-Test-Probe, kein Mensch.",
+    "qz_f997bdb3975848b6b4322e9cae19c0ad": "17.08. - Can, alter Eingang Landing Page Business (Tierprofil), anderes Schema, siehe ohne_ziel.",
+    "qz_jwtprobe0000000000000000000001": "Interne JWT-Diagnoseprobe (24.08.), kein Mensch.",
+    "qz_80afdbdaa0494061baaf0e47f80520ec": "27.08. 09:39 MESZ - Test-Opt-in (global-sce.com) im Bug-Fenster vor dem Fix-Deploy von PR #91; nur Antwort 1 geschrieben. Der Backfill schliesst Test-Adressen bewusst aus."
   }
 }

@@ -255,9 +255,13 @@ async function w2ErgebnisStattVorgang() {
 // Fällen; verschwundene Baseline-Einträge werden zum Aufräumen gemeldet.
 function w3BaselineLaden() {
   const p = require('path').join(__dirname, 'waechter-nurture-baseline.json');
-  if (!fs.existsSync(p)) return { ohne_ziel: {}, ohne_absendezeit: {} };
+  if (!fs.existsSync(p)) return { ohne_ziel: {}, ohne_absendezeit: {}, antworten_unvollstaendig: {} };
   const j = JSON.parse(fs.readFileSync(p, 'utf8'));
-  return { ohne_ziel: j.ohne_ziel || {}, ohne_absendezeit: j.ohne_absendezeit || {} };
+  return {
+    ohne_ziel: j.ohne_ziel || {},
+    ohne_absendezeit: j.ohne_absendezeit || {},
+    antworten_unvollstaendig: j.antworten_unvollstaendig || {},
+  };
 }
 
 async function w3StrukturellUnerreichbar() {
@@ -355,12 +359,71 @@ async function w4AnzeigenKonversion() {
   return [];
 }
 
+/**
+ * W5 — Antwortsätze unvollständig: Opt-in da, aber weniger als 6 Antwortzeilen.
+ *
+ * Anlass (27.08.2026): Ein leerer void-RPC-Body riss die Antwort-Schleife des Opt-in-Pfads
+ * nach der ERSTEN Antwort ab — der Lead sah vollständig aus (Kontakt, Profil, Ziel), aber
+ * die Zeilen 2-6 fehlten. Weder der Backfill (füllte nur bei 0 Zeilen) noch W3 (misst nur
+ * Ziel/Absendezeit) konnten das sehen. Die Messung am 27.08. fand fünf weitere Teilverluste
+ * aus Mai-August, die der Ereignisstrom hinterlassen hatte und die drei Monate unsichtbar
+ * waren. Seit dem 27.08. schreibt der Opt-in-Pfad alle sechs Antworten selbst — ein neuer
+ * Fall bedeutet deshalb: Der kritische Pfad verliert WIEDER Daten.
+ *
+ * Stufenlogik: Einzelfälle sind WARNUNG (Sonderwege wie der alte Landing-Page-Eingang
+ * liefern legitime Ausreisser, die einzeln in die Baseline wandern). Ab drei NEUEN Fällen
+ * ist es systematisch — der Abriss vom 26./27.08. traf deterministisch JEDEN Opt-in — und
+ * damit ALARM. Heilweg: `node scripts/backfill-antworten.js` (Trockenlauf zeigt den Plan).
+ */
+async function w5AntwortsaetzeUnvollstaendig() {
+  const r = await executeManagementQuery(`
+    select v.lead_hash, count(a.lead_hash) as zeilen
+    from public.v_lead_state_full v
+    left join public.lead_answers_current a on a.lead_hash = v.lead_hash
+    where v.source_app = 'business_leads_quiz' and v.funnel_key = 'business'
+      and v.form_submitted_at is not null and v.email_normalized is not null
+      and coalesce(v.lifecycle_stage, '') not in ('merged_duplicate', 'migrated')
+    group by v.lead_hash
+    having count(a.lead_hash) < 6`);
+  const bekannt = w3BaselineLaden().antworten_unvollstaendig;
+  const gefunden = new Map(r.map((z) => [z.lead_hash, Number(z.zeilen)]));
+  const befunde = [];
+
+  const neue = [...gefunden.keys()].filter((h) => !bekannt[h]);
+  if (neue.length) {
+    befunde.push({
+      stufe: neue.length >= 3 ? 'ALARM' : 'WARNUNG',
+      name: 'Antwortsätze unvollständig',
+      zeilen: neue.length,
+      text: `${neue.length} NEUE Opt-ins mit weniger als 6 Antwortzeilen — der Opt-in-Pfad `
+        + 'schreibt seit dem 27.08. alle Antworten selbst, das darf nicht mehr vorkommen. '
+        + 'Heilweg: backfill-antworten.js (Trockenlauf). Nicht in der Baseline: '
+        + neue.slice(0, 5).map((h) => `${h} (${gefunden.get(h)})`).join(', ')
+        + (neue.length > 5 ? ' …' : ''),
+    });
+  }
+  // Schluessel mit Unterstrich sind Kommentare der Baseline-Datei, keine Hashes.
+  const veraltet = Object.keys(bekannt).filter((h) => !h.startsWith('_') && !gefunden.has(h));
+  if (veraltet.length) {
+    befunde.push({
+      stufe: 'WARNUNG',
+      name: 'Baseline veraltet (antworten_unvollstaendig)',
+      zeilen: veraltet.length,
+      text: `${veraltet.length} Baseline-Einträge ohne Befund — vermutlich geheilt, `
+        + 'bitte aus waechter-nurture-baseline.json austragen: '
+        + veraltet.slice(0, 5).join(', '),
+    });
+  }
+  return befunde;
+}
+
 (async () => {
   const w1 = await w1Kappungsnaehe();
   const w2 = await w2ErgebnisStattVorgang();
   const w3 = await w3StrukturellUnerreichbar();
   const w4 = await w4AnzeigenKonversion();
-  const alle = [...w1, ...w2.befunde, ...w3, ...w4];
+  const w5 = await w5AntwortsaetzeUnvollstaendig();
+  const alle = [...w1, ...w2.befunde, ...w3, ...w4, ...w5];
   const still = process.argv.includes('--still');
 
   const jsonIndex = process.argv.indexOf('--json');
