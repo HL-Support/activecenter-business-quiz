@@ -153,12 +153,14 @@ Das Manifest meldet **3 Katalogfunde** außerhalb des Verbunds — alle drei sin
 
 ## 5. Entscheidungen (Markus, 27.08.) und Klärungen — alle 7 Fragen beantwortet
 
-1. **`tracking_*`: mitmigrieren.** Der zweite Schreiber ist weg: Das eigene
-   Business-Formular der `landing-page` wurde **abgeschaltet** — ✅ umgesetzt und am
-   27.08. verifiziert (landing-page-Commit `e8a32b2` „Formular durch Erfolgs-Code-CTA
-   ersetzt, Weiterleitung zum Business-Leads-Quiz"; Live-Seite
-   `global-sce.com/markus/business-info` trägt kein `<form>` mehr und keinen alten
-   Eingang). In der Schreibbarriere 13.5.2 wird das nochmal als Messung nachgewiesen.
+1. **`tracking_*`: mitmigrieren.** Der zweite Schreiber ist weg — in zwei Schritten:
+   Das Business-Formular der `landing-page` wurde abgeschaltet (dortiger Commit
+   `e8a32b2`, Live-Seite trägt kein `<form>` mehr), und der verbliebene
+   `track_event`-Pfad derselben App wird **ebenfalls abgehängt** (Entscheidung Markus,
+   27.08.: die Landing Page ist künftig eine statische Seite, alles Weitere wird neu
+   gebaut). Gemessen vor der Entscheidung: **1 Ereignis in 7 Tagen**, letztes am 20.08. —
+   der Pfad lebte technisch, war praktisch aber still. Damit schreibt in `tracking_*`
+   nur noch das Quiz selbst.
 2. **`lead_contact_crm`: mitnehmen; `Business_Kalkulator` wird im selben Zug auf den
    neuen Zugriffsweg umgestellt** und zieht perspektivisch ebenfalls auf den
    Coolify-Server (genereller Kurs: alles Schritt für Schritt weg von Vercel und
