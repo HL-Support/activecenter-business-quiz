@@ -1,5 +1,11 @@
 # Business Leads Quiz
 
+## 🔴 ZUERST LESEN
+
+**[docs/STAND-UND-FORTSETZUNG.md](docs/STAND-UND-FORTSETZUNG.md)** — Einstiegsdokument:
+Systemlandschaft, aktueller Migrationsstand, geltende Entscheidungen, bekannte Fallen und
+der Fortsetzungsplan. Wer hier weiterarbeitet, faengt dort an.
+
 ## Shared Operating Layer
 
 - Read `D:\OneDrive\Antigravity Laptop\agent-core\governance\GOVERNANCE_RULES.json` before substantial work.

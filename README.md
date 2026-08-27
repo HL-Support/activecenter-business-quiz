@@ -1,5 +1,9 @@
 # Business Leads Quiz
 
+> **Einstieg fuer Mitarbeit und neue Sitzungen:**
+> [docs/STAND-UND-FORTSETZUNG.md](docs/STAND-UND-FORTSETZUNG.md) — Stand, Entscheidungen,
+> Fallen, Fortsetzungsplan.
+
 ## Status
 
 Dieses Quiz ist ein eigenstaendiges Projekt und laeuft seit dem Hosting-Cutover
