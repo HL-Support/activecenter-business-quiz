@@ -1,0 +1,20 @@
+GRANT INSERT, UPDATE, DELETE ON
+  public.lead_state,
+  public.lead_events,
+  public.lead_video_progress,
+  public.lead_answers_current,
+  public.lead_sync_outbox,
+  public.lead_profiles,
+  public.app_config,
+  public.nurture_sequences,
+  public.nurture_runs,
+  public.nurture_subject_states,
+  public.tracking_sessions,
+  public.tracking_events,
+  public.tracking_video_progress,
+  public.quiz_sessions,
+  public.lead_migration_unresolved,
+  public.lead_contact_crm,
+  analytics_internal.event_daily,
+  analytics_internal.refresh_runs
+TO anon, authenticated, service_role;
