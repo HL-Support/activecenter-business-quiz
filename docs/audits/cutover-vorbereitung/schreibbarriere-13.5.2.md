@@ -42,6 +42,8 @@ kein Verkehr).
 
 - `activecenter-analytics` dauerhaft vom Schreiben trennen und **messen**, dass keine
   neuen `lead_events` mit ihrer Signatur mehr ankommen.
+  → Messwerkzeug steht: `node --env-file=.env.prod scripts/fremdschreiber-messen.js`.
+  Stand 27.08.: **ruhend seit 08.06.2026** (siehe unten), Pfad aber noch offen.
 - Frisches Objektmanifest und frischen Schema-Export erzeugen
   (`scripts/objektmanifest-supabase.js`, `scripts/phase5-schema-export.js`).
 - Zieldatenbank vorbereiten: Rollen und Schemata stehen bereits
@@ -125,10 +127,64 @@ SELECT cron.schedule('stats-logs-analytics-v2-current-day', '*/15 * * * *', $$�
 Die Anwendung bleibt bis Schritt 5 auf der alten Datenbank — ein Rückweg kostet damit
 nur das Fenster, keine Daten.
 
+## Messung vom 27.08.2026 — wer schreibt heute wirklich
+
+`scripts/fremdschreiber-messen.js` misst auf **zwei getrennten Wegen**, weil ein Weg
+allein einen offenen Pfad „bewiesen" aussehen lässt (dieselbe Lehre wie beim void-RPC):
+
+**A) Datenseite** — Ereignisse mit Fremdschreiber-Signatur in `lead_events`.
+🔴 **Nicht über `source_app` messbar**: `activecenter-analytics` kopiert diesen Wert aus
+`lead_state` und trägt im Regelfall `business_leads_quiz` — genau wie die Anwendung.
+Trennscharf sind nur `payload->>'source' = 'analytics_dashboard_v2'` und das
+`event_uid`-Präfix `test_lead_`.
+
+**B) Transportseite** — schreibende HTTP-Zugriffe aus den Supabase-Edge-Logs
+(Management-API, `analytics/endpoints/logs.all`, mit `iso_timestamp_start/end`).
+🔴 **Nicht nach Herkunfts-IP gruppieren**: n8n-Cloud und Vercel rufen aus wechselnden
+AWS-Bereichen — gemessen **59 IPs in 24 h** für eine Handvoll Dienste. Stabiler
+Schlüssel ist der **Zielpfad**.
+
+### Ergebnis
+
+| Befund | Messung |
+| --- | --- |
+| **`activecenter-analytics` ist ruhend** | Letztes Ereignis mit ihrer Signatur: **08.06.2026** — 80 Tage her. 15 Zeilen insgesamt, alle aus Mai/Juni. |
+| Andere `test_lead_marked`-Zeilen | stammen von E2E-, Smoke- und Cutover-Proben mit **eigener** `source_app` — nicht vom Dashboard. |
+| Transportseite, 24 h | alle Schreibpfade in die Migrieren-Liste zugeordnet; kein unbekannter Schreiber. |
+| Außerhalb der Auswahl | 6.880 Zugriffe auf `webhook_*`, `cron_runs`, `push_preprompt_health`, `sso_token_consumptions` — Verbünde, die bewusst zurückbleiben (Entscheidungen 3 und 8). |
+| **Löschungen von Hand** | 2 DELETE (`lead_answers_current`, 91 ms später `lead_state`) von einem **Arbeitsplatz-Rechner**, nicht aus dem Repo — Testlead-Aufräumen. |
+
+### Was das für die Trennung bedeutet
+
+🔴 **Ruhend ist nicht geschlossen.** Der Codepfad lebt weiter
+(`analytics/api/bridge.js:2148`, Action `set_test_contact`, ausgelöst vom
+Dashboard-Knopf in `analytics/analytics.html:2854`). Ein einziger Klick schreibt wieder
+— möglicherweise **mitten im Cutover-Fenster**. Die Messung belegt die Trennung, sie
+ersetzt sie nicht.
+
+Zugleich entschärft der Befund die Dringlichkeit: Es fließt **kein Dauerstrom**, der
+erst versiegen müsste. Die Trennung ist ein einzelner, planbarer Eingriff — kein
+Auslaufenlassen mit Wartezeit.
+
+**Der Eingriff liegt in einem fremden Repo** (`activecenter-analytics`, eigenes
+Vercel-Projekt) und kostet die Testlead-Markierung im Dashboard. Zwei Wege:
+
+| Weg | Wirkung | Preis |
+| --- | --- | --- |
+| **`setTestLead` auf Fehler umstellen** (bzw. `set_test_contact` aus der Allowlist `bridge.js:46-56` nehmen) | schließt genau den einen Schreibpfad | Dashboard-Knopf meldet einen Fehler; Lesepfade und `webhook_deliveries` bleiben heil |
+| `SUPABASE_SERVICE_KEY` aus der Vercel-Env ziehen | schließt alles auf einmal | bricht auch **alle Lesepfade** des Dashboards und `webhook_deliveries` — zu grob |
+
+Empfehlung: der erste Weg, mit einem sprechenden Fehlertext („Testlead-Markierung
+wurde zum Datenbank-Umzug abgeschaltet"), damit der Knopf nicht stumm scheitert.
+
+Die Handarbeit vom Arbeitsplatz fängt die Barriere übrigens mit: das `REVOKE` trifft
+`service_role`, also auch lokale Skripte mit dem Service-Key.
+
 ## Offene Punkte vor dem Umzugstag
 
-1. `activecenter-analytics` tatsächlich vom Schreiben trennen (Entscheidung steht, die
-   Ausführung nicht).
-2. Schema-Abbildung `public→leads` im Export bauen und im Testimport beweisen
-   (Funktionsrümpfe tragen `search_path` und qualifizierte Verweise).
+1. `activecenter-analytics` tatsächlich vom Schreiben trennen — **gemessen ruhend seit
+   08.06.**, Pfad aber noch offen; Eingriff im fremden Repo, Entscheidung siehe oben.
+2. ~~Schema-Abbildung `public→leads` im Export bauen und im Testimport beweisen~~ —
+   ✅ erledigt am 27.08. (PR #103), Beweise im
+   [Testimport-Protokoll](phase5-testimport/testimport-protokoll-2026-08-27.md).
 3. Wächter- und n8n-Umstellung vorbereiten, damit Schritt 5 nicht improvisiert wird.
