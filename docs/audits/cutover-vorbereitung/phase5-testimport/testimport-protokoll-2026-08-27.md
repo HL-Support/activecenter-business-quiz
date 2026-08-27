@@ -75,11 +75,47 @@ Drei Funde der Datenprobe, alle behoben:
 3. **Der DB-Server sperrt schnelle SSH-Folgen** (~20 Verbindungen in Folge → Timeout für
    Minuten). Import und Zählung laufen jetzt in **einer** Sitzung.
 
+## pg_dump-Generalprobe (27.08. abends) — der echte Cutover-Weg, gemessen
+
+Der API-Weg war eine Obergrenze. Für die **echte** Übertragung fehlte bislang ein
+Datenbankzugang; das `postgres`-Passwort wurde nie beschafft. Gefunden wurde stattdessen
+die vorhandene App-Rolle **`marathon_app`** (Secrets-Eintrag `marathon_supabase_app`,
+angelegt für den Fitapp-Umbau, Verbindung über den Session-Pooler). Entscheidend: sie
+hat **BYPASSRLS** — ohne das würde `pg_dump` bei den 26 RLS-Policies des Verbunds
+abbrechen oder mit `--enable-row-security` **still weniger Zeilen** liefern.
+
+Ihr fehlten nur Leserechte auf unsere Tabellen; nachgereicht mit
+`supabase-export-rechte.sql` (nur `SELECT` auf die 18 Auswahl-Tabellen und ihre
+Sequenzen, `USAGE` auf `analytics_internal`; Rückweg im Kopf der Datei). Nachgemessen:
+`hba_persons` bleibt für die Rolle unlesbar — die Rechte greifen exakt auf den Verbund.
+
+| Schritt | Messung |
+| --- | --- |
+| `pg_dump --data-only` der 18 Tabellen (PG-18-Client → PG-17.6-Quelle über den Pooler) | **10,2 s**, 124 MB |
+| Einspielen in die frische Ziel-DB | **14,1 s** |
+| **Gesamt** | **≈ 24 Sekunden** (statt 5,2 min über die API) |
+
+Verifikation der Dump-Probe:
+
+- **Sequenzen kommen automatisch mit** — `pg_dump` schrieb 9 `setval`-Aufrufe; der
+  separate Zählerschritt aus der Datenprobe entfällt auf diesem Weg.
+- **Inhalt identisch**: dieselben Prüfsummen wie bei der Datenprobe. `quiz_sessions` wich
+  zunächst ab — Ursache war **Live-Drift** (2 neue Zeilen, `max(id)` 1748 → 1750), nicht
+  der Transportweg: begrenzt auf `id <= 1750` liefern Quelle und Ziel exakt
+  `ce15c89c…` bei 1351 Zeilen.
+- **Referenzielle Integrität**: geladen wurde mit ausgesetzter FK-Prüfung
+  (`session_replication_role = replica`), danach explizit nachgeprüft — **0 echte
+  Waisen** in allen vier FK-Beziehungen. Die zunächst gemeldeten „4 Waisen" waren Events
+  mit `lead_hash IS NULL` (erlaubt); die Prüfabfrage zählte NULL fälschlich mit.
+
+Aufgeräumt: Dumpdateien, die zweite Test-DB `business_leads_dumpprobe` und die
+`.pgpass`-Datei auf dem Server sind entfernt. Für den echten Cutover wird die
+Zugangsdatei aus den Secrets neu erzeugt.
+
 ## Was der Testimport bewusst NICHT abdeckt (Rest bis zum echten Umzug)
 
 | Offen | Gehört zu |
 | --- | --- |
-| Übertragung per `pg_dump`/`COPY` samt echter Zeitmessung (braucht das Supabase-DB-Passwort) | Phase 6 (Cutover) |
 | Rollenmodell (App-Rolle statt service_role/RLS) + Grants | Phase 5/6, eigenes SQL |
 | pg_cron-Job `refresh_event_daily` (alle 15 min) auf dem Ziel | Phase 6, versioniertes SQL |
 | Schreibbarriere 13.5.2 (activecenter-analytics, hl-support-analytics-Leser, n8n) | Phase 6 |
