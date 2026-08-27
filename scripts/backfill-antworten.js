@@ -73,31 +73,35 @@ async function kandidatenLaden() {
     if (seite.length < 1000) break;
   }
   const testmuster = /global-sce\.com|hl-support\.biz|example\.com|codex-test|test@test\.com/i;
-  // Kandidat ist, wer irgendeine fuellbare Luecke hat - auch wenn NUR die Antwortzeilen
-  // fehlen (Profil/Ziel/Barriere schreibt die Opt-in-Persistenz seit dem 30.05. selbst,
-  // die Antworten aber erst seit dem heutigen Patch).
+  // Kandidat ist, wer irgendeine fuellbare Luecke hat - auch wenn NUR Antwortzeilen
+  // fehlen. Seit dem 27.08. zaehlen auch TEILVERLUSTE (1-5 Zeilen) als Luecke: der
+  // void-RPC-Abriss liess genau eine Antwort stehen, und "keine Zeilen" haette diese
+  // Leads fuer immer uebersehen.
   const echte = alle.filter((l) => !testmuster.test(l.email) && (NUR ? l.lead_hash === NUR : true));
-  const zaehler = await antwortZaehlen(echte.map((l) => l.lead_hash));
+  const refs = await antwortRefsLaden(echte.map((l) => l.lead_hash));
   return echte.filter(
     (l) =>
       l.profile_code === null ||
       l.main_aspiration === null ||
       l.initial_barrier === null ||
-      !zaehler.get(l.lead_hash)
+      (refs.get(l.lead_hash)?.size || 0) < 6
   );
 }
 
-/** Antwortzahl je Lead - Antworten werden nur bei 0 vorhandenen Zeilen gefuellt. */
-async function antwortZaehlen(hashes) {
-  const zaehler = new Map();
+/** Vorhandene Antwort-Refs je Lead - gefuellt wird nur, was fehlt, nie ueberschrieben. */
+async function antwortRefsLaden(hashes) {
+  const refs = new Map();
   for (let i = 0; i < hashes.length; i += 150) {
     const block = hashes.slice(i, i + 150);
     const rows = await pg(
-      `lead_answers_current?select=lead_hash&lead_hash=in.(${block.join(',')})&limit=10000`
+      `lead_answers_current?select=lead_hash,question_ref&lead_hash=in.(${block.join(',')})&limit=10000`
     );
-    for (const r of rows) zaehler.set(r.lead_hash, (zaehler.get(r.lead_hash) || 0) + 1);
+    for (const r of rows) {
+      if (!refs.has(r.lead_hash)) refs.set(r.lead_hash, new Set());
+      refs.get(r.lead_hash).add(r.question_ref);
+    }
   }
-  return zaehler;
+  return refs;
 }
 
 /** MySQL-JSON je Hash, Base64-sicher transportiert. Rein lesend. */
@@ -139,7 +143,7 @@ function mysqlLaden(hashes) {
   const mysql = mysqlLaden(kandidaten.map((k) => k.lead_hash));
   console.log(`  davon mit MySQL-JSON     : ${mysql.size}`);
 
-  const antwortAnzahl = await antwortZaehlen(kandidaten.map((k) => k.lead_hash));
+  const antwortRefs = await antwortRefsLaden(kandidaten.map((k) => k.lead_hash));
 
   const plan = [];
   const statistik = { profil: 0, ziel: 0, barriere: 0, antworten: 0, nicht_heilbar: 0 };
@@ -174,11 +178,15 @@ function mysqlLaden(hashes) {
       statistik.barriere += 1;
     }
 
-    const antwortenFehlen = !antwortAnzahl.get(lead.lead_hash) && e.quizAnswers.length === 6;
-    if (antwortenFehlen) statistik.antworten += 1;
+    // Nur schreiben, wenn MySQL den VOLLEN Satz traegt (6) - und davon nur die Refs,
+    // die in PostgreSQL fehlen. Vorhandene Zeilen werden nie angefasst.
+    const vorhandene = antwortRefs.get(lead.lead_hash) || new Set();
+    const fehlendeAntworten =
+      e.quizAnswers.length === 6 ? e.quizAnswers.filter((a) => !vorhandene.has(a.question_ref)) : [];
+    if (fehlendeAntworten.length) statistik.antworten += 1;
 
-    if (Object.keys(patch).length || antwortenFehlen) {
-      plan.push({ lead, patch, antworten: antwortenFehlen ? e.quizAnswers : [], lang: lead.lang || hidden.lang || 'de' });
+    if (Object.keys(patch).length || fehlendeAntworten.length) {
+      plan.push({ lead, patch, antworten: fehlendeAntworten, lang: lead.lang || hidden.lang || 'de' });
     }
   }
 

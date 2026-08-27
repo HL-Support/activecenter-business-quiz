@@ -1810,7 +1810,11 @@ async function supabaseRpc(functionName, body = {}) {
     },
     body: JSON.stringify(body),
   });
-  return response ? response.json() : null;
+  // RPCs mit RETURNS void (upsert_answer_current) antworten mit leerem Body - der
+  // Schreibvorgang ist dann bereits verbucht, nur gibt es nichts zu parsen.
+  if (!response || response.status === 204) return null;
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
 }
 
 async function ensureLeadStateForCanonicalMirror(leadHash, payload, eventAt) {
@@ -4552,5 +4556,6 @@ module.exports = async function handler(req, res) {
 // Ein zweiter Parser waere eine zweite Wahrheit - genau das Muster, das den
 // Antwortverlust drei Monate lang versteckt hat.
 module.exports.extractQuizAnswersFromFormResponse = extractQuizAnswersFromFormResponse;
+module.exports.supabaseRpc = supabaseRpc;
 module.exports.Q6_BARRIER_BY_OPT = Q6_BARRIER_BY_OPT;
 module.exports.normalizeBusinessProfile = normalizeBusinessProfile;
