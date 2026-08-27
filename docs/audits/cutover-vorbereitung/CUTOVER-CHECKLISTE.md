@@ -158,17 +158,15 @@ höchsten Wert.
 
 ### 5 · Anwendung umschalten (ca. 03:15)
 
-In Coolify die Umgebungsvariablen setzen (Werte aus Secrets `leads_pg`):
+✅ **Vorbereitet am 27.08.:** `LEADS_DB_HOST/PORT/NAME/BENUTZER/PASSWORT/SCHEMA` stehen
+**bereits** in Coolify. Es fehlt **nur noch eine einzige Variable**:
 
 ```
 LEADS_DB_MODUS=direkt
-LEADS_DB_SCHEMA=leads
-LEADS_DB_HOST=10.0.1.3
-LEADS_DB_PORT=5432
-LEADS_DB_NAME=hl_support
-LEADS_DB_BENUTZER=leads_app
-LEADS_DB_PASSWORT=…
 ```
+
+(Ohne sie gilt der Standard `postgrest` — deshalb ändert die Vorbereitung nichts am
+laufenden Betrieb.)
 
 > 🔴 **`SUPABASE_URL` und `SUPABASE_SERVICE_KEY` BLEIBEN GESETZT.** Sie zu entfernen
 > liegt nahe („die alte Datenbank ist doch weg"), wäre aber ein stiller Teilausfall:
@@ -200,6 +198,16 @@ ssh root@167.233.251.217 "sh /opt/waechter-nurture/lauf.sh"
 ```
 🔴 **Der Protokollkopf MUSS `Quelle: plattform` zeigen.** Sonst bewacht er weiter die
 alte Datenbank und meldet zufrieden „alles ruhig".
+
+**Vorbereitet am 27.08.:** Die `LEADS_PG_*`-Werte stehen bereits in der `.env`
+(Sicherung: `.env.bak-vor-cutover-20260827`). Es fehlt **nur noch die eine Zeile**
+`WAECHTER_QUELLE=plattform`.
+
+🔴 **Erwartetes Verhalten direkt nach dem Umschalten — und ein nützliches Signal:**
+Ein Probelauf gegen die noch leere Ziel-DB meldete `Letzte Sendung vor: nie`, `Fällige: 0`
+und **„Baseline veraltet"** (die bekannten Ausnahme-Hashes fehlen dort). Nach dem
+Datenumzug müssen diese Warnungen **verschwinden**. Tun sie es nicht, sind die Daten
+unvollständig — der Wächter zeigt das also an, ohne dass man extra danach sucht.
 
 ### 7 · Nachlauf (ca. 03:30)
 
