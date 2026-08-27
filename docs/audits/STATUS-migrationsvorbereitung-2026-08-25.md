@@ -378,10 +378,18 @@ Doppel-Schreibkanal (Videorang → `points_result`) hat einen täglichen Lese-Ab
   Identity-Zähler auf `max+1000` (echter INSERT kollisionsfrei), FK-Abweisung und
   CASCADE bewiesen, RPCs gegen den vollen Bestand korrekt. Drift nur in den zwei
   `analytics_internal`-Tabellen (pg_cron schreibt weiter, Quelle lief ohne Schreibstopp).
-  Dauer 5,2 min über den API-Weg — **Obergrenze, keine Cutover-Messung** (ohne
-  DB-Passwort kein `pg_dump`/`COPY`). Drei Funde behoben: PostgREST verbirgt
+  Dauer 5,2 min über den API-Weg. Drei Funde behoben: PostgREST verbirgt
   `analytics_internal`, `refresh_runs.run_id` ist GENERATED ALWAYS (Identity-Liste jetzt
   gemessen statt handgepflegt), DB-Server sperrt schnelle SSH-Folgen (eine Sitzung).
+- ✅ **pg_dump-GENERALPROBE bestanden** (27.08. abends) — der echte Cutover-Weg ist
+  gemessen: **10,2 s Dump (124 MB) + 14,1 s Restore ≈ 24 Sekunden**. Zugang: vorhandene
+  App-Rolle `marathon_app` (Secrets `marathon_supabase_app`) — hat **BYPASSRLS**, was bei
+  26 RLS-Policies zwingend ist; fehlende Leserechte nachgereicht mit
+  `supabase-export-rechte.sql` (nur SELECT auf die 18 Tabellen + Sequenzen, Rückweg
+  dokumentiert, `hba_*` nachweislich weiterhin unlesbar). Sequenz-Stände kommen bei
+  `pg_dump` automatisch mit (9 `setval`). Inhalt identisch, **0 echte Waisen**; die
+  `quiz_sessions`-Abweichung war Live-Drift (2 neue Zeilen), begrenzt geprüft identisch.
+  Dumpdateien, zweite Test-DB und `.pgpass` wurden wieder entfernt.
 
 ### Nachtrag 27.08.: Vorfall Anzeigen-Konversion (gelöst) — HTTP/3 am Proxy aus
 
