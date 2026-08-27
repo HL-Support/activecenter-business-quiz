@@ -175,7 +175,8 @@ Wurf riss die Antwort-Schleife nach der **ersten** Antwort ab.
 | **Phase 4 Stufe A** | ✅ live (`submit_lead_complete`) |
 | **Phase 4 Stufe B** (direkter Treiber) | ❌ offen — erst nach Vercel-Abbau (Vercel erreicht die private DB nicht) |
 | **Schema-Abbildung `public`→`leads`** | ✅ bestanden (27.08. spät): Parität ohne Abweichung, `public` leer, alles gehört `leads_owner`, Funktionsbeweis grün, Datenprobe 171.708 Zeilen + 3/3 Prüfsummen — Protokoll im [Testimport-Protokoll](audits/cutover-vorbereitung/phase5-testimport/testimport-protokoll-2026-08-27.md) |
-| **Vercel-Abbau** | ⏳ technisch alles erfüllt; es fehlen die Datums-Tore (**ab 02.09.**), zwei Handprüfungen und Markus' Freigabe |
+| **Vercel-Abbau** | ⏳ **Freigabe von Markus liegt vor** (27.08.). Gemessen 12/14 Toren erfüllt; offen sind die zwei Datums-Tore (**01.09.** bzw. **03.09.**, weil der letzte Hosting-Vorfall vom 27.08. datiert) und zwei Handprüfungen |
+| **Wächter-Umstellung** | ✅ vorbereitet und bewiesen (27.08.): Datenquelle umschaltbar, beide Modi liefern identische Befunde — Ablauf in [NURTURE_BETRIEB.md §4b](NURTURE_BETRIEB.md) |
 | **Echter Cutover** | ❌ offen |
 
 ---
@@ -289,12 +290,22 @@ Wächter-Protokolle ohne neuen ALARM), dann Markus' ausdrückliche Freigabe einh
 **der Abbau gibt den Hosting-Rückweg auf**.
 Reihenfolge in [vercel-abbau-checkliste.md](audits/cutover-vorbereitung/vercel-abbau-checkliste.md).
 
+✅ **Markus' Freigabe liegt seit dem 27.08. vor.**
+
 **Stand der Tore am 27.08. abends** (gemessen): 12 von 14 erfüllt — alle drei Domains
 erreichbar, ohne Alt-Svc, Zertifikate 87 Tage Rest; Nurture frisch und erfolgreich;
 Werbe-Besucher konvertieren (58 Besucher, 5 Opt-ins in 48 h). Offen sind nur:
 
-1. die beiden **Datums-Tore** (frühestens 01.09. bzw. 02.09.),
+1. die beiden **Datums-Tore** (01.09. bzw. **03.09.**),
 2. das Tor **„n8n Quiz-Workflows ohne Fehl-Läufe (7 Tage)"**.
+
+🔴 **Warum die Datums-Tore nicht einfach vorgezogen werden sollten:** Das zweite misst
+„7 ruhige Tage seit dem letzten Hosting-Vorfall" — und der letzte Vorfall ist der
+**27.08.** (Anzeigen-Konversion/HTTP-3). Der Abbau gibt den Hosting-Rückweg endgültig
+auf; ihn wegzuwerfen, während das neue Hosting am selben Tag noch einen Vorfall hatte,
+ist genau der Handel, den man hinterher bereut. Das Tor ist kein Formalismus, sondern
+der Rückweg. **Wichtig für die Planung: Der Vercel-Abbau blockiert den
+Datenbank-Umzug nicht** — siehe den Hinweis bei Schritt 5.
 
 🔴 Zu Punkt 2 — **kein Defekt, kein Handlungsbedarf**: Der eine Fehllauf
 (Workflow `Update "Result" by hash`, 27.08. 13:09 MESZ) ist ein **korrekt abgewiesener
@@ -322,11 +333,37 @@ statt Premiere.
 
 ### Schritt 5 — Phase 4 Stufe B (direkter Treiber)
 
-Nach dem Vercel-Abbau: Der Container spricht `hl_support` mit direktem Treiber (`pg`) als
-`leads_app`, `search_path = leads, leads_analytics`. `submit_lead_complete` bleibt
-unverändert — dieselbe Funktion, anderer Transportweg. PostgREST verlässt damit den
-kritischen Pfad; die Outbox wird der **einzige** Übergabepunkt zur Legacy-MySQL
-(Entscheidung 3).
+Der Container spricht `hl_support` mit direktem Treiber als `leads_app`,
+`search_path = leads, leads_analytics`. `submit_lead_complete` bleibt unverändert —
+dieselbe Funktion, anderer Transportweg. PostgREST verlässt damit den kritischen Pfad;
+die Outbox wird der **einzige** Übergabepunkt zur Legacy-MySQL (Entscheidung 3).
+
+Netzweg **steht bereits**: Der Coolify-Host ist im internen Netz `10.0.1.5` — genau die
+IP, die `pg_hba` auf `10.0.1.3:5432` zulässt. Am 27.08. gemessen (der Wächter läuft auf
+derselben Box und erreicht die Plattform-DB).
+
+#### 🔴 Die Abhängigkeit „erst nach Vercel-Abbau" stimmt so nicht
+
+Sie wurde bisher technisch begründet („Vercel erreicht die private DB nicht"). Der
+eigentliche Grund ist ein **anderer und ernsterer**: Nach dem Datenbank-Cutover würde
+ein noch aktiver Vercel-Eingang weiterhin die **alte** Supabase-Datenbank bedienen.
+Wer dort landet — alter Link, Lesezeichen, Anzeige mit alter URL — erzeugt Leads in der
+Datenbank, die niemand mehr liest. Das ist **Split-Brain**, und es ist genau die
+Klasse „stiller Verlust", die dieses Projekt schon dreimal getroffen hat.
+
+Gemessen am 27.08.: `businessleadsquiz.vercel.app` antwortet mit **HTTP 200** und lebt
+**DNS-unabhängig** — er verschwindet also nicht, wenn die Domains umgezogen sind.
+
+**Daraus folgt eine wichtige Unterscheidung**, die den Zeitplan entzerrt:
+
+| | Wirkung | Umkehrbar? |
+| --- | --- | --- |
+| **Vercel stilllegen** (Deployment pausieren bzw. Umgebungsvariablen ziehen) | kein Eingang schreibt mehr → Split-Brain ausgeschlossen | **ja**, jederzeit |
+| **Vercel abbauen** (Projekt löschen) | dasselbe, aber endgültig | **nein** — der Hosting-Rückweg ist weg |
+
+Für den Datenbank-Cutover genügt **Stilllegen**. Der endgültige Abbau kann danach in
+Ruhe folgen, wenn die Datums-Tore erfüllt sind. Damit hängt der Umzug **nicht** am
+01./03.09. — und der Rückweg bleibt bis dahin erhalten.
 
 ### Schritt 6 — Echter Cutover
 
@@ -348,10 +385,31 @@ bewachen sie weiter die alte Datenbank und melden „alles ruhig".
 
 ## 9. Offene Entscheidungen für Markus
 
-1. **Vercel-Abbau freigeben** (ab 02.09.) — gibt den Hosting-Rückweg endgültig auf.
+1. ~~**Vercel-Abbau freigeben**~~ — ✅ **freigegeben am 27.08.** Der Abbau wartet nur noch
+   auf die zwei Datums-Tore; siehe Schritt 3.
 2. **Zeitfenster für den Cutover** — Erfahrung: 02:00–05:00 MESZ ist praktisch verkehrsfrei.
-3. **Server-Upgrade cx32** — nicht jetzt, aber vor der Kontakte-Migration.
-4. **GitHub-Secret** `COOLIFY_API_TOKEN` auf einen nur-Deploy-Token verkleinern.
+3. ~~**Server-Upgrade cx32**~~ — für **dieses** Projekt nicht nötig, siehe unten.
+4. ~~**GitHub-Secret** `COOLIFY_API_TOKEN` verkleinern~~ — siehe Schritt 7.
+
+### Warum das Server-Upgrade nichts mit dem Quiz zu tun hat (gemessen 27.08.)
+
+Die Frage kam auf, weil es „nur 2.000–3.000 Kontakte" seien. Das stimmt — und genau
+deshalb braucht **dieser** Umzug kein Upgrade:
+
+| | |
+| --- | --- |
+| Quiz-Daten gesamt | **124 MB** Dump, 171.708 Zeilen; Restore dauerte 14 Sekunden |
+| Maschine (cx22) | 2 Kerne, 3,8 GB RAM, 38 GB Platte (14 GB belegt, **22 GB frei**) |
+| Last | `load average 0,26` — die Maschine langweilt sich |
+
+Das Upgrade steht für die **Kontakte-Migration** im Plan, und dort geht es nicht um
+Zeilenzahlen, sondern um **Arbeitsspeicher**: Auf derselben Maschine läuft bereits
+**MySQL mit 3,1 GB Daten und 1,6 GB belegtem RAM**. Von 3,8 GB sind aktuell nur
+**1,4 GB verfügbar**. Wenn MySQL und PostgreSQL beim Übertragen gleichzeitig unter Last
+stehen, wird genau das eng — nicht die Platte.
+
+**Fazit:** Für den Quiz-Umzug ist kein Upgrade nötig. Die Entscheidung gehört zum
+Kontakte-Projekt, nicht hierher.
 
 ---
 
