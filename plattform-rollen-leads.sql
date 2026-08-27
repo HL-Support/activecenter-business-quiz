@@ -62,8 +62,8 @@ CREATE SCHEMA IF NOT EXISTS leads           AUTHORIZATION leads_owner;
 CREATE SCHEMA IF NOT EXISTS leads_analytics AUTHORIZATION leads_owner;
 
 -- Verbinden duerfen nur benannte Rollen. (Das breitere REVOKE CONNECT ... FROM PUBLIC
--- fehlt hier bewusst: es wuerde fitapp_app treffen und gehoert in den Marathon-Umzug.)
-GRANT CONNECT ON DATABASE fitapp TO leads_app, leads_migrate, leads_read;
+-- fehlt hier bewusst: es wuerde fitapp_app treffen und gehoert in den FitApp-Umzug.)
+GRANT CONNECT ON DATABASE hl_support TO leads_app, leads_migrate, leads_read;
 
 GRANT USAGE ON SCHEMA leads, leads_analytics TO leads_app, leads_read;
 -- Kein CREATE fuer _app: die laufende Anwendung kann keine Objekte anlegen oder loeschen.
