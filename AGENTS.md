@@ -18,14 +18,18 @@
   npm run safety:guard -- --project business_leads_quiz
   npm run safety:deploy -- --project business_leads_quiz
   ```
-- GitHub CI: `Activecenter Safety` / job `safety`.
-- `main` has Branch Protection requiring `safety`; Vercel Production Branch is `main`.
+- GitHub CI: `Activecenter Safety` / jobs `safety` und `e2e-queue`; `main` hat Branch
+  Protection, die beide verlangt.
 
-## Aktueller Lieferzustand
+## Aktueller Lieferzustand (seit Cutover 25.08.2026)
 
-- Dieses Unterprojekt ist ein separates Vercel-Projekt.
-- Production wird aus `dist/` ausgeliefert.
-- `vercel.json` verwendet `"outputDirectory": "dist"`.
+- Production laeuft auf **Coolify** (`167.233.251.217`, App `business-leads-prod`,
+  Dockerfile-Build, `server/app-server.js` liefert `dist/` + `api/` + `/health/live`).
+- 🔴 **Merge auf `main` deployt NICHT** — Auto-Deploy ist bewusst aus. Deploy manuell per
+  Coolify-API, Nachweis ueber `/health/live`-Commit: siehe
+  [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md).
+- Vercel ist nur noch Hosting-Rueckweg bis zum Abbau (dort gilt weiter
+  `"outputDirectory": "dist"` aus `vercel.json`).
 - `index.html` ist die Shell und laedt `/video-config.js` und `/translations.js` vor `/assets/app.js`.
 
 ## Frontend-Regeln
@@ -56,14 +60,18 @@
 - `npm install`
 - `npm run build`
 - `npm run verify`
-- `npm run deploy:preview`
-- Teste die Preview-URL mit realem Coach-Slug, bevor Production geaendert wird.
-- Committe alle beabsichtigten Aenderungen.
-- Pushe `main` zu `origin/main`.
-- Production wird ausschliesslich durch Promote einer getesteten Preview live geschaltet: `npm run promote:prod -- <preview-url>`.
-- `npm run deploy:prod -- <preview-url>` ist nur ein Alias fuer denselben Promote-Flow.
-- Nie direkt `npx vercel deploy --prod` ausfuehren.
-- Der Promote-Guard muss vor Production gruen sein: sauberer Working Tree, Branch `main`, `HEAD == origin/main`.
+- `npm test` (163 Vertrags-/Verhaltenstests; CI verlangt sie ohnehin)
+- Aenderungen per PR gegen `main`; Merge erst mit gruenen Checks (`safety`, `e2e-queue`).
+- Nach dem Merge von Runtime-Code: Deploy **manuell** anstossen und ueber `/health/live`
+  nachweisen — Ablauf in [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md).
+- Kopien nachziehen, wenn betroffen: Nurture-Waechter auf `167.233.251.217`
+  (docs/NURTURE_BETRIEB.md §4), n8n-Workflows nur ueber die API (Skill
+  `n8n-workflow-update`).
+- Supabase-Zugriffe: `api/bridge.js` und `server/lead-system.js` halten (noch) doppelte
+  Helfer — Aenderungen immer in BEIDEN Fassungen pruefen (Vorfall 27.08.,
+  docs/audits/2026-08-27-void-rpc-teilverluste.md).
+- Vercel-Preview/Promote (`deploy:preview`, `promote:prod`) ist nur noch der Rueckweg bis
+  zum Vercel-Abbau; nie direkt `npx vercel deploy --prod`.
 
 ## Kritische Dateien
 

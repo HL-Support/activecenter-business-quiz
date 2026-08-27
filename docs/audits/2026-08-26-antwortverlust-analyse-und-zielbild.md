@@ -144,6 +144,20 @@ Kandidatensuche muss auch Leads erfassen, denen **nur** die Antwortzeilen fehlen
 Die Nurture-Freigabe für die Geheilten kam von Markus („besser jetzt als gar nie"); die
 Versandbremse hat den Rückstand über den Tag sauber abgetragen (63→45→25→3→0 je Lauf).
 
+## 5c. Korrektur 27.08.: Der „Beweis am echten Verkehr" war eine Fehldeutung
+
+Die neue Opt-in-Persistenz aus 5b war **von Anfang an gebrochen**: Ein leerer HTTP-Body
+der void-RPC `upsert_answer_current` riss die Antwort-Schleife nach der ERSTEN Antwort ab
+(jedes Opt-in erzeugte einen gemeldeten Fehler). Die zwei Beweis-Opt-ins vom 26.08. abends
+hatten ihre 6 Antworten **nicht** vom neuen Pfad, sondern vom weiterhin funktionierenden
+Ereignisstrom — die Redundanz hat den kaputten Rettungspfad verdeckt. Ein Lead, bei dem
+beide Pfade betroffen waren, verlor real die Antworten 2–6 (am 27.08. geheilt).
+
+Behoben in PR #91 (Guard + Regressionstests), dauerhaft bewacht durch Wächter **W5**
+(jedes Opt-in muss 6 Antwortzeilen tragen). Vollständige Aufarbeitung samt Lehren —
+darunter: der Beweis eines Pfads muss den Pfad **isoliert** messen —
+in [2026-08-27-void-rpc-teilverluste.md](2026-08-27-void-rpc-teilverluste.md).
+
 ---
 
 ## 6. Offene Nebenbefunde

@@ -2,12 +2,16 @@
 
 ## Status
 
-Dieses Quiz ist ein eigenstaendiges Vercel-Projekt und laeuft unter `https://quiz.activecenter.info`.
+Dieses Quiz ist ein eigenstaendiges Projekt und laeuft seit dem Hosting-Cutover
+(25.08.2026) auf **Coolify** (`167.233.251.217`, App `business-leads-prod`, Docker).
 Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
 
 - Projekt: `business_leads_quiz`
-- Domain: `https://quiz.activecenter.info`
-- Vercel Projekt-ID: `prj_REvfRPD2XJO5nBgpKBqUnVFKpJur`
+- Domains: `https://quiz.activecenter.info`, `https://business.activecenter.info`, `https://business.eaglesfit.ch`
+- Deploy: **manuell** ueber die Coolify-API — Merge auf `main` deployt NICHT automatisch.
+  Ablauf und Nachweis: [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md)
+- Vercel (Projekt-ID `prj_REvfRPD2XJO5nBgpKBqUnVFKpJur`) ist nur noch der Hosting-Rueckweg
+  bis zum freigegebenen Abbau (Checkliste in `docs/audits/cutover-vorbereitung/`)
 
 ## Aktuelle Architektur
 
@@ -18,8 +22,9 @@ Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
 - `npm run build` baut das Frontend aus `src/app.entry.js` nach `dist/assets/app.js`.
 - `npm run build` kopiert ausserdem `index.html`, `translations.js` und `video-config.js` nach `dist/`.
 - `npm run verify` prueft Syntax, Translation-Key-Konsistenz und die erwartete `dist/`-Outputstruktur.
-- Vercel liefert nur noch `dist/` aus.
-- `vercel.json` nutzt deshalb `"outputDirectory": "dist"`.
+- Ausgeliefert wird `dist/` — auf Coolify durch `server/app-server.js` im Container
+  (derselbe Prozess traegt die `api/`-Routen und `/health/live`); auf dem Vercel-Rueckweg
+  weiterhin ueber `vercel.json` mit `"outputDirectory": "dist"`.
 - `ac-track.js` enthaelt die lesbare Tracking-Source-Logik.
 
 ## Wichtige Regeln
@@ -37,7 +42,7 @@ Es gehoert nicht zum Haupt-Deploy von `activecenter-web`.
 - Zielarchitektur v2: Ein Lead hat genau eine kanonische ID: `lead_hash = qz_...`.
 - `/api/lead/init` erzeugt oder findet diese ID idempotent ueber `client_seed`.
 - `/api/lead-track` ist der neue Writer fuer `lead_events`, `lead_state`, `lead_answers_current`, `lead_video_progress` und `lead_sync_outbox`.
-- `/api/lead-outbox-worker` ist der einzige Outbox-Zusteller. n8n oder Vercel Cron duerfen nur diesen Endpoint triggern; Statuswechsel passieren ueber Supabase-RPCs.
+- `/api/lead-outbox-worker` ist der einzige Outbox-Zusteller. Nur n8n darf diesen Endpoint triggern; Statuswechsel passieren ueber Supabase-RPCs.
 - Der neue Pfad wird ueber Supabase `app_config` gesteuert: `new_lead_writer_enabled`, `new_lead_writer_percent`, `legacy_writer_enabled`, `outbox_worker_enabled`.
 - `session_hash`/`tracking_hash` mit `ac_` ist nur noch Legacy-/Fallback-Kontext waehrend des Cutovers.
 - Im Typeform-kompatiblen Payload steht `lead_hash` weiterhin in `form_response.hidden.hash`, weil HL-Support diese Spalte fuer die finale Survey-Zuordnung nutzt.
@@ -113,23 +118,12 @@ Wichtig: `landing-page/_system/db-bridge.php` enthaelt einen aktualisierten Mirr
 
 ## Deploy
 
-```bash
-cd business_leads_quiz
-npm install
-npm run build
-npm run verify
-npm run deploy:preview
-```
+Produktion laeuft auf Coolify; deployt wird **manuell nach gruener CI** — der komplette
+Ablauf (Coolify-API-Aufruf, `/health/live`-Nachweis, Kopien wie der Nurture-Waechter,
+Vercel-Rueckweg) steht in [DEPLOYMENT_WORKFLOW.md](DEPLOYMENT_WORKFLOW.md).
 
-`npm run deploy:preview` creates a Vercel Preview URL and does not overwrite `https://quiz.activecenter.info`.
-
-After the Preview URL has been tested, commit and push `main`, then promote the exact tested deployment:
-
-```bash
-npm run promote:prod -- <preview-url>
-```
-
-Do not deploy directly with `npx vercel deploy --prod`. Production should only be updated by promoting a tested Preview deployment.
+Kurzform: PR → Checks gruen → Merge → `POST /api/v1/deploy?uuid=yhoacszoiofuq6dg4mykyr7b`
+(Coolify) → `/health/live` zeigt den gemergten Commit.
 
 ## Relevante Dateien
 
@@ -141,8 +135,11 @@ Do not deploy directly with `npx vercel deploy --prod`. Production should only b
 - `ac-track.js`: Tracking-Source
 - `api/bridge.js`: Coach-Lookup, Analytics und Proxy zur zentralen PHP-Bridge
 - `api/validate-email.js`: E-Mail-Validierung
-- `supabase-schema.sql`: SQL fuer alte `quiz_sessions` plus neue `tracking_*` Tabellen
-- `vercel.json`: `dist`-Output und Slug-Rewrite
+- `server/app-server.js`: Container-Laufzeit (liefert `dist/`, `api/`, `/health/live` und `/health/ready`)
+- `Dockerfile`: Produktions-Image fuer Coolify
+- `supabase-lead-system-v2.sql`: kanonisches v2-Schema (Tabellen, RPCs, Views)
+- `supabase-schema.sql`: SQL fuer alte `quiz_sessions` plus Legacy-`tracking_*` Tabellen
+- `vercel.json`: `dist`-Output und Slug-Rewrite (nur noch fuer den Vercel-Rueckweg)
 # Betriebsdokumentation
 
 - Bridge-Vertraege: `docs/BRIDGE_CONTRACTS.md`

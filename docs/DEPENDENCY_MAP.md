@@ -1,6 +1,6 @@
 # Business Leads Quiz: Abhaengigkeitskarte
 
-Stand: 13.07.2026
+Stand: 27.08.2026 (Hosting seit 25.08. auf Coolify; Endpunkte und Fluesse unveraendert)
 
 ## Hauptfluss
 
@@ -32,7 +32,7 @@ Meta-Anzeige
 | `ac-track.js` | Legacy-/Seitentracking und Tracking-Session. | `/api/bridge` |
 | `src/ac-track.js` | Nicht blockierender Event-Batcher. | `/api/bridge` |
 
-## Vercel-APIs
+## Projekt-APIs (`api/`, ausgeliefert vom Coolify-Container; auf dem Vercel-Rueckweg identisch)
 
 | Endpoint | Aufgabe | Kritische Abhaengigkeit |
 | --- | --- | --- |
@@ -83,3 +83,6 @@ npm run guard:deploy
 ```
 
 Build und Verify immer nacheinander ausfuehren. Der Build erstellt `dist/`; parallele Pruefungen koennen sonst unvollstaendige Dateien lesen.
+
+Der eigentliche Produktions-Deploy (Coolify, manuell, `/health/live`-Nachweis) steht in
+[../DEPLOYMENT_WORKFLOW.md](../DEPLOYMENT_WORKFLOW.md).
