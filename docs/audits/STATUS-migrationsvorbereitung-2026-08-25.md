@@ -390,6 +390,27 @@ Doppel-Schreibkanal (Videorang → `points_result`) hat einen täglichen Lese-Ab
   `pg_dump` automatisch mit (9 `setval`). Inhalt identisch, **0 echte Waisen**; die
   `quiz_sessions`-Abweichung war Live-Drift (2 neue Zeilen), begrenzt geprüft identisch.
   Dumpdateien, zweite Test-DB und `.pgpass` wurden wieder entfernt.
+- ✅ **Plattform-Rollenmodell entworfen und ausgerollt** (27.08.):
+  [plattform-rollenmodell-2026-08-27.md](plattform-rollenmodell-2026-08-27.md) — gilt für
+  **alle** Projekte (Fitmarathon, Analysen, Events, Kontakte, Support, Leads). Kern: eine
+  Datenbank, ein Schema je Projekt (PostgreSQL kann nicht über Datenbankgrenzen joinen,
+  und unsere Projekte hängen alle am selben Menschen); vier Rollen je Projekt
+  (`_owner` NOLOGIN als Eigentümer, `_migrate` nur DDL, `_app` nur DML, `_read` nur
+  SELECT) samt `ALTER DEFAULT PRIVILEGES`; **kein** Supabase-Erbe (`anon`/`authenticated`/
+  `service_role`, RLS als Grenze, `BYPASSRLS`) — Begründung je Punkt im Dokument.
+  Für Leads angelegt (`plattform-rollen-leads.sql`, Zugänge in agent-secrets `leads_pg`)
+  und **bewiesen**: `leads_migrate` legt an (Eigentümer `leads_owner`), `leads_app` liest
+  und schreibt automatisch, und alle vier Negativtests scheitern korrekt (kein CREATE,
+  kein DROP, kein Blick nach `marathon`, kein neues Schema). Engstelle benannt:
+  37 nutzbare Verbindungen bei 3 GB RAM — **ab dem dritten Projekt PgBouncer**, nicht
+  `max_connections` hochdrehen. Offene Entscheidung für Markus: Datenbank `fitapp` →
+  neutraler Plattformname umbenennen, solange sie 11 MB hat.
+- ✅ **Schreibbarriere 13.5.2 als Ablaufplan**:
+  [cutover-vorbereitung/schreibbarriere-13.5.2.md](cutover-vorbereitung/schreibbarriere-13.5.2.md)
+  — Rechte entziehen statt bitten, Stillstand **zweimal** messen, dann erst dumpen;
+  Rückweg ohne Datenverlust. Wichtig: das Fenster ist ungefährlich, weil das Opt-in
+  weiterhin über MySQL landet und mit `backfill-antworten.js` in die neue Datenbank
+  geheilt werden kann. `landing-page` ist als Schreiber erledigt (Tracking abgehängt).
 
 ### Nachtrag 27.08.: Vorfall Anzeigen-Konversion (gelöst) — HTTP/3 am Proxy aus
 
