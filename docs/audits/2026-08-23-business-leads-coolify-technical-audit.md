@@ -1,3 +1,25 @@
+> 🔴 **STAND 23.08.2026 — als Plan weiter gültig, im Ist-Zustand überholt.**
+>
+> Was sich seither geändert hat (geprüft im Audit vom 27.08.):
+> - **Die Ziel-Datenbank heißt `hl_support`**, nicht `business_leads`. Schemata `leads`
+>   und `leads_analytics` auf `10.0.1.3`. Wer `/root/pg-neues-projekt.sh business_leads`
+>   ausführt, legt die falsche Datenbank an.
+> - **n8n bekommt doch einen Datenbankzugang** (Rolle `leads_n8n`, `pg_hba` + Firewall
+>   für `10.0.1.4` seit 27.08.) — die Empfehlung „keinen direkten Zugang" ist überholt.
+> - `api/init-quiz-db.js` **existiert nicht mehr** (PR #55) — alle Befunde dazu sind
+>   historisch, auch der Host-Header-Bypass.
+> - Globales CORS `*` ist durch eine Allowlist ersetzt; `engines`/`packageManager` sind
+>   gesetzt; die Deploy-Pipeline Stufe 1 ist gebaut.
+> - Zahlen: 32 Tests → **211**; Supabase ist **PG 17.6**.
+>
+> 🔴 **Weiterhin zu Recht offen (nicht wegräumen):** 13.2.2 — der Outbox-Worker
+> akzeptiert das Secret weiterhin im **Query-String** (`api/lead-outbox-worker.js:65`,
+> `req.query?.secret`). Query-Strings landen in Zugriffsprotokollen.
+>
+> Aktueller Stand: [../STAND-UND-FORTSETZUNG.md](../STAND-UND-FORTSETZUNG.md)
+
+---
+
 # Technischer Funnel-Audit und Konsolidierungs-/Migrationskonzept
 
 Stand: 23.08.2026  

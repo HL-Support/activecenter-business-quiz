@@ -1,3 +1,15 @@
+> ✅ **AUSGEFÜHRT am 25.08.2026.** Dieser Plan ist im Futur geschrieben, aber erledigt.
+> Was tatsächlich passierte, steht im
+> [Cutover-Protokoll](cutover-protokoll-2026-08-25.md).
+>
+> §5 („Vercel bleibt 7–14 Tage") ist überholt: Der Abbau ist seit 27.08. freigegeben und
+> wartet nur noch auf die Datums-Tore (01.09. / 03.09.).
+>
+> 🔴 `scripts/router_check.py` und `scripts/verify.py` in §6.3 liegen im **Coolify**-Repo,
+> nicht in diesem.
+
+---
+
 # Cutover-Plan: Hosting Vercel → Coolify (Phase 3)
 
 Stand: 25.08.2026. Grundlage: [Aufrufer-Inventar](aufrufer-inventar-2026-08-25.md),

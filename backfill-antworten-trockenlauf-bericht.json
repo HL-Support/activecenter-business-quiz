@@ -1,0 +1,37 @@
+{
+  "zeitpunkt": "2026-08-27T08:01:38.695Z",
+  "statistik": {
+    "profil": 0,
+    "ziel": 0,
+    "barriere": 0,
+    "antworten": 5,
+    "nicht_heilbar": 1
+  },
+  "plan": [
+    {
+      "lead_hash": "qz_dffc5fce8b8a4f1f93ea5bfb1330d6a8",
+      "patch": {},
+      "antworten": 3
+    },
+    {
+      "lead_hash": "qz_eea1925d772f4538bcf00cc0fbe71a96",
+      "patch": {},
+      "antworten": 4
+    },
+    {
+      "lead_hash": "qz_54c240bef6454d2fb7f0950e2b3f035c",
+      "patch": {},
+      "antworten": 1
+    },
+    {
+      "lead_hash": "qz_f0b5b49572884cdaa479dbe38967631b",
+      "patch": {},
+      "antworten": 1
+    },
+    {
+      "lead_hash": "qz_8fe0b61bb4044760b8c6de73614d3595",
+      "patch": {},
+      "antworten": 1
+    }
+  ]
+}

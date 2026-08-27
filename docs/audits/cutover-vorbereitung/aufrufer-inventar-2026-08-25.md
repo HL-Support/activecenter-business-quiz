@@ -1,3 +1,13 @@
+> 🔴 **MESSSTAND 25.08.2026 — mehrere Werte sind heute das Gegenteil.**
+>
+> `/health/live` lieferte damals 404 und liefert heute **200 mit Commit**. Die DNS-Tabelle
+> zeigt CNAMEs auf Vercel; seit dem Cutover stehen alle drei Domains als A-Record auf
+> `167.233.251.217`. Die Nachlauffristen sind durch die Abbau-Freigabe überholt.
+>
+> Als Inventar der **Aufrufer** weiter gültig — als Zustandsbeschreibung nicht.
+
+---
+
 # Aufrufer-Inventar der drei Quiz-Domains — Cutover-Vorbereitung
 
 Stand: 25.08.2026 · **Erhebung rein lesend** · Auftrag: Phase 3 Schritt 3

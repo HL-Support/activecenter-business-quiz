@@ -1,3 +1,13 @@
+> 🔴 **HISTORISCH — Arbeitsstand vom 23.08.2026, nicht nachgeführt.**
+>
+> Momentaufnahme *vor* dem Hosting-Cutover. Seit dem 25.08. laufen alle **drei** Domains
+> auf Coolify (`167.233.251.217`), nicht auf Vercel. Der Statuswiderspruch zu
+> `task_plan.md` („Completed") ist Teil dieser Momentaufnahme.
+>
+> Aktueller Stand: [../../STAND-UND-FORTSETZUNG.md](../../STAND-UND-FORTSETZUNG.md)
+
+---
+
 # Progress Log
 
 ## Session: 2026-08-23

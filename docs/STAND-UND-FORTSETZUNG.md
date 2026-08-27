@@ -496,6 +496,62 @@ SELECT cron.schedule('pgss-monatsreset', '15 3 1 * *', $$select pg_stat_statemen
 
 ---
 
+## 8b. Offene Punkte — lückenlos, mit Beleg
+
+Erhoben im Audit vom 27./28.08.2026. Jeder Punkt wurde **gemessen**, nicht aus der
+Dokumentation übernommen. Reihenfolge: nach Dringlichkeit.
+
+### Vor dem Cutover
+
+| # | Punkt | Beleg / Stand |
+| --- | --- | --- |
+| 1 | **Barriere-SQL von Hand** im Supabase-Editor — die Management-API ist read-only und kann weder `REVOKE` noch `cron.schedule` | zweifach gemessen; Block liegt fertig unter `cutover-belege/barriere-an.sql` |
+| 2 | **n8n-Workflows deaktivieren** (mind. Outbox-Worker, Nurture-Sender, Post-Processor, Health-Monitor) | von Hand, n8n-API |
+| 3 | **`LEADS_DB_*` in Coolify setzen** + Redeploy. 🔴 `SUPABASE_*` **stehen lassen** | Werte in Secrets `leads_pg`; kein neuer Build nötig (Treiber liegt im Image) |
+| 4 | **Wächter umstellen** (`WAECHTER_QUELLE=plattform` + `LEADS_PG_*` in die `.env`) | Dateien und Treiber liegen auf der Box, Sicherungen angelegt |
+| 5 | **pg_cron auf dem Ziel anlegen** — erst **nach** dem Datenumzug | `plattform-cron-leads.sql` |
+| 6 | **Vercel stilllegen** (Deployment pausieren, umkehrbar) | verhindert Split-Brain über `businessleadsquiz.vercel.app` (HTTP 200, DNS-unabhängig) |
+
+### Am Folgetag
+
+| # | Punkt | Warum |
+| --- | --- | --- |
+| 7 | **Nurture-Sender umbauen** — 6 Nodes von HTTP auf Postgres (`leads_n8n`) | Netzweg steht seit 27.08.; der Umbau wird *einfacher*, weil die Blätterungslogik entfällt |
+| 8 | **`AC - Error Alert` umstellen** (RPC `record_nurture_failure`) | 🔴 der **Alarmkanal** — zeigt sonst auf die alte Instanz |
+| 9 | `Supabase Keep-Alive` und `AC - Quiz Video Inactivity Checker` (inaktiv) | dieselbe Credential, dieselbe alte Instanz |
+| 10 | **Wächter W2 wird anschlagen**, solange der Versand steht | gewollt; dem Bereitschaftshabenden muss es bekannt sein |
+
+### Danach
+
+| # | Punkt | Stand |
+| --- | --- | --- |
+| 11 | **Vercel endgültig abbauen** | freigegeben; Tore **11/14**, offen: 01.09., 03.09. und das n8n-Tor (löst sich am 03.09. selbst) |
+| 12 | **Test-DB `business_leads_testimport` löschen** | 🔴 enthält **1.236 echte E-Mail-Adressen**. Nach dem Cutover gibt es keinen Grund, eine Kopie personenbezogener Daten zu behalten: `dropdb business_leads_testimport` |
+| 13 | **`pgss-monatsreset` reparieren** | zeigt auf die Datenbank `fitapp`, die es nicht mehr gibt (siehe Schritt 7) |
+| 14 | **Outbox-Worker-Secret aus dem Query-String** | `api/lead-outbox-worker.js:65` akzeptiert `req.query?.secret`; Query-Strings landen in Zugriffsprotokollen (Audit 13.2.2, zu Recht offen) |
+| 15 | `supabase-lead-system-v2.sql` bereinigen (`lead_access_permissions` streichen) | Entscheidung 4 |
+| 16 | **PgBouncer**, sobald das dritte Projekt kommt · **cx32** vor der Kontakte-Migration | RAM ist der Engpass, nicht die Platte |
+| 17 | Alten Eingang „Landing Page Business" abbauen · Empfehlung an FitApp: Schema `marathon` → `fitapp` | Entscheidung 12 |
+
+### Dokumentation — im Audit gefunden und bereits korrigiert
+
+72 Befunde aus zwei unabhängigen Prüfungen. Behoben: der **Bridge-Guard-Bug** (vier
+Stellen, siehe unten), die gefährliche „doppelte Helfer"-Anweisung in `AGENTS.md`,
+veraltete Commit- und Testzahlen, die Tore-Zählung, „Kysely" statt `postgres.js`, ein
+totes Skript im Runbook, die fehlende Verlinkung der Cutover-Checkliste, sowie
+Historisch-Banner auf sechs überholten Dokumenten (darunter
+`PHASE1-PHASE5-DEPLOYMENT.md` mit seiner **Phase-4/5-Namenskollision**).
+
+🔴 **Der wichtigste Fund war kein Doku-Fehler, sondern ein echter Bug:**
+`api/bridge.js` prüfte an **vier** Stellen `SUPABASE_URL`/`SUPABASE_SERVICE_KEY` und gab
+ohne sie `null` zurück — ohne den direkten Modus zu kennen. Wer beim Cutover die nicht
+mehr benötigten Supabase-Variablen entfernt hätte, hätte einen **stillen Teilausfall**
+erzeugt: 28 Bridge-Zugriffe liefern `null`, die übrigen Routen laufen weiter. Betroffen
+war auch `supabaseRpc` — der Pfad von `submit_lead_complete`. Behoben und durch
+`scripts/tests/bridge-transport-guard.test.js` zugehalten.
+
+---
+
 ## 9. Offene Entscheidungen für Markus
 
 1. ~~**Vercel-Abbau freigeben**~~ — ✅ **freigegeben am 27.08.** Der Abbau wartet nur noch
