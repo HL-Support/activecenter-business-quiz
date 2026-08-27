@@ -389,7 +389,16 @@ bewachen sie weiter die alte Datenbank und melden „alles ruhig".
    auf die zwei Datums-Tore; siehe Schritt 3.
 2. **Zeitfenster für den Cutover** — Erfahrung: 02:00–05:00 MESZ ist praktisch verkehrsfrei.
 3. ~~**Server-Upgrade cx32**~~ — für **dieses** Projekt nicht nötig, siehe unten.
-4. ~~**GitHub-Secret** `COOLIFY_API_TOKEN` verkleinern~~ — siehe Schritt 7.
+4. **GitHub-Secret** `COOLIFY_API_TOKEN` verkleinern — 🔴 **braucht dich für 2 Minuten**:
+   Coolify bietet **keinen** API-Endpunkt zum Anlegen von Tokens (geprüft am 27.08.:
+   `security/api-tokens`, `tokens`, `api-tokens`, `personal-access-tokens` → alle 404),
+   und die Weboberfläche verlangt 2FA per Authenticator-App. Der heutige Token liest
+   `applications`, `servers`, `projects` und `teams` — er ist also weitreichend.
+
+   **Dein Teil:** Coolify → *Keys & Tokens* → *API Tokens* → neuen Token mit
+   **nur Deploy-Berechtigung** anlegen und mir den Wert geben.
+   **Mein Teil danach:** `gh secret set COOLIFY_API_TOKEN` im Repo, ein Testdeploy als
+   Nachweis, alten Token in Coolify löschen.
 
 ### Warum das Server-Upgrade nichts mit dem Quiz zu tun hat (gemessen 27.08.)
 
