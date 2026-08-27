@@ -135,6 +135,14 @@ Wächter läuft nicht mehr. Damit wird auch der Wächter bewacht.
   HTTP/3-Ankündigung des neuen Proxys —
   [Vorfallsdoku](audits/2026-08-27-anzeigenkonversion-http3.md)). Erste Prüfrichtung im
   Alarmfall: Antwort-Kopfzeilen (`Alt-Svc`/Protokolle) gegen den letzten guten Stand.
+- **W5** — trägt jedes Opt-in seine 6 Antwortzeilen? Ein Opt-in mit weniger als 6 Zeilen
+  in `lead_answers_current` ist ein Teilverlust — genau die Klasse, die am 27.08. drei
+  Monate lang unsichtbar war (void-RPC-Abriss nach Antwort 1; fünf weitere Altfälle aus
+  der Ereignisstrom-Ära). Gegen dieselbe Hash-Baseline (`antworten_unvollstaendig`);
+  Einzelfall = WARNUNG (Sonderwege wie der alte Landing-Page-Eingang), ab drei NEUEN
+  Fällen = ALARM, denn der Opt-in-Pfad schreibt seit PR #91 alle Antworten selbst.
+  Heilweg: `node scripts/backfill-antworten.js` (Trockenlauf zeigt den Plan; füllt nur
+  fehlende Refs, nie Vorhandenes).
 
 Prüfen ohne Datenbankzugriff: `node scripts/waechter-nurture.js --selbsttest` — 8 Fälle,
 darunter ausdrücklich „der echte Vorfall wäre erkannt worden".
