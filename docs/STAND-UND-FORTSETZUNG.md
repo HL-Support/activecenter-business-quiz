@@ -189,6 +189,7 @@ Alle Zugangsdaten liegen in `C:\Users\Markus\.agent-secrets\agent-secrets.json` 
 | --- | --- |
 | Supabase lesen/schreiben (App) | `.env.prod` im Repo: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` |
 | Supabase SQL (Management-API) | `.env.prod`: `SUPABASE_ACCESS_TOKEN`; Helfer `scripts/stats-logs-baseline.js` → `executeManagementQuery(sql)`; nur mit curl-artigem User-Agent (Cloudflare blockt python-urllib) |
+| Supabase **Edge-Logs** (wer greift zu) | derselbe `SUPABASE_ACCESS_TOKEN` gegen `analytics/endpoints/logs.all`; **`iso_timestamp_start`/`_end` sind Pflicht** — ohne sie liefert die API nur die letzte Minute. Beispiel: `scripts/fremdschreiber-messen.js` |
 | Supabase **pg_dump** | Secrets `marathon_supabase_app` (Rolle `marathon_app`, Pooler, **BYPASSRLS**). 🔴 BYPASSRLS ist Pflicht — sonst liefert der Dump bei aktiver RLS **still weniger Zeilen**. Leserechte auf die Quiz-Objekte: `supabase-export-rechte.sql` (Rückweg im Kopf) |
 | Ziel-DB `hl_support` | Secrets `leads_pg` (`leads_app`, `leads_migrate`). Zugang nur von `10.0.1.5` laut `pg_hba` |
 | DB-Server SSH | `root@91.99.76.104`, Key `id_rsa` — **hat eine Passphrase** (Secrets `cw_forge_server.sshKeyPassphrase`); ohne Agent+Askpass scheitert er still als „Permission denied" |
@@ -205,6 +206,7 @@ Alle Zugangsdaten liegen in `C:\Users\Markus\.agent-secrets\agent-secrets.json` 
 | `scripts/phase5-testimport-vergleich.js` | Paritätsvergleich Quelle ↔ Testimport |
 | `scripts/phase5-datenprobe.js` | echte Daten in die Test-DB pumpen + Zählparität |
 | `scripts/vercel-abbau-vorbedingungen.js` | misst die Abbau-Tore |
+| `scripts/fremdschreiber-messen.js` | wer schreibt außer der App in den Leadkern — Datenseite (Signatur) **und** Transportseite (Edge-Logs); Vorbereitung und Abnahme der Schreibbarriere |
 | `scripts/backfill-antworten.js` | heilt fehlende Antwortzeilen aus dem MySQL-JSON |
 | `scripts/waechter-nurture.js` | W1–W5 (`--selbsttest` läuft ohne Datenbank) |
 | `scripts/abgleich-videorang.js` | täglicher Lese-Abgleich Videorang ↔ `points_result` |
@@ -235,6 +237,14 @@ Alle Zugangsdaten liegen in `C:\Users\Markus\.agent-secrets\agent-secrets.json` 
 9. **Merge ≠ Deploy war gestern**; heute deployt die CI — aber nur Runtime-Pfade. Ein
    alter Stand in Produktion kann völlig korrekt sein.
 10. **Windows-Shell**: Umlaute nie inline per curl; `--data-binary @datei` und HEX prüfen.
+11. **`source_app` verrät den Schreiber nicht.** `activecenter-analytics` kopiert den Wert
+    aus `lead_state` und schreibt damit unter `business_leads_quiz` — wie die Anwendung
+    selbst. Fremdschreiber nur über konstante Merkmale erkennen (`payload->>'source'`).
+12. **Herkunfts-IPs sind bei Cloud-Diensten kein Schlüssel**: n8n und Vercel rufen aus
+    wechselnden AWS-Bereichen (gemessen 59 IPs in 24 h). Nach **Zielpfad** gruppieren.
+13. **Prüfsummen über DB-Grenzen** brauchen beidseitig fixierte Zeitzone und
+    `COLLATE "C"` — ICU-Ziel und Supabase-Quelle sortieren sonst anders und melden
+    einen Transportfehler, den es nicht gibt.
 
 ---
 
@@ -257,9 +267,22 @@ sortieren, sonst erzeugt die ICU-Sortierung des Ziels falsche Rot-Befunde.
 
 ### Schritt 2 — `activecenter-analytics` vom Schreiben trennen (nächster Schritt)
 
-Entscheidung 8 ist getroffen, die Ausführung fehlt. Sie schreibt heute `lead_events`.
-Danach **messen**, dass keine neuen Ereignisse mit ihrer Signatur mehr ankommen — erst
-dann ist die Schreibbarriere realistisch.
+Entscheidung 8 ist getroffen, die Ausführung fehlt. **Gemessen am 27.08.** mit dem neuen
+`scripts/fremdschreiber-messen.js`:
+
+- 🔴 Die Annahme „sie schreibt heute `lead_events`" stimmt so **nicht mehr**: Das letzte
+  Ereignis mit ihrer Signatur ist vom **08.06.2026** — 80 Tage her. Es gibt keinen
+  Dauerstrom, der erst versiegen müsste.
+- Der **Pfad ist trotzdem offen** (`analytics/api/bridge.js:2148`, Dashboard-Knopf
+  „Testlead markieren"). Ein Klick schreibt wieder — möglicherweise mitten im
+  Cutover-Fenster. Ruhend ist nicht geschlossen.
+- Die Signatur ist **nicht** über `source_app` messbar (der Wert wird aus `lead_state`
+  geerbt), sondern nur über `payload->>'source' = 'analytics_dashboard_v2'`.
+
+**Zu tun:** `setTestLead` im fremden Repo `activecenter-analytics` auf einen sprechenden
+Fehler umstellen (nicht den Service-Key ziehen — das bräche auch alle Lesepfade), dann
+die Messung wiederholen. Kostet die Testlead-Markierung im Dashboard; Details und
+Abwägung in [schreibbarriere-13.5.2.md](audits/cutover-vorbereitung/schreibbarriere-13.5.2.md).
 
 ### Schritt 3 — Vercel-Abbau (ab 02.09., nach Freigabe)
 
