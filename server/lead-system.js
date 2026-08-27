@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const dbTransport = require('./db-transport.js');
 
 // Entfernt ein literales '\n' am Ende und Whitespace. Anlass: der produktive JWT_SECRET
 // endete auf Backslash+n (Env-Altlast) - dieselbe Falle darf keinen Supabase-Key treffen.
@@ -232,6 +233,12 @@ function requireSupabase() {
 }
 
 async function supabaseRequest(path, options = {}) {
+  // Phase 4 Stufe B: Im direkten Modus geht derselbe Aufruf ohne PostgREST an die
+  // Plattform-Datenbank. Der Rueckgabewert verhaelt sich wie das fetch-Response, das
+  // alle Aufrufer erwarten - der Vertrag bleibt Zeile fuer Zeile derselbe.
+  // Standard ist unveraendert der HTTP-Weg (server/db-transport.js).
+  if (dbTransport.istDirekt()) return dbTransport.direktRequest(path, options);
+
   requireSupabase();
 
   const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
