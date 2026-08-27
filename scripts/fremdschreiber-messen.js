@@ -69,7 +69,11 @@ const BEKANNTE_PFADE = {
 const SIGNATUREN = [
   {
     name: 'activecenter-analytics (Dashboard-Testlead)',
-    beleg: 'analytics/api/bridge.js:2148, Action set_test_contact',
+    // Pfad geschlossen am 27.08.2026 (activecenter-analytics PR #2, live als 637b71a):
+    // setTestLead meldet 410 Gone, die Oberflaeche ruft die Action nicht mehr auf.
+    // Diese Zeile bleibt als WAECHTER stehen - sie schlaegt an, falls der Pfad
+    // zurueckkehrt, und belegt bis dahin die Stille.
+    beleg: 'geschlossen 27.08.2026 — Waechter, kein aktiver Pfad mehr',
     // payload.source ist konstant und wird NICHT vom Lead geerbt - im Gegensatz zu
     // source_app, das dieselbe Zeile mit 'business_leads_quiz' fuellt.
     bedingung: "payload->>'source' = 'analytics_dashboard_v2'",

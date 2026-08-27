@@ -20,7 +20,7 @@ der Stillstand wird **gemessen**, und erst dann läuft der Dump.
 | **business_leads_quiz** (die Anwendung selbst) | schreibt bis zum Umschalten; im Fenster schlägt nur der PostgreSQL-Teil fehl — siehe „Warum das Fenster ungefährlich ist" | Hauptschreiber |
 | **pg_cron-Job** `refresh_event_daily` (alle 15 min → `leads_analytics`) | **vor** dem Dump abschalten, auf dem Ziel neu anlegen | aktiv |
 | **n8n-Workflows** (Outbox-Worker, Health-Monitor, Nurture-Sender, Post-Processor) | im Fenster deaktivieren, danach auf die neue Datenbank zeigen | aktiv |
-| **activecenter-analytics** (schreibt `lead_events`) | wird **nicht übernommen** (Entscheidung 27.08.) → Schreibzugriff endet dauerhaft **vor** dem Cutover | zu beenden |
+| **activecenter-analytics** (schrieb `lead_events`) | wird **nicht übernommen** (Entscheidung 27.08.) → **erledigt am 27.08.**: Schreibpfade geschlossen und live (activecenter-analytics PR #2, Commit `637b71a`) | ✅ kein Schreiber mehr |
 | **landing-page** (`track_event` → `tracking_*`) | **erledigt**: Seite ist statisch, Tracking abgehängt (Entscheidung Markus, 27.08.). Gemessen: 1 Ereignis in 7 Tagen, letztes am 20.08. | kein Schreiber mehr |
 | **hl-support-analytics** | liest nur (Nurture-RPCs) — blockiert die Barriere nicht, muss aber nach dem Umzug umgestellt werden | Leser |
 
@@ -40,10 +40,9 @@ kein Verkehr).
 
 ### 0. Vorbereitung (Tage vorher)
 
-- `activecenter-analytics` dauerhaft vom Schreiben trennen und **messen**, dass keine
-  neuen `lead_events` mit ihrer Signatur mehr ankommen.
-  → Messwerkzeug steht: `node --env-file=.env.prod scripts/fremdschreiber-messen.js`.
-  Stand 27.08.: **ruhend seit 08.06.2026** (siehe unten), Pfad aber noch offen.
+- ~~`activecenter-analytics` dauerhaft vom Schreiben trennen~~ → **✅ erledigt am
+  27.08.2026**, live als Commit `637b71a`. Nachweis laufend mit
+  `node --env-file=.env.prod scripts/fremdschreiber-messen.js`.
 - Frisches Objektmanifest und frischen Schema-Export erzeugen
   (`scripts/objektmanifest-supabase.js`, `scripts/phase5-schema-export.js`).
 - Zieldatenbank vorbereiten: Rollen und Schemata stehen bereits
@@ -154,36 +153,50 @@ Schlüssel ist der **Zielpfad**.
 | Außerhalb der Auswahl | 6.880 Zugriffe auf `webhook_*`, `cron_runs`, `push_preprompt_health`, `sso_token_consumptions` — Verbünde, die bewusst zurückbleiben (Entscheidungen 3 und 8). |
 | **Löschungen von Hand** | 2 DELETE (`lead_answers_current`, 91 ms später `lead_state`) von einem **Arbeitsplatz-Rechner**, nicht aus dem Repo — Testlead-Aufräumen. |
 
-### Was das für die Trennung bedeutet
+## Die Trennung — ausgeführt am 27.08.2026
 
-🔴 **Ruhend ist nicht geschlossen.** Der Codepfad lebt weiter
-(`analytics/api/bridge.js:2148`, Action `set_test_contact`, ausgelöst vom
-Dashboard-Knopf in `analytics/analytics.html:2854`). Ein einziger Klick schreibt wieder
-— möglicherweise **mitten im Cutover-Fenster**. Die Messung belegt die Trennung, sie
-ersetzt sie nicht.
+**Ruhend war nicht geschlossen.** Der Codepfad lebte weiter; ein einziger Klick hätte
+wieder geschrieben, möglicherweise mitten im Cutover-Fenster. Deshalb geschlossen —
+in `activecenter-analytics` PR #2, live als Commit `637b71a`.
 
-Zugleich entschärft der Befund die Dringlichkeit: Es fließt **kein Dauerstrom**, der
-erst versiegen müsste. Die Trennung ist ein einzelner, planbarer Eingriff — kein
-Auslaufenlassen mit Wartezeit.
+Bei der Durchsicht kamen **zwei** Schreibpfade zum Vorschein, nicht einer:
 
-**Der Eingriff liegt in einem fremden Repo** (`activecenter-analytics`, eigenes
-Vercel-Projekt) und kostet die Testlead-Markierung im Dashboard. Zwei Wege:
-
-| Weg | Wirkung | Preis |
+| Pfad | Riegel | Warum so |
 | --- | --- | --- |
-| **`setTestLead` auf Fehler umstellen** (bzw. `set_test_contact` aus der Allowlist `bridge.js:46-56` nehmen) | schließt genau den einen Schreibpfad | Dashboard-Knopf meldet einen Fehler; Lesepfade und `webhook_deliveries` bleiben heil |
-| `SUPABASE_SERVICE_KEY` aus der Vercel-Env ziehen | schließt alles auf einmal | bricht auch **alle Lesepfade** des Dashboards und `webhook_deliveries` — zu grob |
+| `setTestLead` (`api/bridge.js`) — Dashboard-Knopf „Testkontakt markieren", POST auf `lead_events` | **410 Gone** mit sprechendem Text; die Oberfläche fängt den Klick schon vor dem Bestätigen ab | ein Knopf darf nicht stumm scheitern |
+| `scripts/fill-mautic-v2-fields.js` — PATCH auf `lead_state` bei `--create-missing`/`--exclude-orphans` | **Riegel mit Schlüssel** (`LEADKERN_SCHREIBEN_ERLAUBT=ja`), Trockenlauf bleibt frei | Handwerkzeug, das ein Mensch bewusst startet — keine harte Abschaltung nötig |
 
-Empfehlung: der erste Weg, mit einem sprechenden Fehlertext („Testlead-Markierung
-wurde zum Datenbank-Umzug abgeschaltet"), damit der Knopf nicht stumm scheitert.
+Der zweite Pfad stand in keiner Planungsnotiz. Er fiel nur auf, weil nach dem ersten
+Riegel systematisch nach weiteren Schreibzielen gesucht wurde.
+
+`compactObject` wurde mit entfernt: Der Helfer baute ausschließlich den
+`lead_events`-Datensatz und hätte zum Wiederbeleben eingeladen.
+
+**Bewiesen:**
+
+- 4 Regressionstests im Analytics-Repo halten beide Pfade zu. **Gegengeprüft**: mit
+  testweise wieder eingebautem POST fällt der Test und benennt Tabelle und Zeile;
+  danach Datei aus der Sicherung wiederhergestellt, MD5 verifiziert. Ein Test, der nur
+  grün sein *kann*, würde nichts beweisen.
+- Ein Gegentest hält fest, dass die **Lesepfade** erhalten bleiben — der Riegel darf
+  das Dashboard nicht lahmlegen.
+- Produktion geprüft (nicht die Preview — die ist SSO-geschützt und liefert nur eine
+  Weiterleitung): `HTTP 200`, der alte Aufruf kommt **null**-mal vor, der neue
+  Hinweistext ist da, deployter Commit `637b71a` == `main`.
+
+🔴 **Die CI dieses Repos lief nicht** — GitHub meldet
+„an Actions budget is preventing further use". Der Nachweis stammt deshalb aus dem
+lokalen Gate-Lauf (7/7 Tests, Build, Verify, separate Syntaxprüfung des JavaScripts in
+`analytics.html`) plus der Prüfung am ausgelieferten Artefakt. **Das Budget gehört
+nachgesehen**, sonst laufen dort künftige Änderungen ungeprüft durch.
 
 Die Handarbeit vom Arbeitsplatz fängt die Barriere übrigens mit: das `REVOKE` trifft
 `service_role`, also auch lokale Skripte mit dem Service-Key.
 
 ## Offene Punkte vor dem Umzugstag
 
-1. `activecenter-analytics` tatsächlich vom Schreiben trennen — **gemessen ruhend seit
-   08.06.**, Pfad aber noch offen; Eingriff im fremden Repo, Entscheidung siehe oben.
+1. ~~`activecenter-analytics` tatsächlich vom Schreiben trennen~~ — ✅ erledigt am
+   27.08., beide Pfade geschlossen und live (siehe oben).
 2. ~~Schema-Abbildung `public→leads` im Export bauen und im Testimport beweisen~~ —
    ✅ erledigt am 27.08. (PR #103), Beweise im
    [Testimport-Protokoll](phase5-testimport/testimport-protokoll-2026-08-27.md).

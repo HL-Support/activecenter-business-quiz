@@ -152,7 +152,7 @@ Wurf riss die Antwort-Schleife nach der **ersten** Antwort ab.
 | 5 | `archive`-Schema bleibt zurück | gemessen: alle 4 Tabellen **0 Zeilen** |
 | 6 | `rls_auto_enable` entfällt (Supabase-Instanzhygiene), `close_webhook_delivery_job` folgt dem Webhook-Verbund | — |
 | 7 | Legacy-Objekte (`quiz_sessions`, `lead_migration_unresolved`) ziehen mit | Abbau später (Audit P2) |
-| 8 | **`activecenter-analytics` wird nicht übernommen** — Statistiken bei Bedarf neu | ihr Schreibzugriff auf `lead_events` muss **vor** dem Cutover enden |
+| 8 | **`activecenter-analytics` wird nicht übernommen** — Statistiken bei Bedarf neu | ✅ Schreibzugriff beendet am 27.08. (beide Pfade, live als `637b71a`) |
 | 9 | **Stufe A** des Phase-4-Designs freigegeben | umgesetzt, live |
 | 10 | **Marathon ist tabu** — läuft weiter auf Supabase, nicht anfassen | meine Grants haben nur `SELECT` auf Quiz-Objekte ergänzt |
 | 11 | Datenbank heißt **`hl_support`** (Gesamtsystem); FitApp ist ein **Projekt darin** | umbenannt und verifiziert |
@@ -265,26 +265,23 @@ erzeugen — ein roher `pg_dump --schema-only` würde wieder `public` anlegen. B
 Prüfsummenvergleich Quelle↔Ziel Zeitzone fixieren und Text mit `COLLATE "C"`
 sortieren, sonst erzeugt die ICU-Sortierung des Ziels falsche Rot-Befunde.
 
-### Schritt 2 — `activecenter-analytics` vom Schreiben trennen (nächster Schritt)
+### Schritt 2 — `activecenter-analytics` vom Schreiben trennen — ✅ erledigt (27.08.)
 
-Entscheidung 8 ist getroffen, die Ausführung fehlt. **Gemessen am 27.08.** mit dem neuen
-`scripts/fremdschreiber-messen.js`:
+Gemessen mit `scripts/fremdschreiber-messen.js`, dann geschlossen und live
+(`activecenter-analytics` PR #2, Commit `637b71a`).
 
-- 🔴 Die Annahme „sie schreibt heute `lead_events`" stimmt so **nicht mehr**: Das letzte
-  Ereignis mit ihrer Signatur ist vom **08.06.2026** — 80 Tage her. Es gibt keinen
-  Dauerstrom, der erst versiegen müsste.
-- Der **Pfad ist trotzdem offen** (`analytics/api/bridge.js:2148`, Dashboard-Knopf
-  „Testlead markieren"). Ein Klick schreibt wieder — möglicherweise mitten im
-  Cutover-Fenster. Ruhend ist nicht geschlossen.
+- Die Annahme „sie schreibt heute `lead_events`" stimmte **nicht mehr**: letztes
+  Ereignis mit ihrer Signatur am **08.06.2026**. Kein Dauerstrom, der versiegen musste.
+- Es waren **zwei** Pfade, nicht einer: der Dashboard-Knopf (jetzt 410 Gone) **und**
+  ein Wartungsskript mit `PATCH lead_state` (jetzt Riegel mit Schlüssel). Der zweite
+  stand in keiner Planungsnotiz.
 - Die Signatur ist **nicht** über `source_app` messbar (der Wert wird aus `lead_state`
   geerbt), sondern nur über `payload->>'source' = 'analytics_dashboard_v2'`.
+- 🔴 **Die CI des Analytics-Repos läuft nicht** („Actions budget is preventing further
+  use"). Der Nachweis kam aus lokalem Gate-Lauf plus Prüfung am ausgelieferten
+  Artefakt. Das Budget gehört nachgesehen.
 
-**Zu tun:** `setTestLead` im fremden Repo `activecenter-analytics` auf einen sprechenden
-Fehler umstellen (nicht den Service-Key ziehen — das bräche auch alle Lesepfade), dann
-die Messung wiederholen. Kostet die Testlead-Markierung im Dashboard; Details und
-Abwägung in [schreibbarriere-13.5.2.md](audits/cutover-vorbereitung/schreibbarriere-13.5.2.md).
-
-### Schritt 3 — Vercel-Abbau (ab 02.09., nach Freigabe)
+### Schritt 3 — Vercel-Abbau (ab 02.09., nach Freigabe) — jetzt an der Reihe
 
 `node --env-file=.env.prod scripts/vercel-abbau-vorbedingungen.js` erneut laufen lassen
 (am 27.08. war alles erfüllt außer den zwei Datums-Toren), die zwei Handprüfungen machen
