@@ -38,7 +38,7 @@
  * Exitcode 0 = unauffällig · 1 = Befund · 2 = Messung nicht durchführbar.
  */
 const fs = require('fs');
-const { executeManagementQuery } = require('./stats-logs-baseline.js');
+const { frage, schliessen, istPlattform, MODUS } = require('./waechter-datenquelle.js');
 
 // Serverseitige Zeilengrenze von PostgREST. Steht in der Projektkonfiguration unter
 // `max_rows`. Wird sie dort geändert, muss dieser Wert mitgezogen werden - sonst prüft der
@@ -76,7 +76,7 @@ const LISTENABFRAGEN = [
 ];
 
 async function zahl(sql) {
-  const r = await executeManagementQuery(sql);
+  const r = await frage(sql);
   const erste = r && r[0];
   return Number(erste && (erste.count ?? erste.n ?? Object.values(erste)[0]));
 }
@@ -173,7 +173,7 @@ async function w2ErgebnisStattVorgang() {
   // den CTA geklickt, 8 waren markierte Testleads. Am 26.08. Fall für Fall nachverfolgt.
   // Ein Wächter, der eine andere Semantik misst als das System, das er bewacht, erzeugt
   // Dauerwarnungen — und die erziehen zum Wegsehen.
-  const ueberfaellig = await executeManagementQuery(`
+  const ueberfaellig = await frage(`
     with personen as (
       select v.email_normalized as email,
              max(coalesce(v.completed_rank, 0)) as rang,
@@ -209,7 +209,7 @@ async function w2ErgebnisStattVorgang() {
 
   // (b) Stillstand: Die letzte Sendung liegt zu lange zurück, OBWOHL es fällige gibt.
   // Ohne die zweite Bedingung wäre das ein Fehlalarm an jedem ruhigen Wochenende.
-  const letzte = await executeManagementQuery(
+  const letzte = await frage(
     `select max(event_at) as letzte from public.lead_events where event_name = 'nurture_sent'`
   );
   const stunden = letzte[0].letzte
@@ -269,7 +269,7 @@ async function w3StrukturellUnerreichbar() {
   // `e.lead_hash = lead_hash` die Spalte mit sich selbst, die Bedingung ist immer wahr,
   // und die Prüfung meldet stillschweigend null Treffer. Genau die Fehlerklasse, gegen die
   // dieser Wächter gebaut ist - beim ersten Entwurf am 26.08. selbst hineingetappt.
-  const r = await executeManagementQuery(`
+  const r = await frage(`
     select v.lead_hash,
       (v.main_aspiration is null or v.main_aspiration = '') as ohne_ziel,
       (v.form_submitted_at is null) as ohne_absendezeit
@@ -336,7 +336,7 @@ async function w3StrukturellUnerreichbar() {
  * keine Opt-ins daraus = Alarm. Ohne Werbe-Besucher (Kampagne aus) schweigt sie.
  */
 async function w4AnzeigenKonversion() {
-  const r = await executeManagementQuery(`
+  const r = await frage(`
     select
       count(*) filter (where fbclid is not null) as werbebesucher,
       count(*) filter (where fbclid is not null and form_submitted_at is not null) as werbe_optins
@@ -376,7 +376,7 @@ async function w4AnzeigenKonversion() {
  * damit ALARM. Heilweg: `node scripts/backfill-antworten.js` (Trockenlauf zeigt den Plan).
  */
 async function w5AntwortsaetzeUnvollstaendig() {
-  const r = await executeManagementQuery(`
+  const r = await frage(`
     select v.lead_hash, count(a.lead_hash) as zeilen
     from public.v_lead_state_full v
     left join public.lead_answers_current a on a.lead_hash = v.lead_hash
@@ -430,7 +430,10 @@ async function w5AntwortsaetzeUnvollstaendig() {
   if (jsonIndex >= 0 && process.argv[jsonIndex + 1]) {
     fs.writeFileSync(
       process.argv[jsonIndex + 1],
-      JSON.stringify({ gemessen_am: new Date().toISOString(), zeilengrenze: ZEILENGRENZE, befunde: alle }, null, 2)
+      JSON.stringify({
+        gemessen_am: new Date().toISOString(), quelle: MODUS,
+        zeilengrenze: ZEILENGRENZE, befunde: alle,
+      }, null, 2)
     );
   }
 
@@ -438,6 +441,11 @@ async function w5AntwortsaetzeUnvollstaendig() {
     console.log('');
     console.log('Wächter Nurture-Versand');
     console.log('');
+    // 🔴 Die Quelle steht ganz oben, weil genau hier der teuerste Irrtum lauert: Ein
+    // Wächter auf der ALTEN Datenbank meldet nach dem Cutover zufrieden "alles ruhig",
+    // während die neue unbeobachtet läuft. Wer das Protokoll liest, muss sofort sehen,
+    // welche Datenbank gemeint ist.
+    console.log(`  Quelle                 : ${MODUS}${istPlattform() ? ' (leads/leads_analytics)' : ' (Supabase, public)'}`);
     console.log(`  Zeilengrenze PostgREST : ${ZEILENGRENZE}`);
     console.log(`  Letzte Sendung vor     : ${Number.isFinite(w2.stunden) ? Math.round(w2.stunden) + ' Stunden' : 'nie'}`);
     console.log(`  Fällige ohne Mail      : ${w2.faellige}`);
@@ -455,8 +463,13 @@ async function w5AntwortsaetzeUnvollstaendig() {
     console.log('');
   }
 
+  // Verbindung schliessen, bevor der Exitcode faellt: Ein offener Pool haelt den Prozess
+  // sonst am Leben, der Container laeuft in den Cron-Ueberlauf und der Herzschlag bleibt
+  // aus - was wie eine Stoerung aussieht, obwohl der Lauf sauber war.
+  await schliessen();
   process.exit(alle.some((b) => b.stufe === 'ALARM') ? 1 : 0);
-})().catch((e) => {
-  process.stderr.write(`Wächter nicht durchführbar: ${e.message}\n`);
+})().catch(async (e) => {
+  await schliessen().catch(() => {});
+  process.stderr.write(`Wächter nicht durchführbar (Quelle ${MODUS}): ${e.message}\n`);
   process.exit(2);
 });

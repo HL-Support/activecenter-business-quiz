@@ -149,7 +149,9 @@ darunter ausdrücklich „der echte Vorfall wäre erkannt worden".
 
 🔴 **Der Wächter läuft als Dateikopie, nicht aus dem Repo.** Wer
 `scripts/waechter-nurture.js`, die Baseline oder `scripts/stats-logs-baseline.js` ändert,
-muss die Kopie auf dem Server nachziehen — sonst wacht in Produktion der alte Stand:
+muss die Kopie auf dem Server nachziehen — sonst wacht in Produktion der alte Stand.
+(Seit dem 27.08. gehören `scripts/waechter-datenquelle.js` und
+`scripts/phase5-schema-abbildung.js` mit zur Kopie — siehe §4b.)
 
 ```bash
 # 1. Sicherung der Server-Kopie (Rückweg)
@@ -172,6 +174,65 @@ misst als das System, das er bewacht, erzeugt Dauerwarnungen. Wer eine Prüfung 
 
 > Ein Wächter, den man nie hat anschlagen sehen, ist kein Wächter. Beide Wege wurden am
 > 26.08. end-to-end nachgewiesen, auch der Alarmweg mit einem erzwungenen Ausfall.
+
+### 4b. Umstellung auf die Plattform-Datenbank (beim Cutover)
+
+🔴 **Der teuerste Fehler des Umzugstags wäre ein Wächter, der weiter die alte Datenbank
+befragt.** Er meldet dann zufrieden „alles ruhig", während die neue unbeobachtet läuft.
+Deshalb ist die Datenquelle seit dem 27.08. umschaltbar statt fest verdrahtet.
+
+Der Wächter fragt ausschließlich über `scripts/waechter-datenquelle.js`. Zwei Modi:
+
+| `WAECHTER_QUELLE` | Wohin | Schema |
+| --- | --- | --- |
+| `supabase` (Standard) | Management-API der Supabase-Quelle | `public` |
+| `plattform` | direkter Treiber auf `10.0.1.3` | `leads` / `leads_analytics` |
+
+Der Modus steht **im Protokollkopf und in der JSON-Ausgabe** — wer das Protokoll liest,
+sieht sofort, welche Datenbank gemeint war.
+
+**Vorbereitet und bewiesen am 27.08.2026** (gegen `business_leads_testimport`, also
+echte Daten im Zielschema): beide Modi liefern **identische** Befunde — 9 fällige
+Erstempfänger, 4 Stunden seit der letzten Sendung, dieselbe Warnung, Exitcode 0.
+
+Drei Dinge, die dabei auffielen und ohne Probe am Umzugstag Ärger gemacht hätten:
+
+1. **Der Netzweg steht.** `pg_hba` lässt nur `10.0.1.5` auf `10.0.1.3:5432` — und der
+   Wächter-Host **ist** `10.0.1.5`. Gemessen, nicht angenommen.
+2. **Die Typen unterscheiden sich.** Die Management-API liefert Zeitstempel als
+   ISO-String, der Treiber als `Date`. Eine Ausgabe mit `String(wert).slice(0, 10)`
+   zeigte einmal `2026-06-11`, einmal `Thu Jun 11`. Im Protokoll kosmetisch — bei jedem
+   Datumsvergleich still falsch. Die Datenquelle normalisiert das jetzt.
+3. **Grants gelten je Datenbank.** `plattform-rollen-leads.sql` lief nur in
+   `hl_support`; in der Test-DB fehlten sie, `leads_app` bekam
+   `permission denied for schema leads`. 🔴 **Nach dem Cutover prüfen, ob `leads_app`
+   wirklich lesen darf — bevor umgeschaltet wird.**
+
+**Ablauf am Umzugstag:**
+
+```bash
+# 1. Treiber bereitstellen (einmalig). postgres.js hat KEINE Abhaengigkeiten und passt
+#    damit in das read-only gemountete Verzeichnis; der Container bringt kein psql mit.
+npm pack postgres && tar xzf postgres-*.tgz
+ssh root@167.233.251.217 "mkdir -p /opt/waechter-nurture/node_modules/postgres"
+scp -r package/. root@167.233.251.217:/opt/waechter-nurture/node_modules/postgres/
+
+# 2. Geaenderte Dateien nachziehen (jetzt drei statt zwei!)
+scp scripts/waechter-nurture.js scripts/waechter-datenquelle.js \
+    scripts/phase5-schema-abbildung.js scripts/waechter-nurture-baseline.json \
+    root@167.233.251.217:/opt/waechter-nurture/
+
+# 3. Zugang in die .env des Waechters (chmod 600), Werte aus Secrets `leads_pg`:
+#    WAECHTER_QUELLE=plattform
+#    LEADS_PG_HOST=10.0.1.3 / _PORT=5432 / _DATENBANK=hl_support
+#    LEADS_PG_BENUTZER=leads_app / _PASSWORT=…
+
+# 4. Nachweis: Der Kopf MUSS "Quelle: plattform" zeigen.
+ssh root@167.233.251.217 "/opt/waechter-nurture/lauf.sh"
+```
+
+**Rückweg:** `WAECHTER_QUELLE=supabase` in der `.env` — der Supabase-Pfad ist unverändert
+erhalten und wurde am 27.08. gegen die alte Fassung als **ergebnisgleich** nachgewiesen.
 
 ---
 
