@@ -967,29 +967,8 @@ function extractQuizAnswersFromFormResponse(formResponse) {
   return { quizAnswers, barrier, profileLabel, aspirationLabel };
 }
 
-/**
- * Schreibt die beim Opt-in mitgelieferten Antworten nach lead_answers_current.
- * Idempotent ueber den Unique-Schluessel (lead_hash, question_ref) des RPCs.
- * Ein Fehler hier darf das Opt-in NIE scheitern lassen - aber er darf auch nicht
- * stumm bleiben: genau stumme Verluste haben den Vorfall drei Monate versteckt.
- */
-async function persistQuizAnswers(leadHash, quizAnswers, lang, answeredAt) {
-  for (const antwort of quizAnswers) {
-    await supabaseRpc('upsert_answer_current', {
-      p_lead_hash: leadHash,
-      p_question_ref: antwort.question_ref,
-      p_question_index: antwort.question_index,
-      p_question_text: null,
-      p_answer_ref: antwort.answer_ref,
-      p_answer_text: antwort.answer_text,
-      p_answer_value: antwort.answer_value,
-      p_profile_delta: {},
-      p_lang: lang,
-      p_answered_at: answeredAt,
-    });
-  }
-}
-
+// persistQuizAnswers (je Antwort eine void-RPC) ist seit Stufe A des Phase-4-Designs
+// Geschichte: submit_lead_complete schreibt Kontakt und Antworten in EINER Transaktion.
 async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhookPayload, finalContext = null) {
   const hidden = {
     ...(submissionPayload?.hidden || {}),
@@ -1041,13 +1020,10 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
     ...submissionPayload,
   });
 
-  await supabaseRequest('lead_state?on_conflict=lead_hash', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Prefer: 'resolution=merge-duplicates,return=minimal',
-    },
-    body: JSON.stringify(compactObject({
+  // Stufe A des Phase-4-Designs (27.08.2026): Kontakt UND Antworten in EINER
+  // Transaktion (submit_lead_complete). Vorher waren es 7 Einzel-Calls - ein Abbruch
+  // mittendrin hinterliess Teilzustaende (void-RPC-Vorfall, Waechter W5).
+  const stateForSubmit = compactObject({
       lead_hash: leadHash,
       client_seed: safeString(hidden.client_seed, 120) || null,
       member_id: memberId,
@@ -1094,23 +1070,27 @@ async function persistBusinessSubmissionToLeadStateV2(submissionPayload, webhook
       mysql_contact_id: finalLead?.mysql_contact_id || undefined,
       sync_status: finalLead ? 'mysql_final_synced' : 'pending',
       last_event_at: submittedAt,
-    })),
   });
 
-  // Antworten hinterher - nach dem lead_state-Upsert, damit der Kontakt auf jeden Fall
-  // steht. Ein Fehler hier blockiert das Opt-in nicht, wird aber gemeldet: Stumme
-  // Verluste haben genau diesen Datenpfad drei Monate lang unsichtbar gemacht.
-  if (quizData.quizAnswers.length) {
-    try {
-      await persistQuizAnswers(leadHash, quizData.quizAnswers, lang, submittedAt);
-    } catch (err) {
-      console.warn('persistQuizAnswers failed:', err.message);
-      meldeFehler(err, {
-        bereich: 'bridge',
-        route: 'forward_typeform_adapter/persistQuizAnswers',
-        level: 'warning',
-      });
-    }
+  // Scheitert der Aufruf, ist NICHTS geschrieben (auch kein Kontakt) - das ist gewollt:
+  // kein lead_state ohne Antworten mehr. Der Fehler wird LAUT gemeldet (stumme Verluste
+  // haben diesen Datenpfad drei Monate versteckt) und nach oben gereicht; der Aufrufer
+  // laesst das Opt-in (MySQL-Weg) trotzdem weiterlaufen.
+  try {
+    await supabaseRpc('submit_lead_complete', {
+      p_state: stateForSubmit,
+      p_answers: quizData.quizAnswers,
+      p_lang: lang,
+      p_answered_at: submittedAt,
+    });
+  } catch (err) {
+    console.warn('submit_lead_complete failed:', err.message);
+    meldeFehler(err, {
+      bereich: 'bridge',
+      route: 'forward_typeform_adapter/submit_lead_complete',
+      level: 'error',
+    });
+    throw err;
   }
 
   return {
@@ -4545,5 +4525,6 @@ module.exports = async function handler(req, res) {
 // Antwortverlust drei Monate lang versteckt hat.
 module.exports.extractQuizAnswersFromFormResponse = extractQuizAnswersFromFormResponse;
 module.exports.supabaseRpc = supabaseRpc;
+module.exports.persistBusinessSubmissionToLeadStateV2 = persistBusinessSubmissionToLeadStateV2;
 module.exports.Q6_BARRIER_BY_OPT = Q6_BARRIER_BY_OPT;
 module.exports.normalizeBusinessProfile = normalizeBusinessProfile;
