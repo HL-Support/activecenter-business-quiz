@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-28T09:50:23.392Z",
+  "updatedAt": "2026-08-28T09:59:38.077Z",
   "createdAt": "2026-05-29T18:14:12.695Z",
   "id": "RqKSRTgFv8mv04H2",
   "name": "AC - Quiz Nurture Email Sender",
@@ -527,7 +527,7 @@
       ],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const item = $json || {};\nif (item.skip) return { json: item };\n\n// 🔴 Seit 26.08.2026 gilt die Bremse fuer ALLE Phasen, nicht nur die Zweitmails.\n// Grund: Die stille Zeilengrenze der Auswahlabfrage hatte 186 Menschen drei Wochen lang\n// unsichtbar gemacht. Nach der Reparatur waeren sie alle in EINEM Lauf angeschrieben\n// worden - ein Schwall, der Zustellbarkeit und Ruf kostet. Bei 25 je Lauf und zwoelf\n// Laeufen taeglich ist ein solcher Rueckstand binnen eines Tages abgearbeitet.\nconst SECOND_PHASES = ['a3', 'b2', 'c2', 'd2'];\nconst ALLE_PHASEN = ['a2', 'b1', 'c1', 'd1', 'a3', 'b2', 'c2', 'd2'];\nif (!ALLE_PHASEN.includes(item.phase)) return { json: item };\n\nconst executionId = String($execution.id || '');\nif (!executionId) throw new Error('Missing n8n execution id for recovery cap');\n\nconst state = $getWorkflowStaticData('global');\nif (!state.nurtureRecoveryCap || state.nurtureRecoveryCap.executionId !== executionId) {\n  state.nurtureRecoveryCap = {\n    executionId,\n    counts: Object.fromEntries(ALLE_PHASEN.map(phase => [phase, 0])),\n  };\n}\n\n// 🔴 Zusaetzlich eine GLOBALE Obergrenze je Lauf. Die Zaehlung je Phase allein liess\n// theoretisch 4x25 + 4x20 = 180 Mails in einem Lauf zu - genau der Schwall, der verhindert\n// werden sollte. Gemessen am 26.08. im ersten reparierten Lauf: 63 Mails, davon a2 und b1\n// mit exakt 25 an ihrer Phasengrenze.\nconst GESAMT_GRENZE = 60;\nstate.nurtureRecoveryCap.gesamt = Number(state.nurtureRecoveryCap.gesamt || 0);\nif (state.nurtureRecoveryCap.gesamt >= GESAMT_GRENZE) {\n  return { json: { ...item, skip: true, reason: 'gesamt_cap_reached' } };\n}\n\nconst count = Number(state.nurtureRecoveryCap.counts[item.phase] || 0);\nconst GRENZE = SECOND_PHASES.includes(item.phase) ? 20 : 25;\nif (count >= GRENZE) {\n  return { json: { ...item, skip: true, reason: 'recovery_cap_reached' } };\n}\nstate.nurtureRecoveryCap.counts[item.phase] = count + 1;\nstate.nurtureRecoveryCap.gesamt += 1;\nreturn { json: item };"
+        "jsCode": "const item = $json || {};\nif (item.skip) return { json: item };\n\n// 🔴 Seit 26.08.2026 gilt die Bremse fuer ALLE Phasen, nicht nur die Zweitmails.\n// Grund: Die stille Zeilengrenze der Auswahlabfrage hatte 186 Menschen drei Wochen lang\n// unsichtbar gemacht. Nach der Reparatur waeren sie alle in EINEM Lauf angeschrieben\n// worden - ein Schwall, der Zustellbarkeit und Ruf kostet. Bei 25 je Lauf und zwoelf\n// Laeufen taeglich ist ein solcher Rueckstand binnen eines Tages abgearbeitet.\nconst SECOND_PHASES = ['a3', 'b2', 'c2', 'd2'];\nconst ALLE_PHASEN = ['a2', 'b1', 'c1', 'd1', 'a3', 'b2', 'c2', 'd2'];\nif (!ALLE_PHASEN.includes(item.phase)) return { json: item };\n\nconst executionId = String($execution.id || '');\nif (!executionId) throw new Error('Missing n8n execution id for recovery cap');\n\nconst state = $getWorkflowStaticData('global');\nif (!state.nurtureRecoveryCap || state.nurtureRecoveryCap.executionId !== executionId) {\n  state.nurtureRecoveryCap = {\n    executionId,\n    counts: Object.fromEntries(ALLE_PHASEN.map(phase => [phase, 0])),\n  };\n}\n\n// 🔴 Zusaetzlich eine GLOBALE Obergrenze je Lauf. Die Zaehlung je Phase allein liess\n// theoretisch 4x25 + 4x20 = 180 Mails in einem Lauf zu - genau der Schwall, der verhindert\n// werden sollte. Gemessen am 26.08. im ersten reparierten Lauf: 63 Mails, davon a2 und b1\n// mit exakt 25 an ihrer Phasengrenze.\n// 🔴 Von 60 auf 5 gesenkt (28.08.2026, Entscheidung Markus): Der Sender laeuft nach dem\n  // Umbau auf die Plattform-DB zum ersten Mal wieder. Erst fuenf Mails ansehen, dann oeffnen.\n  // Zum Oeffnen genuegt es, diese Zahl wieder heraufzusetzen - 60 war der Wert davor.\n  const GESAMT_GRENZE = 5;\nstate.nurtureRecoveryCap.gesamt = Number(state.nurtureRecoveryCap.gesamt || 0);\nif (state.nurtureRecoveryCap.gesamt >= GESAMT_GRENZE) {\n  return { json: { ...item, skip: true, reason: 'gesamt_cap_reached' } };\n}\n\nconst count = Number(state.nurtureRecoveryCap.counts[item.phase] || 0);\nconst GRENZE = SECOND_PHASES.includes(item.phase) ? 20 : 25;\nif (count >= GRENZE) {\n  return { json: { ...item, skip: true, reason: 'recovery_cap_reached' } };\n}\nstate.nurtureRecoveryCap.counts[item.phase] = count + 1;\nstate.nurtureRecoveryCap.gesamt += 1;\nreturn { json: item };"
       }
     },
     {
@@ -912,9 +912,9 @@
   "meta": null,
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "7775b6cf-f9dd-48a3-ba60-26b976323ebd",
+  "versionId": "e9815065-af5b-4bc3-bc94-af0afa5dc24a",
   "activeVersionId": null,
-  "versionCounter": 69,
+  "versionCounter": 70,
   "triggerCount": 1,
   "sourceWorkflowId": null,
   "shared": [
