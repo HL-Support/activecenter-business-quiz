@@ -1,7 +1,17 @@
+import os
 import json, re, urllib.request, base64, time
+import os
 
 BASE = 'https://mautic.hl-support.biz/api'
-AUTH = base64.b64encode(b'admin:Activecenter123+').decode()
+# 🔴 Zugangsdaten kommen aus der Umgebung, NIE aus dem Quelltext.
+# Bis zum 28.08.2026 stand hier das Mautic-admin-Passwort im Klartext.
+# Fail-closed: ohne MAUTIC_PASS bricht das Skript ab, statt mit leerem Passwort
+# gegen die Produktion zu laufen.
+MAUTIC_USER = os.environ.get("MAUTIC_USER", "admin")
+MAUTIC_PASS = os.environ.get("MAUTIC_PASS", "").strip()
+if not MAUTIC_PASS:
+    raise SystemExit("MAUTIC_PASS fehlt - Umgebungsvariable setzen, kein Passwort im Quelltext.")
+AUTH = base64.b64encode(f"{MAUTIC_USER}:{MAUTIC_PASS}".encode()).decode()
 H = {'Authorization': f'Basic {AUTH}', 'Content-Type': 'application/json'}
 
 ACCENTS = {

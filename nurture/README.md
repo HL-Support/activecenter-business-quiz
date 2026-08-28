@@ -61,19 +61,20 @@ der Mailweg in [`../docs/MAILWEGE.md`](../docs/MAILWEGE.md). Kurz, damit man es 
 
 ## 🔴 Offene Punkte aus dem Zusammenzug
 
-1. **Drei OneDrive-Konfliktkopien** liegen unaufgelöst in `review-app/_konflikte-onedrive/`.
-   Sie sind **nicht einheitlich** — bei einer Datei ist die normale Fassung neuer, bei einer
-   anderen die Konfliktkopie:
+1. ~~Drei OneDrive-Konfliktkopien~~ → ✅ **aufgelöst am 28.08.2026 — am laufenden System
+   geprüft, nicht geraten.** Übernommen wurde in allen drei Fällen die normal benannte
+   Datei; der Ordner `_konflikte-onedrive/` ist entfernt, sein Inhalt bleibt in der
+   Git-Historie.
 
-   | Datei | normale Fassung | Konfliktkopie |
+   | Datei | Befund am laufenden System | |
    | --- | --- | --- |
-   | `app/page.js` | 23.06. 11:14 · 23.680 B | 18.06. 17:45 · 21.039 B |
-   | `app/info/page.js` | 15.05. 16:22 · 16.990 B | **29.05. 15:14** · 17.117 B ← neuer |
-   | `skripte/upload_humanized.py` | 23.06. 11:10 · 13.700 B | 18.06. 17:26 · 12.432 B |
+   | `app/info/page.js` | Die Live-Auslieferung trägt „82 Templates" und „Testimonial-Email" — **nicht** „84 Templates" und „95–97" der Konfliktkopie. Zählverhältnis sauber 1:2, weil Next.js den Inhalt zweimal einbettet (SSR-HTML + RSC-Nutzlast) | übernommene Fassung ist die ausgelieferte ✅ |
+   | `app/page.js` | Die Konfliktkopie ist **zeichensatzkaputt** — `âœ‰` und `ðŸ”¥` statt `✉` und `🔥`, also UTF-8 als Latin-1 gelesen. Live steht die korrekte Fassung | übernommene Fassung richtig ✅ |
+   | `skripte/upload_humanized.py` | Die Konfliktkopie ist älter und kennt die Aspiration-Akzente nicht | übernommene Fassung richtig ✅ |
 
-   Übernommen wurde jeweils die normal benannte Datei. **Vor dem Neudeploy der Review-App
-   muss `app/info/page.js` geprüft werden** — dort ist womöglich die falsche Fassung aktiv.
-   Die Wahrheit steht bis dahin in der laufenden Vercel-Auslieferung.
+   🔴 Die Lehre: Das **Dateidatum** hätte in einem der drei Fälle zur falschen Wahl
+   geführt — die Konfliktkopie von `app/info/page.js` ist zwei Wochen **neuer** und war
+   trotzdem nie ausgeliefert. Entschieden hat das laufende System, nicht der Zeitstempel.
 
 2. **Die `.vercel`-Projektbindung der Review-App ist bewusst NICHT mitgekommen**
    (`prj_msoMYiNrOSKSp5WJmIcJ0sGQBJ9y`, Projekt `ac-email-review`). Ein `vercel deploy`
@@ -129,6 +130,25 @@ der Mailweg in [`../docs/MAILWEGE.md`](../docs/MAILWEGE.md). Kurz, damit man es 
    | `REVIEW_USER` | nein | Benutzername, Standard `review` |
    | `MAUTIC_PASS` | ja | Mautic-`admin`-Passwort für die API |
    | `MAUTIC_BASE` | nein | Standard `https://mautic.hl-support.biz` |
+
+5. 🔴 **Klartext-Passwort beim Zusammenzug mitgekommen — Mautic-`admin` gehört rotiert.**
+
+   In drei Python-Dateien stand das Mautic-`admin`-Passwort hartkodiert
+   (`base64.b64encode(b'admin:…')`). Beim Verschieben ist es damit ins Repo und **nach
+   GitHub** gelangt. Die n8n-Exporte waren auf Geheimnisse geprüft, der Nurture-Ordner
+   nicht — das war ein Fehler in meiner Prüfreihenfolge.
+
+   ✅ **Behoben:** `upload_humanized.py` und `update_emails_v1_legacy.py` lesen jetzt
+   `MAUTIC_USER` und `MAUTIC_PASS` aus der Umgebung und brechen **fail-closed** ab, wenn
+   `MAUTIC_PASS` fehlt. An der **Ausführung** geprüft, nicht nur am Text — und genau das
+   war nötig: Der erste Versuch brach mit `NameError: name 'os' is not defined` ab, weil
+   `import os` auf Zeile 220 statt am Dateikopf landete. Eine Textsuche hätte den Import
+   gefunden und „passt" gemeldet.
+
+   🔴 **Das Entfernen aus dem Arbeitsbaum nimmt es nicht aus der Historie.** Es ist
+   dasselbe Passwort, das hinter der ungeschützten Review-App lag (Punkt 4) — es gehört
+   aus **zwei** Gründen rotiert. Danach `MAUTIC_PASS` in Coolify und in
+   `agent-secrets.json` nachziehen.
 
 ## Was NICHT mitgezogen ist
 
