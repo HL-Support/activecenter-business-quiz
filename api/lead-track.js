@@ -62,6 +62,7 @@ const ALLOWED_EVENTS = new Set([
   'optin_viewed', // 1724
   'form_submit', // 1018
   'form_submitted', // 1191
+  'email_correction_pending', // Vollstaendiger Lead vor der bestaetigungspflichtigen E-Mail-Korrektur
   'quiz_form_submit', // 87 - Altbestand (heute ueber ac-track/bridge), bei P2 pruefen
   'result_cta_click', // 1059
   // Video-Strecke
@@ -445,7 +446,7 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload, req) {
     return;
   }
 
-  if (eventName === 'form_submitted') {
+  if (eventName === 'form_submitted' || eventName === 'email_correction_pending') {
     const attribution = normalizeMetaAttributionFallback({
       utm_source: safeString(payload.utm_source, 120) || null,
       utm_medium: safeString(payload.utm_medium, 120) || null,
@@ -479,15 +480,20 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload, req) {
       fbc: attribution.fbc || null,
       fbp: attribution.fbp || null,
       event_source_url: attribution.event_source_url || null,
-      lifecycle_stage: 'contact_known',
+      lifecycle_stage:
+        eventName === 'email_correction_pending'
+          ? 'contact_known_pending_email_correction'
+          : 'contact_known',
       lang,
       last_event_at: eventAt,
     });
-    await enqueueSync(leadHash, 'mysql_initial_rank', {
-      rank: 0,
-      lang,
-      reason: 'form_submitted',
-    });
+    if (eventName === 'form_submitted') {
+      await enqueueSync(leadHash, 'mysql_initial_rank', {
+        rank: 0,
+        lang,
+        reason: 'form_submitted',
+      });
+    }
     return;
   }
 

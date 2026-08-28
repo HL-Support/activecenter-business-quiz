@@ -25,6 +25,8 @@ import {
   getActiveLeadRun,
   isLeadSystemV2Active,
   deriveQuizBarrier,
+  getEmailReputationDecision,
+  persistPendingEmailCorrection,
 } from '../lib/core.js';
 
 const VIDEO_FULL_COMPLETION_KEY_PREFIX = 'acVideoFullCompletion_';
@@ -429,25 +431,54 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
     [s, d] = React.useState(''),
     [g, y] = React.useState(!1),
     [S, k] = React.useState(''),
+    [emailCorrection, setEmailCorrection] = React.useState(null),
     submitLock = React.useRef(!1),
     I = e?.accentColor || '#C9A84C',
     f = s.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/),
     c = i.trim().length > 0 && f && !S,
     m = (C) => {
       d(C);
+      setEmailCorrection(null);
       if (S) k('');
     },
-    v = async () => {
+    v = async (emailOverride = '', originalConfirmed = false) => {
       if (submitLock.current || g) return;
-      if (!i.trim() || !s.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      const emailValue = typeof emailOverride === 'string' && emailOverride ? emailOverride : s;
+      if (!i.trim() || !emailValue.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
         k(a('optin_email_error_format'));
         return;
       }
       submitLock.current = !0;
       y(!0);
       const C = i.trim(),
-        z = s.trim();
+        z = emailValue.trim();
       try {
+        const leadRun = getActiveLeadRun(n || 'default');
+        if (!originalConfirmed) {
+          const reputation = await getEmailReputationDecision(z, leadRun?.lead_hash || '');
+          if (reputation.action === 'reject_invalid') {
+            k(a('optin_email_error_invalid'));
+            submitLock.current = !1;
+            y(!1);
+            return;
+          }
+          if (reputation.action === 'request_correction' && reputation.suggested_email) {
+            const persisted = await persistPendingEmailCorrection({
+              firstName: C,
+              email: z,
+              selectedAnswers: t,
+              profile: e,
+              aspiration: r,
+            });
+            if (!persisted) throw new Error('pending_lead_persist_failed');
+            setEmailCorrection(reputation);
+            submitLock.current = !1;
+            y(!1);
+            return;
+          }
+        }
+        setEmailCorrection(null);
+        d(z);
         Dt('form_submit', {
           form_first_name: C,
           form_email: z,
@@ -749,6 +780,57 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
                 },
                 '\u26A0\uFE0F ',
                 S
+              ),
+            emailCorrection &&
+              React.createElement(
+                'div',
+                {
+                  style: {
+                    marginTop: '10px',
+                    padding: '13px',
+                    borderRadius: '12px',
+                    border: `1px solid ${I}66`,
+                    background: `${I}12`,
+                  },
+                },
+                React.createElement(
+                  'p',
+                  { style: { color: '#F5F0E8', fontSize: '13px', margin: '0 0 10px' } },
+                  a('optin_email_suggestion').replace('{email}', emailCorrection.suggested_email)
+                ),
+                React.createElement(
+                  'div',
+                  { style: { display: 'flex', gap: '8px', flexWrap: 'wrap' } },
+                  React.createElement(
+                    'button',
+                    {
+                      type: 'button',
+                      onClick: () => v(emailCorrection.suggested_email, false),
+                      style: In(I, '#0A0A0A', { padding: '10px 13px', fontSize: '12px' }),
+                    },
+                    a('optin_email_use_suggestion')
+                  ),
+                  React.createElement(
+                    'button',
+                    {
+                      type: 'button',
+                      onClick: () => v(s, true),
+                      style: Su({ padding: '10px 13px', fontSize: '12px' }),
+                    },
+                    a('optin_email_keep_original')
+                  )
+                ),
+                React.createElement(
+                  'p',
+                  {
+                    style: {
+                      color: 'rgba(245,240,232,0.52)',
+                      fontSize: '11px',
+                      margin: '9px 0 0',
+                    },
+                  },
+                  a('optin_email_lead_saved')
+                )
               )
           )
         ),

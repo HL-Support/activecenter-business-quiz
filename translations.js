@@ -149,6 +149,10 @@
       optin_email_error_format: 'Bitte gib eine gültige E-Mail-Adresse ein.',
       optin_email_error_invalid:
         'Diese E-Mail-Adresse wirkt nicht zustellbar. Bitte prüfe sie kurz.',
+      optin_email_suggestion: 'Meintest du {email}?',
+      optin_email_use_suggestion: 'Vorschlag übernehmen',
+      optin_email_keep_original: 'So eingegeben lassen',
+      optin_email_lead_saved: 'Deine Angaben sind gespeichert. Du kannst in Ruhe wählen.',
       optin_submit_error:
         'Wir konnten deinen Ansprechpartner gerade nicht sicher zuordnen. Bitte lade die Seite neu und versuche es noch einmal.',
       optin_privacy: 'Kein Spam, versprochen.',
@@ -612,6 +616,10 @@
       optin_email_error_format: 'Inserisci un indirizzo e-mail valido.',
       optin_email_error_invalid:
         'Questo indirizzo e-mail sembra non essere raggiungibile. Controllalo un attimo.',
+      optin_email_suggestion: 'Intendevi {email}?',
+      optin_email_use_suggestion: 'Usa il suggerimento',
+      optin_email_keep_original: 'Mantieni il mio indirizzo',
+      optin_email_lead_saved: 'I tuoi dati sono salvati. Puoi scegliere con calma.',
       optin_submit_error:
         'Non siamo riusciti ad assegnare il tuo referente. Ricarica la pagina e riprova.',
       optin_privacy: 'Niente spam, promesso.',
@@ -1066,6 +1074,10 @@
       optin_email_error_format: 'Please enter a valid email address.',
       optin_email_error_invalid:
         'This email address does not seem deliverable. Please double-check it.',
+      optin_email_suggestion: 'Did you mean {email}?',
+      optin_email_use_suggestion: 'Use suggestion',
+      optin_email_keep_original: 'Keep my entry',
+      optin_email_lead_saved: 'Your details are saved. Take your time choosing.',
       optin_submit_error:
         'We could not securely assign your advisor. Please reload the page and try again.',
       optin_privacy: 'No spam, promise.',
@@ -1516,6 +1528,10 @@
       optin_email_error_format: "Merci d'entrer une adresse e-mail valide.",
       optin_email_error_invalid:
         'Cette adresse e-mail ne semble pas valide. Vérifies-la rapidement.',
+      optin_email_suggestion: 'Tu voulais saisir {email} ?',
+      optin_email_use_suggestion: 'Utiliser la suggestion',
+      optin_email_keep_original: 'Garder ma saisie',
+      optin_email_lead_saved: 'Tes informations sont enregistrées. Tu peux choisir tranquillement.',
       optin_submit_error:
         "Nous n'avons pas pu identifier ton conseiller. Recharge la page et reessaie.",
       optin_privacy: 'Pas de spam, promis.',
@@ -1979,6 +1995,10 @@
       optin_btn_validating: 'Проверка email...',
       optin_email_error_format: 'Пожалуйста, введи валидный email адрес.',
       optin_email_error_invalid: 'Этот email адрес похоже недействителен. Проверь его быстро.',
+      optin_email_suggestion: 'Ты имел в виду {email}?',
+      optin_email_use_suggestion: 'Использовать подсказку',
+      optin_email_keep_original: 'Оставить мой вариант',
+      optin_email_lead_saved: 'Твои данные сохранены. Выбери нужный вариант без спешки.',
       optin_submit_error:
         'Не удалось надежно определить твоего консультанта. Перезагрузи страницу и попробуй еще раз.',
       optin_privacy: 'Без спама. Обещаем.',
@@ -2433,6 +2453,10 @@
       optin_email_error_format: 'Kérlek, adj meg egy érvényes e-mail címet.',
       optin_email_error_invalid:
         'Úgy tűnik, ez az e-mail cím nem kézbesíthető. Kérlek, nézd át még egyszer.',
+      optin_email_suggestion: 'Erre gondoltál: {email}?',
+      optin_email_use_suggestion: 'Javaslat használata',
+      optin_email_keep_original: 'Maradjon az eredeti',
+      optin_email_lead_saved: 'Az adataidat elmentettük. Nyugodtan választhatsz.',
       optin_submit_error:
         'Most nem tudtuk biztosan hozzárendelni a kapcsolattartódat. Kérlek, töltsd újra az oldalt, és próbáld meg még egyszer.',
       optin_privacy: 'Nincs spam. Megígérjük.',
