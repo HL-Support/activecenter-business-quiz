@@ -82,8 +82,25 @@ der Mailweg in [`../docs/MAILWEGE.md`](../docs/MAILWEGE.md). Kurz, damit man es 
    `scripts/tests/removed-runtime-surface.test.js` prüft das jetzt im **gesamten** Baum,
    nicht mehr nur in der Wurzel.
 
-3. **Die Review-App läuft noch auf Vercel** (`ac-email-review.vercel.app`) und ist damit
-   die letzte Vercel-Abhängigkeit des Nurture-Systems. Umzug auf Coolify steht aus.
+3. ✅ **Vercel-Auslieferung am 28.08.2026 entfernt — das offene Loch ist zu.**
+
+   Vercels eigener Zugriffsschutz war kein Weg: `ssoProtection` und `passwordProtection`
+   antworten beide mit `428` („not available on your plan for production deployments").
+   Die Einstellung stand auf `all_except_custom_domains` — genau deshalb war die
+   Produktions-URL offen, während die Vorschau-Adressen geschützt waren.
+
+   Deshalb wurde die aktive Auslieferung `dpl_3Gdjg7Ksun…` gelöscht. **Gemessen, zweimal
+   über Zeit:**
+
+   ```
+   vorher   GET /api/email/48  ->  HTTP 200 (Inhalt)
+   nachher  GET /api/email/48  ->  HTTP 404
+   nachher  GET /                ->  HTTP 404
+   die 14 uebrigen Auslieferungen ->  HTTP 302 (Vercel-SSO)
+   ```
+
+   **Offen: Umzug auf Coolify.** Reihenfolge zwingend — erst `MAUTIC_PASS` rotieren
+   (Punkt 5), dann ausrollen. Sonst wandert ein geleaktes Passwort in die neue Umgebung.
 
 4. 🔴 **SICHERHEITSBEFUND vom 28.08.2026 — die Review-App ist ungeschützt schreibfähig.**
 
