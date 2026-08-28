@@ -99,8 +99,36 @@ der Mailweg in [`../docs/MAILWEGE.md`](../docs/MAILWEGE.md). Kurz, damit man es 
    die 14 uebrigen Auslieferungen ->  HTTP 302 (Vercel-SSO)
    ```
 
-   **Offen: Umzug auf Coolify.** Reihenfolge zwingend — erst `MAUTIC_PASS` rotieren
-   (Punkt 5), dann ausrollen. Sonst wandert ein geleaktes Passwort in die neue Umgebung.
+   ✅ **Umzug auf Coolify erledigt am 28.08.2026** — die Review-App läuft jetzt unter
+   **`https://nurture-review.hl-support.biz`**.
+
+   | | |
+   | --- | --- |
+   | Coolify-Anwendung | `nurture-review`, UUID `e20rigehi49gkdzmrzcwptds` |
+   | Quelle | dieses Repo, Zweig `nurture-auf-plattform-db`, Basisverzeichnis `/nurture/review-app` |
+   | Bauweise | nixpacks, Port 3000 |
+   | DNS | `nurture-review.hl-support.biz` → `167.233.251.217`, **DNS-only** (nicht proxied) — wie alle Coolify-Anwendungen, sonst kommt Let's Encrypt nicht durch |
+   | Zugang | `agent-secrets.json` → `leadgen_review` |
+
+   **Abnahme am laufenden System, zweimal über Zeit gemessen:**
+
+   ```
+   ohne Zugangsdaten        -> 401  (auch /api/email/48, wo der PATCH liegt)
+   falsches Passwort        -> 401
+   falscher Benutzername    -> 401
+   richtige Zugangsdaten    -> 200, /info 200, API liefert Mautic-Inhalt
+   TLS gültig, kein Alt-Svc
+   ```
+
+   🔴 **Bewusst nicht gemacht (Entscheidung Markus, 28.08.):** `MAUTIC_PASS` wurde **nicht**
+   rotiert. Das Passwort, das in der Git-Historie steht und hinter der offenen App lag,
+   ist damit **auch in dieser Auslieferung im Einsatz**. Der Zugang von aussen ist zu —
+   wer aber die Repo-Historie liest, hat weiterhin das Mautic-`admin`-Passwort. Bleibt
+   als B2b im Rückstand.
+
+   Zwei Kleinigkeiten für später: Der Zweig sollte nach dem Merge auf `main` umgestellt
+   werden, und die App liefert keinen `Strict-Transport-Security`-Kopf (die Quiz-App tut
+   das selbst, hier macht es niemand).
 
 4. 🔴 **SICHERHEITSBEFUND vom 28.08.2026 — die Review-App ist ungeschützt schreibfähig.**
 
