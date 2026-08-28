@@ -21,11 +21,30 @@ Zeiten sind MESZ, sofern nicht anders angegeben.
 > ist damit **überholt**. Protokoll und Belege:
 > [CUTOVER-CHECKLISTE](audits/cutover-vorbereitung/CUTOVER-CHECKLISTE.md).
 >
-> **Noch offen:** Nurture-Sender auf `leads_n8n` umbauen (bleibt bis dahin aus,
+> **🔴 Der Cutover ist NICHT das Ende der Supabase-Abhängigkeit.** Der Funnel
+> *schreibt* vollständig in die Plattform-DB. Aber laut
+> `scripts/inventory/supabase-consumers.json` fassen **14 von 26** inventarisierten
+> Verbrauchern Lead-Tabellen an, und mehrere davon **lesen weiter aus Supabase** —
+> und sehen dort seit dem 28.08., 07:25 MESZ **eingefrorene Daten**. In den
+> Edge-Logs nachgewiesen: ein Leser von `v_lead_state_full`, `lead_contact_crm` und
+> `lead_events` aus `eu-central-1` (AWS/Vercel), zuletzt 09:31 MESZ.
+>
+> **Ein echter Regressionsbefund vom 28.08.:** `leads.quiz_sessions` bekommt seit
+> dem Cutover **keine einzige neue Zeile** (neueste Zeile 27.08. 19:48). Ursache:
+> `api/bridge.js` baut an drei Stellen (≈ Z. 2084/2099/2100) die URL **direkt** aus
+> `SUPABASE_URL` statt über den modusbewussten Transport — und prüft die Antwort
+> nicht. Seit der Schreibbarriere antwortet Supabase dort mit **403**, was still
+> verschluckt wird. **Datenverlust begrenzt:** `quiz_sessions` dient nur als
+> Rückfallquelle (`loadLeadFallbackContext`); die Primärtabellen `lead_state`,
+> `lead_events`, `lead_answers_current` und `lead_video_progress` sind vollständig.
+> Fix: dieselben drei Aufrufe über `supabaseRequest` führen und den Status prüfen.
+>
+> **Weiter offen:** Nurture-Sender auf `leads_n8n` umbauen (bleibt bis dahin aus,
 > Wächter W2 schlägt erwartungsgemäß an) · `AC - Error Alert` schreibt weiterhin
 > nach Supabase · Test-DB `business_leads_testimport` löschen · `pgss-monatsreset`
 > reparieren · der **finale CTA nach den Videos** ist nicht automatisiert geprüft
-> (siehe [BROWSERWEG-KETTENTEST](BROWSERWEG-KETTENTEST.md)).
+> (siehe [BROWSERWEG-KETTENTEST](BROWSERWEG-KETTENTEST.md)) · Vercel-Projekt ist
+> **pausiert, aber nicht abgebaut** (vier Domains hängen noch daran).
 
 ---
 
