@@ -594,6 +594,67 @@ Dokumentation übernommen. Reihenfolge: nach Dringlichkeit.
 | 16 | **PgBouncer**, sobald das dritte Projekt kommt · **cx32** vor der Kontakte-Migration | RAM ist der Engpass, nicht die Platte |
 | 17 | Alten Eingang „Landing Page Business" abbauen · Empfehlung an FitApp: Schema `marathon` → `fitapp` | Entscheidung 12 |
 
+---
+
+## 8c. Restweg zu 100 % eigener Infrastruktur (erhoben 28.08.2026)
+
+Ziel: **alles auf Hetzner, Vercel und Supabase raus** — Funnel *und* Nurture.
+Jede Zeile ist gemessen, nicht aus der Doku übernommen.
+
+### Was bereits auf eigener Infrastruktur läuft
+
+| Baustein | Wo | |
+| --- | --- | --- |
+| Funnel-App | Coolify, `167.233.251.217` | ✅ |
+| Lead-Daten | Postgres 18 `hl_support`, `91.99.76.104` | ✅ |
+| Legacy-Kontaktkartei | MySQL, **dieselbe** Maschine | ✅ |
+| n8n | `46.224.76.193` | ✅ |
+| **Mautic** | `46.224.76.193` — kein Fremddienst | ✅ |
+| Nurture-Versand | n8n → Plattform-DB `leads.*` | ✅ live |
+| Error-Alert | n8n → Plattform-DB | ✅ live |
+| Postmark | SaaS, Server **`Leadgen`** | bleibt — Mailversand baut man nicht selbst |
+
+### A — Supabase raus
+
+| # | Punkt | Stand 28.08. |
+| --- | --- | --- |
+| A1 | **Laufzeitcode entkoppeln**: `api/bridge.js`, `api/lead-system-health.js`, `server/app-server.js`, `server/http-adapter.js`, `server/lead-system.js` kennen noch `SUPABASE_*` | offen — erst danach dürfen die Variablen aus Coolify |
+| A2 | ~~Zwei tote Workflows + Zugangsdaten löschen~~ | ✅ **erledigt**: `Supabase Keep-Alive` und `AC - Quiz Video Inactivity Checker` gelöscht, danach **beide** service-role-Zugangsdaten. Nachgemessen: **0 von 84** Workflows haben noch eine Supabase-Spur. Rückweg: `n8n/export-2026-08-28/` |
+| A3 | 🔴 **`hl-support-analytics` umhängen** — liest `v_lead_state_full`, `lead_contact_crm`, `lead_events` **aus Supabase** und sieht dort **eingefrorene Daten seit 28.08. 07:25** | offen, **dringlichster Punkt**: dort werden Entscheidungen auf toten Zahlen getroffen. Nicht abschalten — auf Postgres umhängen |
+| A4 | **Business-Kalkulator** (`herbalife-erfolgs-berechner`) migrieren, `lead_contact_crm` zieht mit | offen (Entscheidung 2) |
+| A5 | **Test-DB `business_leads_testimport` löschen** — 1.236 echte E-Mail-Adressen | offen: `dropdb business_leads_testimport` |
+
+🔴 **Das Supabase-Projekt selbst kann nicht weg**, solange **Marathon** dort liegt
+(Entscheidung 10: tabu). Erreichbar ist „das Quiz benutzt Supabase nicht mehr" —
+nicht „Supabase ist gelöscht".
+
+### B — Vercel raus
+
+| # | Punkt | Stand |
+| --- | --- | --- |
+| B1 | Projekt `business_leads_quiz` löschen | `paused=true` gemessen — Split-Brain ausgeschlossen; es fehlen die Tore 01.09./03.09. |
+| B2 | **Review-App `ac-email-review` auf Coolify** | offen — **letzte Vercel-Abhängigkeit des Nurture-Systems**; Code liegt seit 28.08. in `nurture/review-app/` |
+| B3 | Vier Domains vom Vercel-Projekt lösen, dann löschen | offen |
+
+### C — Der letzte Legacy-MySQL-Knoten
+
+| # | Punkt | Stand |
+| --- | --- | --- |
+| C1 | **Benachrichtigungsweg auf die Plattform** — `AC - Lead Post Processor` pollt alle 5 Min `prod_contacts_activesupport.typeform_surveys` und verschickt von dort Opt-in- und Zugangsmail | offen, sieben Schritte in [plans/benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md). Grösse gemessen: **269.994 Zeichen JS, dreifach kopiert** |
+
+### D — Zusammenzug und Kleinkram
+
+| # | Punkt | Stand |
+| --- | --- | --- |
+| D1 | ~~Nurture-System ins Repo~~ | ✅ **erledigt 28.08.**: `nurture/` (39 Dateien), alte Ablage → `zzz-Leads_quiz_Nurture-abgeloest-2026-08-28`. Vollständigkeit per SHA-256 über alle 42 Dateien geprüft |
+| D2 | ~~n8n-Definitionen versionieren~~ | ✅ **erledigt**: `n8n/export-2026-08-28/`, zehn Workflows |
+| D3 | ~~Postmark-Server umbenennen~~ | ✅ **erledigt**: `Typenanalyse` → `Leadgen`, Token unverändert |
+| D4 | ~~Postmark-Tags~~ | ✅ **erledigt**: sechs Tags, vier im Repo, zwei in n8n |
+| D5 | 47 Fremdmails (6 % des `Leadgen`-Servers) auf `Admin` umziehen | offen |
+| D6 | `activecenter.info`: DKIM einrichten **oder** Signatur `support@activecenter.info` entfernen | offen — sendet heute nichts von dort, geladene Waffe |
+| D7 | Drei OneDrive-Konfliktkopien in `nurture/review-app/_konflikte-onedrive/` auflösen | offen — **vor** dem Neudeploy der Review-App, siehe `nurture/README.md` |
+| D8 | `pgss-monatsreset` · Outbox-Worker-Secret aus dem Query-String · `supabase-lead-system-v2.sql` bereinigen | offen (Punkte 13–15 oben) |
+
 ### Dokumentation — im Audit gefunden und bereits korrigiert
 
 72 Befunde aus zwei unabhängigen Prüfungen. Behoben: der **Bridge-Guard-Bug** (vier
