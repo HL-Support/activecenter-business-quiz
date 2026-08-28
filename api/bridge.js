@@ -2080,36 +2080,28 @@ async function writeToSupabaseAsync(payload) {
       if (field in payload) partialUpdateData[field] = payload[field];
     });
 
-    const checkResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/quiz_sessions?hash=eq.${payload.hash}&select=id`,
-      {
-        method: 'GET',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-        },
-      }
+    // 🔴 Diese drei Aufrufe gingen bis zum 28.08.2026 als rohes fetch direkt an
+    // SUPABASE_URL - am modusbewussten Transport vorbei. Nach dem Cutover
+    // antwortete die schreibgesperrte Quelle mit 403, und weil der Status nie
+    // geprueft wurde, verschwand der Fehler still: leads.quiz_sessions bekam
+    // keine einzige neue Zeile mehr. Jetzt ueber supabaseJson/patchByEquals/
+    // insertIgnoringDuplicates - dieselben Helfer wie der Rest der Datei, damit
+    // der direkte Modus automatisch mitgeht.
+    const existingRecords = await supabaseJson(
+      `quiz_sessions?hash=eq.${encodeURIComponent(payload.hash)}&select=id&limit=1`
     );
-
-    const existingRecords = await checkResponse.json();
     const recordExists = Array.isArray(existingRecords) && existingRecords.length > 0;
 
-    await fetch(
-      recordExists
-        ? `${SUPABASE_URL}/rest/v1/quiz_sessions?hash=eq.${payload.hash}`
-        : `${SUPABASE_URL}/rest/v1/quiz_sessions`,
-      {
-        method: recordExists ? 'PATCH' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-        },
-        body: JSON.stringify(recordExists ? partialUpdateData : fullUpsertData),
-      }
-    );
+    if (recordExists) {
+      // Teil-Update: nur die Felder, die die Nutzlast wirklich mitbringt.
+      await patchByEquals('quiz_sessions', 'hash', payload.hash, partialUpdateData);
+    } else {
+      await insertIgnoringDuplicates('quiz_sessions', 'hash', fullUpsertData);
+    }
   } catch (error) {
-    console.error('Supabase error:', error.message);
+    // Weiterhin nicht werfen - dieser Spiegel darf den Schreibweg nicht aufhalten.
+    // Aber laut genug, dass ein Ausfall im Protokoll auffindbar ist.
+    console.error('quiz_sessions mirror failed:', error.message);
   }
 }
 

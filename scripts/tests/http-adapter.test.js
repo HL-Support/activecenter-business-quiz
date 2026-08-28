@@ -610,6 +610,80 @@ test('validateEnv akzeptiert BRIDGE_KEY oder BRIDGE_SERVICE_KEY', () => {
   assert.equal(validateEnv({ ...base, BRIDGE_KEY: '   ' }).ok, false);
 });
 
+// --- Modusabhaengige Pflicht-Env und Bereitschaft (Abkopplung von Supabase) -----------------
+
+test('im direkten Modus sind die LEADS_DB_*-Werte Pflicht, nicht SUPABASE_*', () => {
+  const gemeinsam = { JWT_SECRET: 's', BRIDGE_KEY: 'a', LEADS_DB_MODUS: 'direkt' };
+  const plattform = {
+    LEADS_DB_HOST: '10.0.1.3',
+    LEADS_DB_NAME: 'hl_support',
+    LEADS_DB_BENUTZER: 'leads_app',
+    LEADS_DB_PASSWORT: 'geheim',
+  };
+
+  // Ohne SUPABASE_* ist der direkte Modus vollstaendig konfiguriert - genau das macht
+  // die Abkopplung ueberhaupt moeglich (vorher startete der Container dann nicht).
+  assert.equal(validateEnv({ ...gemeinsam, ...plattform }).ok, true);
+
+  // Fehlt dagegen ein Zugangswert der Plattform-DB, ist er fail-closed.
+  const ohnePasswort = { ...gemeinsam, ...plattform, LEADS_DB_PASSWORT: '' };
+  const befund = validateEnv(ohnePasswort);
+  assert.equal(befund.ok, false);
+  assert.ok(befund.missing.includes('LEADS_DB_PASSWORT'), befund.missing.join(', '));
+
+  // Und im Standardmodus bleibt es unveraendert bei Supabase.
+  assert.equal(validateEnv({ JWT_SECRET: 's', BRIDGE_KEY: 'a', ...plattform }).ok, false);
+});
+
+test('/health/ready prueft im direkten Modus die Plattform-DB, nicht Supabase', async () => {
+  // 🔴 Kern der Sache: Vor dem 28.08.2026 pingte die Probe IMMER Supabase an. Nach dem
+  // Cutover war das ein falsches Gruen - bestaetigt wurde eine Datenquelle, die die
+  // Anwendung nicht mehr benutzt. Der fetch hier MUSS ungenutzt bleiben.
+  let fetchAufgerufen = false;
+  const env = {
+    LEADS_DB_MODUS: 'direkt',
+    LEADS_DB_HOST: '10.0.1.3',
+    LEADS_DB_NAME: 'hl_support',
+    LEADS_DB_BENUTZER: 'leads_app',
+    LEADS_DB_PASSWORT: 'geheim',
+    JWT_SECRET: 's',
+    BRIDGE_KEY: 'a',
+    SUPABASE_URL: 'https://darf-nicht-gefragt-werden.supabase.co',
+    SUPABASE_SERVICE_KEY: 'k',
+  };
+
+  const report = await readinessReport({
+    env,
+    fetchImpl: async () => {
+      fetchAufgerufen = true;
+      return { status: 200 };
+    },
+    timeoutMs: 200,
+  });
+
+  assert.equal(fetchAufgerufen, false, 'im direkten Modus darf Supabase nicht angefragt werden');
+  assert.equal(report.checks.datasource.quelle, 'plattform');
+  // Ohne erreichbare Datenbank im Test ist "nicht bereit" das richtige Ergebnis -
+  // entscheidend ist, dass die Probe die RICHTIGE Quelle befragt hat.
+  assert.equal(report.ready, false);
+  assert.ok(report.checks.datasource.error, 'ein Fehlgrund muss protokolliert sein');
+});
+
+test('/health/ready weist die befragte Quelle aus - auch im Supabase-Modus', async () => {
+  const report = await readinessReport({
+    env: {
+      SUPABASE_URL: 'https://x.supabase.co',
+      SUPABASE_SERVICE_KEY: 'k',
+      JWT_SECRET: 's',
+      BRIDGE_KEY: 'a',
+    },
+    fetchImpl: async () => ({ status: 200 }),
+    timeoutMs: 500,
+  });
+  assert.equal(report.ready, true);
+  assert.equal(report.checks.datasource.quelle, 'supabase');
+});
+
 // --- Shutdown --------------------------------------------------------------------------------
 
 /** Server-Attrappe: nur die Methoden, die der Controller anfasst. */

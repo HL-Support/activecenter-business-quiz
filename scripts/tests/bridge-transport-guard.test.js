@@ -31,6 +31,43 @@ test('kein Guard umgeht die Modusprüfung', () => {
     `${roh.length} Guard(s) prüfen Supabase ohne Modusprüfung - im direkten Modus liefern sie still null`);
 });
 
+test('kein roher Supabase-Aufruf am Transport vorbei', () => {
+  // Gefunden am 28.08.2026, NACH dem Cutover.
+  //
+  // writeToSupabaseAsync baute die URL an drei Stellen direkt aus SUPABASE_URL
+  // zusammen und ging damit am modusbewussten Transport vorbei. Im direkten Modus
+  // schrieb es weiter in die alte, inzwischen schreibgesperrte Datenbank - und weil
+  // der Status nie geprüft wurde, verschwand der 403 lautlos. Ergebnis:
+  // leads.quiz_sessions bekam vom Cutover an keine einzige neue Zeile mehr.
+  //
+  // Diese Prüfung ist der Wächter dagegen: In api/bridge.js darf keine URL mehr
+  // von Hand aus SUPABASE_URL gebaut werden.
+  const roh = bridge.match(/\$\{SUPABASE_URL\}\/rest/g) || [];
+  assert.equal(
+    roh.length,
+    0,
+    `${roh.length} roher Supabase-Aufruf in bridge.js - im direkten Modus schreibt er in die falsche Datenbank`
+  );
+});
+
+test('der einzige rohe Supabase-Aufruf im Server liegt in lead-system.js', () => {
+  // Genau EINE Stelle darf die REST-URL bauen: der Rumpf von supabaseRequest in
+  // server/lead-system.js - und der prüft vorher dbTransport.istDirekt(). Jede
+  // weitere Stelle waere wieder die Drift, die diesen Fehler erzeugt hat.
+  const serverDir = path.join(__dirname, '..', '..', 'server');
+  const treffer = [];
+  for (const datei of fs.readdirSync(serverDir).filter((d) => d.endsWith('.js'))) {
+    const inhalt = fs.readFileSync(path.join(serverDir, datei), 'utf8');
+    const n = (inhalt.match(/\$\{SUPABASE_URL\}\/rest/g) || []).length;
+    if (n) treffer.push(`${datei}:${n}`);
+  }
+  assert.deepEqual(
+    treffer,
+    ['lead-system.js:1'],
+    `unerwartete rohe Supabase-Aufrufe im Server: ${treffer.join(', ') || 'keine'}`
+  );
+});
+
 test('ALLE Transport-Guards nutzen dieselbe Prüfung', () => {
   // Vier Stellen prüfen den Transport: supabaseRequest, supabaseJson, supabaseRpc und
   // writeToSupabaseAsync. Guards, die auseinanderlaufen, sind genau die Drift, die den

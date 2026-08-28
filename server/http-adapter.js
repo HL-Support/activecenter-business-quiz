@@ -57,12 +57,36 @@ const READY_PROBE_TIMEOUT_MS = 2_000;
  * `alternatives` bildet die heutige Realitaet ab: der Bridge-Key heisst je nach Aufrufer
  * BRIDGE_KEY oder BRIDGE_SERVICE_KEY, einer von beiden muss gesetzt sein.
  */
-const REQUIRED_ENV = [
-  { key: 'SUPABASE_URL', alternatives: [] },
-  { key: 'SUPABASE_SERVICE_KEY', alternatives: [] },
+const REQUIRED_ENV_GEMEINSAM = [
   { key: 'JWT_SECRET', alternatives: [] },
   { key: 'BRIDGE_KEY', alternatives: ['BRIDGE_SERVICE_KEY'] },
 ];
+
+// Welche Datenquelle Pflicht ist, haengt vom Modus ab. Vor dem Cutover war das
+// Supabase; seit LEADS_DB_MODUS=direkt ist es die Plattform-Datenbank. Wuerde hier
+// weiter Supabase gefordert, koennte das Projekt seine letzte Bindung dorthin nie
+// loesen: der Container startet sonst nicht (fail-closed).
+const REQUIRED_ENV_SUPABASE = [
+  { key: 'SUPABASE_URL', alternatives: [] },
+  { key: 'SUPABASE_SERVICE_KEY', alternatives: [] },
+];
+const REQUIRED_ENV_DIREKT = [
+  { key: 'LEADS_DB_HOST', alternatives: [] },
+  { key: 'LEADS_DB_NAME', alternatives: [] },
+  { key: 'LEADS_DB_BENUTZER', alternatives: [] },
+  { key: 'LEADS_DB_PASSWORT', alternatives: [] },
+];
+
+function istDirekterModus(env = process.env) {
+  return String(env.LEADS_DB_MODUS || 'postgrest').toLowerCase() === 'direkt';
+}
+
+function pflichtEnv(env = process.env) {
+  return [
+    ...(istDirekterModus(env) ? REQUIRED_ENV_DIREKT : REQUIRED_ENV_SUPABASE),
+    ...REQUIRED_ENV_GEMEINSAM,
+  ];
+}
 
 // Exakt die vier Header aus vercel.json ("source": "/(.*)"). Sie gelten dort fuer JEDE
 // Antwort - statisch wie API - und muessen das hier auch tun, sonst faellt beim Hostingwechsel
@@ -125,7 +149,7 @@ const API_MODULE_NAME = /^[a-z0-9][a-z0-9-]*$/;
  */
 function validateEnv(env = process.env) {
   const missing = [];
-  for (const entry of REQUIRED_ENV) {
+  for (const entry of pflichtEnv(env)) {
     const candidates = [entry.key, ...entry.alternatives];
     const satisfied = candidates.some((key) => String(env[key] || '').trim().length > 0);
     if (!satisfied) {
@@ -451,11 +475,46 @@ async function readinessReport({
     };
   }
 
+  const startedAt = Date.now();
+
+  // 🔴 Im direkten Modus MUSS die Plattform-Datenbank geprueft werden, nicht Supabase.
+  // Bis zum 28.08.2026 pingte diese Probe immer Supabase an - nach dem Cutover war
+  // /health/ready damit ein falsches Gruen: Es bestaetigte eine Datenquelle, die die
+  // Anwendung gar nicht mehr benutzt.
+  if (istDirekterModus(env)) {
+    const dbTransport = require('./db-transport.js');
+    try {
+      await Promise.race([
+        dbTransport.pruefeVerbindung(),
+        new Promise((_, ab) => setTimeout(() => ab(new Error('timeout')), timeoutMs)),
+      ]);
+      return {
+        ready: true,
+        checks: {
+          env: { ok: true },
+          datasource: { ok: true, quelle: 'plattform', duration_ms: Date.now() - startedAt },
+        },
+      };
+    } catch (error) {
+      return {
+        ready: false,
+        checks: {
+          env: { ok: true },
+          datasource: {
+            ok: false,
+            quelle: 'plattform',
+            error: String(error.message || error),
+            duration_ms: Date.now() - startedAt,
+          },
+        },
+      };
+    }
+  }
+
   const base = String(env.SUPABASE_URL || '').replace(/\/+$/, '');
   const key = String(env.SUPABASE_SERVICE_KEY || '');
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
-  const startedAt = Date.now();
 
   try {
     const response = await fetchImpl(`${base}/rest/v1/`, {
@@ -468,7 +527,12 @@ async function readinessReport({
       ready: ok,
       checks: {
         env: { ok: true },
-        datasource: { ok, status: response.status, duration_ms: Date.now() - startedAt },
+        datasource: {
+          ok,
+          quelle: 'supabase',
+          status: response.status,
+          duration_ms: Date.now() - startedAt,
+        },
       },
     };
   } catch (error) {
@@ -478,6 +542,7 @@ async function readinessReport({
         env: { ok: true },
         datasource: {
           ok: false,
+          quelle: 'supabase',
           error: error.name === 'AbortError' ? 'timeout' : String(error.message || error),
           duration_ms: Date.now() - startedAt,
         },
@@ -895,7 +960,13 @@ module.exports = {
   MAX_BODY_BYTES,
   READY_PROBE_TIMEOUT_MS,
   REQUEST_TIMEOUT_MS,
-  REQUIRED_ENV,
+  // Weiterhin exportiert, jetzt aber modusabhaengig: Aufrufer bekommen die Pflichtliste,
+  // die fuer den GERADE eingestellten Modus gilt.
+  get REQUIRED_ENV() {
+    return pflichtEnv();
+  },
+  pflichtEnv,
+  istDirekterModus,
   SECURITY_HEADERS,
   HSTS_HEADER,
   isSecureRequest,
