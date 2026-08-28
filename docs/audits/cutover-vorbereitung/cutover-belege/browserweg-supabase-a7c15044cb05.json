@@ -1,0 +1,171 @@
+{
+  "seite": "https://business.activecenter.info",
+  "slug": "markus",
+  "quelle": "supabase",
+  "leadHash": "qz_a7c15044cb054b67bf1d67f74847768a",
+  "email": "markus+cutover@global-sce.com",
+  "schritte": [
+    "Intro geladen",
+    "Quiz gestartet",
+    "Frage \"Was treibt dich morgens wirklich aus dem Bett?\" → Ziele & Fortschritt",
+    "Frage \"In einer Gruppe bist du meistens...\" → Der Richtungsgeber",
+    "Frage \"Was bringt dich wirklich auf die Palme?\" → Blockaden & Zögerer",
+    "Frage \"Was ist dir bei deiner Arbeit am wichtigsten?\" → Freiheit",
+    "Frage \"Freiheit ist dein Kernantrieb\" → weiter",
+    "Frage \"Wie sieht dein ideales Leben in 3 Jahren aus?\" → Finanziell frei",
+    "Frage \"Was hält dich WIRKLICH davon ab, dieses Leben bereits heute \" → Fehlendes System",
+    "Frage \"Dein Profil wird erstellt...\" → weiter",
+    "Frage \"Dein Profil wird erstellt...\" → weiter",
+    "Formular erreicht",
+    "Formular ausgefuellt: Cutover / markus+cutover@global-sce.com",
+    "Abgesendet",
+    "Ergebnisseite: \"Der Macher\""
+  ],
+  "aufrufe": [
+    {
+      "pfad": "/api/bridge",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead/init",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/bridge",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    }
+  ],
+  "befunde": [
+    {
+      "name": "lead_state traegt den Lead",
+      "ok": true,
+      "detail": "1 Zeile(n)"
+    },
+    {
+      "name": "E-Mail gespeichert",
+      "ok": true,
+      "detail": "markus+cutover@global-sce.com"
+    },
+    {
+      "name": "Vorname gespeichert",
+      "ok": true,
+      "detail": "Cutover"
+    },
+    {
+      "name": "Formular als abgesendet vermerkt",
+      "ok": true,
+      "detail": "2026-08-27 20:06:26.753+00"
+    },
+    {
+      "name": "Profil berechnet",
+      "ok": true,
+      "detail": "feuer / contact_known"
+    },
+    {
+      "name": "Berater zugeordnet",
+      "ok": true,
+      "detail": "markus"
+    },
+    {
+      "name": "sieben Antworten gespeichert",
+      "ok": false,
+      "detail": "6"
+    },
+    {
+      "name": "Ereignisse geschrieben",
+      "ok": true,
+      "detail": "19"
+    },
+    {
+      "name": "Tracking-Sitzung angelegt",
+      "ok": false,
+      "detail": "0"
+    },
+    {
+      "name": "Outbox-Auftrag erzeugt",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "als interner Verkehr markiert",
+      "ok": true,
+      "detail": "19 von 19 Ereignissen"
+    }
+  ]
+}
