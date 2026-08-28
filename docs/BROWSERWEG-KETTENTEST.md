@@ -120,12 +120,38 @@ geprüft**. Er braucht einen Menschen, der einmal durchklickt.
 - **Nur markierter Verkehr** (`?test=1` → `is_internal_traffic`). Ein echter Besucher
   läuft ohne diese Marke; die Schreibpfade sind dieselben, aber bewiesen ist das hier
   nicht.
-- **Kein Blick ins MySQL-CRM.** Nachweis 14 ist die Meldung der *Anwendung*
-  (`sync_status = mysql_final_synced`) plus der Outbox-Status — kein eigener lesender
-  Zugriff auf die MySQL-Tabelle. Ein solcher Weg existiert von hier aus nicht.
-- **Keine Mail wird empfangen.** Der Test erzeugt den Resume-Link über dieselbe
-  Bridge-Aktion wie die Nurture-Mail und klickt ihn durch — aber er wartet nicht auf
-  eine zugestellte E-Mail im Postfach.
+- **Das Skript schaut nicht selbst ins MySQL-CRM.** Nachweis 14 ist die Meldung der
+  *Anwendung* (`sync_status = mysql_final_synced`) plus der Outbox-Status.
+  ⚠️ **Korrektur vom 28.08.:** Hier stand, ein lesender Weg ins CRM existiere nicht.
+  Das war falsch — er existiert, er ist nur nicht im Skript. Von Hand:
+
+  ```bash
+  "C:/Windows/System32/OpenSSH/ssh.exe" -i C:/Users/Markus/.ssh/id_rsa root@91.99.76.104 \
+    "sudo -u forge mysql --defaults-file=/home/forge/.my.cnf prod_contacts_activesupport \
+     -e \"select * from contacts where id = <mysql_contact_id>\\G\""
+  ```
+
+  `leads.lead_state` trägt dafür `mysql_contact_id` und `mysql_survey_id`; die Umfrage
+  liegt in `prod_contacts_activesupport.typeform_surveys` und enthält im Feld
+  `form_response` **alle Antworten im Klartext** — damit lässt sich Postgres gegen
+  MySQL Antwort für Antwort vergleichen.
+
+- **Das Skript wartet nicht auf eine zugestellte E-Mail.**
+  ⚠️ **Ebenfalls korrigiert:** Nachprüfbar ist der Versand trotzdem, über Postmark:
+
+  ```bash
+  node --env-file=.env.prod -e "fetch('https://api.postmarkapp.com/messages/outbound?count=25', \
+    {headers:{'X-Postmark-Server-Token':process.env.POSTMARK_SERVER_TOKEN}}) \
+    .then(r=>r.json()).then(d=>d.Messages.forEach(m=>console.log(m.ReceivedAt,m.Status,m.Recipients,m.Subject)))"
+  ```
+
+  Ein vollständiger Lauf erzeugt **drei** Mails: „Dein Erfolgs-Code und dein Zugang"
+  an den Lead, „Neuer Erfolgs-Code von: …" an den Coach, und nach dem dritten Video
+  „Hot Lead: … hat alle 3 Videos angesehen".
+
+- **Jeder Lauf hinterlässt einen Kontakt im MySQL-CRM**, den `aufraeumen` **nicht**
+  entfernt (es fasst nur Postgres an). Am 28.08. blieben so `markus+cutover@…` (6
+  Umfragen) und `markus+kette@…` (2 Umfragen) stehen.
 - **Kein Fehlerfall.** Netzausfall, Reload-Nachlieferung und transiente 500er deckt
   die getrennte Suite `scripts/e2e/queue-failure.e2e.js` ab (CI-Gate `e2e-queue`).
 
@@ -177,6 +203,34 @@ Alle vier hätten stille Fehlbefunde erzeugt.
 4. **`generate_resume_token` braucht `email` im Kern der Nutzlast**, nicht nur
    `leadHash`/`sessionHash`. Sonst: `400 Missing resume contact context`. Vorlage ist
    [`scripts/smoke-resume-link.js`](../scripts/smoke-resume-link.js).
+
+---
+
+## Ein Muster, das wie ein Datenverlust aussieht — und keiner ist
+
+Bei einem Handlauf am 28.08. begann die Ereigniskette des fertigen Leads erst bei
+`form_submitted`. `page_view`, `quiz_started`, `question_viewed` und `quiz_answer`
+fehlten — sie lagen unter einem **anderen** `lead_hash`.
+
+**Ursache:** Im Browser lag noch der Lead eines früheren Tests
+(`markus+stufe3@…`, 25.08.). Das Quiz lief darunter. Beim Absenden mit einer
+**anderen** E-Mail-Adresse legte die Anwendung korrekt einen frischen Lead an — die
+vorher gefeuerten Ereignisse blieben beim alten.
+
+**Was dabei NICHT verloren geht:** Die sechs Antworten liegen unter dem neuen Hash,
+weil `submit_lead_complete` sie mitträgt. Auch Profil, Video-Fortschritt und der
+CRM-Abgleich sind vollständig.
+
+**Was fehlt:** die Trichter-Ereignisse *vor* dem Absenden. Für diesen Lead beginnt
+die Auswertung bei `form_submitted`.
+
+**Wie häufig:** Von den letzten 200 abgeschlossenen Leads tragen **15 (7,5 %)** keine
+eigenen Quiz-Ereignisse. Gemessen am 28.08.2026 auf der Plattform-DB. Das Muster ist
+**älter als der Cutover** — es entsteht immer dann, wenn derselbe Browser einen
+gespeicherten Lead mitbringt und dann eine andere Adresse einträgt.
+
+🔴 Wer diesen Lead einzeln ansieht, hält ihn für einen Datenverlust. Er ist keiner —
+aber die Trichterquote für solche Leads ist zu niedrig.
 
 ---
 
