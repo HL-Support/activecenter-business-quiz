@@ -137,7 +137,7 @@ async function browserDurchlauf() {
   const ctx = await browser.newContext({ viewport: { width: 480, height: 900 }, locale: 'de-DE' });
   const page = await ctx.newPage();
 
-  const gesehen = { leadHash: null, aufrufe: [], fehler: [] };
+  const gesehen = { leadHash: null, sessionHash: null, ereignisse: [], aufrufe: [], fehler: [] };
   page.on('console', (m) => {
     if (m.type() === 'error') gesehen.fehler.push(m.text().slice(0, 200));
   });
@@ -148,6 +148,11 @@ async function browserDurchlauf() {
     try {
       const anfrage = JSON.parse(r.request().postData() || '{}');
       if (anfrage.lead_hash && !gesehen.leadHash) gesehen.leadHash = anfrage.lead_hash;
+      if (anfrage.event_name) gesehen.ereignisse.push(String(anfrage.event_name));
+      // Der session_hash steckt in der Nutzlast der Tracking-Aufrufe und wird fuer
+      // den Resume-Link gebraucht - genau wie ihn die Nurture-Mail benutzt.
+      const s = anfrage.session_hash || (anfrage.payload && anfrage.payload.session_hash) || '';
+      if (s && !gesehen.sessionHash) gesehen.sessionHash = String(s);
     } catch {
       /* nur Beweisaufnahme */
     }
@@ -241,8 +246,120 @@ async function browserDurchlauf() {
     if (treffer) gesehen.leadHash = treffer[0];
   }
 
+  // Der session_hash steht im Browserspeicher (acQuizTrackingSession_v1), nicht in
+  // den /api/-Nutzlasten - dort wurde er vergeblich gesucht. Er wird fuer den
+  // Resume-Link gebraucht, damit der Link auf DIESE Sitzung zeigt.
+  if (!gesehen.sessionHash) {
+    const alles = await page.evaluate(() =>
+      JSON.stringify(Object.fromEntries(Object.entries(localStorage)))
+    );
+    const treffer = alles.match(/ac_[a-f0-9]{16,}/);
+    if (treffer) gesehen.sessionHash = treffer[0];
+  }
+  merke(`session_hash: ${gesehen.sessionHash || '(nicht gefunden)'}`);
+
+  // ---- Videoteil: "Teil 1 starten" ist der CTA der Ergebnisseite -------------
+  // Erst hier entstehen result_cta_click, video_viewed, video_started und
+  // video_progress - und damit die Zeilen in lead_video_progress. Ohne diesen
+  // Abschnitt endet der Test vor der Haelfte der Kette.
+  const cta = page.getByRole('button', { name: /Teil 1 starten/ }).first();
+  await cta.waitFor({ state: 'visible', timeout: 30000 });
+  await cta.click();
+  merke('CTA "Teil 1 starten" geklickt');
+
+  // Das Video laeuft in einem Bunny-iframe (player.mediadelivery.net). Stehen
+  // bleiben, bis der Fortschritt gemeldet wurde - video_progress kommt in Schueben.
+  await page.waitForTimeout(30000);
+  const videoZustand = await page.evaluate(() => ({
+    ueberschrift: (document.querySelector('h1,h2,h3') || {}).innerText || '',
+    spieler: Array.from(document.querySelectorAll('iframe'))
+      .map((f) => f.src || '')
+      .filter((s) => /mediadelivery/.test(s)).length,
+  }));
+  merke(
+    `Videoteil erreicht: "${String(videoZustand.ueberschrift).replace(/\n/g, ' ').slice(0, 50)}" ` +
+      `(${videoZustand.spieler} Bunny-Spieler)`
+  );
+
+  const ereignisse = gesehen.ereignisse.slice();
+  merke(`Ereignisse im Lauf: ${[...new Set(ereignisse)].join(', ')}`);
+
   await browser.close();
-  return { ...gesehen, schritte, ergebnis: nachher };
+  return { ...gesehen, schritte, ergebnis: nachher, ereignisse };
+}
+
+/**
+ * Erzeugt einen ECHTEN Resume-Link ueber dieselbe Bridge-Aktion, die auch die
+ * Nurture-Mail benutzt, und klickt ihn in einem FRISCHEN Browser durch - ohne
+ * localStorage, wie jemand, der die Mail auf einem anderen Geraet oeffnet.
+ * 🔴 Der Link wird nicht selbst zusammengebaut, sondern 1:1 so genommen, wie der
+ * Server ihn ausliefert.
+ */
+async function resumeLinkPruefen(leadHash, sessionHash, merke) {
+  const antwort = await fetch(`${SEITE}/api/bridge`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(process.env.BRIDGE_SERVICE_KEY
+        ? { 'X-Bridge-Service-Key': process.env.BRIDGE_SERVICE_KEY }
+        : {}),
+    },
+    // Nutzlast wie beim echten Aufruf (vgl. scripts/smoke-resume-link.js): ohne
+    // `email` antwortet die Bridge mit 400 "Missing resume contact context".
+    body: JSON.stringify({
+      action: 'generate_resume_token',
+      payload: {
+        sessionHash,
+        leadHash,
+        email: EMAIL,
+        slug: SLUG,
+        context: 'quiz',
+        resumeTarget: 'videos',
+        contact: { leadHash, email: EMAIL, firstName: VORNAME, lang: 'de' },
+      },
+    }),
+  });
+  const daten = await antwort.json().catch(() => ({}));
+  const url = daten.shortUrl || daten.resumeUrl || '';
+  if (!antwort.ok || !url) {
+    return {
+      ok: false,
+      grund: `generate_resume_token: HTTP ${antwort.status} ${JSON.stringify(daten).slice(0, 200)}`,
+    };
+  }
+  merke(`Resume-Link vom Server: ${url.replace(/(\?|&)(r|resume)=[^&]{0,12}[^&]*/, '$1$2=…')}`);
+
+  const wurzel = path.join(__dirname, '..');
+  const { chromium } = createRequire(path.join(wurzel, 'package.json'))('playwright');
+  const browser = await chromium.launch({ headless: true, args: ['--mute-audio'] });
+  const ctx = await browser.newContext({ viewport: { width: 480, height: 900 }, locale: 'de-DE' });
+  const page = await ctx.newPage();
+  const erkannt = { leadHash: null, ziel: '' };
+  page.on('response', (r) => {
+    if (!r.url().includes('/api/')) return;
+    try {
+      const a = JSON.parse(r.request().postData() || '{}');
+      if (a.lead_hash && !erkannt.leadHash) erkannt.leadHash = a.lead_hash;
+    } catch {
+      /* nur Beweisaufnahme */
+    }
+  });
+
+  try {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await page.waitForTimeout(12000);
+    erkannt.ziel = await page.evaluate(
+      () => (document.querySelector('h1,h2,h3') || {}).innerText || ''
+    );
+    const wiedererkannt = erkannt.leadHash === leadHash;
+    merke(
+      `Resume im frischen Browser: "${String(erkannt.ziel).replace(/\n/g, ' ').slice(0, 45)}" ` +
+        `— Lead ${wiedererkannt ? 'wiedererkannt' : 'NICHT wiedererkannt (' + erkannt.leadHash + ')'}`
+    );
+    return { ok: wiedererkannt, url, ziel: erkannt.ziel, erkannterHash: erkannt.leadHash };
+  } finally {
+    await browser.close();
+  }
 }
 
 // --- Nachweis ----------------------------------------------------------------
@@ -266,6 +383,8 @@ async function nachweis(quelle, leadHash) {
     'source_app',
     'form_submitted_at',
     'created_at',
+    'cta_clicked_at',
+    'sync_status',
   ];
   const zeilen = await abfrage(
     quelle,
@@ -325,6 +444,72 @@ async function nachweis(quelle, leadHash) {
     'als interner Verkehr markiert',
     Number(markiert[0].n) > 0,
     `${markiert[0].n} von ${ereignisse} Ereignissen`
+  );
+
+  // ---- Zweite Haelfte der Kette: Video und Ereignisnamen --------------------
+  // 🔴 KEINE Bedingung auf cta_clicked_at: das Feld gehoert zum FINALEN CTA nach den
+  // Videos (cta_type 'whatsapp' oder 'spaeter', Ereignis `cta_clicked`), nicht zum
+  // "Teil 1 starten"-Klick. Gemessen am 28.08.2026: 1.121 Leads tragen
+  // result_cta_click, aber nur 221 ein cta_clicked_at. Diese Stufe setzt drei
+  // durchgesehene Videos voraus und wird vom Browserweg bewusst nicht erreicht.
+  console.log(
+    `  (Hinweis) cta_clicked_at: ${z.cta_clicked_at || 'nicht gesetzt'} — finaler CTA, ` +
+      'nicht Teil dieses Wegs'
+  );
+
+  const fortschritt = await zaehl('lead_video_progress');
+  pruefe('Video-Fortschritt gespeichert', fortschritt > 0, `${fortschritt} Zeile(n)`);
+
+  // Die Kette ist nur vollstaendig, wenn ALLE diese Ereignisse in der Datenbank
+  // liegen - nicht nur im Browser gefeuert wurden.
+  const PFLICHT = [
+    'page_view',
+    'quiz_started',
+    'question_viewed',
+    'quiz_answer',
+    'aspiration_confirmed',
+    'quiz_result',
+    'optin_viewed',
+    'form_submit',
+    'form_submitted',
+    'result_cta_click',
+    'video_viewed',
+    'video_started',
+    'video_progress',
+  ];
+  const vorhanden = await abfrage(
+    quelle,
+    `select event_name, count(*)::int as n from public.lead_events ` +
+      `where lead_hash = '${h}' group by event_name`,
+    ['event_name', 'n']
+  );
+  const da = new Map(vorhanden.map((r) => [String(r.event_name).trim(), Number(r.n)]));
+  const fehlend = PFLICHT.filter((e) => !da.has(e));
+  pruefe(
+    `alle ${PFLICHT.length} Ereignisarten der Kette in der Datenbank`,
+    fehlend.length === 0,
+    fehlend.length ? `fehlt: ${fehlend.join(', ')}` : [...da.keys()].sort().join(', ')
+  );
+
+  // ---- Weitergabe an das MySQL-CRM -----------------------------------------
+  const auftrag = await abfrage(
+    quelle,
+    `select sync_type, status, attempts, coalesce(last_error,'-') as last_error ` +
+      `from public.lead_sync_outbox where lead_hash = '${h}' order by id desc limit 1`,
+    ['sync_type', 'status', 'attempts', 'last_error']
+  );
+  const a0 = auftrag[0] || {};
+  pruefe(
+    'Outbox-Auftrag durchgelaufen',
+    String(a0.status).trim() === 'done',
+    `${a0.sync_type} → ${a0.status} (Versuche ${a0.attempts}${String(a0.last_error).trim() !== '-' ? ', ' + a0.last_error : ''})`
+  );
+  // 🔴 Das ist die Meldung der Anwendung, kein eigener Blick in die MySQL-Tabelle:
+  // ein lesender Weg dorthin existiert von hier aus nicht.
+  pruefe(
+    'lead_state meldet CRM-Abgleich',
+    /mysql/.test(String(z.sync_status || '')),
+    `sync_status = ${z.sync_status}`
   );
 
   return { befunde, zeile: z };
@@ -416,11 +601,33 @@ async function main() {
       console.log('\n  Browser-Fehlermeldungen:');
       lauf.fehler.slice(0, 5).forEach((f) => console.log('   ! ' + f));
     }
-    // Outbox und Nachverarbeitung brauchen einen Moment.
-    console.log('\n  15 s warten, damit Outbox und Nachverarbeitung greifen ...');
-    await new Promise((r) => setTimeout(r, 15000));
+    // Outbox laeuft jede Minute; Nachverarbeitung und Video-Fortschritt brauchen
+    // ebenfalls einen Moment. 75 s decken beides ab.
+    console.log('\n  75 s warten, damit Outbox und Nachverarbeitung greifen ...');
+    await new Promise((r) => setTimeout(r, 75000));
+
+    // Resume-Link: der letzte Abschnitt der Kette. Wird vom Server erzeugt und in
+    // einem frischen Browser geklickt - wie aus einer Mail auf einem anderen Geraet.
+    let resume = { ok: false, grund: 'kein session_hash aus dem Lauf' };
+    const merke = (t) => console.log(`  ${t}`);
+    console.log('\n== Resume-Link ==\n');
+    if (lauf.sessionHash) {
+      resume = await resumeLinkPruefen(lauf.leadHash, lauf.sessionHash, merke);
+    } else {
+      console.log('  🔴 ' + resume.grund);
+    }
 
     const { befunde } = await nachweis(quelle, lauf.leadHash);
+    befunde.push({
+      name: 'Resume-Link fuehrt zurueck in den Funnel',
+      ok: Boolean(resume.ok),
+      detail: resume.ok ? String(resume.ziel).replace(/\n/g, ' ').slice(0, 50) : resume.grund,
+    });
+    console.log(
+      `  ${resume.ok ? 'OK     ' : '🔴 OFFEN'} Resume-Link fuehrt zurueck in den Funnel` +
+        (resume.ok ? '' : ` — ${resume.grund}`)
+    );
+
     const offen = befunde.filter((b) => !b.ok);
 
     fs.mkdirSync(BELEGE, { recursive: true });
@@ -433,8 +640,15 @@ async function main() {
           slug: SLUG,
           quelle,
           leadHash: lauf.leadHash,
+          sessionHash: lauf.sessionHash,
           email: EMAIL,
           schritte: lauf.schritte,
+          ereignisseImBrowser: [...new Set(lauf.ereignisse || [])],
+          resume: {
+            ok: Boolean(resume.ok),
+            ziel: resume.ziel || null,
+            grund: resume.grund || null,
+          },
           aufrufe: lauf.aufrufe,
           befunde,
         },

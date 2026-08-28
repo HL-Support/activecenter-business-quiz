@@ -18,7 +18,7 @@
 > | 2 Stillstand | zwei identische Messungen im Abstand von 3 min |
 > | 3 Übertragen | 132 MB, 174.013 Zeilen, **22,8 s** |
 > | 4 Nachweise | **18/18 Zeilenzahlen · 5/5 Prüfsummen · 0 Waisen · 3/3 Sequenzen** |
-> | 5 Umschalten | `LEADS_DB_MODUS=direkt` · Redeploy · Browserweg gegen die neue DB **10/10** |
+> | 5 Umschalten | `LEADS_DB_MODUS=direkt` · Redeploy · Browserweg gegen die neue DB **10/10**, später als volle Kette **15/15** |
 > | 6 Wächter | meldet `Quelle: plattform`, keine „Baseline veraltet" |
 > | 7 Nachlauf | pg_cron Job 2 aktiv · n8n wiederhergestellt · Vercel pausiert (503) |
 > | 8 Beobachtung | Outbox 2479 in <1 min auf `done` · pg_cron-Lauf 3616 `complete` · alte DB bewegt sich nicht |
@@ -267,11 +267,14 @@ node --env-file=.env.prod scripts/cutover-browserweg.js probe --quelle=plattform
 ```
 
 Fährt den **echten** Funnel in einem echten Browser auf `business.activecenter.info`
-— Intro, sechs Fragen, Auswertung, Formular mit echter, zustellbarer Adresse
-(`markus+cutover@global-sce.com`, von ZeroBounce als gültig bestätigt) — und weist
-danach zehn Punkte in der Zielbank nach: Zeile in `lead_state`, E-Mail, Vorname,
-`form_submitted_at`, Profilcode, Berater, sechs Antworten, Ereignisse,
-Outbox-Auftrag, interne Markierung. Legt einen Beleg unter `cutover-belege/` ab.
+— Intro, sechs Fragen, Auswertung, Formular mit echter Adresse, CTA, Videoteil — und
+weist danach **fünfzehn** Punkte in der Zielbank nach, bis hin zum Resume-Link, der
+in einem frischen Browser zurück in den Funnel führt.
+
+📖 **Was er abdeckt und was ausdrücklich nicht:**
+[BROWSERWEG-KETTENTEST.md](../../BROWSERWEG-KETTENTEST.md). Der zweite Teil ist der
+wichtigere — der finale CTA nach den Videos, andere Sprachen, andere Berater und der
+Blick ins MySQL-CRM sind **nicht** abgedeckt.
 
 Aufräumen danach (fasst **nur** den einen `lead_hash` an, ohne `--wirklich` trocken):
 
