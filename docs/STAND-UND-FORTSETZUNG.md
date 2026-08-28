@@ -29,15 +29,27 @@ Zeiten sind MESZ, sofern nicht anders angegeben.
 > Edge-Logs nachgewiesen: ein Leser von `v_lead_state_full`, `lead_contact_crm` und
 > `lead_events` aus `eu-central-1` (AWS/Vercel), zuletzt 09:31 MESZ.
 >
-> **Ein echter Regressionsbefund vom 28.08.:** `leads.quiz_sessions` bekommt seit
-> dem Cutover **keine einzige neue Zeile** (neueste Zeile 27.08. 19:48). Ursache:
-> `api/bridge.js` baut an drei Stellen (≈ Z. 2084/2099/2100) die URL **direkt** aus
-> `SUPABASE_URL` statt über den modusbewussten Transport — und prüft die Antwort
-> nicht. Seit der Schreibbarriere antwortet Supabase dort mit **403**, was still
-> verschluckt wird. **Datenverlust begrenzt:** `quiz_sessions` dient nur als
-> Rückfallquelle (`loadLeadFallbackContext`); die Primärtabellen `lead_state`,
-> `lead_events`, `lead_answers_current` und `lead_video_progress` sind vollständig.
-> Fix: dieselben drei Aufrufe über `supabaseRequest` führen und den Status prüfen.
+> **⚠️ Korrektur zu einer früheren Fassung dieses Absatzes.** Hier stand,
+> `leads.quiz_sessions` sei durch den Cutover kaputtgegangen. **Das stimmt nicht.**
+> Nachgemessen: Die letzte Zeile trägt `27.08. 19:48` — und weil die Spalte
+> `timestamp without time zone` ist, war das **9,5 Stunden vor** der Schreibbarriere
+> (28.08. 05:25 UTC). Die Tabelle hat also schon vorher aufgehört, sich zu füllen.
+>
+> Der wirkliche Grund steht in `api/bridge.js` (≈ Z. 4098):
+> `usesLeadSystemV2 ? Promise.resolve(null) : persistBusinessSubmissionForResume(...)`
+> — unter Lead-System v2, das bei 100 % steht, wird `quiz_sessions` **absichtlich
+> nicht mehr geschrieben**. Gespeist wurde sie zuletzt nur noch vom alten
+> `track_event`-Weg (`ac-track.js`), und der feuert auf der Funnelseite nicht mehr.
+> `quiz_sessions` ist damit eine **Altlast**, keine Regression — sie dient nur noch
+> als Rückfallquelle in `loadLeadFallbackContext`, und die Primärtabellen
+> `lead_state`, `lead_events`, `lead_answers_current`, `lead_video_progress` sind
+> vollständig (an einem Handlauf Feld für Feld gegen MySQL geprüft).
+>
+> **Was trotzdem echt war und behoben wurde:** Dieselben drei Stellen bauten die URL
+> **direkt** aus `SUPABASE_URL` und gingen am modusbewussten Transport vorbei. Für
+> das Ziel „100 % ohne Supabase" ist das unabhängig vom Symptom ein Mangel — jetzt
+> über `supabaseJson`/`patchByEquals`/`insertIgnoringDuplicates`, mit zwei Tests als
+> Wächter dagegen.
 >
 > **Weiter offen:** Nurture-Sender auf `leads_n8n` umbauen (bleibt bis dahin aus,
 > Wächter W2 schlägt erwartungsgemäß an) · `AC - Error Alert` schreibt weiterhin
