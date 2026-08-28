@@ -102,11 +102,33 @@ der Mailweg in [`../docs/MAILWEGE.md`](../docs/MAILWEGE.md). Kurz, damit man es 
    `PATCH` liegt in derselben Datei und ist genauso ungeschützt. Ausgerechnet ID 48 ist
    die Vorlage, die laut Betriebsregel „niemals angefasst" werden darf.
 
-   🔴 **Diese App darf NICHT unverändert auf Coolify ausgerollt werden.** Vorher:
-   Zugangsschutz einbauen (mindestens Basic-Auth über eine `middleware.js`, besser eine
-   nicht öffentlich geratene Adresse plus Schutz), und `MAUTIC_PASS` gehört rotiert,
-   sobald der Weg zu ist. Bis dahin ist das Sinnvollste, die Vercel-Auslieferung zu
-   **pausieren** — das kostet nichts und ist umkehrbar.
+   ✅ **Behoben im Code am 28.08.2026**: `middleware.js` schützt die App per Basic-Auth,
+   `lib/zugang.js` enthält die Prüfung, `scripts/tests/review-app-zugang.test.js` hält sie
+   fest (7 Tests). Zwei Entwurfsentscheidungen:
+
+   - **Fail-closed.** Ohne gesetztes `REVIEW_PASS` ist **alles** zu (HTTP 503), nicht
+     offen. Der übliche Fehler ist das Gegenteil — „kein Passwort gesetzt, also nicht
+     prüfen" — und dann steht die Tür nach einem vergessenen Umgebungswert wieder offen,
+     ohne dass es jemand merkt.
+   - **Der Matcher schliesst `/api/` ausdrücklich ein.** Der Schaden lag nicht auf der
+     Seite, sondern in der API-Route mit dem schreibenden `PATCH`. Ein Test prüft, dass
+     `/api` nicht aus dem Matcher fällt, ein zweiter, dass die Middleware überhaupt noch
+     existiert, solange die Route ein `PATCH` hat.
+
+   🔴 **Der Code-Fix schützt die laufende Vercel-Auslieferung NICHT.** Die läuft aus dem
+   alten Stand weiter; `GET /api/email/48` antwortet dort bis auf Weiteres mit HTTP 200.
+   Zu ist das Loch erst, wenn die Auslieferung **pausiert** oder die App mit
+   `REVIEW_PASS` neu ausgerollt wird. Danach gehört `MAUTIC_PASS` rotiert — es lag
+   hinter einer offenen Tür.
+
+   **Benötigte Umgebungswerte beim Ausrollen:**
+
+   | Wert | Pflicht | Bedeutung |
+   | --- | --- | --- |
+   | `REVIEW_PASS` | **ja** — ohne ihn bleibt die App zu | Passwort für den Zugang |
+   | `REVIEW_USER` | nein | Benutzername, Standard `review` |
+   | `MAUTIC_PASS` | ja | Mautic-`admin`-Passwort für die API |
+   | `MAUTIC_BASE` | nein | Standard `https://mautic.hl-support.biz` |
 
 ## Was NICHT mitgezogen ist
 
