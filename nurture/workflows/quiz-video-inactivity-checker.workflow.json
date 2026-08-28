@@ -1,0 +1,149 @@
+{
+  "name": "ARCHIVE - AC - Quiz Video Inactivity Checker (old segment model)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 2 }]
+        }
+      },
+      "id": "cron-inactivity",
+      "name": "Cron - Every 2h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  lp.contact_id,\n  lp.lead_hash,\n  lp.lifecycle_stage,\n  lp.video_1_watched_at,\n  lp.video_2_watched_at,\n  lp.video_3_watched_at,\n  lp.last_event_at,\n  lp.form_submitted_at,\n  GREATEST(\n    COALESCE(lp.video_1_watched_at, '1970-01-01'),\n    COALESCE(lp.video_2_watched_at, '1970-01-01'),\n    COALESCE(lp.video_3_watched_at, '1970-01-01')\n  ) AS last_video_at\nFROM lead_profiles lp\nWHERE\n  lp.lifecycle_stage IN (1, 2, 3)\n  AND lp.last_event_at > lp.form_submitted_at\n  AND GREATEST(\n    COALESCE(lp.video_1_watched_at, '1970-01-01'),\n    COALESCE(lp.video_2_watched_at, '1970-01-01'),\n    COALESCE(lp.video_3_watched_at, '1970-01-01')\n  ) < NOW() - INTERVAL '24 hours'\n  AND lp.nurture_email_sent_at IS NULL\n     OR GREATEST(\n    COALESCE(lp.video_1_watched_at, '1970-01-01'),\n    COALESCE(lp.video_2_watched_at, '1970-01-01'),\n    COALESCE(lp.video_3_watched_at, '1970-01-01')\n  ) > lp.nurture_email_sent_at\nLIMIT 100",
+        "options": {}
+      },
+      "id": "supabase-query-inactive-leads",
+      "name": "Supabase - Get Inactive Leads",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [240, 0],
+      "credentials": {
+        "postgres": {
+          "id": "SUPABASE_POSTGRES_CRED_ID",
+          "name": "Supabase (Postgres)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) return [];\n\nreturn items.map(item => {\n  const row = item.json;\n  const stage = Number(row.lifecycle_stage || 0);\n\n  let segmentAlias = null;\n  if (stage === 1) segmentAlias = 'ac-nurture-phase-b';\n  else if (stage === 2) segmentAlias = 'ac-nurture-phase-c';\n  else if (stage === 3) segmentAlias = 'ac-nurture-phase-d';\n\n  return {\n    json: {\n      contact_id: row.contact_id,\n      lead_hash: row.lead_hash,\n      lifecycle_stage: stage,\n      segmentAlias,\n      last_video_at: row.last_video_at\n    }\n  };\n}).filter(item => item.json.segmentAlias !== null);"
+      },
+      "id": "code-map-stage-to-segment",
+      "name": "Code - Map Stage to Segment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://mautic.hl-support.biz/api/contacts?search=ac_contact_id:' + $json.contact_id + '&limit=1' }}",
+        "authentication": "oAuth2",
+        "options": {}
+      },
+      "id": "mautic-get-contact",
+      "name": "Mautic - Get Contact by ID",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 0],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "MAUTIC_OAUTH2_CRED_ID",
+          "name": "Mautic OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const contactsResponse = $json;\nconst contacts = Object.values(contactsResponse.contacts || {});\nif (!contacts.length) return [];\n\nconst contact = contacts[0];\nreturn [{\n  json: {\n    ...$('Code - Map Stage to Segment').item.json,\n    mauticContactId: contact.id\n  }\n}];"
+      },
+      "id": "code-extract-mautic-id",
+      "name": "Code - Extract Mautic Contact ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://mautic.hl-support.biz/api/segments/' + $json.segmentAlias + '/contact/' + $json.mauticContactId + '/add' }}",
+        "authentication": "oAuth2",
+        "options": {}
+      },
+      "id": "mautic-add-to-segment",
+      "name": "Mautic - Add to Nurture Segment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 0],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "MAUTIC_OAUTH2_CRED_ID",
+          "name": "Mautic OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE lead_profiles SET nurture_email_sent_at = NOW() WHERE contact_id = '{{ $('Code - Extract Mautic Contact ID').item.json.contact_id }}'",
+        "options": {}
+      },
+      "id": "supabase-mark-sent",
+      "name": "Supabase - Mark Nurture Email Queued",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1440, 0],
+      "credentials": {
+        "postgres": {
+          "id": "SUPABASE_POSTGRES_CRED_ID",
+          "name": "Supabase (Postgres)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron - Every 2h": {
+      "main": [[{ "node": "Supabase - Get Inactive Leads", "type": "main", "index": 0 }]]
+    },
+    "Supabase - Get Inactive Leads": {
+      "main": [[{ "node": "Code - Map Stage to Segment", "type": "main", "index": 0 }]]
+    },
+    "Code - Map Stage to Segment": {
+      "main": [[{ "node": "Mautic - Get Contact by ID", "type": "main", "index": 0 }]]
+    },
+    "Mautic - Get Contact by ID": {
+      "main": [[{ "node": "Code - Extract Mautic Contact ID", "type": "main", "index": 0 }]]
+    },
+    "Code - Extract Mautic Contact ID": {
+      "main": [[{ "node": "Mautic - Add to Nurture Segment", "type": "main", "index": 0 }]]
+    },
+    "Mautic - Add to Nurture Segment": {
+      "main": [[{ "node": "Supabase - Mark Nurture Email Queued", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false,
+  "tags": ["nurture", "business-quiz"],
+  "_setupNotes": {
+    "status": "DEPRECATED_ARCHIVE_DO_NOT_ACTIVATE",
+    "replacement": "AC - Quiz Nurture Email Sender (RqKSRTgFv8mv04H2) sends nurture emails directly and protects against duplicate sends.",
+    "deprecatedReason": "Old segment-based Mautic campaign model. Live workflow was deactivated on 2026-06-24 because it kept calling obsolete Mautic segment URLs and is no longer part of the active nurture flow.",
+    "credentialIds": {
+      "SUPABASE_POSTGRES_CRED_ID": "Replace with your Supabase Postgres credential ID in n8n",
+      "MAUTIC_OAUTH2_CRED_ID": "Replace with your Mautic OAuth2 credential ID in n8n"
+    },
+    "supabaseSchema": "Expects lead_profiles table with: contact_id, lead_hash, lifecycle_stage (0-4), video_1/2/3_watched_at, last_event_at, form_submitted_at, nurture_email_sent_at",
+    "mauticSegments": "Must have segments: ac-nurture-phase-b, ac-nurture-phase-c, ac-nurture-phase-d created before activating",
+    "logic": "After 24h of video inactivity, reads current lifecycle_stage and adds lead to exactly ONE Mautic segment. Mautic campaign then sends the correct email. Prevents email flood when user watches multiple videos in one session."
+  }
+}

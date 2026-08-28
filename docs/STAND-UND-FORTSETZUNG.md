@@ -51,12 +51,22 @@ Zeiten sind MESZ, sofern nicht anders angegeben.
 > über `supabaseJson`/`patchByEquals`/`insertIgnoringDuplicates`, mit zwei Tests als
 > Wächter dagegen.
 >
-> **Weiter offen:** Nurture-Sender auf `leads_n8n` umbauen (bleibt bis dahin aus,
-> Wächter W2 schlägt erwartungsgemäß an) · `AC - Error Alert` schreibt weiterhin
+> **✅ Korrektur vom 28.08. nachmittags:** Der **Nurture-Sender läuft bereits auf der
+> Plattform-DB**. Am n8n-Workflow `AC - Quiz Nurture Email Sender` (`RqKSRTgFv8mv04H2`)
+> nachgemessen: Zugangsdaten «Plattform-DB leads_n8n (hl_support)», SQL auf
+> `leads.lead_events` und `leads.record_nurture_sent`, letzter Lauf 28.08. 14:00 (179 s).
+> Die Knoten **heißen** noch „Supabase - …" — das ist nur der Name, nicht das Ziel.
+> Frühere Fassungen dieses Dokuments und die Commit-Nachricht von `4d72f7c`
+> („noch NICHT aktiviert") sind damit überholt.
+>
+> **Weiter offen:** `AC - Error Alert` schreibt weiterhin
 > nach Supabase · Test-DB `business_leads_testimport` löschen · `pgss-monatsreset`
 > reparieren · der **finale CTA nach den Videos** ist nicht automatisiert geprüft
 > (siehe [BROWSERWEG-KETTENTEST](BROWSERWEG-KETTENTEST.md)) · Vercel-Projekt ist
-> **pausiert, aber nicht abgebaut** (vier Domains hängen noch daran).
+> **pausiert, aber nicht abgebaut** (vier Domains hängen noch daran) · 🔴 **neu:** der
+> **Benachrichtigungsweg hängt noch an der Legacy-MySQL** — siehe
+> [MAILWEGE.md](MAILWEGE.md) und den Plan
+> [benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md).
 
 ---
 
@@ -566,10 +576,11 @@ Dokumentation übernommen. Reihenfolge: nach Dringlichkeit.
 
 | # | Punkt | Warum |
 | --- | --- | --- |
-| 7 | **Nurture-Sender umbauen** — 6 Nodes von HTTP auf Postgres (`leads_n8n`) | Netzweg steht seit 27.08.; der Umbau wird *einfacher*, weil die Blätterungslogik entfällt |
-| 8 | **`AC - Error Alert` umstellen** (RPC `record_nurture_failure`) | 🔴 der **Alarmkanal** — zeigt sonst auf die alte Instanz |
-| 9 | `Supabase Keep-Alive` und `AC - Quiz Video Inactivity Checker` (inaktiv) | dieselbe Credential, dieselbe alte Instanz |
-| 10 | **Wächter W2 wird anschlagen**, solange der Versand steht | gewollt; dem Bereitschaftshabenden muss es bekannt sein |
+| 7 | ~~**Nurture-Sender umbauen**~~ → ✅ **erledigt und live** (nachgemessen 28.08. 15:00) | Zugangsdaten «Plattform-DB leads_n8n (hl_support)», SQL auf `leads.*`, letzter Lauf 14:00. Die Knotennamen tragen noch „Supabase - …" — nur Namen, nicht das Ziel |
+| 8 | ~~**`AC - Error Alert` umstellen**~~ → ✅ **erledigt und live** (nachgemessen 28.08.) | Workflow `vSpXIyOUK9WIlvxi`, Knoten „Supabase - Log Nurture Failure" trägt die Zugangsdaten «Plattform-DB leads_n8n (hl_support)» und ist **nicht** abgeschaltet. Auch hier: nur der Knotenname ist alt |
+| 9 | `Supabase Keep-Alive` (`CODeVYeZ_63C-DoT4Z8SN`) und `AC - Quiz Video Inactivity Checker` (`ie2WEc1RmFhN5LQf`) | **beide inaktiv**, tragen aber weiterhin «Supabase Stats_Logs (service role)». Nachgemessen 28.08.: es sind die **einzigen** von 86 Workflows mit Supabase-Spur. Workflows und danach die Zugangsdaten löschen |
+| 10 | ~~**Wächter W2 wird anschlagen**, solange der Versand steht~~ → der Versand läuft; W2 meldet am 28.08. weiterhin **9 fällige Erstempfänger** — das ist ein **eigener** Befund (Sendegrenze 5 je Lauf), nicht der stehende Versand | gehört getrennt nachgegangen |
+| 10b | 🔴 **Benachrichtigungsweg (Opt-in-Mail) hängt noch an der Legacy-MySQL** | `AC - Lead Post Processor` pollt alle 5 Min `prod_contacts_activesupport.typeform_surveys`. Widerspricht Entscheidung 3 („Outbox ist der **einzige** Übergabepunkt"). Karte: [MAILWEGE.md](MAILWEGE.md) · Plan: [plans/benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md) |
 
 ### Danach
 

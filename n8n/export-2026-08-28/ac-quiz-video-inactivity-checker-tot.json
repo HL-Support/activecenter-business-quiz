@@ -1,0 +1,265 @@
+{
+  "updatedAt": "2026-07-27T09:44:47.082Z",
+  "createdAt": "2026-05-14T19:43:04.895Z",
+  "id": "ie2WEc1RmFhN5LQf",
+  "name": "AC - Quiz Video Inactivity Checker",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "cron-inactivity",
+      "name": "Cron - Every 2h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://xlpiisbozpgmemxhtivj.supabase.co/rest/v1/lead_profiles?lifecycle_stage=in.(video_1_watched,video_2_watched,video_3_watched)&select=id,lead_hash,lifecycle_stage,video_1_watched_at,video_2_watched_at,video_3_watched_at,last_event_at,created_at&order=last_event_at.desc&limit=200",
+        "authentication": "predefinedCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": false,
+        "options": {},
+        "nodeCredentialType": "supabaseApi"
+      },
+      "id": "supa-get-inactive",
+      "name": "Supabase - Get Active Leads (Stage 1-3)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "TbpjpCuPQdM6II2X",
+          "name": "Supabase Stats_Logs (service role)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst rows = Array.isArray(items[0] && items[0].json) ? items[0].json : items.map(i => i.json);\nif (!rows || !rows.length) return [];\n\nconst now = Date.now();\nconst H24 = 24 * 60 * 60 * 1000;\n\nconst STAGE_TO_SEGMENT = {\n  'video_1_watched': 'ac-nurture-phase-b',\n  'video_2_watched': 'ac-nurture-phase-c',\n  'video_3_watched': 'ac-nurture-phase-d',\n};\n\nreturn rows.flatMap(row => {\n  const videos = [row.video_1_watched_at, row.video_2_watched_at, row.video_3_watched_at]\n    .filter(Boolean).map(ts => new Date(ts).getTime());\n  if (!videos.length) return [];\n  const lastVideo = Math.max(...videos);\n  if (now - lastVideo < H24) return [];\n\n  const segmentAlias = STAGE_TO_SEGMENT[row.lifecycle_stage];\n  if (!segmentAlias) return [];\n\n  return [{ json: {\n    lead_hash: row.lead_hash,\n    lifecycle_stage: row.lifecycle_stage,\n    segmentAlias,\n    lastVideoIso: new Date(lastVideo).toISOString()\n  }}];\n});\n"
+      },
+      "id": "code-filter-inactive",
+      "name": "Code - Filter Inactive + Map Segment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://mautic.hl-support.biz/api/contacts?search=ac_last_lead_hash:' + $json.lead_hash + '&limit=1' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "mautic-find-contact",
+      "name": "Mautic - Find Contact by lead_hash",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst resp = $json;\nconst contacts = Object.values(resp.contacts || {});\nif (!contacts.length) {\n  return [{ json: { skip: true, lead_hash: $('Code - Filter Inactive + Map Segment').item.json.lead_hash }}];\n}\nconst c = contacts[0];\nreturn [{ json: {\n  skip: false,\n  mauticContactId: c.id,\n  segmentAlias: $('Code - Filter Inactive + Map Segment').item.json.segmentAlias,\n  lead_hash: $('Code - Filter Inactive + Map Segment').item.json.lead_hash\n}}];\n"
+      },
+      "id": "code-extract-contact",
+      "name": "Code - Extract Mautic Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "if-not-skip",
+      "name": "IF - Contact Found",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://mautic.hl-support.biz/api/segments/' + $json.segmentAlias + '/contact/' + $json.mauticContactId + '/add' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "mautic-add-segment",
+      "name": "Mautic - Add to Nurture Segment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron - Every 2h": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Get Active Leads (Stage 1-3)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Get Active Leads (Stage 1-3)": {
+      "main": [
+        [
+          {
+            "node": "Code - Filter Inactive + Map Segment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Filter Inactive + Map Segment": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Find Contact by lead_hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Find Contact by lead_hash": {
+      "main": [
+        [
+          {
+            "node": "Code - Extract Mautic Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Extract Mautic Contact": {
+      "main": [
+        [
+          {
+            "node": "IF - Contact Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Contact Found": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Add to Nurture Segment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Cron - Every 2h": {
+      "recurrenceRules": [
+        8
+      ]
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "2345acda-3807-42c9-96be-39a696722aac",
+  "activeVersionId": null,
+  "versionCounter": 177,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-05-14T19:43:04.895Z",
+      "createdAt": "2026-05-14T19:43:04.895Z",
+      "role": "workflow:owner",
+      "workflowId": "ie2WEc1RmFhN5LQf",
+      "projectId": "ROWWTo0FQLcxZajT",
+      "project": {
+        "updatedAt": "2026-03-21T16:42:22.082Z",
+        "createdAt": "2025-12-09T17:32:24.857Z",
+        "id": "ROWWTo0FQLcxZajT",
+        "name": "Unnamed Project",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

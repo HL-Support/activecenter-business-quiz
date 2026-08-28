@@ -1,0 +1,247 @@
+{
+  "updatedAt": "2026-07-24T11:19:05.874Z",
+  "createdAt": "2026-05-14T10:08:09.676Z",
+  "id": "m52uJBbSQUFUA2Dm",
+  "name": "AC - Lead System Health Monitor - Business Leads Quiz",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "lead-health-schedule",
+      "name": "Every 15 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://quiz.activecenter.info/api/lead-system-health",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Bridge-Key",
+              "value": "94e88b36b5f460411f5d4d805a46c6bd533aa7d06da64be6"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "rawBody": false,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "notify",
+              "value": true
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "call-lead-system-health",
+      "name": "HTTP - Lead System Health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Every 15 minutes": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Lead System Health",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "staticData": {
+    "node:Every 5 minutes": {
+      "recurrenceRules": []
+    },
+    "node:Every 15 minutes": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "e9a82e3d-8a81-4606-abda-af671941320d",
+  "activeVersionId": "e9a82e3d-8a81-4606-abda-af671941320d",
+  "versionCounter": 9,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-05-14T10:08:09.676Z",
+      "createdAt": "2026-05-14T10:08:09.676Z",
+      "role": "workflow:owner",
+      "workflowId": "m52uJBbSQUFUA2Dm",
+      "projectId": "ROWWTo0FQLcxZajT",
+      "project": {
+        "updatedAt": "2026-03-21T16:42:22.082Z",
+        "createdAt": "2025-12-09T17:32:24.857Z",
+        "id": "ROWWTo0FQLcxZajT",
+        "name": "Unnamed Project",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-07-24T11:19:05.877Z",
+    "createdAt": "2026-07-24T11:19:05.877Z",
+    "versionId": "e9a82e3d-8a81-4606-abda-af671941320d",
+    "workflowId": "m52uJBbSQUFUA2Dm",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 15
+              }
+            ]
+          }
+        },
+        "id": "lead-health-schedule",
+        "name": "Every 15 minutes",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://quiz.activecenter.info/api/lead-system-health",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Bridge-Key",
+                "value": "94e88b36b5f460411f5d4d805a46c6bd533aa7d06da64be6"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "json",
+          "rawBody": false,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "notify",
+                "value": true
+              }
+            ]
+          },
+          "options": {
+            "timeout": 60000
+          }
+        },
+        "id": "call-lead-system-health",
+        "name": "HTTP - Lead System Health",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          260,
+          0
+        ],
+        "onError": "continueRegularOutput"
+      }
+    ],
+    "connections": {
+      "Every 15 minutes": {
+        "main": [
+          [
+            {
+              "node": "HTTP - Lead System Health",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Markus Oberhofer",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-08-28T05:22:00.791Z",
+        "id": 1225,
+        "workflowId": "m52uJBbSQUFUA2Dm",
+        "versionId": "e9a82e3d-8a81-4606-abda-af671941320d",
+        "event": "deactivated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      },
+      {
+        "createdAt": "2026-08-28T05:36:50.756Z",
+        "id": 1230,
+        "workflowId": "m52uJBbSQUFUA2Dm",
+        "versionId": "e9a82e3d-8a81-4606-abda-af671941320d",
+        "event": "activated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      },
+      {
+        "createdAt": "2026-07-24T11:19:05.908Z",
+        "id": 1001,
+        "workflowId": "m52uJBbSQUFUA2Dm",
+        "versionId": "e9a82e3d-8a81-4606-abda-af671941320d",
+        "event": "deactivated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      },
+      {
+        "createdAt": "2026-07-24T11:19:05.925Z",
+        "id": 1002,
+        "workflowId": "m52uJBbSQUFUA2Dm",
+        "versionId": "e9a82e3d-8a81-4606-abda-af671941320d",
+        "event": "activated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    ]
+  }
+}

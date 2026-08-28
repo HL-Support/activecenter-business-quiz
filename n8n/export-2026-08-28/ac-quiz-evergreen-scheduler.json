@@ -1,0 +1,383 @@
+{
+  "updatedAt": "2026-05-14T19:51:37.633Z",
+  "createdAt": "2026-05-14T19:43:04.974Z",
+  "id": "pUaGat8invCLmFx1",
+  "name": "AC - Quiz Evergreen Scheduler",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "cron-daily",
+      "name": "Cron - Daily 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://mautic.hl-support.biz/api/contacts?search=ac_nurture_stopped:0&limit=500&start=0",
+        "authentication": "genericCredentialType",
+        "options": {},
+        "genericAuthType": "httpBasicAuth"
+      },
+      "id": "mautic-get-active-leads",
+      "name": "Mautic - Get Active Nurture Leads",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json;\nconst contacts = Object.values(response.contacts || {});\n\nconst today = new Date();\n\nreturn contacts\n  .filter(contact => {\n    const fields = contact.fields?.all || {};\n    const nurtureStoppedRaw = fields.ac_nurture_stopped;\n    if (nurtureStoppedRaw === true || nurtureStoppedRaw === 1 || nurtureStoppedRaw === '1') return false;\n\n    // Check if activation phase is complete: last phase email > 21 days ago\n    const submittedAt = fields.ac_last_form_submitted_at;\n    if (!submittedAt) return false;\n    const submitted = new Date(submittedAt);\n    const daysSinceSubmit = (today - submitted) / (1000 * 60 * 60 * 24);\n    if (daysSinceSubmit < 23) return false; // 21 days activation + 2 day buffer\n\n    return true;\n  })\n  .map(contact => {\n    const fields = contact.fields?.all || {};\n    const evergreen_position = Number(fields.ac_evergreen_position || 0);\n    return {\n      json: {\n        mauticContactId: contact.id,\n        contact_id: fields.ac_contact_id || '',\n        evergreen_position,\n        next_position: evergreen_position + 1,\n        profile: fields.ac_last_profile || '',\n        language: fields.ac_last_form_language || 'de'\n      }\n    };\n  });"
+      },
+      "id": "code-filter-and-map-evergreen",
+      "name": "Code - Filter and Map Evergreen Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://mautic.hl-support.biz/api/segments/ac-nurture-evergreen/contact/' + $json.mauticContactId + '/add' }}",
+        "authentication": "genericCredentialType",
+        "options": {},
+        "genericAuthType": "httpBasicAuth"
+      },
+      "id": "mautic-add-to-evergreen-segment",
+      "name": "Mautic - Add to Evergreen Segment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $('Code - Filter and Map Evergreen Leads').item.json.mauticContactId + '/edit' }}",
+        "authentication": "genericCredentialType",
+        "body": {
+          "specifyBody": "json",
+          "jsonBody": "={{ { ac_evergreen_position: $('Code - Filter and Map Evergreen Leads').item.json.next_position } }}"
+        },
+        "options": {},
+        "genericAuthType": "httpBasicAuth"
+      },
+      "id": "mautic-update-evergreen-position",
+      "name": "Mautic - Update Evergreen Position",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron - Daily 08:00": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Get Active Nurture Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Get Active Nurture Leads": {
+      "main": [
+        [
+          {
+            "node": "Code - Filter and Map Evergreen Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Filter and Map Evergreen Leads": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Add to Evergreen Segment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Add to Evergreen Segment": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Update Evergreen Position",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Cron - Daily 08:00": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "3f4aeca8-e3ce-4b12-811d-7994b1d418f7",
+  "activeVersionId": "3f4aeca8-e3ce-4b12-811d-7994b1d418f7",
+  "versionCounter": 7,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-05-14T19:43:04.974Z",
+      "createdAt": "2026-05-14T19:43:04.974Z",
+      "role": "workflow:owner",
+      "workflowId": "pUaGat8invCLmFx1",
+      "projectId": "ROWWTo0FQLcxZajT",
+      "project": {
+        "updatedAt": "2026-03-21T16:42:22.082Z",
+        "createdAt": "2025-12-09T17:32:24.857Z",
+        "id": "ROWWTo0FQLcxZajT",
+        "name": "Unnamed Project",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-14T19:51:37.635Z",
+    "createdAt": "2026-05-14T19:51:37.635Z",
+    "versionId": "3f4aeca8-e3ce-4b12-811d-7994b1d418f7",
+    "workflowId": "pUaGat8invCLmFx1",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "days",
+                "daysInterval": 1,
+                "triggerAtHour": 8
+              }
+            ]
+          }
+        },
+        "id": "cron-daily",
+        "name": "Cron - Daily 08:00",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://mautic.hl-support.biz/api/contacts?search=ac_nurture_stopped:0&limit=500&start=0",
+          "authentication": "genericCredentialType",
+          "options": {},
+          "genericAuthType": "httpBasicAuth"
+        },
+        "id": "mautic-get-active-leads",
+        "name": "Mautic - Get Active Nurture Leads",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          240,
+          0
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const response = $json;\nconst contacts = Object.values(response.contacts || {});\n\nconst today = new Date();\n\nreturn contacts\n  .filter(contact => {\n    const fields = contact.fields?.all || {};\n    const nurtureStoppedRaw = fields.ac_nurture_stopped;\n    if (nurtureStoppedRaw === true || nurtureStoppedRaw === 1 || nurtureStoppedRaw === '1') return false;\n\n    // Check if activation phase is complete: last phase email > 21 days ago\n    const submittedAt = fields.ac_last_form_submitted_at;\n    if (!submittedAt) return false;\n    const submitted = new Date(submittedAt);\n    const daysSinceSubmit = (today - submitted) / (1000 * 60 * 60 * 24);\n    if (daysSinceSubmit < 23) return false; // 21 days activation + 2 day buffer\n\n    return true;\n  })\n  .map(contact => {\n    const fields = contact.fields?.all || {};\n    const evergreen_position = Number(fields.ac_evergreen_position || 0);\n    return {\n      json: {\n        mauticContactId: contact.id,\n        contact_id: fields.ac_contact_id || '',\n        evergreen_position,\n        next_position: evergreen_position + 1,\n        profile: fields.ac_last_profile || '',\n        language: fields.ac_last_form_language || 'de'\n      }\n    };\n  });"
+        },
+        "id": "code-filter-and-map-evergreen",
+        "name": "Code - Filter and Map Evergreen Leads",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          480,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://mautic.hl-support.biz/api/segments/ac-nurture-evergreen/contact/' + $json.mauticContactId + '/add' }}",
+          "authentication": "genericCredentialType",
+          "options": {},
+          "genericAuthType": "httpBasicAuth"
+        },
+        "id": "mautic-add-to-evergreen-segment",
+        "name": "Mautic - Add to Evergreen Segment",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          720,
+          0
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "PATCH",
+          "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $('Code - Filter and Map Evergreen Leads').item.json.mauticContactId + '/edit' }}",
+          "authentication": "genericCredentialType",
+          "body": {
+            "specifyBody": "json",
+            "jsonBody": "={{ { ac_evergreen_position: $('Code - Filter and Map Evergreen Leads').item.json.next_position } }}"
+          },
+          "options": {},
+          "genericAuthType": "httpBasicAuth"
+        },
+        "id": "mautic-update-evergreen-position",
+        "name": "Mautic - Update Evergreen Position",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          960,
+          0
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Cron - Daily 08:00": {
+        "main": [
+          [
+            {
+              "node": "Mautic - Get Active Nurture Leads",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mautic - Get Active Nurture Leads": {
+        "main": [
+          [
+            {
+              "node": "Code - Filter and Map Evergreen Leads",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code - Filter and Map Evergreen Leads": {
+        "main": [
+          [
+            {
+              "node": "Mautic - Add to Evergreen Segment",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mautic - Add to Evergreen Segment": {
+        "main": [
+          [
+            {
+              "node": "Mautic - Update Evergreen Position",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Markus Oberhofer",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-14T20:05:25.807Z",
+        "id": 516,
+        "workflowId": "pUaGat8invCLmFx1",
+        "versionId": "3f4aeca8-e3ce-4b12-811d-7994b1d418f7",
+        "event": "activated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    ]
+  }
+}

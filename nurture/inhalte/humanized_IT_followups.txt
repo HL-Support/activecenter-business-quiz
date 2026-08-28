@@ -1,0 +1,293 @@
+=== EMAIL 114 ===
+NAME: AC Nurture IT - A3 - Vehicle
+SUBJECT: Il primo passo non richiede un piano perfetto
+
+Ciao {contactfield=firstname},
+
+<strong>Non devi avere già un piano.</strong> 🧭
+
+La parte 1 serve proprio a questo. Il tuo risultato indica una direzione. Ora ti serve un primo sguardo chiaro: questo percorso può fare per te?
+
+Forse ti stai chiedendo: "Da dove inizierei?" È normale. Prima di una decisione vera serve orientamento.
+
+<strong>La parte 1 mette ordine.</strong> Vedi di cosa si tratta, che tipo di persona può trovarsi bene in questo percorso e se ti riconosci.
+
+👉 <strong>Clicca ora sulla parte 1.</strong> Non devi preparare nulla. Bastano pochi minuti tranquilli e uno sguardo sincero.
+
+CTA: Inizia la parte 1 | {contactfield=ac_last_video_access_url}&acn_phase=A3&acn_email=114
+
+=== EMAIL 115 ===
+NAME: AC Nurture IT - A3 - Community
+SUBJECT: Non devi capirlo tutto da solo
+
+Ciao {contactfield=firstname},
+
+<strong>Alcune decisioni diventano più chiare quando non restano solo nella tua testa.</strong> 🤝
+
+Forse hai visto il tuo risultato e poi non hai ancora iniziato. Forse non sai se questo percorso fa davvero per te.
+
+Non devi capirlo tutto da solo.
+
+<strong>La parte 1 ti mostra prima il modello e il contesto.</strong> Vedi se ti sembra pressione o se invece può darti chiarezza.
+
+Per il tuo tipo lo sentirai abbastanza presto: suona umano e coerente, oppure no.
+
+👉 <strong>Clicca ora sulla parte 1.</strong> Non per decidere subito. Solo per farti una prima idea seria.
+
+CTA: Inizia la parte 1 | {contactfield=ac_last_video_access_url}&acn_phase=A3&acn_email=115
+
+=== EMAIL 116 ===
+NAME: AC Nurture IT - A3 - Confidence
+SUBJECT: Non devi sentirti già pronto
+
+Ciao {contactfield=firstname},
+
+<strong>All'inizio quasi nessuno si sente pronto.</strong> 📋
+
+Se ti chiedi se sei davvero il tipo giusto per questo, stai prendendo la cosa sul serio. È un buon segno.
+
+La parte 1 non ti chiede una decisione. Ti mostra cosa c'è dietro e se riesci a vederti dentro questa possibilità.
+
+<strong>Non devi sembrare più sicuro di quanto sei.</strong> Guarda il tono, l'approccio e il percorso. Chiediti se ti corrispondono.
+
+Per ora basta questo.
+
+👉 <strong>Clicca ora sulla parte 1.</strong> Dopo ne saprai più di prima. È questo il punto.
+
+CTA: Inizia la parte 1 | {contactfield=ac_last_video_access_url}&acn_phase=A3&acn_email=116
+
+=== EMAIL 117 ===
+NAME: AC Nurture IT - A3 - Opportunity
+SUBJECT: Guarda se questo percorso può fare per te
+
+Ciao {contactfield=firstname},
+
+<strong>Il momento perfetto raramente si presenta con un annuncio.</strong> 🌱
+
+Spesso comincia in modo più semplice. Un pensiero mentre compili il quiz. La sensazione che la prossima fase della tua vita possa essere diversa.
+
+Non devi trasformarlo oggi in una grande decisione. Ma vale la pena seguire per un attimo il motivo per cui hai iniziato.
+
+<strong>La parte 1 ti dà chiarezza senza pressione.</strong> Dopo potrai dire meglio: mi interessa, non fa per me, oppure voglio capire di più.
+
+Per questo passo basta così.
+
+👉 <strong>Clicca ora sulla parte 1.</strong> Guarda se questa opportunità può avere un ruolo per te.
+
+CTA: Inizia la parte 1 | {contactfield=ac_last_video_access_url}&acn_phase=A3&acn_email=117
+
+=== EMAIL 118 ===
+NAME: AC Nurture IT - B2 - Feuer
+SUBJECT: {contactfield=firstname}, ora vedi il sistema
+
+Ciao {contactfield=firstname},
+
+Hai visto la parte 1. <strong>Ora si parla del sistema.</strong> 🔥
+
+Per i "tipi Fuoco" conta il passo successivo. Vuoi sapere cosa faresti, come si parte e se il tuo impegno può davvero portare qualcosa.
+
+Per questo la parte 2 è importante. Il primo interesse diventa un percorso concreto. Vedi quali passi ci sono e se questo modello può entrare nella tua vita quotidiana.
+
+<strong>Se vuoi capire se ne vale la pena per te, ti serve la parte 2.</strong>
+
+👉 <strong>Clicca ora sulla parte 2.</strong> Dopo non sarà più solo un'idea interessante. Potrai valutarla.
+
+CTA: Parte 2 - Capire il sistema | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=118
+
+=== EMAIL 119 ===
+NAME: AC Nurture IT - B2 - Wind
+SUBJECT: {contactfield=firstname}, non devi portarlo avanti da solo
+
+Ciao {contactfield=firstname},
+
+Hai visto la parte 1. <strong>Ora si parla del come.</strong> 🤝
+
+Per i "tipi Vento" una domanda conta molto: con chi faccio questo percorso? Senti in fretta se un ambiente è vero o se suona solo bene.
+
+La parte 2 ti mostra la struttura. Vedi come iniziano le persone, che tipo di supporto ricevono e dove la relazione entra in un sistema chiaro.
+
+<strong>Non devi diventare più rumoroso.</strong> Devi solo capire come il tuo modo naturale di entrare in contatto con le persone può essere usato bene.
+
+👉 <strong>Clicca ora sulla parte 2.</strong> Guarda se questo sistema ti sembra umano e giusto per te.
+
+CTA: Parte 2 - Capire il sistema | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=119
+
+=== EMAIL 120 ===
+NAME: AC Nurture IT - B2 - Wasser
+SUBJECT: {contactfield=firstname}, il prossimo passo è la struttura
+
+Ciao {contactfield=firstname},
+
+Hai visto la parte 1. <strong>Ora ti serve una sequenza chiara.</strong> 📋
+
+Per i "tipi Acqua" conta la sicurezza del processo. Vuoi capire cosa viene prima, cosa viene dopo e chi ti sostiene.
+
+La parte 2 fa proprio questo. Il modello viene spiegato passo dopo passo. Vedi come può essere l'inizio e cosa non deve succedere tutto subito.
+
+<strong>Un buon percorso non sembra caotico.</strong> Diventa gestibile quando lo vedi con chiarezza.
+
+👉 <strong>Clicca ora sulla parte 2.</strong> Dopo potrai valutare con più calma se questo percorso entra nella tua vita.
+
+CTA: Parte 2 - Capire il sistema | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=120
+
+=== EMAIL 121 ===
+NAME: AC Nurture IT - B2 - Fels
+SUBJECT: {contactfield=firstname}, ora valuta la struttura
+
+Ciao {contactfield=firstname},
+
+Hai visto la parte 1. <strong>Ora arriva la struttura.</strong> 🔍
+
+Per i "tipi Roccia" una buona sensazione non basta. Vuoi capire perché qualcosa funziona e quale logica c'è dietro.
+
+La parte 2 serve a questo. L'idea diventa un sistema che puoi valutare. Vedi i passi, il supporto e anche i criteri con cui giudicare il percorso.
+
+<strong>Non devi credere a niente sulla fiducia.</strong> Guarda la struttura. Poi puoi decidere meglio.
+
+👉 <strong>Clicca ora sulla parte 2.</strong> La parte 2 ti mostra cosa c'è dietro il primo impatto.
+
+CTA: Parte 2 - Capire il sistema | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=121
+
+=== EMAIL 122 ===
+NAME: AC Nurture IT - C2 - Feuer
+SUBJECT: {contactfield=firstname}, ora servono persone reali
+
+Ciao {contactfield=firstname},
+
+Hai visto la parte 1 e la parte 2. <strong>Ora arriva il confronto con la realtà.</strong> 🔥
+
+Per i "tipi Fuoco" conta quello che ne nasce. Non vuoi solo sapere se un'idea suona bene. Vuoi vedere cosa ne fanno le persone.
+
+La parte 3 mostra esperienze vere. Situazioni diverse, partenze diverse, risultati concreti. Non come spettacolo. Come confronto.
+
+<strong>Non cercare la perfezione.</strong> Chiediti in quale storia pensi: questo potrebbe essere il mio prossimo passo.
+
+👉 <strong>Clicca ora sulla parte 3.</strong> Dopo non hai solo un modello. Hai punti di riferimento reali.
+
+CTA: Parte 3 - Guardare esperienze reali | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=122
+
+=== EMAIL 123 ===
+NAME: AC Nurture IT - C2 - Wind
+SUBJECT: {contactfield=firstname}, guarda le persone
+
+Ciao {contactfield=firstname},
+
+Hai visto l'idea. Hai visto il sistema. <strong>Ora mancano le persone.</strong> 🤝
+
+Per i "tipi Vento" spesso è il punto più importante. L'energia è giusta? Sembra autentico? Riesco a immaginare queste persone accanto a me?
+
+La parte 3 ti dà questo sguardo. Niente altra teoria. Persone, storie, situazioni vere.
+
+<strong>Non devi giudicare tutto.</strong> A volte basta una storia in cui ti riconosci.
+
+👉 <strong>Clicca ora sulla parte 3.</strong> Non cercare una vetrina perfetta. Cerca riconoscimento.
+
+CTA: Parte 3 - Guardare esperienze reali | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=123
+
+=== EMAIL 124 ===
+NAME: AC Nurture IT - C2 - Wasser
+SUBJECT: {contactfield=firstname}, ora vedi partenze vere
+
+Ciao {contactfield=firstname},
+
+Hai visto due parti. <strong>Ora diventa più umano.</strong> 📋
+
+Per i "tipi Acqua" la pura logica raramente basta. Vuoi sentire se un percorso è abbastanza solido.
+
+La parte 3 ti mostra persone che non sono partite perfette. Proprio per questo è utile. Non vedi solo il risultato. Vedi anche il percorso.
+
+<strong>Per una decisione serena ti serve un quadro completo.</strong> La parte 3 è il pezzo che manca.
+
+👉 <strong>Clicca ora sulla parte 3.</strong> Dopo non devi più immaginare come si sente questo percorso nella vita reale.
+
+CTA: Parte 3 - Guardare esperienze reali | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=124
+
+=== EMAIL 125 ===
+NAME: AC Nurture IT - C2 - Fels
+SUBJECT: {contactfield=firstname}, questo percorso fa davvero per te?
+
+Ciao {contactfield=firstname},
+
+Dopo la parte 2 resta spesso una domanda. <strong>Questo percorso è adatto a una persona come me?</strong> 🔍
+
+Per i "tipi Roccia" non è un dettaglio. Un modello può sembrare logico e non essere adatto a te come persona.
+
+La parte 3 ti dà il controllo che manca. Vedi esperienze, non solo affermazioni. Capisci che tipo di persona entra in questo percorso e quali domande nascono lungo la strada.
+
+<strong>Si tratta di compatibilità.</strong> Questo percorso si adatta a te, al tuo modo di essere e alla tua vita quotidiana?
+
+👉 <strong>Clicca ora sulla parte 3.</strong> Dopo potrai valutare con più precisione.
+
+CTA: Parte 3 - Guardare esperienze reali | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=125
+
+=== EMAIL 126 ===
+NAME: AC Nurture IT - D2 - Vehicle
+SUBJECT: Il tuo prossimo passo può essere piccolo
+
+Ciao {contactfield=firstname},
+
+Hai visto tutte e tre le parti. <strong>Ora non serve un piano perfetto.</strong> 📌
+
+Forse la domanda aperta è proprio questa: da dove inizierei?
+
+Non devi risolverla da solo. Il prossimo passo è solo un breve segnale a {contactfield=ac_berater_vorname}: mi interessa, sono incerto, oppure in questo momento non è adatto.
+
+<strong>Da quel segnale può nascere la conversazione giusta.</strong> Così {contactfield=ac_berater_vorname} può guardare con te quale punto di partenza ha senso per la tua situazione.
+
+👉 <strong>Clicca ora sull'ultimo passo.</strong> Basta una risposta sincera.
+
+CTA: Aggiorna {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=126
+
+=== EMAIL 127 ===
+NAME: AC Nurture IT - D2 - Community
+SUBJECT: Il prossimo passo è una breve conversazione
+
+Ciao {contactfield=firstname},
+
+Hai visto tutto. <strong>Ora conta il contatto.</strong> 🤝
+
+Non come pressione. Come confronto. Un percorso così diventa più semplice quando non devi ordinare ogni dettaglio da solo.
+
+{contactfield=ac_berater_vorname} è lì per questo. Dai solo un breve segnale su dove sei. Poi può nascere una conversazione vera, se per te ha senso.
+
+<strong>Non devi valutare tutto da solo.</strong> Parli con una persona che conosce il percorso e ti aiuta a fare chiarezza in modo onesto.
+
+👉 <strong>Clicca ora sull'ultimo passo.</strong> Dì solo se ti interessa o se in questo momento non è il momento giusto.
+
+CTA: Aggiorna {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=127
+
+=== EMAIL 128 ===
+NAME: AC Nurture IT - D2 - Confidence
+SUBJECT: La sicurezza cresce parlando
+
+Ciao {contactfield=firstname},
+
+Hai visto le tre parti. <strong>L'incertezza può esserci lo stesso.</strong> 🔎
+
+Forse la domanda non è se il modello è interessante. Forse la domanda è: me lo sento davvero?
+
+Questa sicurezza nasce raramente continuando a pensarci da soli. Nasce in una conversazione con qualcuno che ascolta la tua situazione e ti dice con sincerità cosa vede.
+
+<strong>L'ultimo passo non ti obbliga a nulla.</strong> Porta chiarezza a una domanda che altrimenti resta in testa.
+
+👉 <strong>Clicca ora sull'ultimo passo.</strong> Fai sapere a {contactfield=ac_berater_vorname} dove sei.
+
+CTA: Aggiorna {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=128
+
+=== EMAIL 129 ===
+NAME: AC Nurture IT - D2 - Opportunity
+SUBJECT: Se sei aperto, dai un breve segnale
+
+Ciao {contactfield=firstname},
+
+Hai visto tutto. <strong>Ora serve una risposta sincera.</strong> 📌
+
+Forse non è ancora un sì netto. Non deve esserlo. Se però senti che qualcosa c'è, resta un attimo su questo punto.
+
+L'ultimo passo è piccolo. Dici a {contactfield=ac_berater_vorname} se ti interessa, se sei incerto o se in questo momento non è adatto.
+
+<strong>Non è una grande decisione.</strong> È un breve segnale, così quel pensiero diventa una risposta chiara.
+
+👉 <strong>Clicca ora sull'ultimo passo.</strong> Dopo {contactfield=ac_berater_vorname} sa dove sei.
+
+CTA: Aggiorna {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=129

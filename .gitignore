@@ -27,3 +27,8 @@ e2e-artifacts/
 # Laufberichte des Backfills - lokale Arbeitsartefakte mit lead_hash-Werten,
 # gehoeren nicht ins Repo (versehentlich mitcommittet am 27.08., sofort entfernt).
 backfill-antworten-*-bericht.json
+
+# Nurture-Zusammenzug 28.08.2026: Bauschutt der Review-App
+nurture/review-app/node_modules
+nurture/review-app/.next
+nurture/skripte/__pycache__

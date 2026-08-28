@@ -1,0 +1,293 @@
+=== EMAIL 130 ===
+NAME: AC Nurture EN - A3 - Vehicle
+SUBJECT: Your first step does not need a finished plan
+
+Hi {contactfield=firstname},
+
+<strong>You do not need a plan yet.</strong> 🧭
+
+That is what part 1 is for. Your result points in a direction. Now you need one clear first look: could this path fit you?
+
+Maybe you are asking yourself: "Where would I even start?" That is normal. Before a real decision, you need orientation.
+
+<strong>Part 1 brings order.</strong> You see what this is about, what kind of person fits this path, and whether you recognize yourself in it.
+
+👉 <strong>Click on part 1 now.</strong> You do not need to prepare anything. Just a few quiet minutes and an honest look.
+
+CTA: Start part 1 | {contactfield=ac_last_video_access_url}&acn_phase=A3&acn_email=130
+
+=== EMAIL 131 ===
+NAME: AC Nurture EN - A3 - Community
+SUBJECT: You do not have to figure this out alone
+
+Hi {contactfield=firstname},
+
+<strong>Some decisions get clearer when they do not stay only in your head.</strong> 🤝
+
+Maybe you saw your result and still did not start. Maybe you are not sure if you really fit into this.
+
+You do not have to figure that out alone.
+
+<strong>Part 1 first shows you the model and the setting behind it.</strong> You see whether it feels like pressure or like a place that can give you clarity.
+
+With your type, you will feel quite quickly whether it feels human and right.
+
+👉 <strong>Click on part 1 now.</strong> Not to make a final decision. Just to get a clean first impression.
+
+CTA: Start part 1 | {contactfield=ac_last_video_access_url}&acn_phase=A3&acn_email=131
+
+=== EMAIL 132 ===
+NAME: AC Nurture EN - A3 - Confidence
+SUBJECT: You do not have to feel ready yet
+
+Hi {contactfield=firstname},
+
+<strong>Almost nobody feels ready at the beginning.</strong> 📋
+
+If you are asking yourself whether you are the right type for this, you are taking it seriously. That is a good sign.
+
+Part 1 does not ask you for a decision. It shows you what stands behind this opportunity and whether you can see yourself in it.
+
+<strong>You do not have to make yourself look more confident than you are.</strong> Watch the tone, the approach, and the path. See if they fit you.
+
+That is enough for now.
+
+👉 <strong>Click on part 1 now.</strong> After that, you will know more than before. That is the point.
+
+CTA: Start part 1 | {contactfield=ac_last_video_access_url}&acn_phase=A3&acn_email=132
+
+=== EMAIL 133 ===
+NAME: AC Nurture EN - A3 - Opportunity
+SUBJECT: Take a quick look at whether this could fit
+
+Hi {contactfield=firstname},
+
+<strong>The perfect moment rarely announces itself first.</strong> 🌱
+
+It often starts smaller. A thought while filling out the quiz. The feeling that the next phase of life could look different.
+
+You do not have to turn this into a big decision today. But it is worth following the moment that made you start.
+
+<strong>Part 1 gives you clarity without pressure.</strong> After that, you can say more honestly: interesting, not for me, or I want to understand more.
+
+That is all this step needs.
+
+👉 <strong>Click on part 1 now.</strong> See whether this opportunity could play a role for you.
+
+CTA: Start part 1 | {contactfield=ac_last_video_access_url}&acn_phase=A3&acn_email=133
+
+=== EMAIL 134 ===
+NAME: AC Nurture EN - B2 - Feuer
+SUBJECT: {contactfield=firstname}, now you see the system
+
+Hi {contactfield=firstname},
+
+You watched part 1. <strong>Now it is about the system.</strong> 🔥
+
+For "Fire types", the next step matters. You want to know what you would actually do, how the start looks, and whether your effort can create something real.
+
+That is why part 2 matters. The first impression becomes a concrete path. You see the steps and whether this model can fit into your everyday life.
+
+<strong>If you want to check whether this is worth it for you, you need part 2.</strong>
+
+👉 <strong>Click on part 2 now.</strong> After that, the model is no longer just interesting. You can judge it.
+
+CTA: Part 2 - Understand the system | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=134
+
+=== EMAIL 135 ===
+NAME: AC Nurture EN - B2 - Wind
+SUBJECT: {contactfield=firstname}, you do not have to carry this alone
+
+Hi {contactfield=firstname},
+
+You watched part 1. <strong>Now it is about the how.</strong> 🤝
+
+For "Wind types", one question matters: who would I walk this path with? You feel quickly whether an environment is real or just sounds good.
+
+Part 2 shows you the structure behind it. You see how people start, what kind of support exists, and where connection fits into a clear system.
+
+<strong>You do not have to become louder.</strong> You just need to understand how your natural contact with people can be used well.
+
+👉 <strong>Click on part 2 now.</strong> See whether this system feels human and right for you.
+
+CTA: Part 2 - Understand the system | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=135
+
+=== EMAIL 136 ===
+NAME: AC Nurture EN - B2 - Wasser
+SUBJECT: {contactfield=firstname}, the next step is structure
+
+Hi {contactfield=firstname},
+
+You watched part 1. <strong>Now you need a clear order.</strong> 📋
+
+For "Water types", safety in the process matters. You want to understand what comes first, what comes later, and who supports you.
+
+That is exactly what part 2 does. The model is explained step by step. You see how the start can look and what does not need to happen all at once.
+
+<strong>A good path does not feel chaotic.</strong> It becomes manageable when you can see it clearly.
+
+👉 <strong>Click on part 2 now.</strong> After that, you can judge more calmly whether this path fits your life.
+
+CTA: Part 2 - Understand the system | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=136
+
+=== EMAIL 137 ===
+NAME: AC Nurture EN - B2 - Fels
+SUBJECT: {contactfield=firstname}, now check the structure
+
+Hi {contactfield=firstname},
+
+You watched part 1. <strong>Now comes the structure.</strong> 🔍
+
+For "Stone types", a strong feeling is rarely enough. You want to know why something works and what logic stands behind it.
+
+Part 2 is made for that. The idea becomes a system you can check. You see the steps, the support, and the criteria you can use to judge the path.
+
+<strong>You do not have to believe anything blindly.</strong> Look at the structure. Then you can decide more clearly.
+
+👉 <strong>Click on part 2 now.</strong> Part 2 shows you what stands behind the first impression.
+
+CTA: Part 2 - Understand the system | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=137
+
+=== EMAIL 138 ===
+NAME: AC Nurture EN - C2 - Feuer
+SUBJECT: {contactfield=firstname}, now you need real people
+
+Hi {contactfield=firstname},
+
+You watched part 1 and part 2. <strong>Now comes the reality check.</strong> 🔥
+
+For "Fire types", what comes out of it matters. You do not only want to know whether an idea sounds good. You want to see what people do with it.
+
+Part 3 shows real experiences. Different situations, different starts, clear results. Not as a show. As a comparison.
+
+<strong>Do not look for perfection.</strong> Ask yourself which story makes you think: this could be my next step.
+
+👉 <strong>Click on part 3 now.</strong> After that, you have more than a model. You have real reference points.
+
+CTA: Part 3 - Watch real experiences | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=138
+
+=== EMAIL 139 ===
+NAME: AC Nurture EN - C2 - Wind
+SUBJECT: {contactfield=firstname}, look at the people
+
+Hi {contactfield=firstname},
+
+You saw the idea. You saw the structure. <strong>Now the people are missing.</strong> 🤝
+
+For "Wind types", this is often the most important point. Does the energy fit? Does it feel real? Can I imagine these people beside me?
+
+Part 3 gives you that view. No more theory. People, stories, real situations.
+
+<strong>You do not have to judge everything.</strong> One story where you recognize yourself can be enough.
+
+👉 <strong>Click on part 3 now.</strong> Do not look for a polished show. Look for recognition.
+
+CTA: Part 3 - Watch real experiences | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=139
+
+=== EMAIL 140 ===
+NAME: AC Nurture EN - C2 - Wasser
+SUBJECT: {contactfield=firstname}, now you see real starts
+
+Hi {contactfield=firstname},
+
+You watched two parts. <strong>Now it gets more human.</strong> 📋
+
+For "Water types", pure logic is rarely enough. You want to feel whether a path is solid enough.
+
+Part 3 shows you people who did not start perfectly. That is what makes it useful. You do not only see the result. You also see the path.
+
+<strong>For a calm decision, you need the full picture.</strong> Part 3 is the missing piece.
+
+👉 <strong>Click on part 3 now.</strong> After that, you do not have to guess how this path feels in real life.
+
+CTA: Part 3 - Watch real experiences | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=140
+
+=== EMAIL 141 ===
+NAME: AC Nurture EN - C2 - Fels
+SUBJECT: {contactfield=firstname}, does this really fit you?
+
+Hi {contactfield=firstname},
+
+After part 2, one question often stays open. <strong>Does this really fit someone like me?</strong> 🔍
+
+For "Stone types", that is not a small detail. A model can sound logical and still not fit you as a person.
+
+Part 3 gives you the missing check. You see experiences, not only claims. You see what kind of person walks this path and what questions come up along the way.
+
+<strong>This is about fit.</strong> Does this path fit you, your nature, and your everyday life?
+
+👉 <strong>Click on part 3 now.</strong> After that, you can judge it more clearly.
+
+CTA: Part 3 - Watch real experiences | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=141
+
+=== EMAIL 142 ===
+NAME: AC Nurture EN - D2 - Vehicle
+SUBJECT: Your next step can be small
+
+Hi {contactfield=firstname},
+
+You watched all three parts. <strong>Now this is not about a perfect plan.</strong> 📌
+
+Maybe the open question is simple: where would I even start?
+
+You do not have to solve that alone. The next step is just a quick signal to {contactfield=ac_berater_vorname}: interested, unsure, or not the right time.
+
+<strong>That signal can start the right conversation.</strong> Then {contactfield=ac_berater_vorname} can look with you at what starting point makes sense for your situation.
+
+👉 <strong>Click on the last step now.</strong> An honest answer is enough.
+
+CTA: Update {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=142
+
+=== EMAIL 143 ===
+NAME: AC Nurture EN - D2 - Community
+SUBJECT: The next step is a short conversation
+
+Hi {contactfield=firstname},
+
+You saw everything. <strong>Now contact matters.</strong> 🤝
+
+Not as pressure. As a check-in. A path like this gets easier when you do not have to sort every detail alone.
+
+{contactfield=ac_berater_vorname} is there for exactly that. You give a quick signal about where you stand. Then a real conversation can happen, if it fits for you.
+
+<strong>You do not have to judge this alone.</strong> You speak with someone who knows the path and can help you sort it honestly.
+
+👉 <strong>Click on the last step now.</strong> Say briefly whether it is interesting or not the right time.
+
+CTA: Update {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=143
+
+=== EMAIL 144 ===
+NAME: AC Nurture EN - D2 - Confidence
+SUBJECT: More certainty comes through a conversation
+
+Hi {contactfield=firstname},
+
+You watched the three parts. <strong>Uncertainty can still be there.</strong> 🔎
+
+Maybe the open question is not whether the model is interesting. Maybe the question is: do I really trust myself to do this?
+
+That kind of certainty rarely comes from thinking about it alone. It comes through a conversation with someone who hears your situation and tells you honestly what they see.
+
+<strong>The last step does not commit you to anything.</strong> It brings clarity to a question that would otherwise keep running in your head.
+
+👉 <strong>Click on the last step now.</strong> Let {contactfield=ac_berater_vorname} know where you stand.
+
+CTA: Update {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=144
+
+=== EMAIL 145 ===
+NAME: AC Nurture EN - D2 - Opportunity
+SUBJECT: If you are open, send a quick signal
+
+Hi {contactfield=firstname},
+
+You saw everything. <strong>Now it is time for an honest answer.</strong> 📌
+
+Maybe it is not a clear yes yet. It does not have to be. But if you feel there is something here, stay with it for one more moment.
+
+The last step is small. You tell {contactfield=ac_berater_vorname} whether you are interested, unsure, or whether it does not fit right now.
+
+<strong>This is not a big decision.</strong> It is a quick signal, so the thought turns into a clear answer.
+
+👉 <strong>Click on the last step now.</strong> After that, {contactfield=ac_berater_vorname} knows where you stand.
+
+CTA: Update {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=145

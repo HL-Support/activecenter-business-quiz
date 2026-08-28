@@ -1,0 +1,117 @@
+{
+  "name": "AC - Quiz Evergreen Scheduler",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "days", "daysInterval": 1, "triggerAtHour": 8 }]
+        }
+      },
+      "id": "cron-daily",
+      "name": "Cron - Daily 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://mautic.hl-support.biz/api/contacts?search=ac_nurture_stopped:0&limit=500&start=0",
+        "authentication": "oAuth2",
+        "options": {}
+      },
+      "id": "mautic-get-active-leads",
+      "name": "Mautic - Get Active Nurture Leads",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 0],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "MAUTIC_OAUTH2_CRED_ID",
+          "name": "Mautic OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json;\nconst contacts = Object.values(response.contacts || {});\n\nconst today = new Date();\n\nreturn contacts\n  .filter(contact => {\n    const fields = contact.fields?.all || {};\n    const nurtureStoppedRaw = fields.ac_nurture_stopped;\n    if (nurtureStoppedRaw === true || nurtureStoppedRaw === 1 || nurtureStoppedRaw === '1') return false;\n\n    // Check if activation phase is complete: last phase email > 21 days ago\n    const submittedAt = fields.ac_last_form_submitted_at;\n    if (!submittedAt) return false;\n    const submitted = new Date(submittedAt);\n    const daysSinceSubmit = (today - submitted) / (1000 * 60 * 60 * 24);\n    if (daysSinceSubmit < 23) return false; // 21 days activation + 2 day buffer\n\n    return true;\n  })\n  .map(contact => {\n    const fields = contact.fields?.all || {};\n    const evergreen_position = Number(fields.ac_evergreen_position || 0);\n    return {\n      json: {\n        mauticContactId: contact.id,\n        contact_id: fields.ac_contact_id || '',\n        evergreen_position,\n        next_position: evergreen_position + 1,\n        profile: fields.ac_last_profile || '',\n        language: fields.ac_last_form_language || 'de'\n      }\n    };\n  });"
+      },
+      "id": "code-filter-and-map-evergreen",
+      "name": "Code - Filter and Map Evergreen Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://mautic.hl-support.biz/api/segments/ac-nurture-evergreen/contact/' + $json.mauticContactId + '/add' }}",
+        "authentication": "oAuth2",
+        "options": {}
+      },
+      "id": "mautic-add-to-evergreen-segment",
+      "name": "Mautic - Add to Evergreen Segment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 0],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "MAUTIC_OAUTH2_CRED_ID",
+          "name": "Mautic OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $('Code - Filter and Map Evergreen Leads').item.json.mauticContactId + '/edit' }}",
+        "authentication": "oAuth2",
+        "body": {
+          "specifyBody": "json",
+          "jsonBody": "={{ { ac_evergreen_position: $('Code - Filter and Map Evergreen Leads').item.json.next_position } }}"
+        },
+        "options": {}
+      },
+      "id": "mautic-update-evergreen-position",
+      "name": "Mautic - Update Evergreen Position",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 0],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "MAUTIC_OAUTH2_CRED_ID",
+          "name": "Mautic OAuth2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron - Daily 08:00": {
+      "main": [[{ "node": "Mautic - Get Active Nurture Leads", "type": "main", "index": 0 }]]
+    },
+    "Mautic - Get Active Nurture Leads": {
+      "main": [[{ "node": "Code - Filter and Map Evergreen Leads", "type": "main", "index": 0 }]]
+    },
+    "Code - Filter and Map Evergreen Leads": {
+      "main": [[{ "node": "Mautic - Add to Evergreen Segment", "type": "main", "index": 0 }]]
+    },
+    "Mautic - Add to Evergreen Segment": {
+      "main": [[{ "node": "Mautic - Update Evergreen Position", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false,
+  "tags": ["nurture", "evergreen", "business-quiz"],
+  "_setupNotes": {
+    "credentialIds": {
+      "MAUTIC_OAUTH2_CRED_ID": "Replace with your Mautic OAuth2 credential ID in n8n"
+    },
+    "logic": "Daily at 08:00: Finds all leads where activation phase is complete (>23 days since registration) and ac_nurture_stopped is not true. Adds them to ac-nurture-evergreen segment and increments ac_evergreen_position. Mautic campaign reads position and sends the correct evergreen email. Never repeats: position advances each time.",
+    "mauticFields": "Reads: ac_nurture_stopped, ac_last_form_submitted_at, ac_evergreen_position, ac_last_profile, ac_last_form_language. Writes: ac_evergreen_position (+1).",
+    "mauticSegments": "Must have segment: ac-nurture-evergreen created before activating",
+    "scalingNote": "For >500 contacts, add pagination loop over Mautic API (start parameter)"
+  }
+}

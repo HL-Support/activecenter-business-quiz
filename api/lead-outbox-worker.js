@@ -817,6 +817,7 @@ function buildHotLeadEmail({ lead, coach, answers, job }) {
     HtmlBody: html,
     TextBody: text,
     MessageStream: POSTMARK_MESSAGE_STREAM,
+    Tag: 'hot_lead',
     Metadata: {
       lead_hash: lead.lead_hash,
       member_id: safeString(lead.member_id, 80),

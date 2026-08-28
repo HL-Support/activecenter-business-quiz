@@ -2344,6 +2344,7 @@ async function sendIdentityAlertEmail({ payload, error, forwardedFor, userAgent 
       </div>`,
     TextBody: textBody,
     MessageStream: POSTMARK_MESSAGE_STREAM,
+    Tag: 'alert_missing_member_id',
     Metadata: {
       alert_type: 'missing_member_id',
       lead_hash: leadHash,
@@ -2486,6 +2487,7 @@ async function sendPointsResultAlertEmail({ error, context = {}, payload = {}, n
     TextBody: textBody,
     HtmlBody: `<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;">${escapeHtml(textBody)}</pre>`,
     MessageStream: POSTMARK_MESSAGE_STREAM,
+    Tag: 'alert_points_result_failed',
     Metadata: {
       alert_type: 'points_result_update_failed',
       lead_hash: context.leadHash || payload.lead_hash || '',
@@ -3905,6 +3907,7 @@ module.exports = async function handler(req, res) {
       HtmlBody: email.html,
       TextBody: email.text,
       MessageStream: POSTMARK_MESSAGE_STREAM,
+      Tag: 'hot_lead_legacy',
       Metadata: {
         lead_hash: String(context.leadHash || ''),
         session_hash: String(context.sessionHash || ''),

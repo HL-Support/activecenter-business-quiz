@@ -81,14 +81,34 @@ test('kein Runtime-Code referenziert die entfernte Init-Route oder ihr Secret', 
 // 🔴 vercel.json BLEIBT bewusst liegen: Es ist die Spezifikation, die server/http-adapter.js
 // nachbildet (vier Security-Header, Rewrites in fester Reihenfolge), und scripts/verify.js
 // prueft sie bei jedem CI-Lauf. Die Datei ist Sicherheitsnetz, kein Deploy-Artefakt.
-test('die Vercel-Projektbindung ist entfernt und kommt nicht zurueck', () => {
-  const reste = ['.vercel', '.vercelignore'].filter((p) =>
-    fs.existsSync(path.join(projectRoot, p))
-  );
+// 🔴 Seit dem Zusammenzug des Nurture-Systems (28.08.2026) liegt unter nurture/review-app/
+// eine zweite, eigenstaendige Anwendung im Baum - die hatte auf Vercel eine eigene
+// Projektbindung (prj_msoMYiNrOSKSp5WJmIcJ0sGQBJ9y / ac-email-review). Die Wurzelpruefung
+// haette die nicht gesehen. Deshalb sucht der Test jetzt im GESAMTEN Baum.
+function findeVercelReste(startDir) {
+  const treffer = [];
+  const ignorieren = new Set(['node_modules', '.git', '.next', 'dist', '.playwright-cli']);
+  function walk(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (ignorieren.has(entry.name)) continue;
+      const fullPath = path.join(dir, entry.name);
+      if (entry.name === '.vercel' || entry.name === '.vercelignore') {
+        treffer.push(path.relative(startDir, fullPath).split(path.sep).join('/'));
+        continue;
+      }
+      if (entry.isDirectory()) walk(fullPath);
+    }
+  }
+  walk(startDir);
+  return treffer.sort();
+}
+
+test('die Vercel-Projektbindung ist entfernt und kommt nicht zurueck - im ganzen Baum', () => {
+  const reste = findeVercelReste(projectRoot);
   assert.deepEqual(
     reste,
     [],
-    `Vercel-Bindung wieder im Repo: ${reste.join(', ')} - ein Deploy von hier wuerde die Produktion ueberschreiben`
+    `Vercel-Bindung wieder im Repo: ${reste.join(', ')} - ein Deploy von dort wuerde eine Produktion ueberschreiben`
   );
 });
 

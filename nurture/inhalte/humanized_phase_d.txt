@@ -1,0 +1,313 @@
+=== EMAIL 39 ===
+NAME: AC Nurture - D1 - Freedom
+SUBJECT: {contactfield=firstname}, du hast jetzt alles gesehen
+
+Hallo {contactfield=firstname},
+
+<strong>drei Videos. Eine Idee.</strong> 🔓 Ein konkretes Bild davon, wie dein Leben aussehen könnte, wenn der Wecker nicht mehr entscheidet, wann dein Tag beginnt.
+
+<strong>Freiheit beginnt nicht an dem Tag, an dem du kündigst.</strong> Sie beginnt an dem Tag, an dem du eine Entscheidung triffst und mit jemandem sprichst, der den Weg schon kennt.
+
+<strong>Genau diese Person ist {contactfield=ac_berater_vorname}.</strong>
+
+Ein Gespräch, in dem du herausfindest, ob das hier zu dir passt und {contactfield=ac_berater_vorname} herausfindet, ob er dich auf diesem Weg begleiten kann.
+
+Vielleicht hast du {contactfield=ac_berater_vorname} längst direkt geantwortet, per Nachricht oder am Telefon. Dann passt alles, ignorier diese Mail.
+
+Falls nicht: Informiere {contactfield=ac_berater_vorname} mit einem Klick, wo du stehst. <strong>Klingt es interessant für dich? Oder gerade nicht?</strong> Beides ist völlig okay.
+
+CTA: {contactfield=ac_berater_vorname} kurz Bescheid geben | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=39
+
+=== EMAIL 40 ===
+NAME: AC Nurture - D1 - Impact
+SUBJECT: {contactfield=firstname}, was du jetzt weißt
+
+Hallo {contactfield=firstname},
+
+<strong>Du hast alle drei Teile gesehen.</strong> 🎯 Irgendwo in dir ist ein Satz hängen geblieben, der dich nicht mehr loslässt.
+
+<strong>Wirkung entsteht nicht durch das, was du tust. Durch den Menschen, der du dabei wirst.</strong>
+
+Das ist der Punkt, an dem dieses Modell aufhört, ein Geschäft zu sein. Du baust eine Position auf, von der aus andere Menschen anders auf ihr Leben schauen. Weil du anders auf deins schaust.
+
+Genau darüber sprichst du im Erstgespräch mit {contactfield=ac_berater_vorname}. Nicht über Pläne, Pakete, Strukturen. Über eine Frage: <strong>Wo willst du in zwei Jahren stehen? Und wem willst du dann etwas zu sagen haben?</strong> 📌
+
+30 Minuten. Du gehst entweder mit Klarheit raus, dass das hier dein Weg ist. Oder mit der Gewissheit, dass es gerade nicht passt.
+
+Vielleicht hast du {contactfield=ac_berater_vorname} längst direkt geantwortet, per Nachricht oder am Telefon. Dann passt alles, ignorier diese Mail.
+
+Falls nicht: Informiere {contactfield=ac_berater_vorname} mit einem Klick, wo du stehst. <strong>Klingt es interessant für dich? Oder gerade nicht?</strong> Beides ist völlig okay.
+
+CTA: {contactfield=ac_berater_vorname} kurz Bescheid geben | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=40
+
+=== EMAIL 41 ===
+NAME: AC Nurture - D1 - Security
+SUBJECT: {contactfield=firstname}, Sicherheit beginnt mit Klarheit
+
+Hallo {contactfield=firstname},
+
+<strong>Es gibt zwei Arten von Sicherheit.</strong> 🏗️
+
+Die eine kommt von außen. Ein Gehaltszettel, der jeden Monat das Gleiche zeigt. Planbar, abhängig von einer Entscheidung, die nicht du triffst.
+
+<strong>Die andere kommt von innen. Diese Sicherheit kann dir niemand kündigen.</strong>
+
+Du hast in den drei Teilen gesehen, wie dieses Modell funktioniert. Zahlen. Strukturen. Menschen, die es gemacht haben. <strong>Du hast genug gesehen, um zu wissen, dass es real ist.</strong>
+
+Was jetzt fehlt, ist kein weiteres Video. Ein Gespräch, in dem du auf deine Situation schaust. Dein Hintergrund, deine Verpflichtungen. Wie der Weg für DICH konkret aussehen würde.
+
+Genau das macht {contactfield=ac_berater_vorname} im Erstgespräch. Er fragt, er hört zu, er sagt dir ehrlich, ob er einen Weg sieht. 🔎
+
+Vielleicht hast du {contactfield=ac_berater_vorname} längst direkt geantwortet, per Nachricht oder am Telefon. Dann passt alles, ignorier diese Mail.
+
+Falls nicht: Informiere {contactfield=ac_berater_vorname} mit einem Klick, wo du stehst. <strong>Klingt es interessant für dich? Oder gerade nicht?</strong> Beides ist völlig okay.
+
+CTA: {contactfield=ac_berater_vorname} kurz Bescheid geben | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=41
+
+=== EMAIL 42 ===
+NAME: AC Nurture - D1 - Growth
+SUBJECT: {contactfield=firstname}, du bist nicht zufällig hier
+
+Hallo {contactfield=firstname},
+
+<strong>drei Teile. Komplett durchgeschaut.</strong> 🌱 Das machen die wenigsten.
+
+<strong>Wachstum ist eine Entscheidung, die du im Moment triffst, in dem es unbequem wird.</strong> Genau dieser Moment ist jetzt.
+
+Du bist an einem Punkt, an dem du nicht mehr nur überlegst, ob mehr möglich ist. Du weißt es bereits. Du spürst es morgens. Und abends, wenn du dich fragst, ob das wirklich alles war.
+
+Im Gespräch mit {contactfield=ac_berater_vorname} geht es darum, gemeinsam zu schauen, wie der nächste konkrete Schritt für dich aussieht. Was zuerst, was später, wo deine Stärken liegen. 💡
+
+Vielleicht hast du {contactfield=ac_berater_vorname} längst direkt geantwortet, per Nachricht oder am Telefon. Dann passt alles, ignorier diese Mail.
+
+Falls nicht: Informiere {contactfield=ac_berater_vorname} mit einem Klick, wo du stehst. <strong>Klingt es interessant für dich? Oder gerade nicht?</strong> Beides ist völlig okay.
+
+CTA: {contactfield=ac_berater_vorname} kurz Bescheid geben | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=42
+
+=== EMAIL 43 ===
+NAME: AC Nurture - D2 - Vehicle
+SUBJECT: Dein nächster Schritt kann klein sein
+
+Hallo {contactfield=firstname},
+
+Du hast alle drei Teile gesehen. <strong>Jetzt geht es nicht um einen perfekten Plan.</strong> 📌
+
+Vielleicht ist gerade genau das offen: Wo würde ich überhaupt anfangen?
+
+Diese Frage musst du nicht alleine lösen. Der nächste Schritt ist nur eine kurze Rückmeldung an {contactfield=ac_berater_vorname}: interessiert, unsicher oder gerade nicht passend.
+
+<strong>Aus deiner Rückmeldung entsteht das richtige Gespräch.</strong> Dann kann {contactfield=ac_berater_vorname} mit dir schauen, welcher Startpunkt für deine Situation Sinn macht.
+
+👉 <strong>Klick jetzt auf den letzten Schritt.</strong> Eine ehrliche Einordnung reicht.
+
+CTA: {contactfield=ac_berater_vorname} kurz Bescheid geben | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=43
+
+=== EMAIL 44 ===
+NAME: AC Nurture - D2 - Community
+SUBJECT: Der nächste Schritt ist ein kurzes Gespräch
+
+Hallo {contactfield=firstname},
+
+Du hast alles gesehen. <strong>Jetzt zählt der Kontakt.</strong> 🤝
+
+Nicht als Druck. Als Abgleich. Ein Weg wie dieser wird leichter, wenn du nicht jedes Detail allein im Kopf sortieren musst.
+
+{contactfield=ac_berater_vorname} ist genau dafür da. Du gibst kurz Bescheid, wo du stehst. Danach kann daraus ein echtes Gespräch entstehen, falls es für dich passt.
+
+<strong>Du musst das nicht allein bewerten.</strong> Du sprichst mit einem Menschen, der den Weg kennt und ehrlich mit dir einordnet.
+
+👉 <strong>Klick jetzt auf den letzten Schritt.</strong> Sag kurz, ob es interessant ist oder gerade nicht.
+
+CTA: {contactfield=ac_berater_vorname} kurz Bescheid geben | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=44
+
+=== EMAIL 45 ===
+NAME: AC Nurture - D2 - Confidence
+SUBJECT: Mehr Sicherheit entsteht im Gespräch
+
+Hallo {contactfield=firstname},
+
+Du hast die drei Teile gesehen. <strong>Unsicherheit darf trotzdem da sein.</strong> 🔎
+
+Vielleicht ist nicht die Frage offen, ob das Modell interessant ist. Vielleicht ist die Frage: Traue ich mir das wirklich zu?
+
+Diese Sicherheit entsteht selten durch noch mehr Nachdenken. Sie entsteht im Gespräch mit jemandem, der deine Situation hört und ehrlich sagt, was er sieht.
+
+<strong>Der letzte Schritt verpflichtet dich zu nichts.</strong> Er bringt Klarheit in eine Frage, die sonst im Kopf weiterläuft.
+
+👉 <strong>Klick jetzt auf den letzten Schritt.</strong> Gib {contactfield=ac_berater_vorname} kurz Bescheid, wo du stehst.
+
+CTA: {contactfield=ac_berater_vorname} kurz Bescheid geben | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=45
+
+=== EMAIL 46 ===
+NAME: AC Nurture - D2 - Opportunity
+SUBJECT: Wenn du offen bist, sag kurz Bescheid
+
+Hallo {contactfield=firstname},
+
+Du hast alles gesehen. <strong>Jetzt ist der Punkt für eine ehrliche Einordnung.</strong> 📌
+
+Vielleicht ist es noch kein klares Ja. Das muss es auch nicht sein. Wenn du aber spürst, dass da etwas dran ist, bleib kurz dran.
+
+Der letzte Schritt ist klein. Du sagst {contactfield=ac_berater_vorname}, ob es dich interessiert, ob du unsicher bist oder ob es gerade nicht passt.
+
+<strong>Das ist keine große Entscheidung.</strong> Es ist eine kurze Rückmeldung, damit aus dem Gedanken eine klare Antwort wird.
+
+👉 <strong>Klick jetzt auf den letzten Schritt.</strong> Danach weiß {contactfield=ac_berater_vorname}, wo du stehst.
+
+CTA: {contactfield=ac_berater_vorname} kurz Bescheid geben | {contactfield=ac_last_video_access_url}&acn_phase=D2&acn_email=46
+
+=== EMAIL 47 ===
+NAME: AC Nurture - D3 - Goodbye
+SUBJECT: {contactfield=firstname}, eine ehrliche Frage
+
+Hallo {contactfield=firstname},
+
+ich schreibe dir jetzt ohne Verkauf, ohne Argument, ohne Strategie.
+
+Du hast alle drei Videos gesehen. Du weißt, was wir machen. Du weißt, wie es funktioniert. Du weißt, wer dich begleiten würde.
+
+<strong>Die einzige Frage, die übrig bleibt: Was hält dich gerade zurück?</strong>
+
+Vielleicht ist es Timing. Vielleicht ist es Zweifel. Vielleicht ist es etwas, das gar nichts mit uns zu tun hat. Job, Familie, irgendetwas, was im Moment Vorrang hat.
+
+Das ist alles in Ordnung. Wirklich.
+
+Aber wenn es etwas ist, das wir in einem ehrlichen Gespräch klären können, dann schreib kurz auf WhatsApp. Ein Satz reicht. Kein Pitch von meiner Seite, kein Druck. 👇
+
+Nur Klarheit. Für dich.
+
+CTA: Kurz mit {contactfield=ac_berater_vorname} schreiben | https://wa.me/{contactfield=ac_berater_whatsapp}?text=Hallo {contactfield=ac_berater_vorname}, lass uns reden!
+
+=== EMAIL 89 ===
+NAME: AC Nurture - D4 - Feuer
+SUBJECT: {contactfield=firstname}, was du im Gespräch konkret bekommst
+
+Hallo {contactfield=firstname},
+
+du bist jemand, der vor einer Entscheidung wissen will, was sie konkret bringt. Keine Floskeln, keine Inspiration. Ergebnis.
+
+Also lass mich dir konkret sagen, was in den 30 bis 45 Minuten mit {contactfield=ac_berater_vorname} passiert. 📌
+
+Erstens: Eine ehrliche Standortbestimmung. Du sagst, wo du heute stehst. Einkommen, Zeit, Verpflichtungen, Ziel. {contactfield=ac_berater_vorname} sagt dir auf Basis von Erfahrung, ob er einen realistischen Weg sieht.
+
+Zweitens: Konkrete Zahlen. Was ist in 6 Monaten möglich, was in 12, was in 24. Abhängig davon, wie viel Zeit du investierst. Keine Versprechen, sondern Bandbreiten, mit denen du rechnen kannst.
+
+Und drittens: <strong>Du verlässt das Gespräch nicht mit "Ich überleg's mir."</strong> Du verlässt es mit einer klaren Antwort. Ja, das passt. Oder: nein, gerade nicht. Beides ist ein Ergebnis.
+
+Wenn du in den letzten Wochen gespürt hast, dass dir das Modell etwas wert sein könnte, dann ist dieses Gespräch der schnellste Weg, das zu prüfen.
+
+Ein Satz auf WhatsApp. Termin steht innerhalb von 24 Stunden.
+
+CTA: Klare Antworten mit {contactfield=ac_berater_vorname} | https://wa.me/{contactfield=ac_berater_whatsapp}?text=Hallo {contactfield=ac_berater_vorname}, lass uns reden!
+
+=== EMAIL 90 ===
+NAME: AC Nurture - D4 - Wind
+SUBJECT: {contactfield=firstname}, du wärst nicht allein
+
+Hallo {contactfield=firstname},
+
+eine Sache, die ich an dir mag: Du fragst nicht nur "Was bekomme ich?", sondern "Mit wem mache ich das?".
+
+Das ist die klügste Frage überhaupt. Denn auf diesem Weg ist nicht das Modell entscheidend. Sondern der Mensch, der mit dir geht.
+
+Im Erstgespräch mit {contactfield=ac_berater_vorname} geht es genau darum. Keine Präsentation. Ein gegenseitiges Kennenlernen. Du spürst in den ersten zehn Minuten, ob es zwischen euch passt. Er auch.
+
+Und falls es passt: <strong>Du bist von Tag eins nicht allein.</strong> Du hast {contactfield=ac_berater_vorname} als direkten Ansprechpartner. Du hast ein Team um dich herum, das dieselben Werte teilt. Du hast Menschen, mit denen du wachsen kannst, geschäftlich und menschlich. 💡
+
+Genau das ist der Unterschied zwischen "ein Geschäft machen" und "eine Gemeinschaft finden, in der dein Geschäft entsteht".
+
+Du musst dich auf nichts festlegen. Sprich einfach mit ihm. Und merk, wie es sich anfühlt.
+
+CTA: {contactfield=ac_berater_vorname} kennenlernen | https://wa.me/{contactfield=ac_berater_whatsapp}?text=Hallo {contactfield=ac_berater_vorname}, lass uns reden!
+
+=== EMAIL 91 ===
+NAME: AC Nurture - D4 - Wasser
+SUBJECT: {contactfield=firstname}, was im Gespräch passiert, und was nicht
+
+Hallo {contactfield=firstname},
+
+bevor du in ein Gespräch gehst, willst du wissen, was dich erwartet. Kein Überfall, kein Druck, keine Überraschung.
+
+Also transparent: 🔎
+
+Was im Gespräch passiert: Du schreibst {contactfield=ac_berater_vorname} eine kurze Nachricht. Er meldet sich zurück, ihr findet einen Termin, der dir passt. Telefon oder Video, du entscheidest. 30 bis 45 Minuten. Er stellt dir Fragen zu deiner Situation. Du stellst ihm alle Fragen, die du hast. Am Ende habt ihr gemeinsam ein klares Bild, ob es passt.
+
+Was NICHT passiert: Keine Kostenfalle. Keine versteckten Verpflichtungen. Kein "Du musst jetzt unterschreiben". Kein Druck, irgendetwas zu kaufen, beizutreten oder zu entscheiden. Wenn du sagst "Ich muss das in Ruhe überlegen", dann ist das die richtige Antwort. Und die wird respektiert.
+
+<strong>Das Gespräch ist ein Gespräch. Mehr nicht. Aber auch nicht weniger.</strong> Es ist der einzige Weg, von "Ich überlege" zu "Ich weiß" zu kommen.
+
+Wann du soweit bist, entscheidest du. Wenn das jetzt ist, schreib ihm.
+
+CTA: Transparentes Gespräch mit {contactfield=ac_berater_vorname} | https://wa.me/{contactfield=ac_berater_whatsapp}?text=Hallo {contactfield=ac_berater_vorname}, lass uns reden!
+
+=== EMAIL 92 ===
+NAME: AC Nurture - D4 - Fels
+SUBJECT: {contactfield=firstname}, der nächste logische Schritt
+
+Hallo {contactfield=firstname},
+
+du gehst Entscheidungen wie diese strukturiert an. Erst informieren, dann prüfen, dann entscheiden. Das ist der einzige Weg, mit dem du am Ende mit dir selbst im Reinen bist.
+
+Phase 1 abgeschlossen. Information. Drei Videos, das Modell ist klar.
+
+<strong>Phase 2 ist Prüfung. Und Prüfung passiert nicht in deinem Kopf.</strong> Sie passiert im Gespräch mit jemandem, der die Praxis kennt. 📌
+
+Konkret: 30 bis 45 Minuten mit {contactfield=ac_berater_vorname}. In dieser Zeit prüft ihr gemeinsam vier Dinge.
+
+Eins: Passt das Modell strukturell zu deiner Lebenssituation. Zeit, Familie, Beruf.<br>Zwei: Wie sehen die ersten 90 Tage in deinem konkreten Fall aus.<br>Drei: Welche Unterstützung du von {contactfield=ac_berater_vorname} und dem Team konkret bekommst.<br>Vier: Welche Voraussetzungen erfüllt sein müssen, damit der Start sinnvoll ist.
+
+Am Ende des Gesprächs hast du eine strukturierte Grundlage für deine Entscheidung. Kein Gefühl. Eine Grundlage.
+
+Phase 3, die eigentliche Entscheidung, folgt danach. In deinem Tempo.
+
+Eine Nachricht reicht, um Phase 2 zu starten.
+
+CTA: Strukturiertes Gespräch mit {contactfield=ac_berater_vorname} | https://wa.me/{contactfield=ac_berater_whatsapp}?text=Hallo {contactfield=ac_berater_vorname}, lass uns reden!
+
+=== EMAIL 93 ===
+NAME: AC Nurture - D5 - Direkt
+SUBJECT: {contactfield=firstname}, zwei Arten von Menschen
+
+Hallo {contactfield=firstname},
+
+ich habe in den letzten Jahren zwei Arten von Menschen gesehen.
+
+Die einen schauen die Videos, fühlen den Funken, schreiben eine Nachricht. Sie führen das Gespräch. Manche starten. Manche nicht. Aber alle wissen am Ende, woran sie sind.
+
+Die anderen schauen die Videos, fühlen den Funken. Und warten. Auf den besseren Moment. Auf mehr Sicherheit. Auf das Gefühl, "bereit" zu sein.
+
+<strong>Der Unterschied zwischen beiden ist nicht Intelligenz. Nicht Geld. Nicht Zeit.</strong> Es ist eine einzige Sekunde, in der die einen "ja" sagen und die anderen "später". 💡
+
+Ich weiß nicht, zu welcher Gruppe du gehörst. Das entscheidest du.
+
+Aber wenn du heute den Satz schreibst. "Hallo {contactfield=ac_berater_vorname}, ich möchte mit dir sprechen." Dann hast du den Unterschied bereits gemacht.
+
+Alles Weitere ergibt sich.
+
+CTA: Jetzt {contactfield=ac_berater_vorname} schreiben | https://wa.me/{contactfield=ac_berater_whatsapp}?text=Hallo {contactfield=ac_berater_vorname}, lass uns reden!
+
+=== EMAIL 94 ===
+NAME: AC Nurture - D6 - Letzte Nachricht
+SUBJECT: {contactfield=firstname}, eine letzte ehrliche Nachricht
+
+Hallo {contactfield=firstname},
+
+das ist die letzte Email aus dieser Serie.
+
+Du hast in den letzten Wochen alles bekommen, was ich dir ohne persönliches Gespräch geben kann. Drei Videos, in denen das Modell und der Weg klar wurden. Mehrere Emails, in denen ich versucht habe, jeden Einwand ehrlich zu beantworten.
+
+Und du hast bis hierher gelesen. Das ist kein Zufall.
+
+Ab jetzt schreibe ich dir anders. Kein Verkauf mehr. Höchstens ein Update, wenn es etwas wirklich Wichtiges gibt. Kein Druck.
+
+Aber ich will, dass du diese eine Sache mitnimmst, bevor diese Serie für dich endet. 👇
+
+<strong>Der Moment, in dem ein Gespräch mit {contactfield=ac_berater_vorname} dein Leben verändern könnte, ist nicht in einem Jahr.</strong> Er ist nicht "wenn es besser passt". Er ist genau jetzt. Solange das Gefühl noch lebendig ist, das du beim Anschauen der Videos hattest.
+
+In einem Jahr ist dieses Gefühl entweder eine Erinnerung an einen Weg, den du gegangen bist. Oder eine Erinnerung an einen Weg, den du nicht gegangen bist.
+
+Beides ist deine Entscheidung. Und sie wird heute getroffen, nicht morgen.
+
+Eine Nachricht. Ein Satz. Du weißt, wo er ist.
+
+CTA: Letzter Schritt zu {contactfield=ac_berater_vorname} | https://wa.me/{contactfield=ac_berater_whatsapp}?text=Hallo {contactfield=ac_berater_vorname}, lass uns reden!

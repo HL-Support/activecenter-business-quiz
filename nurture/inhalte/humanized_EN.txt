@@ -1,0 +1,291 @@
+=== EMAIL 146 ===
+NAME: AC Nurture EN - A2 - Freedom
+SUBJECT: {contactfield=firstname}, your success code
+
+Hi {contactfield=firstname},
+
+<strong>Your success code says: you are {contactfield=ac_last_profile_label}.</strong> 🔓
+
+People like you do not want to work even more. They want to work differently. A model that belongs to them. One that keeps moving, even when they are not there.
+
+Your result is the starting point. In part 1 you see whether this opportunity could fit you and your next chapter.
+
+<strong>👉 Start with part 1.</strong> After that, you can judge more clearly whether this path feels right for you.
+
+CTA: Start part 1 | {contactfield=ac_last_video_access_url}&acn_phase=A2&acn_email=146
+
+=== EMAIL 147 ===
+NAME: AC Nurture EN - A2 - Impact
+SUBJECT: {contactfield=firstname}, your success code
+
+Hi {contactfield=firstname},
+
+<strong>Your success code says: you are {contactfield=ac_last_profile_label}.</strong> 🎯
+
+You want to reach people. The right people. Not everyone. The ones where something actually lands. People who think differently afterward. Maybe act differently. In a setting that belongs to you.
+
+Your result is the starting point. In part 1 you see whether this opportunity could fit you and your next chapter.
+
+<strong>👉 Start with part 1.</strong> After that, you can judge more clearly whether this path feels right for you.
+
+CTA: Start part 1 | {contactfield=ac_last_video_access_url}&acn_phase=A2&acn_email=147
+
+=== EMAIL 148 ===
+NAME: AC Nurture EN - A2 - Security
+SUBJECT: {contactfield=firstname}, your success code
+
+Hi {contactfield=firstname},
+
+<strong>Your success code says: you are {contactfield=ac_last_profile_label}.</strong> 🏗️
+
+Risk everything or do nothing. Most people only see those two options. What is missing is a third one. A path you can build beside what already exists.
+
+Your result is the starting point. In part 1 you see whether this opportunity could fit you and your next chapter.
+
+<strong>👉 Start with part 1.</strong> After that, you can judge more clearly whether this path feels right for you.
+
+CTA: Start part 1 | {contactfield=ac_last_video_access_url}&acn_phase=A2&acn_email=148
+
+=== EMAIL 149 ===
+NAME: AC Nurture EN - A2 - Growth
+SUBJECT: {contactfield=firstname}, your success code
+
+Hi {contactfield=firstname},
+
+<strong>Your success code says: you are {contactfield=ac_last_profile_label}.</strong> 🌱
+
+Growth is a word almost everyone uses. Very few define it. More income? More responsibility that feels the same as before? Or something else: a role that keeps developing you too.
+
+Your result is the starting point. In part 1 you see whether this opportunity could fit you and your next chapter.
+
+<strong>👉 Start with part 1.</strong> After that, you can judge more clearly whether this path feels right for you.
+
+CTA: Start part 1 | {contactfield=ac_last_video_access_url}&acn_phase=A2&acn_email=149
+
+=== EMAIL 150 ===
+NAME: AC Nurture EN - B1 - Feuer
+SUBJECT: {contactfield=firstname}, now it gets concrete
+
+Hi {contactfield=firstname},
+
+You watched part 1. <strong>That is more than most people do.</strong> 🔥
+
+<strong>Markus showed you what this is about.</strong> Why now can be a good moment. The question at the end is simple: do I want to start changing something myself, or wait until change comes to me?
+
+Part 1 is done. Now comes the key point: how does interest become a clear system?
+
+Part 2 shows you the concrete structure: how you start, who supports you, and how a personal experience can become a real second foundation.
+
+👉 <strong>Click on part 2 now.</strong> After that, you can see more clearly whether this path fits your everyday life.
+
+CTA: Part 2 - Understand the system | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=150
+
+=== EMAIL 151 ===
+NAME: AC Nurture EN - B1 - Wind
+SUBJECT: {contactfield=firstname}, who is in this with you
+
+Hi {contactfield=firstname},
+
+You watched part 1. <strong>Good that you stayed with it.</strong> 🤝
+
+<strong>Markus showed who we are looking for.</strong> People who feel there is more. People who want success without bending themselves into someone else.
+
+Part 1 is done. Now comes the key point: how does interest become a clear system?
+
+Part 2 shows you the concrete structure: how you start, who supports you, and how a personal experience can become a real second foundation.
+
+👉 <strong>Click on part 2 now.</strong> After that, you can see more clearly whether this path fits your everyday life.
+
+CTA: Part 2 - Understand the system | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=151
+
+=== EMAIL 152 ===
+NAME: AC Nurture EN - B1 - Wasser
+SUBJECT: {contactfield=firstname}, the plan behind it
+
+Hi {contactfield=firstname},
+
+You watched part 1. <strong>Good that you took the time.</strong> 📋
+
+<strong>In the first part, you saw the bigger picture.</strong> What this is about and why it matters now. But a picture is not a plan yet.
+
+Part 1 is done. Now comes the key point: how does interest become a clear system?
+
+Part 2 shows you the concrete structure: how you start, who supports you, and how a personal experience can become a real second foundation.
+
+👉 <strong>Click on part 2 now.</strong> After that, you can see more clearly whether this path fits your everyday life.
+
+CTA: Part 2 - Understand the system | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=152
+
+=== EMAIL 153 ===
+NAME: AC Nurture EN - B1 - Fels
+SUBJECT: {contactfield=firstname}, the mechanism
+
+Hi {contactfield=firstname},
+
+You watched part 1. <strong>The model probably makes sense.</strong> 🔍
+
+<strong>In the first part, you saw the what.</strong> You may already have the next question. For someone who likes to understand the structure, that is rarely enough. How exactly does it work? Why should it work for me?
+
+Part 1 is done. Now comes the key point: how does interest become a clear system?
+
+Part 2 shows you the concrete structure: how you start, who supports you, and how a personal experience can become a real second foundation.
+
+👉 <strong>Click on part 2 now.</strong> After that, you can see more clearly whether this path fits your everyday life.
+
+CTA: Part 2 - Understand the system | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=153
+
+=== EMAIL 154 ===
+NAME: AC Nurture EN - C1 - Freedom
+SUBJECT: {contactfield=firstname}, now it gets personal
+
+Hi {contactfield=firstname},
+
+Two parts watched. <strong>Now come the real experiences.</strong> ✨
+
+You know the structure now. In part 3 you see how it feels for real people.
+
+In part 3, you hear from people who started from very different situations: a second job, studying, family, debt, the wish for more freedom.
+
+<strong>Do not look for perfection. Look for recognition.</strong> Which experience sounds like your next step?
+
+👉 <strong>Click on part 3 now.</strong>
+
+CTA: Part 3 - Watch real experiences | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=154
+
+=== EMAIL 155 ===
+NAME: AC Nurture EN - C1 - Impact
+SUBJECT: {contactfield=firstname}, now it gets personal
+
+Hi {contactfield=firstname},
+
+Two parts watched. <strong>Now come the real experiences.</strong> ✨
+
+You know the structure now. In part 3 you see how it feels for real people.
+
+In part 3, you hear from people who started from very different situations: a second job, studying, family, debt, the wish for more freedom.
+
+<strong>Do not look for perfection. Look for recognition.</strong> Which experience sounds like your next step?
+
+👉 <strong>Click on part 3 now.</strong>
+
+CTA: Part 3 - Watch real experiences | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=155
+
+=== EMAIL 156 ===
+NAME: AC Nurture EN - C1 - Security
+SUBJECT: {contactfield=firstname}, now it gets personal
+
+Hi {contactfield=firstname},
+
+Two parts watched. <strong>Now come the real experiences.</strong> ✨
+
+You know the structure now. In part 3 you see how it feels for real people.
+
+In part 3, you hear from people who started from very different situations: a second job, studying, family, debt, the wish for more freedom.
+
+<strong>Do not look for perfection. Look for recognition.</strong> Which experience sounds like your next step?
+
+👉 <strong>Click on part 3 now.</strong>
+
+CTA: Part 3 - Watch real experiences | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=156
+
+=== EMAIL 157 ===
+NAME: AC Nurture EN - C1 - Growth
+SUBJECT: {contactfield=firstname}, now it gets personal
+
+Hi {contactfield=firstname},
+
+Two parts watched. <strong>Now come the real experiences.</strong> ✨
+
+You know the structure now. In part 3 you see how it feels for real people.
+
+In part 3, you hear from people who started from very different situations: a second job, studying, family, debt, the wish for more freedom.
+
+<strong>Do not look for perfection. Look for recognition.</strong> Which experience sounds like your next step?
+
+👉 <strong>Click on part 3 now.</strong>
+
+CTA: Part 3 - Watch real experiences | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=157
+
+=== EMAIL 158 ===
+NAME: AC Nurture EN - D1 - Freedom
+SUBJECT: {contactfield=firstname}, you have seen the full picture
+
+Hi {contactfield=firstname},
+
+<strong>Three videos. One idea.</strong> 🔓 A concrete picture of what life could look like when the alarm clock no longer decides when your day begins.
+
+<strong>Freedom does not start on the day you quit something.</strong> It starts on the day you make a decision and speak with someone who already knows the path.
+
+<strong>That person is {contactfield=ac_berater_vorname}.</strong>
+
+A conversation helps you find out whether this fits you. It also helps {contactfield=ac_berater_vorname} see whether he can support you on this path.
+
+Maybe you already answered {contactfield=ac_berater_vorname} directly, by message or on the phone. If so, all good. You can ignore this email.
+
+If not, let {contactfield=ac_berater_vorname} know where you stand with one click. <strong>Does it feel interesting to you? Or not right now?</strong> Both answers are fine.
+
+CTA: Update {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=158
+
+=== EMAIL 159 ===
+NAME: AC Nurture EN - D1 - Impact
+SUBJECT: {contactfield=firstname}, what you know now
+
+Hi {contactfield=firstname},
+
+<strong>You watched all three parts.</strong> 🎯 Somewhere inside, one sentence probably stayed with you.
+
+<strong>Impact does not come only from what you do. It comes from who you become while doing it.</strong>
+
+That is where this model stops being only a business. You build a position from which other people can look at their lives differently because you start looking at yours differently.
+
+That is what the first conversation with {contactfield=ac_berater_vorname} is for. Not plans, packages, or pressure. One question matters: <strong>Where do you want to stand in two years? And who do you want to be able to help from there?</strong> 📌
+
+Maybe you already answered {contactfield=ac_berater_vorname} directly, by message or on the phone. If so, all good. You can ignore this email.
+
+If not, let {contactfield=ac_berater_vorname} know where you stand with one click. <strong>Does it feel interesting to you? Or not right now?</strong> Both answers are fine.
+
+CTA: Update {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=159
+
+=== EMAIL 160 ===
+NAME: AC Nurture EN - D1 - Security
+SUBJECT: {contactfield=firstname}, certainty starts with clarity
+
+Hi {contactfield=firstname},
+
+<strong>There are two kinds of security.</strong> 🏗️
+
+One comes from the outside. A salary slip that looks the same every month. Predictable, but still dependent on decisions you do not control.
+
+<strong>The other comes from inside. No one can cancel that kind of security.</strong>
+
+In the three parts, you saw how this model works. Numbers. Structure. Real people who have done it. <strong>You have seen enough to know that it is real.</strong>
+
+What is missing now is not another video. It is a conversation about your situation. Your background, your responsibilities, and what this path could look like for you.
+
+That is what {contactfield=ac_berater_vorname} does in the first conversation. He asks, listens, and tells you honestly whether he sees a path. 🔎
+
+Maybe you already answered {contactfield=ac_berater_vorname} directly, by message or on the phone. If so, all good. You can ignore this email.
+
+If not, let {contactfield=ac_berater_vorname} know where you stand with one click. <strong>Does it feel interesting to you? Or not right now?</strong> Both answers are fine.
+
+CTA: Update {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=160
+
+=== EMAIL 161 ===
+NAME: AC Nurture EN - D1 - Growth
+SUBJECT: {contactfield=firstname}, you are not here by accident
+
+Hi {contactfield=firstname},
+
+<strong>Three parts. Watched until the end.</strong> 🌱 Most people do not get that far.
+
+<strong>Growth is a decision you make when things start to feel uncomfortable.</strong> That moment may be now.
+
+You are at a point where you are no longer just wondering whether more is possible. You already know it is. You feel it in the morning. And in the evening, when you ask yourself whether this is really all there is.
+
+In the conversation with {contactfield=ac_berater_vorname}, you look at the next concrete step together. What comes first, what can wait, and where your strengths already are. 💡
+
+Maybe you already answered {contactfield=ac_berater_vorname} directly, by message or on the phone. If so, all good. You can ignore this email.
+
+If not, let {contactfield=ac_berater_vorname} know where you stand with one click. <strong>Does it feel interesting to you? Or not right now?</strong> Both answers are fine.
+
+CTA: Update {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=161
