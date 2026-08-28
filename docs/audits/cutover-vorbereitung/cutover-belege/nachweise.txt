@@ -1,0 +1,27 @@
+  OK      public.lead_state: Quelle 6182 | Ziel 6182
+  OK      public.lead_events: Quelle 109809 | Ziel 109809
+  OK      public.lead_video_progress: Quelle 1899 | Ziel 1899
+  OK      public.lead_answers_current: Quelle 10558 | Ziel 10558
+  OK      public.lead_sync_outbox: Quelle 2462 | Ziel 2462
+  OK      public.lead_profiles: Quelle 723 | Ziel 723
+  OK      public.app_config: Quelle 5 | Ziel 5
+  OK      public.nurture_sequences: Quelle 1 | Ziel 1
+  OK      public.nurture_runs: Quelle 262 | Ziel 262
+  OK      public.nurture_subject_states: Quelle 920 | Ziel 920
+  OK      public.tracking_sessions: Quelle 2009 | Ziel 2009
+  OK      public.tracking_events: Quelle 23758 | Ziel 23758
+  OK      public.tracking_video_progress: Quelle 582 | Ziel 582
+  OK      public.quiz_sessions: Quelle 1394 | Ziel 1394
+  OK      public.lead_migration_unresolved: Quelle 40 | Ziel 40
+  OK      public.lead_contact_crm: Quelle 41 | Ziel 41
+  OK      analytics_internal.event_daily: Quelle 9519 | Ziel 9519
+  OK      analytics_internal.refresh_runs: Quelle 3615 | Ziel 3615
+  OK      quiz_sessions: 46af55cbd1ef… / 46af55cbd1ef…
+  OK      lead_contact_crm: 7184d162087b… / 7184d162087b…
+  OK      tracking_video_progress: bc725e484d6d… / bc725e484d6d…
+  OK      lead_profiles: d3e95c40199e… / d3e95c40199e…
+  OK      nurture_subject_states: 73c5284eca71… / 73c5284eca71…
+  OK      0 echte Waisen erwartet, gefunden 0 (0/0/0/0)
+  OK      lead_events=true lead_sync_outbox=true quiz_sessions=true
+
+Befunde: 0

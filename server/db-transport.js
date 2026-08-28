@@ -106,4 +106,16 @@ async function schliessen() {
   }
 }
 
-module.exports = { MODUS, SCHEMA, istDirekt, direktRequest, schliessen };
+/**
+ * Billige Lebendprobe fuer /health/ready im direkten Modus. Fasst keine Fachtabelle an -
+ * `select 1` beweist genau das, was die Bereitschaft wissen muss: Die Verbindung steht,
+ * die Zugangsdaten stimmen, die Datenbank antwortet innerhalb der Frist.
+ */
+async function pruefeVerbindung() {
+  const sql_ = verbindungHolen();
+  const zeilen = await sql_`select 1 as lebt`;
+  if (!zeilen.length || zeilen[0].lebt !== 1) throw new Error('unerwartete Antwort auf select 1');
+  return true;
+}
+
+module.exports = { MODUS, SCHEMA, istDirekt, direktRequest, pruefeVerbindung, schliessen };

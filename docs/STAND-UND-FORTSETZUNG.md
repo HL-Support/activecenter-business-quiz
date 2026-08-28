@@ -10,6 +10,42 @@ Zeiten sind MESZ, sofern nicht anders angegeben.
 > `D:\OneDrive\Antigravity Laptop\agent-core\governance\GOVERNANCE_RULES.json`.
 > 🔴 R0 gilt immer: keine Eile, alles prüfen, nie gegen echte Daten testen.
 
+> ## 🔴 Zuerst lesen: der Cutover ist erfolgt
+>
+> **Am 28.08.2026, 07:22–07:55 MESZ** ist der Umzug Supabase → Plattform-DB
+> `hl_support` (Schemata `leads`/`leads_analytics`) durchgeführt worden. Die
+> Anwendung läuft mit `LEADS_DB_MODUS=direkt`, Supabase ist schreibgesperrt und
+> eingefroren, das Vercel-Projekt ist pausiert.
+>
+> Alles darunter, was den Cutover als *bevorstehend* beschreibt (§5, §8 Schritt 6),
+> ist damit **überholt**. Protokoll und Belege:
+> [CUTOVER-CHECKLISTE](audits/cutover-vorbereitung/CUTOVER-CHECKLISTE.md).
+>
+> **🔴 Der Cutover ist NICHT das Ende der Supabase-Abhängigkeit.** Der Funnel
+> *schreibt* vollständig in die Plattform-DB. Aber laut
+> `scripts/inventory/supabase-consumers.json` fassen **14 von 26** inventarisierten
+> Verbrauchern Lead-Tabellen an, und mehrere davon **lesen weiter aus Supabase** —
+> und sehen dort seit dem 28.08., 07:25 MESZ **eingefrorene Daten**. In den
+> Edge-Logs nachgewiesen: ein Leser von `v_lead_state_full`, `lead_contact_crm` und
+> `lead_events` aus `eu-central-1` (AWS/Vercel), zuletzt 09:31 MESZ.
+>
+> **Ein echter Regressionsbefund vom 28.08.:** `leads.quiz_sessions` bekommt seit
+> dem Cutover **keine einzige neue Zeile** (neueste Zeile 27.08. 19:48). Ursache:
+> `api/bridge.js` baut an drei Stellen (≈ Z. 2084/2099/2100) die URL **direkt** aus
+> `SUPABASE_URL` statt über den modusbewussten Transport — und prüft die Antwort
+> nicht. Seit der Schreibbarriere antwortet Supabase dort mit **403**, was still
+> verschluckt wird. **Datenverlust begrenzt:** `quiz_sessions` dient nur als
+> Rückfallquelle (`loadLeadFallbackContext`); die Primärtabellen `lead_state`,
+> `lead_events`, `lead_answers_current` und `lead_video_progress` sind vollständig.
+> Fix: dieselben drei Aufrufe über `supabaseRequest` führen und den Status prüfen.
+>
+> **Weiter offen:** Nurture-Sender auf `leads_n8n` umbauen (bleibt bis dahin aus,
+> Wächter W2 schlägt erwartungsgemäß an) · `AC - Error Alert` schreibt weiterhin
+> nach Supabase · Test-DB `business_leads_testimport` löschen · `pgss-monatsreset`
+> reparieren · der **finale CTA nach den Videos** ist nicht automatisiert geprüft
+> (siehe [BROWSERWEG-KETTENTEST](BROWSERWEG-KETTENTEST.md)) · Vercel-Projekt ist
+> **pausiert, aber nicht abgebaut** (vier Domains hängen noch daran).
+
 ---
 
 ## 1. Was dieses Projekt ist
@@ -247,6 +283,8 @@ Alle Zugangsdaten liegen in `C:\Users\Markus\.agent-secrets\agent-secrets.json` 
 | `scripts/phase5-datenprobe.js` | echte Daten in die Test-DB pumpen + Zählparität |
 | `scripts/vercel-abbau-vorbedingungen.js` | misst die Abbau-Tore |
 | `scripts/cutover.js` | **der Cutover selbst**, in Einzelschritten: `pruefen` · `barriere-an` · `stillstand` · `uebertragen` · `nachweisen` · `barriere-aus` |
+| `scripts/cutover-n8n.js` | n8n-Schreiber `stand` / `aus` / `an` — sichert den Ist-Zustand selbst und stellt **ihn** wieder her, nicht pauschal alles |
+| `scripts/cutover-browserweg.js` | **Kettentest mit echten Daten**: echter Funnel im echten Browser gegen die Produktion, 15 Nachweise in der Datenbank bis zum Resume-Link. Grenzen und Nicht-Abgedecktes: [BROWSERWEG-KETTENTEST.md](BROWSERWEG-KETTENTEST.md) |
 | `scripts/cutover-schema-umschreiben.py` | hebt den `pg_dump` auf die Zielschemata — zustandsbehaftet, fasst COPY-Daten nie an |
 | `scripts/stufe-b-beweis.js` | fährt den echten App-Pfad im direkten Modus gegen eine Test-DB (10 Proben) |
 | `scripts/waechter-datenquelle.js` | Umschaltstelle des Wächters (`WAECHTER_QUELLE`) |

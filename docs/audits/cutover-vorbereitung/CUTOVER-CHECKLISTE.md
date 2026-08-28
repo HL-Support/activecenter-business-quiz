@@ -1,5 +1,48 @@
 # Cutover-Checkliste — Supabase → Plattform-Datenbank
 
+> ## ✅ DURCHGEFÜHRT am 28.08.2026, 07:22–07:55 MESZ
+>
+> Der Umzug ist erfolgt und in allen Punkten belegt. Diese Checkliste ist ab hier
+> **Protokoll**, keine Anleitung mehr. Was noch offen ist, steht unter
+> „Was am Folgetag ansteht".
+>
+> **Nicht im geplanten 03:00-Fenster:** Der Wecker lief um 02:45:20, die Sitzung
+> wurde aber erst um 07:18 wieder aufgerufen — das Fenster verstrich unbemerkt.
+> Vor dem Start deshalb zweimal gemessen: 2 Ereignisse in drei Stunden, letztes um
+> 06:38. Auf dieser Grundlage entschieden, sofort zu fahren.
+>
+> | Schritt | Ergebnis |
+> | --- | --- |
+> | 0 Vorbedingungen | 6/6 · GlitchTip 0 Vorfälle · Wächter ohne Alarm |
+> | 1 n8n aus + Barriere | 6 Workflows aus (Zustand gesichert) · `service_role` auf `rxtm` |
+> | 2 Stillstand | zwei identische Messungen im Abstand von 3 min |
+> | 3 Übertragen | 132 MB, 174.013 Zeilen, **22,8 s** |
+> | 4 Nachweise | **18/18 Zeilenzahlen · 5/5 Prüfsummen · 0 Waisen · 3/3 Sequenzen** |
+> | 5 Umschalten | `LEADS_DB_MODUS=direkt` · Redeploy · Browserweg gegen die neue DB **10/10**, später als volle Kette **15/15** |
+> | 6 Wächter | meldet `Quelle: plattform`, keine „Baseline veraltet" |
+> | 7 Nachlauf | pg_cron Job 2 aktiv · n8n wiederhergestellt · Vercel pausiert (503) |
+> | 8 Beobachtung | Outbox 2479 in <1 min auf `done` · pg_cron-Lauf 3616 `complete` · alte DB bewegt sich nicht |
+>
+> **Drei Fehler in den eigenen Skripten, alle im Fenster gefunden und behoben:**
+>
+> 1. `uebertragen` — `umask 077` ließ `/tmp/cutover-ziel.sql` als `0600 root` zurück,
+>    `sudo -u postgres psql -f` bekam „Permission denied". Behoben mit
+>    `chown postgres:postgres` (statt die Rechte zu öffnen — die Datei enthält echte
+>    Kontaktdaten). **Nichts war teilweise eingespielt**, das Ziel war noch leer.
+> 2. `nachweisen`, Prüfsummen — `order by id collate "C"` bricht bei `bigint`
+>    („collations are not supported by type bigint"). Behoben mit `(schlüssel)::text`
+>    vor dem `COLLATE`, auf beiden Seiten identisch.
+> 3. `nachweisen`, Sequenzen — die Prüfung fragte `last_value > max`. `pg_dump` schreibt
+>    aber `setval(N, true)`, damit ist `last_value == max` und der **nächste** Wert erst
+>    `N+1`. Drei gesunde Sequenzen wurden als „ZU NIEDRIG" gemeldet. An einer selbst
+>    angelegten Sequenz gegengeprüft (`setval(112755,true)` → `nextval` = 112756) und
+>    auf `next > max` umgestellt.
+>
+> Dazu zwei Dinge, die nur Handgriffe kosteten: `/root/…sql` ist für `postgres` nicht
+> lesbar (Verzeichnis `0700`) — Dateien über `-f -` per Standardeingabe hereinreichen.
+> Und die **SSH-Ratensperre** des DB-Servers greift bei vielen kurzen Verbindungen;
+> mehrere Abfragen in *eine* Sitzung bündeln.
+
 **Stand: 27.08.2026, 22:00 MESZ · Ausführung geplant für ~03:00 MESZ.**
 
 Dieses Dokument wird in der Cutover-Nacht von oben nach unten abgearbeitet. Es ist so
@@ -100,7 +143,19 @@ node --env-file=.env.prod scripts/cutover.js pruefen
 ```
 **Weiter nur bei 6/6.** Prüft Zielschema, Leere, Rechte, pg_cron, Quell-Cron-Job, `pg_dump`.
 
-Zusätzlich von Hand: GlitchTip ohne offene Vorfälle, letzter Wächterlauf ohne ALARM.
+Dazu die beiden Blicke, die das Skript nicht abdeckt — **beide als Befehl, nicht von Hand**:
+
+```bash
+# GlitchTip: offene Vorfaelle im Projekt business-leads (erwartet: 0)
+T=$(node -e "process.stdout.write(require('C:/Users/Markus/.agent-secrets/agent-secrets.json').glitchtip.readTokenAnalytics)")
+curl -sS -H "Authorization: Bearer $T" \
+  "https://errors.hl-support.biz/api/0/projects/hl-support/business-leads/issues/?query=is:unresolved"
+```
+```bash
+# Letzter Waechterlauf ohne ALARM (Cron laeuft stuendlich zur Minute 37)
+"C:/Windows/System32/OpenSSH/ssh.exe" -i C:/Users/Markus/.ssh/id_rsa root@167.233.251.217 \
+  "tail -60 /var/log/waechter-nurture.log"
+```
 
 ### 1 · Barriere setzen (ca. 03:00)
 
@@ -205,7 +260,27 @@ laufenden Betrieb.)
 > stehen lassen.** Sie kosten nichts und decken den Rückweg ab.
 
 Dann Redeploy. **Nachweis:** `/health/live` trägt den Commit, `/health/ready` antwortet
-200, und ein echter Funnel-Durchlauf erzeugt eine Zeile in `leads.lead_state`.
+200, und ein echter Funnel-Durchlauf erzeugt eine Zeile in `leads.lead_state`:
+
+```bash
+node --env-file=.env.prod scripts/cutover-browserweg.js probe --quelle=plattform
+```
+
+Fährt den **echten** Funnel in einem echten Browser auf `business.activecenter.info`
+— Intro, sechs Fragen, Auswertung, Formular mit echter Adresse, CTA, Videoteil — und
+weist danach **fünfzehn** Punkte in der Zielbank nach, bis hin zum Resume-Link, der
+in einem frischen Browser zurück in den Funnel führt.
+
+📖 **Was er abdeckt und was ausdrücklich nicht:**
+[BROWSERWEG-KETTENTEST.md](../../BROWSERWEG-KETTENTEST.md). Der zweite Teil ist der
+wichtigere — der finale CTA nach den Videos, andere Sprachen, andere Berater und der
+Blick ins MySQL-CRM sind **nicht** abgedeckt.
+
+Aufräumen danach (fasst **nur** den einen `lead_hash` an, ohne `--wirklich` trocken):
+
+```bash
+node --env-file=.env.prod scripts/cutover-browserweg.js aufraeumen <lead_hash> --quelle=plattform --wirklich
+```
 
 🔴 **Kein neuer Build nötig:** Nachgemessen am 27.08. — `postgres.js` und die
 Stufe-B-Dateien liegen bereits im laufenden Image, und der Produktions-Container kann
@@ -303,6 +378,71 @@ müsste dann nachgezogen werden — deshalb: **Schritt 5 erst, wenn Schritt 4 gr
 **Wenn etwas schiefgeht:** `scripts/cutover.js barriere-aus` · `scripts/cutover-n8n.js an` ·
 `LEADS_DB_MODUS` in Coolify entfernen · Redeploy. Bis Schritt 4 kostet ein Abbruch **nur
 das Fenster** — die Quelle ist unverändert, weil niemand hineinschreiben konnte.
+
+---
+
+## Nachtrag 27.08., 22:25 MESZ — was die Generalprobe noch gefunden hat
+
+Alles darunter wurde **gemessen**, nicht angenommen.
+
+### Fünf Fallen, die sonst in der Nacht Zeit gekostet hätten
+
+1. **SSH nur mit `C:/Windows/System32/OpenSSH/ssh.exe`.** Der Schlüssel `id_rsa` trägt
+   eine Passphrase und liegt im **Windows**-ssh-agent. Die Git-Bash-Variante sieht den
+   Agenten nicht und antwortet `Permission denied (publickey)` — das sieht aus wie ein
+   kaputter Zugang, ist aber nur das falsche `ssh`. `cutover.js` ruft ohnehin den
+   richtigen Pfad auf; für Handgriffe denselben nehmen.
+2. **Der JS-Treiber verschiebt `timestamp without time zone` um −2 h.** Eine Handprobe
+   meldete `17:58 UTC`, während die Datenbank real `19:58 UTC` sagte: `postgres.js`
+   liest den Typ als Lokalzeit. Die Cutover-Skripte sind **nicht** betroffen, sie lesen
+   überall `::text`. 🔴 Für eigene Zwischenfragen in der Nacht gilt: **immer `::text`
+   anhängen**, sonst misst man die Zeitfalle ein zweites Mal.
+3. **Der `CASCADE` von `lead_state` deckt nur vier Tabellen ab** —
+   `lead_answers_current`, `lead_events`, `lead_sync_outbox`, `lead_video_progress`.
+   `tracking_sessions`, `tracking_events`, `lead_profiles`, `lead_contact_crm` und
+   `nurture_subject_states` hängen **ohne Fremdschlüssel** dran und bleiben als Waisen
+   zurück. `cutover-browserweg.js aufraeumen` fasst deshalb alle zwölf Tabellen an.
+4. **`tracking_sessions` entsteht verzögert.** 15 s nach dem Absenden: 0 Zeilen. Rund
+   20 min später: 1. Wer darauf eine Bedingung setzt, erzeugt einen falschen
+   Rot-Befund. Im Browserweg bewusst nur gemeldet, nicht gewertet.
+5. **Der Funnel hat sechs Fragen, nicht sieben.** Schritt 5 ist eine Zwischenseite
+   („Freiheit ist dein Kernantrieb"). Gegengemessen über alle 1.922 Leads der Quelle:
+   Höchstwert ist 6.
+
+### Was nachweislich bereitsteht
+
+| Geprüft am 27.08. gegen das laufende System | Ergebnis |
+| --- | --- |
+| Vorbedingungen | 6/6 |
+| Testsuite (`pnpm test`, nackt) | 211/211 |
+| SSH DB-Server + App-/Wächter-Box | beide erreichbar |
+| Coolify: `LEADS_DB_*` gesetzt, `LEADS_DB_MODUS` leer | bestätigt **im laufenden Container** |
+| `LEADS_DB_PASSWORT` gegen `agent-secrets` | gleicher sha256, keine Sonderzeichen |
+| Produktions-Container → Ziel-DB als `leads_app` | Verbindung steht, 22 Objekte im Schema `leads` |
+| Wächter-`.env`: `LEADS_PG_*` da, `WAECHTER_QUELLE` fehlt | bestätigt |
+| n8n: sechs aktive Workflows | bestätigt |
+| GlitchTip `business-leads` | 0 offene Vorfälle |
+| `plattform-cron-leads.sql` auf `91.99.76.104:/root/` | kopiert, md5 identisch |
+| Browserweg gegen Produktion, echte Daten | **10/10 grün** |
+| Aufräumen des Testleads | 27 Zeilen, restlos entfernt |
+
+### Zwei Dinge, die kein Cutover-Problem sind — aber danach so aussehen
+
+- **Wächter-Warnung „9 Fällige ohne Mail"** steht **konstant** über das gesamte
+  Protokoll (ältester Formulareingang 11.06.2026). Das ist Grundrauschen, kein frischer
+  Stau. „Letzte Sendung vor" läuft zyklisch 1→8 h. 🔴 Nach dem Cutover **wächst** die
+  Zahl, weil der Nurture-Sender bewusst aus bleibt — das ist erwartet. Ein Sprung bei
+  *anderen* Kennzahlen ist es nicht.
+- **Ein Testlead bleibt bewusst in der Quelle stehen:**
+  `qz_349d1c9bd3454450aeefa5daf95d432b` (Cutover / `markus+cutover@global-sce.com`,
+  angelegt 27.08. 22:11 MESZ über den echten Browserweg). Er zieht heute Nacht mit um
+  und dient als **Wiedererkennungsmarke**: taucht er nach Schritt 4 im Ziel auf, ist
+  der Weg vom Browser bis in die neue Datenbank durchgängig belegt.
+  🔴 **Nach dem Cutover aufräumen** (siehe Schritt 5). Der Lauf hat zusätzlich einen
+  Kontakt im MySQL-CRM erzeugt (`mysql_initial_rank`, Status `done`) — den räumt das
+  Skript **nicht** mit ab.
+
+---
 
 **Was am Folgetag ansteht:** Nurture-Sender umbauen (6 Nodes auf `leads_n8n`),
 `AC - Error Alert` mitnehmen, Test-DB löschen (`dropdb business_leads_testimport` —

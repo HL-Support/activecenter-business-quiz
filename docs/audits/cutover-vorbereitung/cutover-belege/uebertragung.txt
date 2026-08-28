@@ -1,0 +1,60 @@
+DUMP-GROESSE 132057489
+Zeilen gesamt      : 174013
+davon COPY-Daten   : 173779 (unveraendert durchgereicht)
+COPY-Kopfzeilen    : 18 umgeschrieben
+setval-Aufrufe     : 9 umgeschrieben
+
+Keine Reste - alle Schemaverweise zugeordnet.
+ set_config 
+------------
+ 
+(1 row)
+
+ setval 
+--------
+   3615
+(1 row)
+
+ setval 
+--------
+ 112755
+(1 row)
+
+ setval 
+--------
+     40
+(1 row)
+
+ setval 
+--------
+  11700
+(1 row)
+
+ setval 
+--------
+   2478
+(1 row)
+
+ setval 
+--------
+   1795
+(1 row)
+
+ setval 
+--------
+  25053
+(1 row)
+
+ setval 
+--------
+  25017
+(1 row)
+
+ setval 
+--------
+  12473
+(1 row)
+
+FERTIG
+
+Dauer: 22.8 s

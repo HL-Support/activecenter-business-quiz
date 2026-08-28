@@ -244,6 +244,11 @@ pg_dump -h ${conn.host} -p ${conn.port} -U ${conn.user} -d ${conn.database} \
   --data-only --no-owner --no-privileges ${tabellenArg} -f /tmp/cutover-roh.sql
 echo "DUMP-GROESSE $(stat -c%s /tmp/cutover-roh.sql)"
 python3 /tmp/umschreiben.py /tmp/cutover-roh.sql /tmp/cutover-ziel.sql
+# umask 077 laesst die Datei als 0600 root zurueck - "sudo -u postgres psql -f" kann sie
+# dann nicht oeffnen ("Permission denied", am 28.08.2026 im Fenster aufgelaufen).
+# Eigentuemer wechseln statt Rechte oeffnen: die Datei enthaelt echte Kontaktdaten und
+# bleibt so 0600 - nur eben fuer postgres.
+chown postgres:postgres /tmp/cutover-ziel.sql
 # session_replication_role=replica setzt FK-Pruefungen aus - die Reihenfolge der
 # Tabellen im Dump folgt nicht den Abhaengigkeiten. Danach wird explizit auf Waisen
 # geprueft (Schritt "nachweisen"), also nichts still uebergangen.
@@ -286,7 +291,12 @@ async function nachweisen() {
     ['lead_profiles', 'id'], ['nurture_subject_states', 'lead_hash'],
   ];
   for (const [tabelle, schluessel] of proben) {
-    const sql = (schema) => `select md5(string_agg(row_to_json(t)::text,'|' order by ${schluessel} collate "C")) h `
+    // Sortierschluessel erst nach text, dann COLLATE "C": auf einen bigint-Schluessel
+    // (quiz_sessions.id, lead_profiles.id) wirft COLLATE sonst
+    // "collations are not supported by type bigint" - am 28.08.2026 im Fenster
+    // aufgelaufen. Beide Seiten benutzen denselben Ausdruck, die Ordnung ist damit
+    // identisch und deterministisch; lexikografisch statt numerisch ist dafuer egal.
+    const sql = (schema) => `select md5(string_agg(row_to_json(t)::text,'|' order by (${schluessel})::text collate "C")) h `
       + `from (select * from ${schema}.${tabelle}) t`;
     const q = (await executeManagementQuery(`set timezone='UTC'; ${sql('public')}`)).slice(-1)[0];
     const z = zielSql(`set timezone='UTC';\n${sql('leads')};`).split('\n').pop().trim();
@@ -314,13 +324,19 @@ async function nachweisen() {
   const wText = `  ${summe === 0 ? 'OK     ' : '🔴 WAISEN'} 0 echte Waisen erwartet, gefunden ${summe} (${waisen.join('/')})`;
   console.log(wText); zeilen.push(wText);
 
-  // 4. Sequenzstände über dem höchsten Wert - sonst kollidiert der erste INSERT.
+  // 4. Der NAECHSTE Sequenzwert muss über dem höchsten Wert liegen - sonst kollidiert
+  //    der erste INSERT. 🔴 Nicht last_value vergleichen: pg_dump schreibt
+  //    setval(N, true), damit ist last_value == max und der naechste Wert erst N+1.
+  //    Die alte Fassung fragte "last_value > max" und meldete deshalb am 28.08.2026
+  //    drei gesunde Sequenzen als "ZU NIEDRIG". An einer selbst angelegten Sequenz
+  //    gegengeprueft: setval(112755,true) -> nextval = 112756.
   console.log('\n  Sequenzen:');
+  const naechster = (s) => `(select case when is_called then last_value + 1 else last_value end from ${s})`;
   const seq = zielSql(`
     select string_agg(x.t || '=' || x.ok::text, ' ') from (
-      select 'lead_events' t, (select last_value from leads.lead_events_event_id_seq) > coalesce((select max(event_id) from leads.lead_events),0) as ok
-      union all select 'lead_sync_outbox', (select last_value from leads.lead_sync_outbox_id_seq) > coalesce((select max(id) from leads.lead_sync_outbox),0)
-      union all select 'quiz_sessions', (select last_value from leads.quiz_sessions_id_seq) > coalesce((select max(id) from leads.quiz_sessions),0)
+      select 'lead_events' t, ${naechster('leads.lead_events_event_id_seq')} > coalesce((select max(event_id) from leads.lead_events),0) as ok
+      union all select 'lead_sync_outbox', ${naechster('leads.lead_sync_outbox_id_seq')} > coalesce((select max(id) from leads.lead_sync_outbox),0)
+      union all select 'quiz_sessions', ${naechster('leads.quiz_sessions_id_seq')} > coalesce((select max(id) from leads.quiz_sessions),0)
     ) x;`);
   const seqOk = !seq.includes('false');
   if (!seqOk) fehler += 1;
