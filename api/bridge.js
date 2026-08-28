@@ -69,7 +69,10 @@ const DEFAULT_COACH_LANGUAGE_OVERRIDES = { markus: 'de' };
 const TYPEFORM_TARGET = 'https://contacts.hl-support.biz/webhook/typeform';
 const ALLOWED_ADAPTER_KEYS = new Set(['business_leads_quiz_v1']);
 
-if (!SUPABASE_KEY) {
+// Im direkten Modus ist Supabase keine Datenquelle mehr - dann ist ein fehlender
+// Schluessel der NORMALFALL und kein Fehler. Ein "ERROR" bei jedem Containerstart
+// waere Rauschen, das echte Meldungen zudeckt (28.08.2026, Abkopplung).
+if (!SUPABASE_KEY && !dbTransport.istDirekt()) {
   console.error('ERROR: SUPABASE_SERVICE_KEY environment variable is not set');
 }
 
