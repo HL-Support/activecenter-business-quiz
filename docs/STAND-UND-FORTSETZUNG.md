@@ -633,7 +633,8 @@ nicht „Supabase ist gelöscht".
 | # | Punkt | Stand |
 | --- | --- | --- |
 | B1 | Projekt `business_leads_quiz` löschen | `paused=true` gemessen — Split-Brain ausgeschlossen; es fehlen die Tore 01.09./03.09. |
-| B2 | **Review-App `ac-email-review` auf Coolify** | offen — **letzte Vercel-Abhängigkeit des Nurture-Systems**; Code liegt seit 28.08. in `nurture/review-app/` |
+| B2 | **Review-App `ac-email-review` auf Coolify** | 🔴 **gestoppt, nicht ausgerollt** — die App ist **ungeschützt schreibfähig** (siehe B2a). Code liegt in `nurture/review-app/` |
+| B2a | 🔴 **Review-App: offener Schreibzugriff auf die Mautic-Vorlagen** | `app/api/email/[id]/route.js` bietet GET **und PATCH** als Mautic-`admin`, **ohne jede Zugangsprüfung** (keine Middleware, kein Token — im ganzen `app/` nachgemessen). Live belegt, nur lesend geprüft: `GET /api/email/48` → **HTTP 200 mit Inhalt**, kein Login. Jeder mit der URL kann die laufenden Nurture-Mails überschreiben. **Sofortmassnahme: Vercel-Auslieferung pausieren** (kostenlos, umkehrbar). Danach Zugangsschutz einbauen und `MAUTIC_PASS` rotieren |
 | B3 | Vier Domains vom Vercel-Projekt lösen, dann löschen | offen |
 
 ### C — Der letzte Legacy-MySQL-Knoten

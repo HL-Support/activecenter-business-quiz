@@ -84,6 +84,30 @@ der Mailweg in [`../docs/MAILWEGE.md`](../docs/MAILWEGE.md). Kurz, damit man es 
 3. **Die Review-App läuft noch auf Vercel** (`ac-email-review.vercel.app`) und ist damit
    die letzte Vercel-Abhängigkeit des Nurture-Systems. Umzug auf Coolify steht aus.
 
+4. 🔴 **SICHERHEITSBEFUND vom 28.08.2026 — die Review-App ist ungeschützt schreibfähig.**
+
+   `app/api/email/[id]/route.js` bietet **GET und PATCH** auf die Mautic-Vorlagen, mit
+   dem Mautic-**admin**-Konto (`Basic admin:$MAUTIC_PASS`). Es gibt **keine**
+   Zugangsprüfung: keine `middleware.js`, kein Session-Check, kein Token — nachgemessen
+   im gesamten `app/`-Verzeichnis.
+
+   Am Live-Stand belegt (nur **lesend** geprüft, kein Schreibversuch):
+
+   ```
+   GET https://ac-email-review.vercel.app/api/email/48  ->  HTTP 200 + Inhalt der Vorlage
+   Startseite: kein Login, kein SSO
+   ```
+
+   Damit kann **jeder, der die URL kennt, die laufenden Nurture-Vorlagen überschreiben** —
+   `PATCH` liegt in derselben Datei und ist genauso ungeschützt. Ausgerechnet ID 48 ist
+   die Vorlage, die laut Betriebsregel „niemals angefasst" werden darf.
+
+   🔴 **Diese App darf NICHT unverändert auf Coolify ausgerollt werden.** Vorher:
+   Zugangsschutz einbauen (mindestens Basic-Auth über eine `middleware.js`, besser eine
+   nicht öffentlich geratene Adresse plus Schutz), und `MAUTIC_PASS` gehört rotiert,
+   sobald der Weg zu ist. Bis dahin ist das Sinnvollste, die Vercel-Auslieferung zu
+   **pausieren** — das kostet nichts und ist umkehrbar.
+
 ## Was NICHT mitgezogen ist
 
 - `node_modules/` und `.next/` der Review-App (285 MB Bauschutt gegen 667 KB Inhalt)
