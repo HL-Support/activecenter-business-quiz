@@ -634,8 +634,8 @@ nicht „Supabase ist gelöscht".
 | --- | --- | --- |
 | B1 | Projekt `business_leads_quiz` löschen | `paused=true` gemessen — Split-Brain ausgeschlossen; es fehlen die Tore 01.09./03.09. |
 | B2 | **Review-App `ac-email-review` auf Coolify** | 🔴 **gestoppt, nicht ausgerollt** — die App ist **ungeschützt schreibfähig** (siehe B2a). Code liegt in `nurture/review-app/` |
-| B2a | ✅ **erledigt 28.08.** Offener Schreibzugriff der Review-App geschlossen | Vercels eigener Schutz war auf diesem Tarif nicht verfuegbar (428 bei ssoProtection und passwordProtection), deshalb die aktive Auslieferung geloescht. Zweimal ueber Zeit gemessen:  von **200 auf 404**, Startseite 404, die 14 uebrigen Auslieferungen 302 (Vercel-SSO). Code-seitig schuetzt jetzt  fail-closed |
-| B2b | 🔴 ** rotieren — Vorbedingung fuer den Coolify-Umzug** | Das Mautic--Passwort lag hinter der offenen App **und** stand im Klartext in drei Python-Dateien, die am 28.08. nach GitHub gepusht wurden. Erst rotieren, dann ausrollen — sonst wandert es in die neue Umgebung |
+| B2a | ✅ **erledigt 28.08.** Offener Schreibzugriff der Review-App geschlossen | Vercels eigener Schutz war auf diesem Tarif nicht verfügbar (`428` bei `ssoProtection` **und** `passwordProtection`; die Einstellung stand auf `all_except_custom_domains` — deshalb war ausgerechnet die Produktions-URL offen). Deshalb die aktive Auslieferung gelöscht. Zweimal über Zeit gemessen: `GET /api/email/48` von **200 auf 404**, Startseite 404, die 14 übrigen Auslieferungen 302 (Vercel-SSO). Code-seitig schützt jetzt `nurture/review-app/middleware.js` fail-closed, mit 7 Tests |
+| B2b | 🔴 **`MAUTIC_PASS` rotieren — Vorbedingung für den Coolify-Umzug, nicht Nacharbeit** | Das Mautic-`admin`-Passwort lag hinter der offenen App **und** stand im Klartext in drei Python-Dateien, die am 28.08. nach GitHub gepusht wurden (aus dem Arbeitsbaum entfernt, in der Historie weiterhin vorhanden). Erst rotieren, dann ausrollen — sonst wandert ein geleaktes Passwort in die neue Umgebung |
 | B3 | Vier Domains vom Vercel-Projekt lösen, dann löschen | offen |
 
 ### C — Der letzte Legacy-MySQL-Knoten
