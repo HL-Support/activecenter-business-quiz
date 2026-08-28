@@ -14,6 +14,14 @@
 // on_conflict, Methoden GET/POST/PATCH, Prefer resolution=merge-duplicates|
 // ignore-duplicates und return=minimal|representation.
 //
+// Erweitert am 28.08.2026 für den Business-Kalkulator (UMZUG-COOLIFY-POSTGRES.md §4,
+// gegen dessen echte 14 Abfragen gemessen): die not.-Negation (not.is.null, not.eq.…),
+// die Oder-Gruppe or=(a.eq.1,b.in.(2,3)) und offset mit Obergrenze. offset war bewusst
+// gesperrt (hier wird per Keyset geblättert); die Kontaktliste des Kalkulators blättert
+// aber per LIMIT/OFFSET über höchstens 250 Zeilen je Seite - dafür ist OFFSET
+// unbedenklich, solange eine harte Grenze verhindert, dass ein Ausreisser die
+// Datenbank ganze Tabellen durchzählen lässt.
+//
 // Bezeichner werden NICHT aus Nutzereingaben gebildet - sie stammen aus fest im Code
 // stehenden Pfaden. Trotzdem werden sie streng geprüft (nur [a-z_][a-z0-9_]*), damit
 // eine künftige dynamische Zusammensetzung nicht unbemerkt zur Lücke wird. WERTE
@@ -24,6 +32,11 @@ const BEZEICHNER = /^[a-z_][a-z0-9_]*$/i;
 const OPERATOREN = {
   eq: '=', neq: '<>', gt: '>', gte: '>=', lt: '<', lte: '<=',
 };
+
+// Obergrenze für OFFSET: gross genug für jede echte Blätterung (Kontaktliste: max. 250
+// Zeilen je Seite), klein genug, dass ein durchgedrehter Aufrufer die Datenbank nicht
+// ganze Tabellen überspringen-und-zählen lässt.
+const OFFSET_OBERGRENZE = 10000;
 
 function pruefeBezeichner(name, was) {
   if (!BEZEICHNER.test(String(name || ''))) {
@@ -38,6 +51,13 @@ function filterBedingung(spalte, roh, werte) {
   const punkt = roh.indexOf('.');
   if (punkt < 0) throw new Error(`Filter ohne Operator: ${spalte}=${roh}`);
   const op = roh.slice(0, punkt);
+
+  if (op === 'not') {
+    // PostgREST-Negation: not.is.null, not.eq.x, … - der Rest ist ein gewöhnlicher
+    // Operatorausdruck, der rekursiv übersetzt und als Ganzes verneint wird.
+    return `NOT (${filterBedingung(spalte, roh.slice(punkt + 1), werte)})`;
+  }
+
   const wert = decodeURIComponent(roh.slice(punkt + 1));
 
   if (op === 'is') {
@@ -60,6 +80,42 @@ function filterBedingung(spalte, roh, werte) {
   if (!sqlOp) throw new Error(`Unbekannter Operator: ${spalte}=${op}.…`);
   werte.push(wert);
   return `${spalte} ${sqlOp} $${werte.length}`;
+}
+
+// PostgREST-Oder-Gruppe: or=(a.eq.1,b.in.(2,3)). Die Teile trennt ein Komma auf oberster
+// Ebene - Kommata INNERHALB von in.(…) gehören zum Teil und dürfen nicht trennen, deshalb
+// wird die Klammertiefe mitgezählt. Verschachtelte Gruppen (and(…), or(…)) kommen im
+// Kalkulator nicht vor und scheitern laut an der Bezeichnerprüfung.
+function oderGruppe(roh, werte) {
+  const dekodiert = decodeURIComponent(roh);
+  if (!dekodiert.startsWith('(') || !dekodiert.endsWith(')')) {
+    throw new Error(`Unzulaessige or-Gruppe: ${roh}`);
+  }
+  const innen = dekodiert.slice(1, -1);
+  const teile = [];
+  let tiefe = 0;
+  let aktuell = '';
+  for (const zeichen of innen) {
+    if (zeichen === '(') tiefe += 1;
+    if (zeichen === ')') tiefe -= 1;
+    if (tiefe < 0) throw new Error(`Unzulaessige or-Gruppe: ${roh}`);
+    if (zeichen === ',' && tiefe === 0) {
+      teile.push(aktuell);
+      aktuell = '';
+      continue;
+    }
+    aktuell += zeichen;
+  }
+  if (tiefe !== 0) throw new Error(`Unzulaessige or-Gruppe: ${roh}`);
+  teile.push(aktuell);
+  if (teile.length === 1 && !teile[0]) throw new Error(`Leere or-Gruppe: ${roh}`);
+  const bedingungen = teile.map((teil) => {
+    // In der Gruppe steht der Spaltenname VOR dem ersten Punkt: spalte.op.wert.
+    const punkt = teil.indexOf('.');
+    if (punkt < 0) throw new Error(`or-Teil ohne Operator: ${teil}`);
+    return filterBedingung(teil.slice(0, punkt), teil.slice(punkt + 1), werte);
+  });
+  return `(${bedingungen.join(' OR ')})`;
 }
 
 function ordnung(roh) {
@@ -138,11 +194,18 @@ function uebersetze(pfad, options = {}, schema = 'leads') {
   const bedingungen = [];
   for (const [schluessel, roh] of abfrage.entries()) {
     if (STEUER.has(schluessel)) continue;
+    if (schluessel === 'or') {
+      bedingungen.push(oderGruppe(roh, werte));
+      continue;
+    }
     bedingungen.push(filterBedingung(schluessel, roh, werte));
   }
   const wo = bedingungen.length ? ` WHERE ${bedingungen.join(' AND ')}` : '';
 
-  if (abfrage.has('offset')) throw new Error('offset wird nicht unterstuetzt (Blaetterung ueber Keyset)');
+  // offset gibt es nur beim Lesen; bei PATCH/POST wäre es ein stiller Irrtum des Aufrufers.
+  if (abfrage.has('offset') && methode !== 'GET') {
+    throw new Error('offset ist nur bei GET erlaubt');
+  }
   if (abfrage.has('columns')) throw new Error('columns wird nicht unterstuetzt');
 
   // --- Lesen ---------------------------------------------------------------
@@ -153,6 +216,13 @@ function uebersetze(pfad, options = {}, schema = 'leads') {
       const n = Number(abfrage.get('limit'));
       if (!Number.isInteger(n) || n < 0) throw new Error(`Unzulaessiges limit: ${abfrage.get('limit')}`);
       sql += ` LIMIT ${n}`;
+    }
+    if (abfrage.has('offset')) {
+      const n = Number(abfrage.get('offset'));
+      if (!Number.isInteger(n) || n < 0 || n > OFFSET_OBERGRENZE) {
+        throw new Error(`Unzulaessiges offset: ${abfrage.get('offset')} (erlaubt 0 bis ${OFFSET_OBERGRENZE})`);
+      }
+      sql += ` OFFSET ${n}`;
     }
     return { sql, werte, erwartetZeilen: true };
   }
