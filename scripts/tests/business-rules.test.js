@@ -233,6 +233,23 @@ test('pending correction persists the full contact before the UI asks for confir
   assert.equal(pendingBody.payload.profile_code, 'wind');
 });
 
+test('explicit correction confirmation uses only the local backend adapter', async () => {
+  const core = loadCore();
+  let request;
+  globalThis.fetch = async (url, options = {}) => {
+    request = { url, body: JSON.parse(options.body) };
+    return { ok: true, json: async () => ({ success: true, confirmation: 'suggestion' }) };
+  };
+
+  assert.equal(await core.confirmEmailCorrection({
+    consumerRef: 'qz_123', confirmation: 'suggestion',
+  }), true);
+  assert.deepEqual(request, {
+    url: '/api/confirm-email-correction',
+    body: { consumer_ref: 'qz_123', confirmation: 'suggestion' },
+  });
+});
+
 test('correction prompt is shown only after the pending lead write succeeds', () => {
   const source = require('node:fs').readFileSync(
     path.resolve(__dirname, '../../src/app/App.jsx'),
@@ -243,4 +260,6 @@ test('correction prompt is shown only after the pending lead write succeeds', ()
 
   assert.ok(persistPosition >= 0);
   assert.ok(promptPosition > persistPosition);
+  assert.match(source, /await confirmEmailCorrection/);
+  assert.match(source, /confirmation: confirmationChoice/);
 });

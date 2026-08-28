@@ -1407,6 +1407,26 @@ export async function persistPendingEmailCorrection({
   return response.ok && data.success === true;
 }
 
+export async function confirmEmailCorrection({ consumerRef, confirmation }) {
+  if (!consumerRef || !['suggestion', 'original'].includes(confirmation)) return false;
+  try {
+    const response = await fetchWithTimeout(
+      '/api/confirm-email-correction',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ consumer_ref: consumerRef, confirmation }),
+      },
+      5000
+    );
+    if (!response.ok) return false;
+    const data = await response.json().catch(() => ({}));
+    return data.success === true && data.confirmation === confirmation;
+  } catch {
+    return false;
+  }
+}
+
 // Der fruehere Browser-Direktcall an Mautic (submitMauticLead) wurde am 23.08.2026
 // entfernt: Er scheiterte in Produktion nachweislich an CORS und war damit toter
 // Code; die Mautic-Anbindung laeuft ausschliesslich serverseitig ueber den

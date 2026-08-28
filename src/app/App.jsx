@@ -27,6 +27,7 @@ import {
   deriveQuizBarrier,
   getEmailReputationDecision,
   persistPendingEmailCorrection,
+  confirmEmailCorrection,
 } from '../lib/core.js';
 
 const VIDEO_FULL_COMPLETION_KEY_PREFIX = 'acVideoFullCompletion_';
@@ -441,7 +442,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
       setEmailCorrection(null);
       if (S) k('');
     },
-    v = async (emailOverride = '', originalConfirmed = false) => {
+    v = async (emailOverride = '', confirmationChoice = '') => {
       if (submitLock.current || g) return;
       const emailValue = typeof emailOverride === 'string' && emailOverride ? emailOverride : s;
       if (!i.trim() || !emailValue.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
@@ -454,7 +455,13 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
         z = emailValue.trim();
       try {
         const leadRun = getActiveLeadRun(n || 'default');
-        if (!originalConfirmed) {
+        if (confirmationChoice) {
+          const confirmed = await confirmEmailCorrection({
+            consumerRef: leadRun?.lead_hash || '',
+            confirmation: confirmationChoice,
+          });
+          if (!confirmed) throw new Error('email_confirmation_pending');
+        } else {
           const reputation = await getEmailReputationDecision(z, leadRun?.lead_hash || '');
           if (reputation.action === 'reject_invalid') {
             k(a('optin_email_error_invalid'));
@@ -805,7 +812,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
                     'button',
                     {
                       type: 'button',
-                      onClick: () => v(emailCorrection.suggested_email, false),
+                      onClick: () => v(emailCorrection.suggested_email, 'suggestion'),
                       style: In(I, '#0A0A0A', { padding: '10px 13px', fontSize: '12px' }),
                     },
                     a('optin_email_use_suggestion')
@@ -814,7 +821,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
                     'button',
                     {
                       type: 'button',
-                      onClick: () => v(s, true),
+                      onClick: () => v(s, 'original'),
                       style: Su({ padding: '10px 13px', fontSize: '12px' }),
                     },
                     a('optin_email_keep_original')
