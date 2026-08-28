@@ -71,3 +71,44 @@ test('kein Runtime-Code referenziert die entfernte Init-Route oder ihr Secret', 
     `Runtime-Referenzen auf die entfernte DB-Init-Flaeche gefunden:\n${offenders.join('\n')}`
   );
 });
+
+// --- Vercel-Abkopplung (28.08.2026) ---------------------------------------------------------
+//
+// Das Projekt laeuft vollstaendig auf Coolify. Der Vercel-Deployweg ist entfernt, weil ein
+// versehentliches `vercel deploy` aus einer Arbeitskopie die Produktion auf einen alten Stand
+// zurueckwerfen koennte - genau die Gefahr, die eine .vercel-Projektbindung mit sich bringt.
+//
+// 🔴 vercel.json BLEIBT bewusst liegen: Es ist die Spezifikation, die server/http-adapter.js
+// nachbildet (vier Security-Header, Rewrites in fester Reihenfolge), und scripts/verify.js
+// prueft sie bei jedem CI-Lauf. Die Datei ist Sicherheitsnetz, kein Deploy-Artefakt.
+test('die Vercel-Projektbindung ist entfernt und kommt nicht zurueck', () => {
+  const reste = ['.vercel', '.vercelignore'].filter((p) =>
+    fs.existsSync(path.join(projectRoot, p))
+  );
+  assert.deepEqual(
+    reste,
+    [],
+    `Vercel-Bindung wieder im Repo: ${reste.join(', ')} - ein Deploy von hier wuerde die Produktion ueberschreiben`
+  );
+});
+
+test('package.json kennt keinen Vercel-Deploybefehl mehr', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8'));
+  const treffer = Object.entries(pkg.scripts || {})
+    .filter(([, befehl]) => /vercel/i.test(String(befehl)))
+    .map(([name]) => name);
+  assert.deepEqual(
+    treffer,
+    [],
+    `Vercel-Deploybefehle wieder in package.json: ${treffer.join(', ')}`
+  );
+});
+
+test('vercel.json bleibt als Spezifikation erhalten', () => {
+  // Gegenstueck zu den beiden Tests darueber: Die Datei DARF nicht mitentfernt werden,
+  // sonst verliert scripts/verify.js seine Vergleichsgrundlage fuer Rewrites und Header.
+  assert.ok(
+    fs.existsSync(path.join(projectRoot, 'vercel.json')),
+    'vercel.json fehlt - verify.js kann Rewrites und Security-Header nicht mehr pruefen'
+  );
+});

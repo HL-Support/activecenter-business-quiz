@@ -1,0 +1,236 @@
+{
+  "seite": "https://business.activecenter.info",
+  "slug": "markus",
+  "quelle": "plattform",
+  "leadHash": "qz_a7208c88967e408d8181d2377c0c82d6",
+  "sessionHash": "ac_5c967788077d47b0bf57be0e8c126bb2",
+  "email": "markus+cutover@global-sce.com",
+  "schritte": [
+    "Intro geladen",
+    "Quiz gestartet",
+    "Frage \"Was treibt dich morgens wirklich aus dem Bett?\" → Ziele & Fortschritt",
+    "Frage \"In einer Gruppe bist du meistens...\" → Der Richtungsgeber",
+    "Frage \"Was bringt dich wirklich auf die Palme?\" → Blockaden & Zögerer",
+    "Frage \"Was ist dir bei deiner Arbeit am wichtigsten?\" → Freiheit",
+    "Frage \"Freiheit ist dein Kernantrieb\" → weiter",
+    "Frage \"Wie sieht dein ideales Leben in 3 Jahren aus?\" → Finanziell frei",
+    "Frage \"Was hält dich WIRKLICH davon ab, dieses Leben bereits heute \" → Fehlendes System",
+    "Frage \"Dein Profil wird erstellt...\" → weiter",
+    "Frage \"Dein Profil wird erstellt...\" → weiter",
+    "Formular erreicht",
+    "Formular ausgefuellt: Cutover / markus+cutover@global-sce.com",
+    "Abgesendet",
+    "Ergebnisseite: \"Der Macher\"",
+    "session_hash: ac_5c967788077d47b0bf57be0e8c126bb2",
+    "CTA \"Teil 1 starten\" geklickt",
+    "Videoteil erreicht: \"Lerne in den nächsten Minuten, worum es wirklich g\" (1 Bunny-Spieler)",
+    "Ereignisse im Lauf: page_view, quiz_started, question_viewed, quiz_answer, aspiration_confirmed, quiz_result, optin_viewed, form_submit, form_submitted, result_cta_click, video_viewed, video_started, video_progress"
+  ],
+  "ereignisseImBrowser": [
+    "page_view",
+    "quiz_started",
+    "question_viewed",
+    "quiz_answer",
+    "aspiration_confirmed",
+    "quiz_result",
+    "optin_viewed",
+    "form_submit",
+    "form_submitted",
+    "result_cta_click",
+    "video_viewed",
+    "video_started",
+    "video_progress"
+  ],
+  "resume": {
+    "ok": true,
+    "ziel": "Lerne in den nächsten Minuten, worum es wirklich geht.",
+    "grund": null
+  },
+  "aufrufe": [
+    {
+      "pfad": "/api/bridge",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead/init",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/bridge",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    },
+    {
+      "pfad": "/api/lead-track",
+      "status": 200
+    }
+  ],
+  "befunde": [
+    {
+      "name": "lead_state traegt den Lead",
+      "ok": true,
+      "detail": "1 Zeile(n)"
+    },
+    {
+      "name": "E-Mail gespeichert",
+      "ok": true,
+      "detail": "markus+cutover@global-sce.com"
+    },
+    {
+      "name": "Vorname gespeichert",
+      "ok": true,
+      "detail": "Cutover"
+    },
+    {
+      "name": "Formular als abgesendet vermerkt",
+      "ok": true,
+      "detail": "2026-08-28 08:31:55.663+00"
+    },
+    {
+      "name": "Profil berechnet",
+      "ok": true,
+      "detail": "feuer / contact_known"
+    },
+    {
+      "name": "Berater zugeordnet",
+      "ok": true,
+      "detail": "markus"
+    },
+    {
+      "name": "sechs Antworten gespeichert",
+      "ok": true,
+      "detail": "6"
+    },
+    {
+      "name": "Ereignisse geschrieben",
+      "ok": true,
+      "detail": "26"
+    },
+    {
+      "name": "Outbox-Auftrag erzeugt",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "als interner Verkehr markiert",
+      "ok": true,
+      "detail": "24 von 26 Ereignissen"
+    },
+    {
+      "name": "Video-Fortschritt gespeichert",
+      "ok": true,
+      "detail": "1 Zeile(n)"
+    },
+    {
+      "name": "alle 13 Ereignisarten der Kette in der Datenbank",
+      "ok": true,
+      "detail": "aspiration_confirmed, form_submit, form_submitted, optin_viewed, page_view, question_viewed, quiz_answer, quiz_result, quiz_started, result_cta_click, video_progress, video_started, video_viewed"
+    },
+    {
+      "name": "Outbox-Auftrag durchgelaufen",
+      "ok": true,
+      "detail": "mysql_initial_rank → done (Versuche 1)"
+    },
+    {
+      "name": "lead_state meldet CRM-Abgleich",
+      "ok": true,
+      "detail": "sync_status = mysql_final_synced"
+    },
+    {
+      "name": "Resume-Link fuehrt zurueck in den Funnel",
+      "ok": true,
+      "detail": "Lerne in den nächsten Minuten, worum es wirklich g"
+    }
+  ]
+}

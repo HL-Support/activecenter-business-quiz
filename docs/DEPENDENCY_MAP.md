@@ -79,8 +79,12 @@ npm run verify
 npm run lint
 npm run smoke:readonly
 npm run smoke:resume   # schreibt einen klar markierten Testkontakt
-npm run guard:deploy
 ```
+
+`guard:deploy` gibt es seit dem 28.08.2026 nicht mehr. Es war der Branch- und
+Arbeitsbaum-Wächter vor einem manuellen `vercel promote` — und mit dem Vercel-Deployweg
+entfallen. Dieselben Gates laufen unverändert in CI (`safety`: Tests, Lint, Build,
+Verify, beide Smokes), und deployt wird ausschließlich über den CI-Job `deploy`.
 
 Build und Verify immer nacheinander ausfuehren. Der Build erstellt `dist/`; parallele Pruefungen koennen sonst unvollstaendige Dateien lesen.
 
