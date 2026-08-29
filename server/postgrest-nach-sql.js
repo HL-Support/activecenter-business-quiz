@@ -78,7 +78,17 @@ function filterBedingung(spalte, roh, werte) {
 
   const sqlOp = OPERATOREN[op];
   if (!sqlOp) throw new Error(`Unbekannter Operator: ${spalte}=${op}.…`);
-  werte.push(wert);
+  // 🔴 true/false MÜSSEN als echte Booleans zum Treiber. PostgREST parst Werte nach
+  // Spaltentyp; hier gibt es keine Typinformation, und der bool-Serializer von
+  // postgres.js macht aus JEDEM Nicht-`true` ein 'f' - ein eq.true-Filter gegen eine
+  // boolean-Spalte würde sonst STILL INVERTIERT (gemessen 28.08.2026: der Kalkulator
+  // bekam auf manual_added=eq.true genau die falschen Zeilen). Trifft der typisierte
+  // Boolean auf eine Textspalte, ist das ein lauter Typfehler - laut statt still.
+  if ((op === 'eq' || op === 'neq') && (wert === 'true' || wert === 'false')) {
+    werte.push(wert === 'true');
+  } else {
+    werte.push(wert);
+  }
   return `${spalte} ${sqlOp} $${werte.length}`;
 }
 

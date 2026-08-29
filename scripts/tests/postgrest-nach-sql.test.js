@@ -206,6 +206,19 @@ test('kaputte or-Gruppen scheitern laut', () => {
   assert.throws(() => uebersetze('t?or=(ohnepunkt)', { method: 'GET' }), /or-Teil ohne Operator/);
 });
 
+test('eq.true/eq.false werden echte Booleans - der Treiber macht aus Strings sonst still false', () => {
+  // Gemessen 28.08.2026 am Kalkulator: postgres.js serialisiert fuer eine
+  // boolean-Spalte JEDEN Nicht-`true`-Wert zu 'f'. Mit dem String 'true' war
+  // manual_added=eq.true faktisch manual_added=false - exakt die falschen Zeilen.
+  const a = uebersetze('t?manual_added=eq.true', { method: 'GET' });
+  assert.deepEqual(a.werte, [true]);
+  const b = uebersetze('t?aktiv=neq.false', { method: 'GET' });
+  assert.deepEqual(b.werte, [false]);
+  // Andere Werte bleiben Strings - der Treiber laesst PostgreSQL den Typ bestimmen.
+  const c = uebersetze('t?status=eq.truey', { method: 'GET' });
+  assert.deepEqual(c.werte, ['truey']);
+});
+
 test('offset wird bei GET übersetzt, bleibt begrenzt und ist ausserhalb von GET verboten', () => {
   const r = uebersetze('t?a=eq.1&order=b.desc&limit=61&offset=60', { method: 'GET' });
   assert.ok(r.sql.endsWith('ORDER BY b DESC LIMIT 61 OFFSET 60'), r.sql);
