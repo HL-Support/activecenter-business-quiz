@@ -163,6 +163,35 @@ Zwei Eigenheiten der n8n-API, die dabei Zeit kosten:
 6. **Nicht im Repo suchen.** Mail 1, 2 und 4 liegen ausschliesslich in n8n. Wer nur den
    Repo-Code liest, kommt zum falschen Schluss „die Mail kommt nicht von hier" — und
    übersieht dabei, dass Mail 3 und 5 sehr wohl von hier kommen.
+7. **„Gesendet" in unserer Datenbank beweist keine Zustellung.** Postmark lehnt gesperrte
+   Empfänger mit `406` ab; Mautic meldet den Aufruf trotzdem als Erfolg, und der Sender
+   verbucht `nurture_sent` samt `ac_nurture_sent_phases`. Gemessen am 30.08.2026: **24
+   Mails an 12 Adressen** so verbucht, keine einzige zugestellt — und weil die Phase als
+   gesendet gilt, wird sie **nie wiederholt**. Gegenmittel siehe §8.
+
+---
+
+## 5a. Sperrliste: Postmark → Mautic (seit 30.08.2026)
+
+Postmark führt je Server eine Sperrliste (Hardbounce, Spambeschwerde, manuelle Sperre).
+Weder Mautic noch der Nurture-Sender kannten sie. Der Workflow
+**`AC - Postmark-Sperren nach Mautic spiegeln`** (`HmLGMm2H7Brxl8CK`, täglich 05:15)
+schliesst das: Er liest beide Ströme des Postmark-Servers `Mautic` (18375164) und setzt
+für jeden passenden Mautic-Kontakt `DNC email, reason 2` mit dem Kommentar
+`Postmark-Sperre (<Grund>, Strom <Strom>) automatisch gespiegelt`.
+
+🔴 **Das Sicherheitsnetz im Knoten `Code - Entscheiden`:** gesperrt wird **nur**, wenn die
+*aktuelle* Adresse des Kontakts genau die gesperrte ist. Wird ein Tippfehler später
+korrigiert, greift die alte Sperre nicht mehr — genau dieser Fall wäre am 29.08. bei
+Christine und am 30.08. bei drei weiteren Menschen eingetreten.
+
+🔴 **Was er NICHT tut:** Er hebt keine Sperre wieder auf. Wird eine Adresse korrigiert oder
+bei Postmark reaktiviert, muss der DNC-Eintrag **von Hand** entfernt werden
+(`DELETE /api/contacts/<id>/dnc/email/delete`). Ein leerer Abruf gilt als Fehler und bricht
+laut ab, statt still nichts zu tun.
+
+Erster scharfer Lauf am 30.08.2026: 13 Sperren geprüft, 6 neu gesetzt, 3 bereits gesperrt,
+4 ohne Mautic-Kontakt. Zweiter Lauf: 0 neu — der Spiegel arbeitet wiederholbar.
 
 ---
 
