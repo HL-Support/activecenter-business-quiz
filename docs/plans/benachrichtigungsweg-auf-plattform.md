@@ -108,7 +108,7 @@ Vollständiger Befund: [../audits/c1-postprocessor-extrakt/BEFUND.md](../audits/
 | 2a | **Bedarf eingrenzen.** Von den 53 Funktionen sind **12** mailbezogen: `buildBrandedEmailShell`, `getLeadEmailPresentation`, `getLeadEmailCopy`, `getLocalizedLeadEmailPresentation`, `buildLeadProfileIconHtml`, `getLeadEmailValue`, `getLeadEmailMapValue`, `buildPremiumLeadEmailHtml`, `buildPremiumLeadEmailText`, `buildCoachEmailHtml`, `buildCoachEmailText`, `escapeHtml`. Der Rest baut das Modell | Aufrufgraph ab den vier Einstiegspunkten; keine Funktion ausserhalb der Hülle bleibt übrig |
 | 2b | **Goldene Vorlagen ziehen**: je Sprache eine **echt versendete** Mail aus Postmark (Server `Leadgen`, Tags `optin_coach` und `lead_access`) samt zugehörigem Lead | Vier Sprachen belegt — oder benannt, für welche es keinen echten Fall gibt |
 | 2c | 🔴 **Feldabbildung nachweisen.** Der Post Processor baut sein Modell aus `MySQL - Re-Read Final Lead Context`; die Coach-Felder (`coach_id`, `coach_first_name`, `coach_last_name`, `coach_full_name`, `coach_email`, `coach_herbalife_id`, `coach_sub_domain`, `coach_organisation_name`) kommen per JOIN aus `prod_activesupport.users` | Feld für Feld: dieselbe Menge aus `leads.lead_state` / `lead_answers_current` — oder benannt, was nur in MySQL steht |
-| 2d | **Portieren** nach `server/mail-vorlagen/`, ohne n8n-Abhängigkeit (`$input`, `$()` kommen in der Bibliothek nicht vor — nur in den Treibern) | Modul lädt und läuft im Node-Testlauf |
+| 2d | **Portieren** nach `server/mail-vorlagen/`, ohne n8n-Abhängigkeit (`$input`, `$()` kommen in der Bibliothek nicht vor — nur in den Treibern). **Dabei fällt der zweite Befund weg:** `Code - Normalize Candidate Rows` baut heute je Kandidat vier Sprachfassungen von Betreff, HTML und Text, um daraus **17 skalare Felder** in eine Auftragszeile zu schreiben. Im Zielbild ersetzt ein schlanker Feldauszug diesen Aufruf — die Vorlagenbibliothek wird dort **gar nicht** gebraucht | Modul lädt und läuft im Node-Testlauf; die Auftragszeile enthält zeichengleich dieselben 17 Felder wie heute |
 | 2e | **Golden-Tests**: erzeugte Mail == versendete Mail, zeichengleich, je Sprache | Vier grüne Vergleiche gegen echte Postmark-Inhalte |
 
 🔴 **Die harte Stelle ist 2c, nicht der Port.** Die Berateridentität liegt in
@@ -117,12 +117,58 @@ dasselbe Hindernis wie Abschnitt 3 Zeile 3, nur von der anderen Seite gesehen: D
 Weg holt den Coach per **SQL-JOIN**, der Zielweg (`api/lead-outbox-worker.js:669`,
 `lookupCoach`) holt ihn per **HTTP** von `ac-reconnect.com/db-bridge.php`.
 
-🟢 **Daraus folgt eine Vereinfachung, die im Plan vom 28.08. noch nicht stand:** Beide
-Datenbanken stehen auf **derselben Maschine** (`91.99.76.104`). Der Outbox-Worker könnte den
-Coach genauso per SQL auflösen wie der Post Processor es heute tut, statt über den externen
-HTTP-Aufruf. Das würde die Abhängigkeit von der Legacy-Bridge **jetzt** beseitigen, statt
-auf die Kontakte-Migration zu warten — und nähme dem Zielbild seinen letzten Fremdaufruf.
-Zu entscheiden, bevor 2c gebaut wird.
+## 4b. Der Berater kommt per SQL statt per Fremdaufruf (Entscheidung Markus, 30.08.2026)
+
+**Ausgangslage.** `api/lead-outbox-worker.js:669` holte die Berateridentität per HTTP von
+`ac-reconnect.com/db-bridge.php` — der letzte Fremdaufruf im Benachrichtigungsweg.
+
+**Warum ein Spiegel und nicht ein direkter MySQL-Zugriff:** Die Anwendung hat bewusst
+**keinen** MySQL-Treiber (Abhängigkeiten: `jsonwebtoken`, `postgres`, `react`, `react-dom`).
+Ein zweiter Treiber wäre ein neuer Ausfallweg im teuersten Vorgang des Funnels.
+
+### Vorher gemessen, nicht angenommen
+
+| Frage | Messung 30.08. |
+| --- | --- |
+| Stimmt `berater_slug` == `users.sub_domain`? | **95 von 96** Quiz-Slugs gefunden |
+| Was fehlt? | nur **`default`** — dazu gibt es in `users` gar keinen Satz |
+| Wie oft war `default` betroffen? | 171 Leads, aber **0 von 245** Hot-Lead-Aufträgen |
+| Gab es je `coach_email_missing`? | **0** — alle 245 Aufträge `done` |
+| Doppelte `sub_domain`? | **0** — der Primärschlüssel trägt |
+| Berater ohne Adresse? | **0** von 255 |
+| Welche Coach-Felder braucht die Mail? | `email`, `first_name`, `organisation_name`, `country` und die Sprachfelder — alle in `users` vorhanden |
+
+### ✅ Gebaut am 30.08.
+
+| | Was | Beweis |
+| --- | --- | --- |
+| 1 | **`leads.berater`** — Verzeichnis auf der Plattform, Eigentümerin `leads_owner`, Rechte wie `lead_state` | Tabelle angelegt, Rechte gegengeprüft |
+| 2 | **n8n «AC - Berater-Verzeichnis spiegeln»** (`IFOqAOYbUp8Zwnlk`), alle 15 Minuten `prod_activesupport.users` → `leads.berater`, mit Löschung verschwundener Slugs | 1. Lauf 255 geschrieben, 2. Lauf 255 geschrieben / **0 neu** → wiederholbar. Test-Webhook danach entfernt (404) |
+| 3 | **`server/berater-verzeichnis.js`** — eigenes Modul nach dem Vorbild von `coach-insights-link.js`, damit der Weg testbar ist | **11 Tests**, Gesamtlauf 259 grün |
+| 4 | **Schalter `COACH_LOOKUP_SOURCE`** im Worker | Standard `bridge` → ein Deploy ohne gesetzte Variable ändert **nichts** |
+
+🔴 **Der Spiegel bricht laut ab**, wenn MySQL weniger als 50 Zeilen liefert oder doppelte
+Slugs kommen. Eine leere Antwort sieht aus wie ein fehlgeschlagener Abruf — und würde
+sonst das Verzeichnis leeren.
+
+### Restweg, in dieser Reihenfolge
+
+| # | Schritt | Beweis, bevor es weitergeht |
+| --- | --- | --- |
+| B1 | **Deployen** mit `COACH_LOOKUP_SOURCE` **ungesetzt** | `/health/ready` grün, nächste Hot-Lead-Mail unverändert |
+| B2 | Auf **`beide`** stellen: beide Wege abfragen, die **Bridge entscheidet weiterhin**, Abweichungen landen als `[berater-vergleich]` im Containerprotokoll | Über mehrere echte Hot-Leads: **keine** Abweichung in `email`, `first_name`, `organisation_name`, `country`, Sprache |
+| B3 | Auf **`verzeichnis`** stellen | Nächste Hot-Lead-Mail geht an dieselbe Adresse, kein Aufruf mehr an `ac-reconnect.com` |
+| B4 | `BRIDGE_URL`/`BRIDGE_KEY` aus dem Coach-Pfad entfernen | Der Fremdaufruf ist aus dem Benachrichtigungsweg verschwunden |
+
+🔴 **Nicht angefasst:** `src/lib/core.js:829` hat einen **zweiten** `lookupCoach` — das ist
+der Funnelweg, nicht der Mailweg. Er gehört in denselben Umbau, aber in einem eigenen
+Schritt mit eigenem Beweis.
+
+🟡 **`default` bleibt eine Lücke** — die gleiche wie heute: kein Verzeichniseintrag, also
+kein Versand. Sie ist nie aufgetreten. Wer sie schliessen will, legt einen Satz mit
+`slug = 'default'` an; der Spiegel würde ihn beim nächsten Lauf wieder löschen, weil er in
+`users` fehlt — also besser dort anlegen.
+
 
 🔴 **Reihenfolge ist nicht verhandelbar.** Schritt 5 vor Schritt 4 hiesse, den teuersten
 Vorgang des Funnels ohne Netz umzuhängen.
