@@ -26,7 +26,49 @@ Die Bibliothek enthält **53 Funktionen** — Betreff, HTML, Text, Profil- und Z
 `de`/`it`/`en`/`hu`. Die Treiber rufen ausschließlich Bibliotheksfunktionen; die einzige
 Ausnahme ist `first`, und das ist n8n (`$input.first()`), keine eigene Funktion.
 
-## 2. 🔴 Die drei Kopien sind auseinandergelaufen
+## 2. ✅ Drift behoben am 30.08.2026, 17:24 MESZ
+
+**Nachtrag zum Befund unten.** Die beiden zurückhängenden Knoten laufen jetzt auf der
+maßgeblichen Bibliothek. Nachgemessen nach dem Schreibvorgang — Prüfsumme über die
+Bibliothekszeilen 1–1708:
+
+| Knoten | vorher | nachher |
+| --- | --- | --- |
+| `Normalize Candidate Rows` | `40b9fa74…` (alt) | **`883c5aa78cec941e`** |
+| `Build Lead Model` | `bb5c701f…` | **`883c5aa78cec941e`** |
+| `Apply Resume Link` | `40b9fa74…` (alt) | **`883c5aa78cec941e`** |
+
+Das ist dieselbe Prüfsumme wie die von [bibliothek.js](bibliothek.js) in diesem
+Verzeichnis — der laufende Workflow und der Extrakt sind damit nachweislich dieselbe
+Fassung.
+
+**Warum das gefahrlos war, vorher bewiesen:**
+
+- `buildPremiumLeadEmailHtml` und `buildPremiumLeadEmailText` waren in **allen drei**
+  Fassungen byteweise identisch → die versendete Mail kann sich nicht ändern (nachher
+  erneut geprüft: identisch).
+- `Apply Resume Link` ruft `buildLeadModel` **null mal** auf → die einzige abweichende
+  Funktion wird dort gar nicht ausgeführt.
+- Bei `Normalize Candidate Rows` ändert sich in `buildLeadModel` nur der
+  Mautic-Nutzdatensatz (`ac_berater_org_display`, neu `ac_berater_display_name`) —
+  `MySQL - Insert Pending Jobs` verwendet davon **kein einziges** Feld.
+
+**Weiter geprüft:** Verbindungen unverändert, 36 Knoten, Workflow aktiv geblieben, genau
+die zwei erwarteten Knoten geändert. Sicherung der Fassung davor:
+`post-processor-VOR-DRIFT-FIX.json` (Sitzungsablage).
+
+🟡 **Eine Sorge, die sich nicht bestätigt hat:** Die öffentliche n8n-API nimmt beim
+Schreiben nur einen Teil der Einstellungen an (`callerPolicy`, `availableInMCP`,
+`binaryMode`, `timeSavedMode` gelten als unbekannt). Erwartet war ein Verlust dieser vier
+Werte. Nachgemessen: **n8n hat sie behalten** — sie stehen unverändert im Workflow.
+
+🔴 **Was der Fix NICHT behebt** — siehe Abschnitt 4: `Normalize Candidate Rows` baut
+weiterhin das vollständige Modell, um 17 Felder zu schreiben. Das gehört in den Port
+(Schritt 2), nicht in einen Eingriff am laufenden Versandweg.
+
+---
+
+## 2a. 🔴 Der ursprüngliche Befund: die drei Kopien waren auseinandergelaufen
 
 Prüfsumme über die Bibliothekszeilen 1–1695:
 

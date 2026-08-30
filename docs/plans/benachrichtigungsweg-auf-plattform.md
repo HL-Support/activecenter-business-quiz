@@ -93,13 +93,36 @@ Vollständiger Befund: [../audits/c1-postprocessor-extrakt/BEFUND.md](../audits/
 
 | # | Schritt | Beweis, bevor es weitergeht |
 | --- | --- | --- |
-| 1 | ~~**Bibliothek extrahieren**~~ | ✅ **erledigt 30.08.** Es sind **eine** Bibliothek (1.708 Zeilen, 53 Funktionen) und drei Treiber (3 / 4 / 47 Zeilen), nicht dreimal 87.000 Zeichen. Zwei Fassungen im Umlauf, die maßgebliche benannt. Befund und Dateien: [../audits/c1-postprocessor-extrakt/BEFUND.md](../audits/c1-postprocessor-extrakt/BEFUND.md) |
+| 1 | ~~**Bibliothek extrahieren**~~ | ✅ **erledigt 30.08.** Es sind **eine** Bibliothek (1.708 Zeilen, 53 Funktionen) und drei Treiber (3 / 4 / 47 Zeilen), nicht dreimal 87.000 Zeichen. Zwei Fassungen gefunden — und **am selben Tag angeglichen**: alle drei Knoten tragen jetzt `883c5aa78cec941e`, dieselbe Prüfsumme wie der Extrakt im Repo. Erster Lauf danach um 17:25:59 erfolgreich. Befund: [../audits/c1-postprocessor-extrakt/BEFUND.md](../audits/c1-postprocessor-extrakt/BEFUND.md) |
 | 2 | **Vorlagen ins Repo portieren** (`server/mail-vorlagen/`), vier Sprachen, mit Golden-Tests gegen die real versendeten Mails aus Postmark | Für je einen echten Lead je Sprache: erzeugte Mail == versendete Mail, Zeichen für Zeichen |
 | 3 | **Outbox-Arten ergänzen** (`coach_optin_email`, `lead_access_email`), Versand **hinter einem Schalter** (`OPTIN_OUTBOX_EMAIL_ENABLED`, Standard aus) | Regressionstests grün; bei Schalter aus verhält sich das System exakt wie heute |
 | 4 | **Schattenlauf**: Aufträge werden erzeugt und abgearbeitet, aber statt zu senden nur protokolliert | Über 48 h: für **jeden** Opt-in genau ein Auftrag je Art, kein Doppel, keine Lücke — gegen die tatsächlich versendeten Postmark-Mails abgeglichen |
 | 5 | **Umschalten**: Schalter an, dieselbe Stunde die beiden Postmark-Knoten im Post Processor abschalten | Nächster echter Opt-in: Mail da, Tag `optin_coach`/`lead_access`, Inhalt identisch zur Vorwoche, Abstand jetzt Sekunden statt Minuten |
 | 6 | **Mautic ablösen**: Kontakt-Upsert und Segment aus der Outbox heraus | Nurture-Strecke sendet für einen neuen Lead unverändert weiter |
 | 7 | **Post Processor stilllegen**, MySQL-Poll entfällt | 7 Tage ohne Fehl-Lauf, dann Entscheidung-3-Konflikt geschlossen |
+
+## 4a. Schritt 2 im Einzelnen (aufgestellt 30.08.2026, nach der Messung)
+
+| # | Teilschritt | Beweis |
+| --- | --- | --- |
+| 2a | **Bedarf eingrenzen.** Von den 53 Funktionen sind **12** mailbezogen: `buildBrandedEmailShell`, `getLeadEmailPresentation`, `getLeadEmailCopy`, `getLocalizedLeadEmailPresentation`, `buildLeadProfileIconHtml`, `getLeadEmailValue`, `getLeadEmailMapValue`, `buildPremiumLeadEmailHtml`, `buildPremiumLeadEmailText`, `buildCoachEmailHtml`, `buildCoachEmailText`, `escapeHtml`. Der Rest baut das Modell | Aufrufgraph ab den vier Einstiegspunkten; keine Funktion ausserhalb der Hülle bleibt übrig |
+| 2b | **Goldene Vorlagen ziehen**: je Sprache eine **echt versendete** Mail aus Postmark (Server `Leadgen`, Tags `optin_coach` und `lead_access`) samt zugehörigem Lead | Vier Sprachen belegt — oder benannt, für welche es keinen echten Fall gibt |
+| 2c | 🔴 **Feldabbildung nachweisen.** Der Post Processor baut sein Modell aus `MySQL - Re-Read Final Lead Context`; die Coach-Felder (`coach_id`, `coach_first_name`, `coach_last_name`, `coach_full_name`, `coach_email`, `coach_herbalife_id`, `coach_sub_domain`, `coach_organisation_name`) kommen per JOIN aus `prod_activesupport.users` | Feld für Feld: dieselbe Menge aus `leads.lead_state` / `lead_answers_current` — oder benannt, was nur in MySQL steht |
+| 2d | **Portieren** nach `server/mail-vorlagen/`, ohne n8n-Abhängigkeit (`$input`, `$()` kommen in der Bibliothek nicht vor — nur in den Treibern) | Modul lädt und läuft im Node-Testlauf |
+| 2e | **Golden-Tests**: erzeugte Mail == versendete Mail, zeichengleich, je Sprache | Vier grüne Vergleiche gegen echte Postmark-Inhalte |
+
+🔴 **Die harte Stelle ist 2c, nicht der Port.** Die Berateridentität liegt in
+`prod_activesupport.users` — in der Legacy-MySQL, nicht in der Plattform-DB. Das ist
+dasselbe Hindernis wie Abschnitt 3 Zeile 3, nur von der anderen Seite gesehen: Der heutige
+Weg holt den Coach per **SQL-JOIN**, der Zielweg (`api/lead-outbox-worker.js:669`,
+`lookupCoach`) holt ihn per **HTTP** von `ac-reconnect.com/db-bridge.php`.
+
+🟢 **Daraus folgt eine Vereinfachung, die im Plan vom 28.08. noch nicht stand:** Beide
+Datenbanken stehen auf **derselben Maschine** (`91.99.76.104`). Der Outbox-Worker könnte den
+Coach genauso per SQL auflösen wie der Post Processor es heute tut, statt über den externen
+HTTP-Aufruf. Das würde die Abhängigkeit von der Legacy-Bridge **jetzt** beseitigen, statt
+auf die Kontakte-Migration zu warten — und nähme dem Zielbild seinen letzten Fremdaufruf.
+Zu entscheiden, bevor 2c gebaut wird.
 
 🔴 **Reihenfolge ist nicht verhandelbar.** Schritt 5 vor Schritt 4 hiesse, den teuersten
 Vorgang des Funnels ohne Netz umzuhängen.
