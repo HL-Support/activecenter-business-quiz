@@ -23,11 +23,22 @@ const {
   normalizeProfileCode,
 } = require('../server/coach-insights-link');
 
+// Seit 30.08.2026: der Berater kommt wahlweise aus dem gespiegelten Verzeichnis
+// leads.berater statt per HTTP von ac-reconnect.com. Siehe server/berater-verzeichnis.js.
+const {
+  beraterAusVerzeichnis,
+  normalisiereSlug,
+  vergleiche,
+} = require('../server/berater-verzeichnis');
+
 const N8N_UPDATE_RESULT_URL = process.env.N8N_UPDATE_RESULT_URL;
 const N8N_UPDATE_RESULT_SECRET = String(process.env.N8N_UPDATE_RESULT_SECRET || '').trim();
 const WORKER_SECRET = process.env.LEAD_OUTBOX_WORKER_SECRET || process.env.BRIDGE_KEY;
 const BRIDGE_URL = process.env.BRIDGE_URL || 'https://ac-reconnect.com/db-bridge.php';
 const BRIDGE_KEY = process.env.BRIDGE_KEY;
+const COACH_LOOKUP_SOURCE = String(process.env.COACH_LOOKUP_SOURCE || 'bridge')
+  .trim()
+  .toLowerCase();
 const POSTMARK_SERVER_TOKEN = process.env.POSTMARK_SERVER_TOKEN;
 const POSTMARK_FROM = process.env.POSTMARK_FROM || 'Activecenter-Support <mail@mail.hl-support.biz>';
 const POSTMARK_MESSAGE_STREAM = process.env.POSTMARK_MESSAGE_STREAM || 'outbound';
@@ -666,8 +677,7 @@ async function callN8nUpdateResult(job) {
   return data;
 }
 
-async function lookupCoach(slug) {
-  const normalizedSlug = safeString(slug, 80).toLowerCase() || 'default';
+async function lookupCoachUeberBridge(normalizedSlug) {
   if (!BRIDGE_KEY) return null;
 
   const response = await fetch(BRIDGE_URL, {
@@ -681,6 +691,44 @@ async function lookupCoach(slug) {
   const data = await response.json().catch(() => ({}));
   if (!response.ok || !data.found) return null;
   return data;
+}
+
+// 🔴 COACH_LOOKUP_SOURCE steuert, woher die Berateridentitaet kommt:
+//   'bridge'  (Standard) HTTP an ac-reconnect.com/db-bridge.php - Verhalten wie bisher
+//   'beide'   beides abfragen, die BRIDGE entscheidet weiterhin, Abweichungen werden
+//             protokolliert. Der Schattenlauf vor dem Umschalten.
+//   'verzeichnis' nur leads.berater - kein Fremdaufruf mehr
+// Der Standard ist bewusst 'bridge': ein Deploy ohne gesetzte Variable aendert nichts.
+async function lookupCoach(slug) {
+  const normalizedSlug = normalisiereSlug(slug);
+
+  if (COACH_LOOKUP_SOURCE === 'verzeichnis') {
+    return beraterAusVerzeichnis(normalizedSlug, supabaseJson);
+  }
+
+  const ausBridge = await lookupCoachUeberBridge(normalizedSlug);
+
+  if (COACH_LOOKUP_SOURCE === 'beide') {
+    // Nur messen, nie entscheiden. Ein Fehler im Verzeichnisweg darf den Versand
+    // nicht gefaehrden - deshalb faengt der Schattenvergleich alles ab.
+    try {
+      const ausVerzeichnis = await beraterAusVerzeichnis(normalizedSlug, supabaseJson);
+      const abweichungen = vergleiche(ausBridge, ausVerzeichnis);
+      console.warn(
+        '[berater-vergleich] ' +
+          JSON.stringify({
+            slug: normalizedSlug,
+            bridge_gefunden: Boolean(ausBridge),
+            verzeichnis_gefunden: Boolean(ausVerzeichnis),
+            abweichungen,
+          })
+      );
+    } catch (error) {
+      console.warn(`[berater-vergleich] Verzeichnisweg fehlgeschlagen: ${error.message}`);
+    }
+  }
+
+  return ausBridge;
 }
 
 async function sendPostmark(message) {
