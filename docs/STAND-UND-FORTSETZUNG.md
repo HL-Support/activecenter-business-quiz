@@ -1,6 +1,31 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
-**Letzte Aktualisierung: 28.08.2026, nachts — nach dem vollständigen Audit.**
+> ## 🟢 Stand 30.08.2026, 15:40 MESZ — am laufenden System gemessen
+>
+> **Das Ziel „ohne Supabase, ohne Vercel, auf eigener Infrastruktur" ist erreicht.**
+> Alles darunter, was A1, A3, B1 oder B3 als offen führt, ist überholt.
+>
+> | Beweis | Messung |
+> | --- | --- |
+> | Produktionscontainer | `SUPABASE_*`-Variablen: **0** · `LEADS_DB_MODUS=direkt` · Ziel `10.0.1.3/hl_support` |
+> | `/health/ready` | `status: ready`, `datasource.quelle: plattform`, 34 ms |
+> | n8n (86 Workflows, 61 aktiv) | Workflows mit Supabase-Spur: **0** |
+> | Vercel | `zzz-stillgelegt-business-leads-quiz`, **pausiert, Git-Verknüpfung gekappt, keine Domains** |
+> | Datenfluss | 6.308 Leads · 111.589 Ereignisse · 22 neue Leads heute, 46 gestern |
+> | Outbox | genau **1** offener Auftrag — der bekannte geparkte vom 19.05. |
+> | pg_cron | `leads-refresh-event-daily` alle 15 min, zuletzt 15:30 |
+>
+> 🔴 **Was das NICHT heisst:** Das Supabase-Projekt existiert weiter, weil **Marathon**
+> dort liegt (Entscheidung 10: tabu). Erreicht ist „dieses Projekt benutzt Supabase
+> nicht mehr", nicht „Supabase ist weg". Und **17 andere Vercel-Projekte laufen
+> unverändert weiter** — das war so entschieden.
+>
+> **Offen sind nur noch Aufräumarbeiten**, keine Migrationsschritte: Test-DB
+> `business_leads_testimport` (233 MB) löschen · das pausierte Vercel-Projekt endgültig
+> entfernen · den Benachrichtigungsweg von der Legacy-MySQL lösen (C1) · `pgss-monatsreset`
+> reparieren · D5–D8. Details in §8c.
+
+**Letzte inhaltliche Überarbeitung: 28.08.2026, nachts — nach dem vollständigen Audit.**
 Alle Zahlen in diesem Dokument sind am 27.08. abends **neu gemessen**, nicht übernommen. Dieses Dokument ist der Einstieg für jede
 neue Sitzung: Es beschreibt, wo das System steht, was zuletzt passiert ist, welche
 Entscheidungen gelten, welche Fallen bekannt sind — und wie es konkret weitergeht.
@@ -618,9 +643,9 @@ Jede Zeile ist gemessen, nicht aus der Doku übernommen.
 
 | # | Punkt | Stand 28.08. |
 | --- | --- | --- |
-| A1 | **Laufzeitcode entkoppeln**: `api/bridge.js`, `api/lead-system-health.js`, `server/app-server.js`, `server/http-adapter.js`, `server/lead-system.js` kennen noch `SUPABASE_*` | offen — erst danach dürfen die Variablen aus Coolify |
+| A1 | ~~**Laufzeitcode entkoppeln**~~ | ✅ **erledigt 29.08.** Alle fünf Dateien laufen modusbewusst; danach `SUPABASE_*` aus Coolify entfernt. Nachgemessen am 30.08.: **0** solcher Variablen im Produktionscontainer, `/health/ready` meldet `quelle: plattform` |
 | A2 | ~~Zwei tote Workflows + Zugangsdaten löschen~~ | ✅ **erledigt**: `Supabase Keep-Alive` und `AC - Quiz Video Inactivity Checker` gelöscht, danach **beide** service-role-Zugangsdaten. Nachgemessen: **0 von 84** Workflows haben noch eine Supabase-Spur. Rückweg: `n8n/export-2026-08-28/` |
-| A3 | 🔴 **Fremdleser auf Postgres umhängen** | offen, **dringlichster Punkt**. Am 28.08. nachmittags gemessen: seit der Schreibbarriere **14.046** Zugriffe auf die Supabase-Instanz, davon auf Quiz-Objekte **42** — `quiz_sessions` 24×, `lead_contact_crm` 9×, `v_lead_state_full` 7×, `lead_events` 2×. Dort werden **eingefrorene** Daten gelesen. Der grosse Rest gehört anderen Systemen: `cron_runs` 11.367×, dazu der Webhook-Verbund (`claim_webhook_delivery_jobs`, `record_webhook_connector_heartbeat`, Health-Signale). Herkunft: **2.902 Zugriffe vom Coolify-Server selbst** (`167.233.251.217`), der Rest aus wechselnden AWS-Bereichen |
+| A3 | ~~**Fremdleser auf Postgres umhängen**~~ | ✅ **erledigt 29.08.** Für dieses Projekt gibt es keinen Supabase-Leser mehr: Container ohne `SUPABASE_*`, n8n mit **0 von 86** Workflows mit Supabase-Spur (30.08. nachgemessen). Der große Rest der damals gezählten 14.046 Zugriffe (`cron_runs`, Webhook-Verbund) gehörte **anderen Systemen** und läuft dort weiter |
 | A3a | 🔴 **Falle: die Edge-Log-Abfrage lügt still** | Eine Abfrage mit `cross join unnest(t.metadata) … unnest(m.request)` und `order by … limit N` lieferte **0 Zeilen** für ein Fenster, in dem `select count(*) from edge_logs` **14.046** meldete. Wer nur die erste Form nutzt, schliesst „niemand greift mehr zu" — und liegt falsch. **Immer zuerst gegenzählen** und die Abfrage an einem Fenster prüfen, in dem garantiert Verkehr war |
 | A4 | ~~**Business-Kalkulator** auf Coolify **und** Postgres~~ | ✅ **KOMPLETT erledigt 29.08.** (Freigabe Markus). Läuft als Coolify-App `kalkulator` unter **`kalkulator.hl-support.biz`** im direkten Modus (eigene Rolle `leads_kalk`, Limit 4). Schritt 6: SSO-Linkziel im Online-Support per `SSO_ERFOLGS_URL` umgestellt (Laufzeit-Beweis via artisan im neuen Container), Schlüsselpaar-Beweis, SSO-Flow-Probe inkl. Replay-Schutz und DB-Zeile, SSO-Delta dreimal gemessen = **0** (nichts nachzuziehen; Endstand Supabase 854 / Plattform 855), Vercel-Projekt `zzz-stillgelegt-…`, alte Domain gelöscht → 404. Abnahme zweimal über Zeit. 🔴 Nebenbefund behoben: CRM-Speichern war auf Vercel seit der Schreibbarriere kaputt (42501) — auf der Plattform wieder funktionsfähig. Beweise: **Business_Kalkulator/UMZUG-COOLIFY-POSTGRES.md §5b** |
 | A4a | ✅ **Datenlücke geschlossen: `sso_token_consumptions`** | 🔴 Die Tabelle **fehlte auf der Plattform**, obwohl der Kalkulator hineinschreibt (`api/sso.js:42`). Sie ist der **Replay-Schutz der SSO-Token** — ohne sie wäre ein Token nach dem Umzug mehrfach einlösbar. Angelegt in `leads` (Eigentümerin `leads_owner`, Rechte deckungsgleich mit `lead_contact_crm`), **854 Zeilen übernommen**, Zeitstempel identisch. `lead_contact_crm` war bereits vollständig: 41 Zeilen beidseitig gleich |
@@ -638,11 +663,11 @@ nicht „Supabase ist gelöscht".
 
 | # | Punkt | Stand |
 | --- | --- | --- |
-| B1 | Projekt `business_leads_quiz` löschen | `paused=true` gemessen — Split-Brain ausgeschlossen; es fehlen die Tore 01.09./03.09. |
+| B1 | Pausiertes Vercel-Projekt endgültig löschen | offen — aber ungefährlich: `zzz-stillgelegt-business-leads-quiz` ist **pausiert, ohne Git-Verknüpfung und ohne Domains** (30.08. nachgemessen). Nur noch Kosmetik |
 | B2 | ~~Review-App `ac-email-review` auf Coolify~~ | ✅ **erledigt 28.08.** — läuft unter **`https://nurture-review.hl-support.biz`** (Coolify-App `nurture-review`, UUID `e20rigehi49gkdzmrzcwptds`, nixpacks, Basisverzeichnis `/nurture/review-app`, Zweig `nurture-auf-plattform-db`). DNS über Cloudflare, **DNS-only**. Abnahme zweimal über Zeit: ohne Zugangsdaten 401 (auch auf `/api/email/48`), falsches Passwort 401, falscher Benutzer 401, richtige Zugangsdaten 200 und API liefert Mautic-Inhalt. Zugang in `agent-secrets.json` → `leadgen_review`. **Damit ist das Nurture-System frei von Vercel** |
 | B2a | ✅ **erledigt 28.08.** Offener Schreibzugriff der Review-App geschlossen | Vercels eigener Schutz war auf diesem Tarif nicht verfügbar (`428` bei `ssoProtection` **und** `passwordProtection`; die Einstellung stand auf `all_except_custom_domains` — deshalb war ausgerechnet die Produktions-URL offen). Deshalb die aktive Auslieferung gelöscht. Zweimal über Zeit gemessen: `GET /api/email/48` von **200 auf 404**, Startseite 404, die 14 übrigen Auslieferungen 302 (Vercel-SSO). Code-seitig schützt jetzt `nurture/review-app/middleware.js` fail-closed, mit 7 Tests |
 | B2b | 🔴 **`MAUTIC_PASS` rotieren — offen, bewusst zurückgestellt** | Das Mautic-`admin`-Passwort lag hinter der offenen App **und** steht im Klartext in der Git-Historie (drei Python-Dateien, am 28.08. gepusht; aus dem Arbeitsbaum entfernt, aus der Historie nicht). **Entscheidung Markus am 28.08.: nicht rotieren.** Damit ist dasselbe Passwort auch in der neuen Coolify-Auslieferung im Einsatz. Der Zugang von aussen ist zu — wer die Repo-Historie liest, hat es trotzdem. Bleibt offen |
-| B3 | Vier Domains vom Vercel-Projekt lösen, dann löschen | offen |
+| B3 | ~~Vier Domains vom Vercel-Projekt lösen~~ | ✅ **erledigt 29.08.** — das Projekt trägt keine Domain mehr |
 
 ### C — Der letzte Legacy-MySQL-Knoten
 
