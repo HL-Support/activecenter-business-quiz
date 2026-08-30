@@ -155,8 +155,8 @@ sonst das Verzeichnis leeren.
 
 | # | Schritt | Beweis, bevor es weitergeht |
 | --- | --- | --- |
-| B1 | **Deployen** mit `COACH_LOOKUP_SOURCE` **ungesetzt** | `/health/ready` grün, nächste Hot-Lead-Mail unverändert |
-| B2 | Auf **`beide`** stellen: beide Wege abfragen, die **Bridge entscheidet weiterhin**, Abweichungen landen als `[berater-vergleich]` im Containerprotokoll | Über mehrere echte Hot-Leads: **keine** Abweichung in `email`, `first_name`, `organisation_name`, `country`, Sprache |
+| B1 | ~~**Deployen** mit `COACH_LOOKUP_SOURCE` ungesetzt~~ | ✅ **erledigt 30.08. 20:34.** Bewusst als **eigener, kleiner PR** (#123, drei Dateien) statt über den Arbeitszweig: der liegt 28 Commits vor `main` und hätte drei weitere, unabhängige Vorhaben mitgeliefert (E-Mail-Korrektur, Reputations-Pilot, Übersetzer-Erweiterungen) — zwei davon nutzersichtbar und nie in Produktion. Produktion trägt `6688a05`, `/health/ready` grün, `quelle: plattform`. Gegenprobe, dass wirklich nur der Schalter kam: `/api/confirm-email-correction` **weiterhin 404** |
+| B2 | Auf **`beide`** stellen: beide Wege abfragen, die **Bridge entscheidet weiterhin**, Abweichungen landen als `[berater-vergleich]` im Containerprotokoll | 🟡 **läuft seit 30.08. 20:39.** `COACH_LOOKUP_SOURCE=beide` (is_literal) im Container nachgelesen, `/health/ready` grün, null Fehler im Protokoll, Outbox-Worker antwortet weiter mit 200. **Noch keine Vergleichszeile** — sie entsteht erst beim nächsten `coach_hot_lead_email`. Bei rund zwei Hot-Leads am Tag braucht das zwei bis drei Tage für belastbare Zahlen. Ablesen: `docker logs <container> \| grep berater-vergleich` |
 | B3 | Auf **`verzeichnis`** stellen | Nächste Hot-Lead-Mail geht an dieselbe Adresse, kein Aufruf mehr an `ac-reconnect.com` |
 | B4 | `BRIDGE_URL`/`BRIDGE_KEY` aus dem Coach-Pfad entfernen | Der Fremdaufruf ist aus dem Benachrichtigungsweg verschwunden |
 
