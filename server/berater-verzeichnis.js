@@ -34,7 +34,7 @@ const VERZEICHNIS_FELDER = [
 
 /** Genau die Normalisierung, die der Bridge-Weg seit jeher benutzt. */
 function normalisiereSlug(slug) {
-  const roh = String(slug == null ? '' : slug).slice(0, 80).trim().toLowerCase();
+  const roh = String(slug ?? '').slice(0, 80).trim().toLowerCase();
   return roh || 'default';
 }
 
@@ -97,8 +97,8 @@ function vergleiche(ausBridge, ausVerzeichnis) {
   if (!ausBridge) return ['nur_im_verzeichnis'];
   if (!ausVerzeichnis) return ['nur_in_der_bridge'];
   const gleich = (a, b) => {
-    const x = a == null ? '' : String(a).trim().toLowerCase();
-    const y = b == null ? '' : String(b).trim().toLowerCase();
+    const x = String(a ?? '').trim().toLowerCase();
+    const y = String(b ?? '').trim().toLowerCase();
     return x === y;
   };
   return VERGLEICHSFELDER.filter((feld) => !gleich(ausBridge[feld], ausVerzeichnis[feld]));
