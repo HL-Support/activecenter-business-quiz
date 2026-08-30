@@ -20,7 +20,21 @@ const commonGlobals = {
 
 export default [
   {
-    ignores: ['node_modules/', 'dist/', 'build/', '.vercel/', 'code_details/**'],
+    ignores: [
+      'node_modules/',
+      'dist/',
+      'build/',
+      '.vercel/',
+      'code_details/**',
+      // Aus n8n gezogene Code-Belege. Das sind Fragmente, die nur im n8n-Code-Knoten
+      // laufen (`return` auf oberster Ebene, `$input`) - kein Projektquelltext, sondern
+      // Beweismaterial. Siehe docs/audits/c1-postprocessor-extrakt/BEFUND.md.
+      'docs/audits/**/*.js',
+      // Eigenstaendige Anwendungen mit eigenem Werkzeugkasten (Next.js, JSX in .js).
+      // Sie werden nicht vom Quiz gebaut und nicht von dessen ESLint-Regeln bedient.
+      'nurture/review-app/**',
+      'nurture/mautic-setup/**',
+    ],
   },
   js.configs.recommended,
   prettier,
