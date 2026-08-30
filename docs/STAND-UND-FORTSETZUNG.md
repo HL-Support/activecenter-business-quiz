@@ -653,7 +653,7 @@ Jede Zeile ist gemessen, nicht aus der Doku übernommen.
 | A4c | **Anwendung umstellen** — Vercel/Supabase → Coolify/Postgres | 🔴 **Vercel kann die Plattform-DB gar nicht erreichen** (pg_hba lässt nur 10.0.1.5 zu). Umzug auf Coolify ist **Voraussetzung**, nicht Alternative. Vollständiger Plan mit Beweisen je Schritt: **Business_Kalkulator/UMZUG-COOLIFY-POSTGRES.md** |
 | A4d | ~~Lücken im Übersetzer~~ | ✅ **erledigt 28./29.08.** — es waren **vier**, nicht zwei: `not.`-Negation, `offset` (Obergrenze 10000), **`or=(…)`** (von `coachPostgrestFilter` genutzt, war vom `not.`-Fehler verdeckt) und 🔴 **Boolean-Filter**: postgres.js serialisiert für boolean-Spalten jeden Nicht-`true`-Wert zu `'f'` — `manual_added=eq.true` als String-Parameter wurde **still invertiert** (falsche Zeilen, am Kalkulator gemessen). Fix: `eq.true/false` → echte Booleans. Alles im Quiz-Repo mit Tests (`postgrest-nach-sql.kalkulator.test.js` beweist die zeichengleichen Kalkulator-Abfragen), Kopie im Kalkulator mit Drift-Wächter-Test. Das Quiz selbst nutzt keine Boolean-Filter (ausgezählt) — Produktion war nicht betroffen |
 | A4e | ~~Vercel-Projekt des Quiz~~ | ✅ **stillgelegt 29.08.**: Projekt hiess weiter `business_leads_quiz` und **baute bei jedem Push auf `main` weiter** (gemessen: Prod-Deploy 28.08. durch die Umzugs-Commits — Zombie ohne Domains). Umbenannt in `zzz-stillgelegt-business-leads-quiz`, **Git-Verknüpfung per API gekappt** (`DELETE /v9/projects/<id>/link`). Ebenfalls 29.08.: `ac-email-review` → `zzz-stillgelegt-ac-email-review` (seit B2 durch `nurture-review` auf Coolify ersetzt, letztes Deploy 29.05.) |
-| A5 | **Test-DB `business_leads_testimport` löschen** — 1.236 echte E-Mail-Adressen | offen: `dropdb business_leads_testimport` |
+| A5 | ~~**Test-DB `business_leads_testimport` löschen**~~ | ✅ **erledigt 30.08.** Inhalt vor dem Löschen protokolliert: 18 Tabellen, größte `lead_events` 108.445 Zeilen, **1.236 Adressen / 1.095 eindeutige**. Nur die **Struktur** gesichert (`/root/testdb-abschied-20260830/struktur.sql`, sha256 im Manifest) — die Adressen sollten ja gerade weg. Danach `dropdb`; auf dem Server liegen jetzt nur noch `hl_support` und `postgres`. Die drei Skripte `phase5-datenprobe.js`, `phase5-testimport-vergleich.js` und `stufe-b-beweis.js` sprechen die DB an, werden aber **nirgends automatisiert aufgerufen** (geprüft: keine CI-, npm- oder Shell-Verwendung) |
 
 🔴 **Das Supabase-Projekt selbst kann nicht weg**, solange **Marathon** dort liegt
 (Entscheidung 10: tabu). Erreichbar ist „das Quiz benutzt Supabase nicht mehr" —
@@ -673,7 +673,7 @@ nicht „Supabase ist gelöscht".
 
 | # | Punkt | Stand |
 | --- | --- | --- |
-| C1 | **Benachrichtigungsweg auf die Plattform** — `AC - Lead Post Processor` pollt alle 5 Min `prod_contacts_activesupport.typeform_surveys` und verschickt von dort Opt-in- und Zugangsmail | offen, sieben Schritte in [plans/benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md). Grösse gemessen: **269.994 Zeichen JS, dreifach kopiert** |
+| C1 | **Benachrichtigungsweg auf die Plattform** — `AC - Lead Post Processor` pollt alle 5 Min `prod_contacts_activesupport.typeform_surveys` und verschickt von dort Opt-in- und Zugangsmail | **Schritt 1 von 7 erledigt 30.08.**: Es sind nicht dreimal 87.000 Zeichen, sondern **eine** Bibliothek (1.708 Zeilen, 53 Funktionen) und drei Treiber (3 / 4 / 47 Zeilen). 🔴 Zwei Fassungen im Umlauf — zwei Knoten laufen auf der älteren. Befund: [audits/c1-postprocessor-extrakt/BEFUND.md](audits/c1-postprocessor-extrakt/BEFUND.md). Schritte 2–7 offen; Schritt 4 verlangt einen 48-Stunden-Schattenlauf |
 
 ### D — Zusammenzug und Kleinkram
 
@@ -686,7 +686,7 @@ nicht „Supabase ist gelöscht".
 | D5 | 47 Fremdmails (6 % des `Leadgen`-Servers) auf `Admin` umziehen | offen |
 | D6 | `activecenter.info`: DKIM einrichten **oder** Signatur `support@activecenter.info` entfernen | offen — sendet heute nichts von dort, geladene Waffe |
 | D7 | Drei OneDrive-Konfliktkopien in `nurture/review-app/_konflikte-onedrive/` auflösen | offen — **vor** dem Neudeploy der Review-App, siehe `nurture/README.md` |
-| D8 | `pgss-monatsreset` · Outbox-Worker-Secret aus dem Query-String · `supabase-lead-system-v2.sql` bereinigen | offen (Punkte 13–15 oben) |
+| D8 | ~~`pgss-monatsreset`~~ · Outbox-Worker-Secret aus dem Query-String · `supabase-lead-system-v2.sql` bereinigen | ✅ **Cron-Job erledigt 30.08.**: Der Job zeigte auf die Datenbank **`fitapp`**, die es auf diesem Server nicht mehr gibt — der nächste fällige Lauf am 01.09. wäre daran gescheitert. Neu als **`pgss-wochenreset`** in `hl_support`, sonntags 03:15. Warum wöchentlich: gemessen **4.782 von 5.000 Einträgen nach 11 Tagen (95,6 %)** — monatlich stünde die Tabelle zwei Drittel des Monats voll und verdrängte. Rückweg: `cron.alter_job(<id>, schedule := '15 3 1 * *')`. Die übrigen zwei Punkte bleiben offen |
 
 ### Dokumentation — im Audit gefunden und bereits korrigiert
 

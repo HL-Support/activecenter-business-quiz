@@ -66,11 +66,34 @@ Ablösung der Mautic-Anbindung. Das ist mehrere Arbeitssitzungen groß — und e
 Pfad, über den **jede** Lead-Mail läuft. Ein Schnellschuss darauf wäre genau die halbe
 Lösung, die hier niemand will.
 
+## 3a. 🟢 Korrektur nach der Messung vom 30.08.2026
+
+Abschnitt 3 schätzte den Umfang, bevor er gemessen war. Die Messung fällt günstiger aus:
+
+| | Annahme 28.08. | gemessen 30.08. |
+| --- | --- | --- |
+| Vorlagenlogik | „rund 87.000 Zeichen“ **dreifach kopiert** | **eine** Bibliothek, 1.708 Zeilen, 53 Funktionen |
+| Knotenspezifischer Teil | unklar | **3 / 4 / 47 Zeilen**, einzeln benannt |
+| Fassungsstand | unklar | **zwei** Fassungen im Umlauf — die maßgebliche ist die aus `Code - Build Lead Model` |
+
+🔴 **Neuer Befund, der in den Port gehört:** `Code - Normalize Candidate Rows` und
+`Code - Apply Resume Link` laufen auf der **älteren** Fassung; ihnen fehlen
+`ac_berater_display_name` und `getOrganisationName`. Heute folgenlos — der erste Knoten
+benutzt vom gebauten Modell nur 17 skalare Felder für die Auftragszeile, der dritte erbt die
+Mautic-Felder aus dem zweiten. Die **versendete Mail** entsteht aber in der alten Fassung.
+Die nächste Textkorrektur träfe zwangsläufig nur eine der beiden Hälften.
+
+🔴 **Zweiter Befund:** `Normalize Candidate Rows` baut je Kandidat das vollständige
+Modell samt vier Sprachfassungen von Betreff, HTML und Text — und schreibt danach 17 Felder
+in eine Auftragszeile. Dieser Aufruf braucht im Zielbild **keine** Vorlagenbibliothek.
+
+Vollständiger Befund: [../audits/c1-postprocessor-extrakt/BEFUND.md](../audits/c1-postprocessor-extrakt/BEFUND.md)
+
 ## 4. Schritte, jeder mit eigenem Beweis
 
 | # | Schritt | Beweis, bevor es weitergeht |
 | --- | --- | --- |
-| 1 | **Bibliothek extrahieren**: die drei Kopien aus n8n ziehen, diffen, die *eine* echte Fassung feststellen | Die drei Kopien sind zeichengleich — oder die Abweichungen sind benannt |
+| 1 | ~~**Bibliothek extrahieren**~~ | ✅ **erledigt 30.08.** Es sind **eine** Bibliothek (1.708 Zeilen, 53 Funktionen) und drei Treiber (3 / 4 / 47 Zeilen), nicht dreimal 87.000 Zeichen. Zwei Fassungen im Umlauf, die maßgebliche benannt. Befund und Dateien: [../audits/c1-postprocessor-extrakt/BEFUND.md](../audits/c1-postprocessor-extrakt/BEFUND.md) |
 | 2 | **Vorlagen ins Repo portieren** (`server/mail-vorlagen/`), vier Sprachen, mit Golden-Tests gegen die real versendeten Mails aus Postmark | Für je einen echten Lead je Sprache: erzeugte Mail == versendete Mail, Zeichen für Zeichen |
 | 3 | **Outbox-Arten ergänzen** (`coach_optin_email`, `lead_access_email`), Versand **hinter einem Schalter** (`OPTIN_OUTBOX_EMAIL_ENABLED`, Standard aus) | Regressionstests grün; bei Schalter aus verhält sich das System exakt wie heute |
 | 4 | **Schattenlauf**: Aufträge werden erzeugt und abgearbeitet, aber statt zu senden nur protokolliert | Über 48 h: für **jeden** Opt-in genau ein Auftrag je Art, kein Doppel, keine Lücke — gegen die tatsächlich versendeten Postmark-Mails abgeglichen |
