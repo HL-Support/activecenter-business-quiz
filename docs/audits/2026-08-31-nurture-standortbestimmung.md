@@ -70,7 +70,7 @@ Verlust.**
 
 ---
 
-## 4. 🔴 Die einzige echte Lücke: Sprachen
+## 4. Die einzige echte Lücke: Sprachen — ✅ noch am selben Abend geschlossen (§5a)
 
 `SUPPORTED_LANGS = ['de', 'it', 'en']` (`Code - Select Email ID`). Die Vorlagen im Repo
 bestätigen das: `nurture/vorlagen/nurture-email-templates-{de,en,it}.md`.
@@ -116,13 +116,69 @@ Die **Nurture-Strecke** ist davon nicht berührt.
 
 ---
 
+## 5a. ✅ Die Sprachlücke ist geschlossen (31.08.2026, abends)
+
+**Entscheidung Markus: „Version A" — eine generische Vorlage je Phase und Sprache.**
+
+| | |
+| --- | --- |
+| Angelegt | **24 Mautic-Vorlagen**, Kennungen **162–185** (hu 162–169, fr 170–177, ru 178–185) |
+| Texte | `nurture/vorlagen/generisch-hu-fr-ru.js` — deutsche Referenz + hu/fr/ru |
+| Erzeuger | `scripts/nurture-vorlagen-anlegen.js` (Trockenlauf ist Standard) |
+| Workflow | `SUPPORTED_LANGS = ['de','it','en','hu','fr','ru']`, `EMAIL_MAP` ergänzt, Rückfall auf `_single` |
+| Sicherung | `n8n/backups/quiz-nurture-sender-2026-08-31-vor-sprachen.json` |
+| Geprüft | am laufenden Workflow gegengelesen: `{"de":37,"it":37,"en":37,"hu":8,"fr":8,"ru":8}` |
+
+**Wie der Rückfall funktioniert:**
+
+```js
+const emailId = EMAIL_MAP[phase]?.[lang]?.[variantKey]
+  ?? EMAIL_MAP[phase]?.[lang]?.['_single'];
+```
+
+Deutsch, Italienisch und Englisch behalten ihre vier Varianten je Phase — für sie ändert
+sich **nichts**. hu/fr/ru laufen über `_single`.
+
+### ⚠️ Vermerk für spätere Optimierung
+
+Das ist bewusst die vereinfachte Fassung. Zwei Dinge gehören nachgeholt, sobald es sich
+lohnt:
+
+1. **Variantentiefe.** Bekommt eine dieser Sprachen nennenswert Volumen, gehört sie auf
+   dieselbe Tiefe wie Deutsch — vier Varianten je Phase nach Hauptziel, Profil bzw.
+   Barriere. Der Rückfall macht das **schrittweise** möglich: Wer eine einzelne Variante
+   nachträgt, überschreibt damit genau diese Kombination. Es braucht dafür keine
+   Umstellung, keinen Deploy und keine Änderung am Sender.
+2. **`a4` und `a5`.** Sie stehen in keiner Sprache aktiv (`ACTIVE_PHASES` kennt sie nicht)
+   — auch in Deutsch nicht. Wer die Strecke verlängern will, aktiviert sie zuerst dort.
+
+### 🔴 Was noch offen ist
+
+**Die Übersetzungen sind nicht muttersprachlich gegengelesen.** Bei Code fängt ein Test den
+Fehler, bei Verkaufstext niemand. Die betroffenen Berater sind aber selbst
+Muttersprachler — die ungarischen Leads hängen an `wellnesskurs`, der russische an `fit`.
+Dort gehört es hin.
+
+Ein Test (`scripts/tests/nurture-vorlagen-generisch.test.js`) bewacht das, was prüfbar
+**ist**: dass kein Mautic-Platzhalter beim Übersetzen zerbrochen ist, dass jede Sprache
+dieselben Platzhalter trägt wie die deutsche Referenz, und dass der Rahmen
+(Beraterkasten, Abmeldelink, Impressum) nirgends deutsch geblieben ist. Genau das war beim
+ersten Entwurf passiert.
+
+**Rückweg:** die Sprache aus `SUPPORTED_LANGS` nehmen. Die Vorlagen bleiben stehen und
+lassen sich jederzeit wieder zuschalten.
+
+---
+
 ## 6. Was daraus folgt
 
 1. **Kein Handlungsbedarf am Versandweg.** Er läuft, meldet sauber und hat den Augustvorfall
    nachweislich abgearbeitet.
-2. **Eine Entscheidung steht an:** Nurture-Vorlagen für hu/fr/ru — bauen oder bewusst
-   verzichten. Bei Verzicht gehören die Fälle in die Baseline, sonst bleibt W2 dauerhaft
-   gelb und wird mit der Zeit ignoriert.
+2. ✅ **Die Sprachlücke ist geschlossen** (§5a) — 24 generische Vorlagen für hu/fr/ru,
+   Rückfall auf `_single`. Von den neun Warnfällen werden damit **vier** erreichbar. Die
+   übrigen fünf bleiben zu Recht draußen: vier sind im Mautic angehalten, einer hat keinen
+   Mautic-Kontakt. Sie gehören in die Wächter-Baseline, sonst bleibt W2 dauerhaft gelb.
+   🔴 Offen: muttersprachliche Gegenlese durch die Berater `wellnesskurs` (hu) und `fit` (ru).
 3. **Ein Beobachtungspunkt:** `no_email_id` darf nicht zurückkommen. Er hat 30 Menschen
    ihre Strecke gekostet, bevor er auffiel.
 

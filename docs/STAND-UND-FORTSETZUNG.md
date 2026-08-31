@@ -152,9 +152,22 @@
 > 4× keine Vorlage in ihrer Sprache · 4× im Mautic angehalten · 1× kein Mautic-Kontakt.
 > **Kein technischer Ausfall.**
 >
-> 🔴 **Eine Entscheidung steht an:** Die Strecke kennt nur `de`, `it`, `en`. Sieben Menschen
-> in `hu`/`fr`/`ru` fallen strukturell durch — Vorlagen bauen oder bewusst verzichten und in
-> die Baseline aufnehmen, damit W2 nicht dauerhaft gelb bleibt.
+> ✅ **Die Sprachlücke ist geschlossen.** Die Strecke kannte nur `de`, `it`, `en`; sieben
+> Menschen in `hu`/`fr`/`ru` fielen strukturell durch. Jetzt gibt es für diese drei je eine
+> generische Vorlage pro Phase — **24 neue Mautic-Vorlagen (162–185)**, `SUPPORTED_LANGS`
+> erweitert, Rückfall auf `_single`. Damit werden **vier** der neun Warnfälle erreichbar;
+> die übrigen fünf bleiben zu Recht draußen (vier im Mautic angehalten, einer ohne
+> Mautic-Kontakt) und gehören in die Wächter-Baseline.
+>
+> 🔴 **Offen: muttersprachliche Gegenlese.** Die Übersetzungen sind nicht gegengelesen —
+> bei Verkaufstext fängt kein Test den Fehler. Die betroffenen Berater sind selbst
+> Muttersprachler (`wellnesskurs` für hu, `fit` für ru). Rückweg: Sprache aus
+> `SUPPORTED_LANGS` nehmen, die Vorlagen bleiben stehen.
+>
+> ⚠️ **Vermerk für später:** Das ist bewusst die vereinfachte Fassung („Version A", eine
+> Vorlage je Phase statt vier Varianten). Bekommt eine Sprache Volumen, gehört sie auf die
+> Tiefe von Deutsch — der Rückfall erlaubt das **schrittweise**, ohne Umstellung.
+>
 > Vollständig: [audits/2026-08-31-nurture-standortbestimmung.md](audits/2026-08-31-nurture-standortbestimmung.md)
 >
 > ### Was weiterhin bei Markus liegt
