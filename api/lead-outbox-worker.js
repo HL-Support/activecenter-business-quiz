@@ -31,7 +31,11 @@ const {
   vergleiche,
 } = require('../server/berater-verzeichnis');
 const { beraterAusMysql } = require('../server/legacy/berater');
-const { STELLEN, beraterAufloesen } = require('../server/berater-aufloesen');
+const {
+  STELLEN,
+  beraterAufloesen,
+  schattenNotizUeberRpc,
+} = require('../server/berater-aufloesen');
 
 const N8N_UPDATE_RESULT_URL = process.env.N8N_UPDATE_RESULT_URL;
 const N8N_UPDATE_RESULT_SECRET = String(process.env.N8N_UPDATE_RESULT_SECRET || '').trim();
@@ -705,6 +709,7 @@ async function lookupCoach(slug) {
     stelle: STELLEN.MAIL,
     env: process.env,
     vergleiche,
+    schattenNotiz: schattenNotizUeberRpc(supabaseRpc),
     quellen: {
       bridge: async () => {
         const berater = await lookupCoachUeberBridge(normalizedSlug);

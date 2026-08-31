@@ -36,7 +36,11 @@ const {
 // Welche Quelle entscheidet, steuert COACH_LOOKUP_SOURCE; Standard 'bridge'.
 const { beraterAusVerzeichnis, vergleiche } = require('../server/berater-verzeichnis');
 const { beraterAusMysql } = require('../server/legacy/berater');
-const { STELLEN, beraterAufloesen } = require('../server/berater-aufloesen');
+const {
+  STELLEN,
+  beraterAufloesen,
+  schattenNotizUeberRpc,
+} = require('../server/berater-aufloesen');
 const dbTransport = require('../server/db-transport');
 // Seit Phase 1 (/berater-info) gibt es genau EINEN Erzeuger fuer Coach-Insights-Links.
 // Die frueheren lokalen Kopien in dieser Datei und im Outbox-Worker waren nicht
@@ -450,6 +454,7 @@ async function beraterHolen(subdomain, stelle, forwardedFor, userAgent) {
     stelle,
     env: process.env,
     vergleiche,
+    schattenNotiz: schattenNotizUeberRpc(supabaseRpc),
     quellen: beraterQuellen(subdomain, forwardedFor, userAgent),
   });
 }
