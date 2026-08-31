@@ -161,3 +161,65 @@ test('faellt die Bridge aus, wird der Fehler weitergereicht', async () => {
     /bridge_kaputt/
   );
 });
+
+// 🔴 Die haltbare Notiz: Der Vergleich darf einen Deploy ueberleben.
+test('die Schattennotiz ruft die RPC mit kanonisch sortierten Feldern', async () => {
+  const rufe = [];
+  const rpc = async (name, args) => {
+    rufe.push({ name, args });
+    return [{ anzahl: 1 }];
+  };
+  const { schattenNotizUeberRpc } = require('../../server/berater-aufloesen');
+
+  await beraterAufloesen({
+    slug: 'trix24',
+    stelle: STELLEN.MAIL,
+    quellen: quellen({ verzeichnis: ANDERS }),
+    env: { COACH_LOOKUP_SOURCE: 'beide' },
+    vergleiche,
+    schattenNotiz: schattenNotizUeberRpc(rpc),
+  });
+
+  assert.equal(rufe.length, 1);
+  assert.equal(rufe[0].name, 'notiere_berater_vergleich');
+  assert.deepEqual(rufe[0].args, {
+    p_stelle: 'mail',
+    p_slug: 'trix24',
+    p_quelle: 'bridge',
+    p_schatten: 'verzeichnis',
+    p_abweichungen: 'organisation_name',
+  });
+});
+
+test('mehrere Abweichungen werden immer gleich sortiert abgelegt', async () => {
+  const { schattenNotizUeberRpc } = require('../../server/berater-aufloesen');
+  const rufe = [];
+  const notiz = schattenNotizUeberRpc(async (name, args) => rufe.push(args));
+  await notiz({ stelle: 'funnel', slug: 'x', quelle: 'bridge', schatten: 'mysql',
+    abweichungen: ['organisation_name', 'country', 'email'] });
+  assert.equal(rufe[0].p_abweichungen, 'country,email,organisation_name');
+});
+
+test('ohne Datenzugang gibt es keine Notiz - und keinen Fehler', async () => {
+  const { schattenNotizUeberRpc } = require('../../server/berater-aufloesen');
+  assert.equal(schattenNotizUeberRpc(undefined), undefined);
+  const r = await beraterAufloesen({
+    slug: 'trix24', stelle: STELLEN.MAIL, quellen: quellen(),
+    env: { COACH_LOOKUP_SOURCE: 'beide' }, vergleiche,
+    schattenNotiz: schattenNotizUeberRpc(undefined),
+  });
+  assert.deepEqual(r.data, BRIDGE);
+});
+
+// Ein Protokoll ist nie ein Datenpfad: faellt die RPC aus, laeuft der Aufruf weiter.
+test('eine scheiternde RPC gefaehrdet den Aufruf nicht', async () => {
+  const { schattenNotizUeberRpc } = require('../../server/berater-aufloesen');
+  const r = await beraterAufloesen({
+    slug: 'trix24', stelle: STELLEN.MAIL, quellen: quellen(),
+    env: { COACH_LOOKUP_SOURCE: 'beide' }, vergleiche,
+    schattenNotiz: schattenNotizUeberRpc(async () => {
+      throw new Error('datenbank_weg');
+    }),
+  });
+  assert.deepEqual(r.data, BRIDGE);
+});
