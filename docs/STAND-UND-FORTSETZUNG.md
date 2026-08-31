@@ -15,21 +15,29 @@
 > **B2** (`COACH_LOOKUP_SOURCE=beide`, Schattenvergleich) läuft seit 30.08. 20:39; die
 > Bridge entscheidet weiterhin. Der Schalter ist über die Coolify-API gegengeprüft.
 >
-> 🔴 **B3 ist gesperrt — der Schattenlauf hat einen echten Unterschied gefunden.** Beide
-> bisherigen Vergleiche (30.08. 20:51 und 20:54) melden `organisation_name` und `country`.
-> Nachgefasst an beiden Quellen:
+> **Der Schattenlauf hat einen echten Unterschied gefunden — und er ist behoben.** Beide
+> Vergleiche (30.08. 20:51 und 20:54) meldeten `organisation_name` und `country`:
 >
-> | Feld | Bridge | Verzeichnis | Urteil |
-> | --- | --- | --- | --- |
-> | `organisation_name` | `EaglesFit` / `Activecenter` | `EaglesFit-Support` / `Activecenter-Support` | 🔴 **echt** — steht als Markenname in jeder Hot-Lead-Mail |
-> | `country` | `address.country` = `CH` / `IT` | `CH` / `IT` | 🟢 **Fehlalarm** — der Vergleich liest die flache Form, die Bridge liefert sie verschachtelt |
+> | Feld | Bridge | Verzeichnis (vorher) | Urteil | Stand |
+> | --- | --- | --- | --- | --- |
+> | `organisation_name` | `EaglesFit` / `Activecenter` | `EaglesFit-Support` / `Activecenter-Support` | 🔴 **echt** — Markenname in jeder Hot-Lead-Mail | ✅ Spiegel nahm `o.name` statt `o.org_name`; korrigiert, Verzeichnis stimmt seit 05:30 |
+> | `country` | `address.country` = `CH` / `IT` | `CH` / `IT` | 🟢 **Fehlalarm** — Bridge liefert nur verschachtelt | ✅ `vergleiche()` liest jetzt die effektiven Werte |
 >
-> Ein Umschalten auf `verzeichnis` würde also aus „EaglesFit" sichtbar „EaglesFit-Support"
-> machen. Vor B3 sind zwei Dinge zu tun: **`vergleiche()` auf die effektiven Werte
-> korrigieren** (sonst meldet `country` dauerhaft Fehlalarm) und **die Spiegelquelle für
-> `organisation_name` angleichen**. Beweise, Ursachen und der Zugangsweg (Coolify-API statt
-> SSH) stehen unter „B2a" in
+> Ein Umschalten auf `verzeichnis` hätte aus „EaglesFit" sichtbar „EaglesFit-Support"
+> gemacht — genau der Fall, für den der Schattenlauf gebaut wurde. Gegenprobe nach der
+> Korrektur: **12 zufällige Berater, alle deckungsgleich.**
+>
+> 🟡 **B3 noch nicht stellen.** Die Vergleichskorrektur liegt erst auf dem Arbeitszweig; bis
+> zum Deploy meldet die Produktion weiter `["country"]` (reiner Fehlalarm). Danach frische
+> Vergleichszeilen abwarten — die zwei alten taugen nicht mehr als Beweis. Beweise,
+> Ursachen und der Zugangsweg (Coolify-API statt SSH) stehen unter „B2a" in
 > [plans/benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md).
+>
+> **Warum es die Bridge überhaupt noch gibt** (Grundsatzfrage, 31.08. beantwortet): Sie ist
+> kein Hosting-Rest, sondern der Zugang zu `prod_activesupport` — der Mitgliederverwaltung,
+> in der die Berater-Stammdaten liegen und die **nie Teil des Umzugs war**. B3/B4 entfernen
+> den *synchronen Fremdaufruf im Sendemoment*, nicht die Abhängigkeit: die wandert in den
+> 15-Minuten-Spiegel. Ausführlich in §4b des Plans.
 >
 > ⚠️ Der Arbeitszweig `nurture-auf-plattform-db` liegt **30 Commits vor** und **1 hinter**
 > `origin/main` (der B1-Merge). Deploys laufen nur von `main`.

@@ -86,6 +86,27 @@ const VERGLEICHSFELDER = [
 ];
 
 /**
+ * Wie der Verbraucher das Feld tatsaechlich liest.
+ *
+ * 🔴 Der Vergleich muss dieselben Ausdruecke benutzen wie die Mail, sonst meldet er
+ * Unterschiede, die es im Verhalten gar nicht gibt. Gemessen am 31.08.2026: die Bridge
+ * liefert das Land **ausschliesslich verschachtelt** als `address.country`
+ * (`db-bridge.php`, `lookup_subdomain` — ein flaches `country` gibt es dort nicht), das
+ * Verzeichnis liefert es flach. Der Vergleich las nur die flache Form und meldete
+ * deshalb bei **jedem** Berater eine Abweichung in `country`, obwohl beide Seiten
+ * dasselbe trugen (`CH` bzw. `IT` nachgeprueft). Das echte Signal waere darin ertrunken.
+ *
+ * Die Ausdruecke spiegeln `api/lead-outbox-worker.js`:
+ * `detectCoachLanguage` (Land und Sprachkandidaten) und `buildHotLeadEmail` (`brandName`).
+ */
+const EFFEKTIVER_WERT = {
+  country: (k) => k?.address?.country || k?.country,
+  organisation_name: (k) => k?.organisation_name || k?.org_name || k?.company,
+  preferred_newsletter_language: (k) =>
+    k?.preferred_newsletter_language || k?.preferred_language || k?.language || k?.lang || k?.locale,
+};
+
+/**
  * Vergleicht die Antwort der Bridge mit der aus dem Verzeichnis.
  * Liefert die Namen der abweichenden Felder — leer heisst deckungsgleich.
  * Verglichen wird nachsichtig: leer, null und undefined gelten als gleich, und bei
@@ -101,7 +122,11 @@ function vergleiche(ausBridge, ausVerzeichnis) {
     const y = String(b ?? '').trim().toLowerCase();
     return x === y;
   };
-  return VERGLEICHSFELDER.filter((feld) => !gleich(ausBridge[feld], ausVerzeichnis[feld]));
+  const wert = (koffer, feld) =>
+    EFFEKTIVER_WERT[feld] ? EFFEKTIVER_WERT[feld](koffer) : koffer?.[feld];
+  return VERGLEICHSFELDER.filter(
+    (feld) => !gleich(wert(ausBridge, feld), wert(ausVerzeichnis, feld))
+  );
 }
 
 module.exports = {

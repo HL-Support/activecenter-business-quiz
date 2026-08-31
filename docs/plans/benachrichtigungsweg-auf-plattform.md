@@ -119,6 +119,39 @@ Weg holt den Coach per **SQL-JOIN**, der Zielweg (`api/lead-outbox-worker.js:669
 
 ## 4b. Der Berater kommt per SQL statt per Fremdaufruf (Entscheidung Markus, 30.08.2026)
 
+> ### 🔴 Grundsatzfrage: „Wir sind doch auf Coolify — wozu noch eine Bridge?"
+>
+> Beantwortet am 31.08.2026 am Quelltext und an der laufenden Bridge gemessen.
+>
+> **Weil die Bridge nichts mit dem Hosting zu tun hat.** Der Umzug hat zwei Dinge bewegt:
+> die *Anwendung* (Vercel → Coolify) und die *Leaddaten* (Supabase → Plattform-DB). Die
+> Bridge liest aber ein **drittes System**: `prod_activesupport` — die MySQL der
+> ActiveSupport-/Herbalife-Mitgliederverwaltung. **Dort liegt die Berater-Stammdatenhaltung,
+> und dieses System war nie Teil des Umzugs.** Es gehört uns nicht in dem Sinne, dass wir es
+> mitnehmen könnten.
+>
+> **Was B3/B4 also wirklich erreichen:** Sie entfernen den **synchronen Fremdaufruf im
+> Sendemoment** — nicht die Abhängigkeit von der Legacy-MySQL. Die bleibt, sie wandert nur
+> vom Sendeweg in den Spiegel: n8n liest alle 15 Minuten `prod_activesupport.users` und
+> schreibt nach `leads.berater`. Aus „bei jeder Mail einen fremden Server fragen" wird „alle
+> 15 Minuten einmal nachführen, im Sendemoment nur noch die eigene DB lesen".
+>
+> Das ist der eigentliche Gewinn: **der teuerste Vorgang des Funnels hängt nicht mehr an der
+> Verfügbarkeit eines fremden PHP-Endpunkts.** Fällt die Bridge aus, verzögert sich nur die
+> Aktualität des Verzeichnisses; heute fiele der Mailversand aus.
+>
+> **Und deshalb kann `BRIDGE_URL` nicht einfach weg.** Der Vertrag
+> (`scripts/lib/bridge-contracts.js`) führt **14 Aktionen**; `lookup_subdomain` ist eine
+> davon. Weiterhin über dieselbe Bridge laufen unter anderem `forward_webhook` (die
+> Lead-Übergabe an `contacts.hl-support.biz`), `track_event`, `write_analytics*`,
+> `resolve_resume_token`/`resolve_resume_key` und `update_points_result`.
+> 🔴 Ausserdem gibt es einen **zweiten Berater-Abruf im Funnelweg**: `src/lib/core.js:829`
+> fragt aus dem Browser `/api/bridge` → `lookup_subdomain`, also bei **jedem Seitenaufruf**.
+> B4 räumt ausdrücklich nur den **Coach-Pfad des Mailwegs** ab.
+>
+> **Was „die Bridge ganz weg" bedeuten würde:** die Kontakte-/Mitgliedermigration selbst —
+> ein eigenes Vorhaben, kein Schritt in diesem Plan.
+
 **Ausgangslage.** `api/lead-outbox-worker.js:669` holte die Berateridentität per HTTP von
 `ac-reconnect.com/db-bridge.php` — der letzte Fremdaufruf im Benachrichtigungsweg.
 
@@ -157,7 +190,7 @@ sonst das Verzeichnis leeren.
 | --- | --- | --- |
 | B1 | ~~**Deployen** mit `COACH_LOOKUP_SOURCE` ungesetzt~~ | ✅ **erledigt 30.08. 20:34.** Bewusst als **eigener, kleiner PR** (#123, drei Dateien) statt über den Arbeitszweig: der liegt 28 Commits vor `main` und hätte drei weitere, unabhängige Vorhaben mitgeliefert (E-Mail-Korrektur, Reputations-Pilot, Übersetzer-Erweiterungen) — zwei davon nutzersichtbar und nie in Produktion. Produktion trägt `6688a05`, `/health/ready` grün, `quelle: plattform`. Gegenprobe, dass wirklich nur der Schalter kam: `/api/confirm-email-correction` **weiterhin 404** |
 | B2 | Auf **`beide`** stellen: beide Wege abfragen, die **Bridge entscheidet weiterhin**, Abweichungen landen als `[berater-vergleich]` im Containerprotokoll | ✅ **läuft seit 30.08. 20:39, erste Zahlen liegen vor.** `COACH_LOOKUP_SOURCE=beide` (is_literal) am 31.08. über die Coolify-API gegengeprüft, `/health/ready` grün, Outbox-Worker antwortet weiter mit 200. **Zwei Vergleichszeilen** (30.08. 20:51 `trix24`, 20:54 `ingeunterthiner`) — **beide mit Abweichung** in `organisation_name` und `country`. Auswertung unten |
-| B3 | Auf **`verzeichnis`** stellen | 🔴 **GESPERRT.** Der Schattenlauf hat genau das gefunden, wofür er gebaut wurde: `organisation_name` weicht **echt** ab und steht sichtbar in jeder Hot-Lead-Mail. Siehe B2a |
+| B3 | Auf **`verzeichnis`** stellen | 🟡 **Ursache behoben, Beweis steht aus.** Der Schattenlauf fand eine **echte** Abweichung in `organisation_name` (Markenname in jeder Hot-Lead-Mail) — Ursache am 31.08. gefunden und korrigiert (Spiegel nahm `o.name` statt `o.org_name`). Stichprobe von 12 Beratern jetzt deckungsgleich. Vor B3 fehlen: Deploy der Vergleichskorrektur und **frische** Vergleichszeilen. Siehe B2a |
 | B4 | `BRIDGE_URL`/`BRIDGE_KEY` aus dem Coach-Pfad entfernen | Der Fremdaufruf ist aus dem Benachrichtigungsweg verschwunden |
 
 #### 🔴 B2a — Auswertung des Schattenlaufs: B3 ist gesperrt
@@ -210,26 +243,55 @@ Das Feld wird zu `brandName` (`api/lead-outbox-worker.js:786`:
 steht damit **als Marken-/Absendername in jeder Hot-Lead-Mail**. Ein Umschalten auf `verzeichnis` würde aus „EaglesFit" **„EaglesFit-Support"**
 machen — bei jedem betroffenen Berater, sofort und sichtbar.
 
-Die Ursache liegt im Spiegel: der Workflow nimmt
-`left join prod_activesupport.organizations o on o.id = u.organization_id` → **`o.name`**,
-und `o.name` trägt offenbar die `-Support`-Fassung. Die Bridge (`db-bridge.php`) liefert
-denselben Berater ohne diesen Zusatz, zieht den Namen also aus einer anderen Spalte oder
-schneidet ihn zu. **Welche Spalte das ist, ist noch offen** — `db-bridge.php` liegt nicht in
-diesem Repo, und die Legacy-MySQL ist nur von `10.0.1.5` (dem Coolify-App-Server) aus
-erreichbar; ein Leseversuch von `10.0.1.4` (n8n) wurde erwartungsgemäss mit
-`Access denied for user 'bioniq_public_reader'@'10.0.1.4'` abgewiesen.
+**Ursache gefunden — es ist eine einzige Spalte.** Der Quelltext der Bridge liegt als
+Spiegel im Nachbarrepo (`landing-page/_system/db-bridge.php`, dort noch unmigriert; die
+Zeile ist am laufenden Endpunkt gegengeprüft). `lookup_subdomain` selektiert:
 
-##### Was daraus folgt
+```sql
+o.org_name AS organisation_name          -- Bridge
+FROM users u LEFT JOIN organizations o ON u.organization_id = o.id
+```
 
-1. 🔴 **B3 bleibt gesperrt**, bis `organisation_name` deckungsgleich ist. Das ist kein
-   Formfehler, sondern genau der Fall, für den der Schattenlauf gebaut wurde.
-2. **`vergleiche()` korrigieren**, damit `country` die effektiven Werte vergleicht
-   (`address.country || country`) — sonst ist jede weitere Messung verrauscht. Sinnvoll
-   wäre, den Vergleich generell gegen **dieselben Ausdrücke** laufen zu lassen, die der
-   Verbraucher benutzt, statt gegen die kanonischen Feldnamen.
-3. **Spiegelquelle für `organisation_name` klären** und angleichen — von `10.0.1.5` aus die
-   `organizations`-Spalten ansehen und mit der Bridge-Antwort vergleichen.
-4. **Erst danach** weiter Zahlen sammeln und B3 stellen.
+Der n8n-Spiegel nahm dagegen **`o.name`**. `organizations` führt beide Spalten:
+`name` = „EaglesFit-Support", `org_name` = „EaglesFit". Kein Datenfehler, ein Abgriff auf
+der falschen Spalte.
+
+Ebenfalls aus dem Quelltext bestätigt: das Land steht in der Antwort **nur** im
+`address`-Objekt (`'address' => ['street','postal','place','country']`), ein flaches
+`country` gibt es dort nicht — genau die Form, an der sich der Vergleich verschluckt hat.
+
+##### ✅ Beides korrigiert am 31.08.2026
+
+| # | Korrektur | Beweis |
+| --- | --- | --- |
+| 1 | **Spiegel-SQL `o.name` → `o.org_name`** (n8n `IFOqAOYbUp8Zwnlk`) | Per API-PUT nach Verfahren `agent-core/skills/n8n-workflow-update`, **nie per SQL**. `versionId` `9aa90b0b…` → `641c9dea…`, Workflow weiter aktiv. Sicherung: `n8n/backups/berater-verzeichnis-spiegeln-2026-08-31-vor-org-name.json` |
+| 2 | **`vergleiche()` liest die effektiven Werte** (`server/berater-verzeichnis.js`) | Neue Abbildung `EFFEKTIVER_WERT` spiegelt `detectCoachLanguage` und `buildHotLeadEmail`. Drei neue Tests mit der **echten** Bridge-Form; 262 Tests grün |
+
+**Nachgemessen am laufenden System**, nicht angenommen:
+
+- Nach dem Spiegellauf **05:30:13 UTC**: `trix24` → `EaglesFit`, `ingeunterthiner` →
+  `Activecenter` — beide jetzt zeichengleich mit der Bridge.
+- Das ganze Verzeichnis ist unbeschädigt: **255** Zeilen, **255** mit `organisation_name`,
+  **0** noch auf `-Support`, 255 mit E-Mail und Land, 6 verschiedene Organisationen.
+- **Gegenprobe über eine Zufallsstichprobe von 12 Beratern**: jeder einzeln gegen die
+  **echte** Bridge abgefragt und durch die korrigierte `vergleiche()` geschickt →
+  **12 deckungsgleich, 0 Abweichungen.**
+
+🔴 **Der Testaufbau war mitschuldig.** Der bisherige Test baute die Bridge-Antwort *flach*
+nach (`country: 'IT'`), also in einer Form, die es nie gab. Deshalb war der Fehlalarm im
+Test unsichtbar. Die neuen Tests bilden die gemessene Form nach — verschachteltes
+`address.country` und die Ausweichnamen, die die Mail liest.
+
+##### Was jetzt noch fehlt
+
+1. **Die Vergleichskorrektur ist noch nicht in Produktion.** Der Spiegel ist live, der Code
+   liegt auf dem Arbeitszweig. Bis zum Deploy meldet der Schattenlauf weiterhin
+   `["country"]` — **jetzt ein reiner Fehlalarm**, `organisation_name` ist raus. Ausliefern
+   wie B1: kleiner, eigener PR gegen `main`, nicht über den Arbeitszweig.
+2. **Danach frische Vergleichszeilen abwarten** (rund zwei Hot-Leads am Tag) — die zwei
+   bisherigen sind mit dem alten Code und dem alten Spiegel entstanden und taugen nicht
+   mehr als Beweis.
+3. **Erst dann B3.**
 
 ##### 🟡 Nebenbefund: der Vergleich lebt nur im Containerprotokoll
 
