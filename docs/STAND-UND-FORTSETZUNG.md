@@ -1,5 +1,33 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
+> ## 🔴 Nachtrag 31.08.2026, 19:30 MESZ — es sind acht Mails, nicht fünf
+>
+> Beim Beweislauf für Strang B kamen **drei weitere** Mails zum Vorschein, die bisher
+> nirgends dokumentiert waren. Sie stammen nicht aus n8n und nicht aus diesem Repo:
+>
+> | Mail | An | Wer sendet | Steuerung |
+> | --- | --- | --- | --- |
+> | „Neuer Kontakteintrag" | Berater | ActiveCenter (`NotificationService`) | 🔴 hing an **gar nichts**; seit 31.08. an `kartei_benachrichtigung` |
+> | „Neuer Kontakt aus: Business" | Berater | contacts, `NewContactCreated` | `noemail` (alt) / `coach_email` (neu) |
+> | „Deine Anfrage zu unserer Geschäftsmöglichkeit" | Lead | contacts, `sendEmailToContact` | `noemail` (alt) / `contact_email` (neu) |
+>
+> Das Quiz schickt `noemail: 1` mit, das blockt im alten Controller die unteren beiden.
+> Die **erste** blockt es nicht — ihr Aufruf steht bei `TypeformWebhookController.php:368`
+> ausserhalb jeder Prüfung, sie kommt also bis heute bei jedem Quiz-Lead an. Mit B5 hört
+> sie auf; über `/webhook/quiz` verschickt contacts **null** Mails (alle drei
+> Registry-Schalter `false`, im ausgelieferten Container nachgemessen, contacts `10e9251`).
+>
+> ⚠️ **Korrektur:** In Plan B §5 stand, die Probe löse „Mail 1+2 an `info@global-sce.com`"
+> aus. Gemessen: Nur **eine** geht an den Berater, die andere an den **Interessenten**.
+>
+> ⚠️ **Grenze der Zustellmessung:** Postmark beweist die Annahme durch den Mailhost, nicht
+> die Ablage im Postfach. Wer den EMPFANG beweisen will, nimmt ein echtes Postfach, keine
+> Plus-Adresse.
+>
+> 🔴 Der vollständige, laufend gepflegte Stand liegt auf dem Arbeitszweig
+> `nurture-auf-plattform-db` — dort sind auch das Mailbild (`docs/MAILWEGE.md` §0) und der
+> Fortsetzungsplan nachgezogen.
+>
 > ## 🟡 Nachtrag 31.08.2026, 18:00 MESZ — B4 läuft, der Schattenlauf ist scharf
 >
 > `CONTACTS_QUIZ_MODUS=schatten` gesetzt, dazu Adresse und Geheimnis — B5 ist damit **eine
