@@ -1,5 +1,30 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
+> ## 🟡 Nachtrag 31.08.2026 — B3 ist ausgeliefert, aber inaktiv
+>
+> Der Absender an `contacts /webhook/quiz` liegt im Repo und läuft mit. **Er tut
+> nichts:** ohne `CONTACTS_QUIZ_MODUS` gilt der Standard `aus`, das Opt-in geht
+> unverändert über `forward_webhook` an die Bridge.
+>
+> | Was | Wo |
+> | --- | --- |
+> | Der Vertrag (gilt, nicht §3 des Plans) | [contacts-quiz-webhook-vertrag.md](contacts-quiz-webhook-vertrag.md) |
+> | Absender | `server/legacy/kontakte.js` |
+> | Vertragspayload | `api/bridge.js`, `buildContactsQuizPayload` |
+> | Datenseite (angewandt und bewiesen) | `sql/contacts-quiz-uebergabe.sql`, Schema `leads` |
+> | Auftragsart `contacts_quiz_submission` | `api/lead-outbox-worker.js` |
+> | Wächterprüfung **W6** | `scripts/waechter-nurture.js` — 🔴 Serverkopie nachziehen |
+>
+> 🔴 **Drei Abweichungen der Gegenstelle, beim Nachlesen gefunden:** Sie liest
+> `meta.survey` (nicht `meta.quiz`), erwartet den Kopf `X-Quiz-Signature`, und sie
+> spiegelte `meta` **nicht** nach `form_response.hidden`. Das Dritte hätte beim
+> Umschalten „Unbekannt" statt Profil und Ziel in Mail 1 und Mail 2 gestellt — ohne
+> jede Meldung. Behoben im contacts-Repo (`721f525`, ausgeliefert), Hergang in
+> [uebergaben/2026-08-31-contacts-hidden-abbildung.md](uebergaben/2026-08-31-contacts-hidden-abbildung.md).
+>
+> **Nächster Schritt: B4** — `CONTACTS_QUIZ_MODUS=schatten`, mehrere Tage messen.
+> Reihenfolge und Tore: [plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md) §0a.
+
 **Letzte Aktualisierung: 28.08.2026, nachts — nach dem vollständigen Audit.**
 Alle Zahlen in diesem Dokument sind am 27.08. abends **neu gemessen**, nicht übernommen. Dieses Dokument ist der Einstieg für jede
 neue Sitzung: Es beschreibt, wo das System steht, was zuletzt passiert ist, welche
