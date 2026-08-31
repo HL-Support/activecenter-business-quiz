@@ -105,6 +105,41 @@ test('der Vergleich benennt genau die abweichenden Felder', () => {
   assert.deepEqual(vergleiche(ausBridge, ausVerzeichnis), ['organisation_name', 'country']);
 });
 
+// 🔴 Diese Form ist am 31.08.2026 an der echten Bridge gemessen (`lookup_subdomain`):
+// das Land steht NUR in `address.country`, ein flaches `country` gibt es nicht.
+// Der alte Vergleich las die flache Form und meldete deshalb bei jedem Berater
+// eine Abweichung in `country`, die es im Verhalten nicht gab.
+test('die verschachtelte Landangabe der Bridge ist keine Abweichung', () => {
+  const ausBridge = {
+    email: 'info@global-sce.com',
+    first_name: 'Markus',
+    last_name: 'Oberhofer',
+    organisation_name: 'Activecenter-Support',
+    preferred_newsletter_language: 'de',
+    address: { street: 'Weg 1', postal: '39100', place: 'Bozen', country: 'IT' },
+  };
+  assert.deepEqual(vergleiche(ausBridge, ausVerzeichniszeile(ZEILE)), []);
+});
+
+test('ein echter Landunterschied wird trotz Verschachtelung erkannt', () => {
+  const ausBridge = { email: 'a@b.de', address: { country: 'CH' } };
+  const ausVerzeichnis = { email: 'a@b.de', country: 'IT' };
+  assert.deepEqual(vergleiche(ausBridge, ausVerzeichnis), ['country']);
+});
+
+test('der Vergleich kennt die Ausweichnamen, die auch die Mail liest', () => {
+  // buildHotLeadEmail: organisation_name || org_name || company
+  assert.deepEqual(
+    vergleiche({ email: 'a@b.de', org_name: 'EaglesFit' }, { email: 'a@b.de', organisation_name: 'EaglesFit' }),
+    []
+  );
+  // detectCoachLanguage kennt preferred_language als Kandidaten
+  assert.deepEqual(
+    vergleiche({ email: 'a@b.de', preferred_language: 'de' }, { email: 'a@b.de', preferred_newsletter_language: 'de' }),
+    []
+  );
+});
+
 test('kennt nur eine Seite den Berater, sagt der Vergleich welche', () => {
   assert.deepEqual(vergleiche(null, { email: 'a@b.de' }), ['nur_im_verzeichnis']);
   assert.deepEqual(vergleiche({ email: 'a@b.de' }, null), ['nur_in_der_bridge']);
