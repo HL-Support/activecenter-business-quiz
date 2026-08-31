@@ -49,6 +49,7 @@ SELECT
     `u`.`herbalife_id`                                     AS `herbalife_id`,
     `u`.`preferred_newsletter_language`                    AS `preferred_newsletter_language`,
     `o`.`org_name`                                         AS `organisation_name`,
+    `u`.`organization_id`                                  AS `organisation_id`,
     -- 🔴 org_name, NICHT o.name: Die Bridge liest org_name (db-bridge.php:1237).
     --    Der n8n-Spiegel las bis 31.08. faelschlich o.name und lieferte dadurch
     --    "EaglesFit-Support" statt "EaglesFit" — sichtbar als Markenname in jeder Mail.
