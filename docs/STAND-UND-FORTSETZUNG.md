@@ -1,25 +1,28 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
-> ## 🟢 Stand 31.08.2026, 12:10 MESZ — Berater kommt aus einem Auflöser, Schattenlauf gegen MySQL läuft
+> ## 🟢 Stand 31.08.2026, 13:40 MESZ — Schattenlauf gegen MySQL, haltbar gespeichert
 >
 > | Prüfung | Messung |
 > | --- | --- |
-> | Produktion | `e7aa22a` (PR **#124** und **#125**), **dreimal über Zeit** gleich |
-> | `/health/ready` | `status: ready`, `quelle: plattform` |
-> | Funnel | `lookup_subdomain` antwortet unverändert: `found=true`, `source=user` |
-> | MySQL-View | `prod_quiz.quiz_berater`, **255 Zeilen** |
-> | Rechte | `quiz@10.0.1.5`: genau `USAGE` + `SELECT` auf die eine View |
+> | Produktion | `0135ef3`, `/health/ready` grün, `quelle: plattform` |
+> | Funnel | `lookup_subdomain` antwortet unverändert (`found=true`, `source=user`) |
+> | MySQL-View | `prod_quiz.quiz_berater`, **255 Zeilen**; Rechte: nur `SELECT` auf diese View |
 > | Gleichheit zur Bridge | **25 Berater Feld für Feld: 25 zeichengleich, 0 Abweichungen** |
-> | Schattenlauf in Produktion | erste vier Vergleiche: **alle `abweichungen: []`** |
+> | Schattenlauf | läuft; Vergleiche in `leads.berater_vergleich`, **0 mit Abweichung** |
+> | **Haltbarkeit** | 5 Vergleiche erzeugt → deployt → **immer noch 5**. Kein Verlust mehr |
+> | Postmark-Tags | **alle fünf** Nutzlasten tragen einen Tag, Wächter-Test hält den Stand |
 >
-> **A1–A3 sind erledigt und live, A4 läuft.** Die vier Stellen, die die Berateridentität
-> brauchen, fragen jetzt über **einen** Auflöser (`server/berater-aufloesen.js`); die
-> Quelle ist ein Schalter. 🔴 **Die Bridge entscheidet weiterhin** — MySQL wird nur
-> mitgemessen.
+> **A1–A4 sind erledigt, A5 wartet nur noch auf Menge.** Die vier Stellen fragen über
+> **einen** Auflöser; 🔴 **die Bridge entscheidet weiterhin**, MySQL wird nur mitgemessen.
 >
-> **Offen:** A5 (umschalten — braucht A4-Belege über Tage), Strang B (Route im
-> contacts-Repo zuerst) und Strang M. Reihenfolge, Tore und Begründung:
-> [plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md).
+> 🟢 **Es gibt keine Deploy-Sperre.** Der Vergleich liegt jetzt in der Datenbank statt im
+> Containerprotokoll und überlebt jeden Deploy — nachgewiesen. Am Projekt darf normal
+> weitergearbeitet werden.
+>
+> **Offen:** A5 (Env-Umschaltung, Tor in
+> [plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md)), Strang B (Route im
+> contacts-Repo zuerst), Strang M (Opt-in-Mails kommen **weiterhin aus n8n**, nicht aus
+> dem Repo).
 
 
 **Letzte inhaltliche Überarbeitung: 28.08.2026, nachts — nach dem vollständigen Audit.**
