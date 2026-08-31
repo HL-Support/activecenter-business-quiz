@@ -18,7 +18,7 @@
 - Do not change production during the audit.
 
 ## Research Findings
-- Repository is canonical under `D:\OneDrive\Antigravity Laptop\...`, on `main`, with zero commits ahead or behind `origin/main`.
+- Repository is canonical under `D:\Antigravity_Projects\...`, on `main`, with zero commits ahead or behind `origin/main`.
 - Existing untracked `business_leads_quiz.code-workspace` is unrelated and must be preserved.
 - Production currently serves `dist/`; the browser shell loads runtime translation/video configuration plus the built app bundle.
 - Supabase v2 is the source of truth; MySQL is downstream through an outbox worker.
@@ -179,7 +179,7 @@
 
 ## Scope-Erweiterung: `business-schulung`
 
-- Das separate Repository liegt kanonisch unter `D:/OneDrive/Antigravity Laptop/activecenter-web/business-schulung`, ist auf `main` sauber und synchron zu `origin/main`.
+- Das separate Repository liegt kanonisch unter `D:\Antigravity_Projects/activecenter-web/business-schulung`, ist auf `main` sauber und synchron zu `origin/main`.
 - Es ist eine kleine Next.js-14-Pages-Anwendung ohne eigene API und ohne Datenbank: eine 511-zeilige Clientseite, ein Translation-Provider, lokale JSON-Inhalte in fünf Sprachen und lokale Fonts.
 - Die Fachseite ist damit kein eigenständiger Backend-Service, sondern ein statisches Berater-Nachschlagewerk. Eine Integration als Route/Featuremodul in das Business-Leads-Produkt ist technisch sinnvoller als ein dauerhaft separates Deployment.
 - Bestehender Deep-Link-Vertrag: `type` wählt das Profil; `goal`, `asp` oder `aspiration` wählen das Ziel; `lang` oder `l` wählen die Sprache. Profil-Aliase und Ziel-Aliase sind öffentliches Verhalten und müssen beim Import erhalten bleiben.

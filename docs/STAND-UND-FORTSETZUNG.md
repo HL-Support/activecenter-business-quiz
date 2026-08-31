@@ -1,5 +1,39 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
+> ## 🟡 Stand 31.08.2026, 06:45 MESZ — Berateridentität: B1 ausgeliefert, B2 läuft
+>
+> Nachgemessen am laufenden System, nicht übernommen:
+>
+> | Prüfung | Messung |
+> | --- | --- |
+> | Produktion | `6688a05` (PR **#123**, gemergt 30.08. 20:32 UTC), **dreimal über Zeit** gleich |
+> | `/health/ready` | `status: ready`, `quelle: plattform`, 35–40 ms |
+> | Abgrenzung | `/api/confirm-email-correction` → **404** — es kam wirklich nur der Schalter |
+> | Containerstart | 30.08. **20:40 MESZ** — deckt sich mit dem B2-Deploy |
+>
+> **B1** (Verzeichnismodul ausliefern, Schalter leer → Verhalten unverändert) ist erledigt.
+> **B2** (`COACH_LOOKUP_SOURCE=beide`, Schattenvergleich) läuft seit 30.08. 20:39; die
+> Bridge entscheidet weiterhin. Der Schalter ist über die Coolify-API gegengeprüft.
+>
+> 🔴 **B3 ist gesperrt — der Schattenlauf hat einen echten Unterschied gefunden.** Beide
+> bisherigen Vergleiche (30.08. 20:51 und 20:54) melden `organisation_name` und `country`.
+> Nachgefasst an beiden Quellen:
+>
+> | Feld | Bridge | Verzeichnis | Urteil |
+> | --- | --- | --- | --- |
+> | `organisation_name` | `EaglesFit` / `Activecenter` | `EaglesFit-Support` / `Activecenter-Support` | 🔴 **echt** — steht als Markenname in jeder Hot-Lead-Mail |
+> | `country` | `address.country` = `CH` / `IT` | `CH` / `IT` | 🟢 **Fehlalarm** — der Vergleich liest die flache Form, die Bridge liefert sie verschachtelt |
+>
+> Ein Umschalten auf `verzeichnis` würde also aus „EaglesFit" sichtbar „EaglesFit-Support"
+> machen. Vor B3 sind zwei Dinge zu tun: **`vergleiche()` auf die effektiven Werte
+> korrigieren** (sonst meldet `country` dauerhaft Fehlalarm) und **die Spiegelquelle für
+> `organisation_name` angleichen**. Beweise, Ursachen und der Zugangsweg (Coolify-API statt
+> SSH) stehen unter „B2a" in
+> [plans/benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md).
+>
+> ⚠️ Der Arbeitszweig `nurture-auf-plattform-db` liegt **30 Commits vor** und **1 hinter**
+> `origin/main` (der B1-Merge). Deploys laufen nur von `main`.
+
 > ## 🟢 Stand 30.08.2026, 15:40 MESZ — am laufenden System gemessen
 >
 > **Das Ziel „ohne Supabase, ohne Vercel, auf eigener Infrastruktur" ist erreicht.**
@@ -32,7 +66,7 @@ Entscheidungen gelten, welche Fallen bekannt sind — und wie es konkret weiterg
 Zeiten sind MESZ, sofern nicht anders angegeben.
 
 > Regeln zuerst: `AGENTS.md` (dieses Repo) und die globale Governance in
-> `D:\OneDrive\Antigravity Laptop\agent-core\governance\GOVERNANCE_RULES.json`.
+> `D:\Antigravity_Projects\agent-core\governance\GOVERNANCE_RULES.json`.
 > 🔴 R0 gilt immer: keine Eile, alles prüfen, nie gegen echte Daten testen.
 
 > ## 🔴 Zuerst lesen: der Cutover ist erfolgt
@@ -605,7 +639,7 @@ Dokumentation übernommen. Reihenfolge: nach Dringlichkeit.
 | 8 | ~~**`AC - Error Alert` umstellen**~~ → ✅ **erledigt und live** (nachgemessen 28.08.) | Workflow `vSpXIyOUK9WIlvxi`, Knoten „Supabase - Log Nurture Failure" trägt die Zugangsdaten «Plattform-DB leads_n8n (hl_support)» und ist **nicht** abgeschaltet. Auch hier: nur der Knotenname ist alt |
 | 9 | `Supabase Keep-Alive` (`CODeVYeZ_63C-DoT4Z8SN`) und `AC - Quiz Video Inactivity Checker` (`ie2WEc1RmFhN5LQf`) | **beide inaktiv**, tragen aber weiterhin «Supabase Stats_Logs (service role)». Nachgemessen 28.08.: es sind die **einzigen** von 86 Workflows mit Supabase-Spur. Workflows und danach die Zugangsdaten löschen |
 | 10 | ~~**Wächter W2 wird anschlagen**, solange der Versand steht~~ → der Versand läuft; W2 meldet am 28.08. weiterhin **9 fällige Erstempfänger** — das ist ein **eigener** Befund (Sendegrenze 5 je Lauf), nicht der stehende Versand | gehört getrennt nachgegangen |
-| 10b | 🔴 **Benachrichtigungsweg (Opt-in-Mail) hängt noch an der Legacy-MySQL** | `AC - Lead Post Processor` pollt alle 5 Min `prod_contacts_activesupport.typeform_surveys`. Widerspricht Entscheidung 3 („Outbox ist der **einzige** Übergabepunkt"). Karte: [MAILWEGE.md](MAILWEGE.md) · Plan: [plans/benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md) |
+| 10b | 🔴 **Benachrichtigungsweg (Opt-in-Mail) hängt noch an der Legacy-MySQL** | `AC - Lead Post Processor` pollt alle 5 Min `prod_contacts_activesupport.typeform_surveys`. Widerspricht Entscheidung 3 („Outbox ist der **einzige** Übergabepunkt"). Karte: [MAILWEGE.md](MAILWEGE.md) · Plan: [plans/benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md). **Stand 31.08.:** die *Berateridentität* ist der erste gelöste Teilstrang — B1 ausgeliefert (`6688a05`), B2 im Schattenlauf, B3/B4 offen. Der Postprozessor-Poll selbst ist davon **unberührt** |
 
 ### Danach
 

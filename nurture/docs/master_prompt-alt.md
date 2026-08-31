@@ -5,16 +5,16 @@ Use this prompt as the runtime entry for agents working in `Leads_quiz_Nurture`.
 ## Start
 
 ```powershell
-. "D:\OneDrive\Antigravity Laptop\agent-core\scripts\direct-api-helpers.ps1"
+. "D:\Antigravity_Projects\agent-core\scripts\direct-api-helpers.ps1"
 Read-Memory -Query "leads quiz nurture mautic aktuelle entscheidungen status"
 ```
 
 Then read:
 
-- `D:\OneDrive\Antigravity Laptop\agent-core\governance\GOVERNANCE_RULES.json`
-- `D:\OneDrive\Antigravity Laptop\activecenter-web\AGENTS.md`
-- `D:\OneDrive\Antigravity Laptop\activecenter-web\Leads_quiz_Nurture\AGENTS.md`
-- `D:\OneDrive\Antigravity Laptop\activecenter-web\Leads_quiz_Nurture\docs\NURTURE_EMAIL_SENDER_WORKFLOW.md`
+- `D:\Antigravity_Projects\agent-core\governance\GOVERNANCE_RULES.json`
+- `D:\Antigravity_Projects\activecenter-web\AGENTS.md`
+- `D:\Antigravity_Projects\activecenter-web\Leads_quiz_Nurture\AGENTS.md`
+- `D:\Antigravity_Projects\activecenter-web\Leads_quiz_Nurture\docs\NURTURE_EMAIL_SENDER_WORKFLOW.md`
 
 ## Brain
 

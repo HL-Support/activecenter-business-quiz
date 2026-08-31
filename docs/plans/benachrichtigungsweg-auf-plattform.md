@@ -156,9 +156,109 @@ sonst das Verzeichnis leeren.
 | # | Schritt | Beweis, bevor es weitergeht |
 | --- | --- | --- |
 | B1 | ~~**Deployen** mit `COACH_LOOKUP_SOURCE` ungesetzt~~ | ✅ **erledigt 30.08. 20:34.** Bewusst als **eigener, kleiner PR** (#123, drei Dateien) statt über den Arbeitszweig: der liegt 28 Commits vor `main` und hätte drei weitere, unabhängige Vorhaben mitgeliefert (E-Mail-Korrektur, Reputations-Pilot, Übersetzer-Erweiterungen) — zwei davon nutzersichtbar und nie in Produktion. Produktion trägt `6688a05`, `/health/ready` grün, `quelle: plattform`. Gegenprobe, dass wirklich nur der Schalter kam: `/api/confirm-email-correction` **weiterhin 404** |
-| B2 | Auf **`beide`** stellen: beide Wege abfragen, die **Bridge entscheidet weiterhin**, Abweichungen landen als `[berater-vergleich]` im Containerprotokoll | 🟡 **läuft seit 30.08. 20:39.** `COACH_LOOKUP_SOURCE=beide` (is_literal) im Container nachgelesen, `/health/ready` grün, null Fehler im Protokoll, Outbox-Worker antwortet weiter mit 200. **Noch keine Vergleichszeile** — sie entsteht erst beim nächsten `coach_hot_lead_email`. Bei rund zwei Hot-Leads am Tag braucht das zwei bis drei Tage für belastbare Zahlen. Ablesen: `docker logs <container> \| grep berater-vergleich` |
-| B3 | Auf **`verzeichnis`** stellen | Nächste Hot-Lead-Mail geht an dieselbe Adresse, kein Aufruf mehr an `ac-reconnect.com` |
+| B2 | Auf **`beide`** stellen: beide Wege abfragen, die **Bridge entscheidet weiterhin**, Abweichungen landen als `[berater-vergleich]` im Containerprotokoll | ✅ **läuft seit 30.08. 20:39, erste Zahlen liegen vor.** `COACH_LOOKUP_SOURCE=beide` (is_literal) am 31.08. über die Coolify-API gegengeprüft, `/health/ready` grün, Outbox-Worker antwortet weiter mit 200. **Zwei Vergleichszeilen** (30.08. 20:51 `trix24`, 20:54 `ingeunterthiner`) — **beide mit Abweichung** in `organisation_name` und `country`. Auswertung unten |
+| B3 | Auf **`verzeichnis`** stellen | 🔴 **GESPERRT.** Der Schattenlauf hat genau das gefunden, wofür er gebaut wurde: `organisation_name` weicht **echt** ab und steht sichtbar in jeder Hot-Lead-Mail. Siehe B2a |
 | B4 | `BRIDGE_URL`/`BRIDGE_KEY` aus dem Coach-Pfad entfernen | Der Fremdaufruf ist aus dem Benachrichtigungsweg verschwunden |
+
+#### 🔴 B2a — Auswertung des Schattenlaufs: B3 ist gesperrt
+
+**Gemessen am 31.08.2026, 06:39–07:30 MESZ.** Zuerst der Rahmen:
+
+| Prüfung | Messung |
+| --- | --- |
+| `/health/live` | `6688a05`, **dreimal über Zeit** gleich (R0: eine Messung ist kein Beweis) |
+| `/health/ready` | `status: ready`, `quelle: plattform`, 35–40 ms |
+| Abgrenzung | `/api/confirm-email-correction` → **404** (unverändert) |
+| Containerstart | `uptime_s` 35.960 → Start **30.08. 20:40 MESZ**, deckt sich mit dem B2-Deploy |
+| Schalter | `COACH_LOOKUP_SOURCE = beide` (`is_literal`), über die Coolify-API gelesen |
+| Protokollfenster | 30.08. 18:39 UTC → 31.08. 05:05 UTC, 9.469 Zeilen, **2** Vergleichszeilen |
+
+Beide Vergleiche fielen in einen erfolgreichen `/api/lead-outbox-worker`-Lauf (HTTP 200,
+aufgerufen von `46.224.76.193`). **Der Versand lief unbeeinflusst weiter** — genau wie
+gebaut. Und beide meldeten dieselben zwei Felder:
+
+```
+[berater-vergleich] {"slug":"trix24",          "bridge_gefunden":true,"verzeichnis_gefunden":true,"abweichungen":["organisation_name","country"]}
+[berater-vergleich] {"slug":"ingeunterthiner", "bridge_gefunden":true,"verzeichnis_gefunden":true,"abweichungen":["organisation_name","country"]}
+```
+
+Beide Quellen wurden daraufhin **direkt** abgefragt — die Bridge mit demselben
+`lookup_subdomain`, das der Worker benutzt, das Verzeichnis per `select` auf `leads.berater`:
+
+| slug | Bridge | Verzeichnis | Urteil |
+| --- | --- | --- | --- |
+| `trix24` | `organisation_name` = **EaglesFit** | **EaglesFit-Support** | 🔴 **echte Abweichung** |
+| `ingeunterthiner` | `organisation_name` = **Activecenter** | **Activecenter-Support** | 🔴 **echte Abweichung** |
+| `trix24` | `address.country` = **CH**, flaches `country` fehlt | `country` = **CH** | 🟢 **Fehlalarm** |
+| `ingeunterthiner` | `address.country` = **IT**, flaches `country` fehlt | `country` = **IT** | 🟢 **Fehlalarm** |
+
+**Die zwei Abweichungen haben verschiedene Ursachen — und nur eine ist ein echtes Problem.**
+
+**1. `country` ist ein Fehlalarm im Vergleich selbst, kein Datenunterschied.**
+Die Bridge liefert das Land **verschachtelt** als `address.country`; ein flaches `country`
+gibt es dort nicht. `vergleiche()` liest aber nur `ausBridge['country']` → `undefined` →
+meldet Abweichung, obwohl beide Seiten `CH` bzw. `IT` tragen. Für das Verhalten ist es
+folgenlos, weil der Verbraucher beide Formen kennt:
+`api/lead-outbox-worker.js:444` liest `coach?.address?.country || coach?.country`.
+🔴 **Der Vergleich misst hier am Verbraucher vorbei** und wird diesen Fehlalarm bei *jedem*
+Berater melden — er würde B3 dauerhaft unsicher aussehen lassen. Das gehört korrigiert,
+bevor weitere Zahlen gesammelt werden, sonst ertrinkt das echte Signal im Rauschen.
+
+**2. `organisation_name` weicht wirklich ab — und ist nutzersichtbar.**
+Das Feld wird zu `brandName` (`api/lead-outbox-worker.js:786`:
+`coach?.organisation_name || coach?.org_name || coach?.company || 'Activecenter'`) und
+steht damit **als Marken-/Absendername in jeder Hot-Lead-Mail**. Ein Umschalten auf `verzeichnis` würde aus „EaglesFit" **„EaglesFit-Support"**
+machen — bei jedem betroffenen Berater, sofort und sichtbar.
+
+Die Ursache liegt im Spiegel: der Workflow nimmt
+`left join prod_activesupport.organizations o on o.id = u.organization_id` → **`o.name`**,
+und `o.name` trägt offenbar die `-Support`-Fassung. Die Bridge (`db-bridge.php`) liefert
+denselben Berater ohne diesen Zusatz, zieht den Namen also aus einer anderen Spalte oder
+schneidet ihn zu. **Welche Spalte das ist, ist noch offen** — `db-bridge.php` liegt nicht in
+diesem Repo, und die Legacy-MySQL ist nur von `10.0.1.5` (dem Coolify-App-Server) aus
+erreichbar; ein Leseversuch von `10.0.1.4` (n8n) wurde erwartungsgemäss mit
+`Access denied for user 'bioniq_public_reader'@'10.0.1.4'` abgewiesen.
+
+##### Was daraus folgt
+
+1. 🔴 **B3 bleibt gesperrt**, bis `organisation_name` deckungsgleich ist. Das ist kein
+   Formfehler, sondern genau der Fall, für den der Schattenlauf gebaut wurde.
+2. **`vergleiche()` korrigieren**, damit `country` die effektiven Werte vergleicht
+   (`address.country || country`) — sonst ist jede weitere Messung verrauscht. Sinnvoll
+   wäre, den Vergleich generell gegen **dieselben Ausdrücke** laufen zu lassen, die der
+   Verbraucher benutzt, statt gegen die kanonischen Feldnamen.
+3. **Spiegelquelle für `organisation_name` klären** und angleichen — von `10.0.1.5` aus die
+   `organizations`-Spalten ansehen und mit der Bridge-Antwort vergleichen.
+4. **Erst danach** weiter Zahlen sammeln und B3 stellen.
+
+##### 🟡 Nebenbefund: der Vergleich lebt nur im Containerprotokoll
+
+Ein Deploy ersetzt den Container — die gesammelten `[berater-vergleich]`-Zeilen sind dann
+**weg**. Das B2-Fenster überlebt keinen Zwischendeploy. Solange der Beweis für B3 an einem
+flüchtigen Protokoll hängt, ist er zerbrechlich. **Empfehlung:** Abweichungen zusätzlich
+haltbar schreiben (Zeile in `lead_events` oder eine kleine Tabelle `berater_vergleich`);
+dann sind sie abfragbar, überleben Deploys und brauchen keinen Serverzugang.
+
+##### 🔴 Zugangslage (für die nächste Sitzung wichtig)
+
+- **Containerprotokoll und Env sind über die Coolify-API lesbar** — das ist der Weg, nicht SSH:
+  ```bash
+  # Token: agent-secrets → coolify.apiToken
+  curl -s -H "Authorization: Bearer <apiToken>" \
+    "https://coolify.hl-support.biz/api/v1/applications/yhoacszoiofuq6dg4mykyr7b/logs?lines=200000"
+  curl -s -H "Authorization: Bearer <apiToken>" \
+    "https://coolify.hl-support.biz/api/v1/applications/yhoacszoiofuq6dg4mykyr7b/envs"
+  ```
+- 🔴 **SSH auf `167.233.251.217` gibt es nicht** (mehr): `Permission denied (publickey)` mit
+  allen vier vorhandenen Schlüsseln, während derselbe `id_rsa_server` auf `46.224.76.193`
+  trägt. In `agent-secrets.json` ist zu dieser Box **nur ein UI-Login** hinterlegt, kein
+  SSH-Schlüssel. Das widerspricht dem globalen Runtime-Hinweis „auf beiden Hosts am
+  2026-08-28 verifiziert" — und **`docs/NURTURE_BETRIEB.md` setzt `ssh root@167.233.251.217`
+  weiterhin voraus** (Wächter-Pflege). Das ist zu klären, bevor dort etwas ansteht.
+- Die Plattform-DB ist von `10.0.1.4` (n8n) mit der Rolle `leads_n8n` lesbar
+  (`docker exec n8n-postgres-1 psql -h 10.0.1.3 …`); `leads_app` ist dort **nicht**
+  freigeschaltet (nur von `10.0.1.5`). Der `/api/v1/applications/…/execute`-Endpunkt
+  existiert in dieser Coolify-Version **nicht** (404).
 
 🔴 **Nicht angefasst:** `src/lib/core.js:829` hat einen **zweiten** `lookupCoach` — das ist
 der Funnelweg, nicht der Mailweg. Er gehört in denselben Umbau, aber in einem eigenen

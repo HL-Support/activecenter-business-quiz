@@ -4,12 +4,12 @@ Nutze diese Datei zusammen mit `AGENTS.md`. `AGENTS.md` enthaelt die detailreich
 
 ## Start
 
-1. Lies `D:\OneDrive\Antigravity Laptop\agent-core\governance\GOVERNANCE_RULES.json`.
-2. Lies `D:\OneDrive\Antigravity Laptop\activecenter-web\AGENTS.md`.
-3. Lies `D:\OneDrive\Antigravity Laptop\activecenter-web\business_leads_quiz\AGENTS.md`.
+1. Lies `D:\Antigravity_Projects\agent-core\governance\GOVERNANCE_RULES.json`.
+2. Lies `D:\Antigravity_Projects\activecenter-web\AGENTS.md`.
+3. Lies `D:\Antigravity_Projects\activecenter-web\business_leads_quiz\AGENTS.md`.
 4. Lade Projekterinnerungen:
    ```powershell
-   . "D:\OneDrive\Antigravity Laptop\agent-core\scripts\direct-api-helpers.ps1"
+   . "D:\Antigravity_Projects\agent-core\scripts\direct-api-helpers.ps1"
    Read-Memory -Query "business leads quiz aktuelle entscheidungen status"
    ```
 
