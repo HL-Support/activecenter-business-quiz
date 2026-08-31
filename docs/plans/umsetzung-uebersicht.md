@@ -12,24 +12,38 @@ Umsetzungspläne. Wer hier anfängt, liest in dieser Reihenfolge:
 
 ---
 
-## 0. Stand am 31.08.2026, 11:20 MESZ — was live ist
+## 0. Stand am 31.08.2026, 12:10 MESZ — was live ist
 
 | Schritt | Stand | Beweis |
 | --- | --- | --- |
-| **A1** — View, Benutzer, Rechte in MySQL | ✅ **erledigt** | `prod_quiz.quiz_berater` liefert **255 Zeilen** (deckungsgleich mit Quelle und Spiegel). `SHOW GRANTS` für `quiz@10.0.1.5`: genau `USAGE` + `SELECT` auf die eine View. Definition und Rückweg: [`sql/legacy-views.sql`](../../sql/legacy-views.sql) |
-| **A2** — `server/legacy/`, Treiber, Grenzzaun | ✅ **erledigt und ausgeliefert** (PR #124) | Produktion trägt `707ab58`, **dreimal über Zeit** geprüft; `/health/ready` grün, `quelle: plattform`. Abgrenzung: `/api/confirm-email-correction` weiterhin **404** — es kam wirklich nur das Modul |
-| **`vergleiche()`-Korrektur** | ✅ **live** (im selben PR) | Der Fehlalarm auf `country` ist damit aus der Produktion raus |
-| **A3–A5** | 🔴 **offen** | siehe §5 |
-| **B, M** | 🔴 **offen** | siehe §5 |
+| **A1** — View, Benutzer, Rechte in MySQL | ✅ **erledigt** | `prod_quiz.quiz_berater`: **255 Zeilen**. `SHOW GRANTS` für `quiz@10.0.1.5`: genau `USAGE` + `SELECT` auf die eine View. Definition und Rückweg: [`sql/legacy-views.sql`](../../sql/legacy-views.sql) |
+| **A2** — `server/legacy/`, Treiber, Grenzzaun | ✅ **live** (PR #124) | **25 zufällige Berater Feld für Feld gegen die echte Bridge: 25 zeichengleich, 0 Abweichungen** |
+| **`vergleiche()`-Korrektur** | ✅ **live** (PR #124) | Der `country`-Fehlalarm ist aus der Produktion raus |
+| **A3** — vier Stellen auf **einen** Auflöser | ✅ **live** (PR #125) | Produktion `e7aa22a`, dreimal über Zeit; Funnel antwortet unverändert (`found=true`, `source=user`) |
+| **A4** — Schattenlauf gegen MySQL | 🟡 **läuft seit 31.08. 12:05** | `COACH_LOOKUP_SCHATTEN=mysql`, MySQL-Zugang gesetzt. Erste vier Vergleiche in Produktion: **alle `abweichungen: []`** |
+| **A5** | 🔴 offen | braucht A4-Belege über Tage |
+| **B, M** | 🔴 offen | siehe §2e |
 
-🔴 **A2 ist bewusst inert ausgeliefert.** Kein Aufrufer benutzt das Modul; ohne die
-`LEGACY_MYSQL_`-Variablen wird der Treiber nicht einmal geladen. Der Deploy hat am
-Verhalten des Funnels **nichts** geändert — genau so war er gebaut.
+### Der Schattenlauf, wie er gerade in Produktion steht
 
-**Der tragende Beweis für A2:** 25 zufällige Berater aus der View durch den Nachbau
-geschickt und **Feld für Feld gegen die echte Bridge** verglichen —
-**25 zeichengleich, 0 Abweichungen**, inklusive der länderspezifischen
-Telefonformatierung.
+```
+[berater-vergleich] {"slug":"markus","stelle":"funnel","quelle":"bridge","schatten":"mysql","abweichungen":[]}
+[berater-vergleich] {"slug":"trix24","stelle":"funnel","quelle":"bridge","schatten":"mysql","abweichungen":[]}
+[berater-vergleich] {"slug":"ingeunterthiner",…,"abweichungen":[]}
+[berater-vergleich] {"slug":"default",…,"abweichungen":[]}
+```
+
+🔴 **Die Bridge entscheidet weiterhin.** MySQL wird nur mitgemessen. Ablesen über die
+Coolify-API (nicht SSH — die gibt es auf der Box nicht):
+
+```bash
+curl -s -H "Authorization: Bearer <coolify.apiToken>"   "https://coolify.hl-support.biz/api/v1/applications/yhoacszoiofuq6dg4mykyr7b/logs?lines=200000"   | grep berater-vergleich
+```
+
+🟡 **Eine Falle beim Nachmessen:** Ein Deploy ersetzt den Container. Direkt danach sind im
+Protokoll **null** Zeilen — nicht weil der Schatten schweigt, sondern weil der neue
+Container noch keinen Verkehr gesehen hat. Genau darauf bin ich am 31.08. einmal
+hereingefallen. Erst Verkehr erzeugen, dann lesen.
 
 ---
 

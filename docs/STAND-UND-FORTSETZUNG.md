@@ -1,103 +1,26 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
-> ## 🟢 Stand 31.08.2026, 11:20 MESZ — MySQL-Leseweg gebaut und ausgeliefert
+> ## 🟢 Stand 31.08.2026, 12:10 MESZ — Berater kommt aus einem Auflöser, Schattenlauf gegen MySQL läuft
 >
 > | Prüfung | Messung |
 > | --- | --- |
-> | Produktion | `707ab58` (PR **#124**), **dreimal über Zeit** gleich |
+> | Produktion | `e7aa22a` (PR **#124** und **#125**), **dreimal über Zeit** gleich |
 > | `/health/ready` | `status: ready`, `quelle: plattform` |
-> | Abgrenzung | `/api/confirm-email-correction` → **404** — es kam nur das Modul |
-> | MySQL-View | `prod_quiz.quiz_berater`, **255 Zeilen**, deckungsgleich mit Quelle und Spiegel |
+> | Funnel | `lookup_subdomain` antwortet unverändert: `found=true`, `source=user` |
+> | MySQL-View | `prod_quiz.quiz_berater`, **255 Zeilen** |
 > | Rechte | `quiz@10.0.1.5`: genau `USAGE` + `SELECT` auf die eine View |
-> | **Gleichheit zur Bridge** | **25 zufällige Berater, Feld für Feld: 25 zeichengleich, 0 Abweichungen** |
+> | Gleichheit zur Bridge | **25 Berater Feld für Feld: 25 zeichengleich, 0 Abweichungen** |
+> | Schattenlauf in Produktion | erste vier Vergleiche: **alle `abweichungen: []`** |
 >
-> **A1** (View, Benutzer, Rechte) und **A2** (`server/legacy/`, Treiber, Grenzzaun) sind
-> erledigt; die `vergleiche()`-Korrektur ist damit ebenfalls live — der Fehlalarm auf
-> `country` ist aus der Produktion raus.
+> **A1–A3 sind erledigt und live, A4 läuft.** Die vier Stellen, die die Berateridentität
+> brauchen, fragen jetzt über **einen** Auflöser (`server/berater-aufloesen.js`); die
+> Quelle ist ein Schalter. 🔴 **Die Bridge entscheidet weiterhin** — MySQL wird nur
+> mitgemessen.
 >
-> 🔴 **A2 ist bewusst inert ausgeliefert:** Kein Aufrufer benutzt das Modul, ohne die
-> `LEGACY_MYSQL_`-Variablen wird der Treiber nicht einmal geladen. Am Verhalten des
-> Funnels hat sich **nichts** geändert.
->
-> **Offen:** A3 (vier Aufrufstellen auf einen Auflöser), A4/A5 (Schattenlauf und
-> Umschalten — brauchen echten Verkehr über Tage), Strang B (Route im contacts-Repo
-> zuerst) und Strang M. Reihenfolge, Tore und die Begründung, warum das nicht an einem Tag
-> geht, stehen in [plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md).
+> **Offen:** A5 (umschalten — braucht A4-Belege über Tage), Strang B (Route im
+> contacts-Repo zuerst) und Strang M. Reihenfolge, Tore und Begründung:
+> [plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md).
 
-
-> ## 🟡 Stand 31.08.2026, 06:45 MESZ — Berateridentität: B1 ausgeliefert, B2 läuft
->
-> Nachgemessen am laufenden System, nicht übernommen:
->
-> | Prüfung | Messung |
-> | --- | --- |
-> | Produktion | `6688a05` (PR **#123**, gemergt 30.08. 20:32 UTC), **dreimal über Zeit** gleich |
-> | `/health/ready` | `status: ready`, `quelle: plattform`, 35–40 ms |
-> | Abgrenzung | `/api/confirm-email-correction` → **404** — es kam wirklich nur der Schalter |
-> | Containerstart | 30.08. **20:40 MESZ** — deckt sich mit dem B2-Deploy |
->
-> **B1** (Verzeichnismodul ausliefern, Schalter leer → Verhalten unverändert) ist erledigt.
-> **B2** (`COACH_LOOKUP_SOURCE=beide`, Schattenvergleich) läuft seit 30.08. 20:39; die
-> Bridge entscheidet weiterhin. Der Schalter ist über die Coolify-API gegengeprüft.
->
-> **Der Schattenlauf hat einen echten Unterschied gefunden — und er ist behoben.** Beide
-> Vergleiche (30.08. 20:51 und 20:54) meldeten `organisation_name` und `country`:
->
-> | Feld | Bridge | Verzeichnis (vorher) | Urteil | Stand |
-> | --- | --- | --- | --- | --- |
-> | `organisation_name` | `EaglesFit` / `Activecenter` | `EaglesFit-Support` / `Activecenter-Support` | 🔴 **echt** — Markenname in jeder Hot-Lead-Mail | ✅ Spiegel nahm `o.name` statt `o.org_name`; korrigiert, Verzeichnis stimmt seit 05:30 |
-> | `country` | `address.country` = `CH` / `IT` | `CH` / `IT` | 🟢 **Fehlalarm** — Bridge liefert nur verschachtelt | ✅ `vergleiche()` liest jetzt die effektiven Werte |
->
-> Ein Umschalten auf `verzeichnis` hätte aus „EaglesFit" sichtbar „EaglesFit-Support"
-> gemacht — genau der Fall, für den der Schattenlauf gebaut wurde. Gegenprobe nach der
-> Korrektur: **12 zufällige Berater, alle deckungsgleich.**
->
-> 🟡 **B3 noch nicht stellen.** Die Vergleichskorrektur liegt erst auf dem Arbeitszweig; bis
-> zum Deploy meldet die Produktion weiter `["country"]` (reiner Fehlalarm). Danach frische
-> Vergleichszeilen abwarten — die zwei alten taugen nicht mehr als Beweis. Beweise,
-> Ursachen und der Zugangsweg (Coolify-API statt SSH) stehen unter „B2a" in
-> [plans/benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md).
->
-> **Warum es die Bridge überhaupt noch gibt** (Grundsatzfrage, 31.08. beantwortet): Sie ist
-> kein Hosting-Rest, sondern der Zugang zu `prod_activesupport` — der Mitgliederverwaltung,
-> in der die Berater-Stammdaten liegen und die **nie Teil des Umzugs war**. B3/B4 entfernen
-> den *synchronen Fremdaufruf im Sendemoment*, nicht die Abhängigkeit: die wandert in den
-> 15-Minuten-Spiegel. Ausführlich in §4b des Plans.
->
-> 🔴 **Entscheidung Markus, 31.08.:** Das Quiz soll direkt aus MySQL lesen. Inventur und
-> Umstellungsplan: **[plans/bridge-abloesen-direktzugriff.md](plans/bridge-abloesen-direktzugriff.md)**.
-> Kurzfassung der Inventur — es sind nur noch **zwei** Aktionen an **sechs** Stellen:
-> `lookup_subdomain` (4×, echtes MySQL-Lesen) und `forward_webhook` (2×, **kein** MySQL,
-> sondern HTTP-Weiterleitung an `contacts.hl-support.biz`). Alles andere läuft längst gegen
-> die Plattform-Postgres. Die landing-page behält die Bridge — sie ist nicht migriert.
->
-> ⚠️ Der Arbeitszweig `nurture-auf-plattform-db` liegt **30 Commits vor** und **1 hinter**
-> `origin/main` (der B1-Merge). Deploys laufen nur von `main`.
-
-> ## 🟢 Stand 30.08.2026, 15:40 MESZ — am laufenden System gemessen
->
-> **Das Ziel „ohne Supabase, ohne Vercel, auf eigener Infrastruktur" ist erreicht.**
-> Alles darunter, was A1, A3, B1 oder B3 als offen führt, ist überholt.
->
-> | Beweis | Messung |
-> | --- | --- |
-> | Produktionscontainer | `SUPABASE_*`-Variablen: **0** · `LEADS_DB_MODUS=direkt` · Ziel `10.0.1.3/hl_support` |
-> | `/health/ready` | `status: ready`, `datasource.quelle: plattform`, 34 ms |
-> | n8n (86 Workflows, 61 aktiv) | Workflows mit Supabase-Spur: **0** |
-> | Vercel | `zzz-stillgelegt-business-leads-quiz`, **pausiert, Git-Verknüpfung gekappt, keine Domains** |
-> | Datenfluss | 6.308 Leads · 111.589 Ereignisse · 22 neue Leads heute, 46 gestern |
-> | Outbox | genau **1** offener Auftrag — der bekannte geparkte vom 19.05. |
-> | pg_cron | `leads-refresh-event-daily` alle 15 min, zuletzt 15:30 |
->
-> 🔴 **Was das NICHT heisst:** Das Supabase-Projekt existiert weiter, weil **Marathon**
-> dort liegt (Entscheidung 10: tabu). Erreicht ist „dieses Projekt benutzt Supabase
-> nicht mehr", nicht „Supabase ist weg". Und **17 andere Vercel-Projekte laufen
-> unverändert weiter** — das war so entschieden.
->
-> **Offen sind nur noch Aufräumarbeiten**, keine Migrationsschritte: Test-DB
-> `business_leads_testimport` (233 MB) löschen · das pausierte Vercel-Projekt endgültig
-> entfernen · den Benachrichtigungsweg von der Legacy-MySQL lösen (C1) · `pgss-monatsreset`
-> reparieren · D5–D8. Details in §8c.
 
 **Letzte inhaltliche Überarbeitung: 28.08.2026, nachts — nach dem vollständigen Audit.**
 Alle Zahlen in diesem Dokument sind am 27.08. abends **neu gemessen**, nicht übernommen. Dieses Dokument ist der Einstieg für jede

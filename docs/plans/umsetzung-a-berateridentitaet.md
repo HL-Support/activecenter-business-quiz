@@ -123,7 +123,7 @@ Konsequenzen für diesen Plan:
 
 ---
 
-> ### ✅ Stand 31.08.2026: A1 und A2 sind erledigt
+> ### ✅ Stand 31.08.2026: A1, A2 und A3 sind erledigt und live — A4 laeuft
 >
 > | Schritt | Beweis |
 > | --- | --- |
@@ -138,6 +138,17 @@ Konsequenzen für diesen Plan:
 >
 > Offene Punkte 1 und 3 aus §9 sind damit erledigt: Der DDL-Zugang ist geklaert, und
 > `users.domain` **existiert nicht** — ein zweiter Slug-Treffer entfaellt.
+>
+> **A3** (PR #125): Die vier Stellen laufen ueber `server/berater-aufloesen.js`. Standard
+> blieb `bridge`, der Altwert `beide` wird weiter verstanden — der laufende Schattenlauf
+> ist nicht abgerissen. Funnel antwortet unveraendert (`found=true`, `source=user`).
+>
+> **A4** laeuft seit 12:05 mit `COACH_LOOKUP_SCHATTEN=mysql`. Erste vier Vergleiche in
+> Produktion: alle `abweichungen: []`.
+>
+> 🟡 **Beim Nachmessen aufgepasst:** Nach einem Deploy stehen im Protokoll erst einmal
+> **null** Schattenzeilen — der neue Container hat noch keinen Verkehr gesehen. Erst
+> Verkehr erzeugen, dann lesen.
 
 ## 2. Zielbild
 
