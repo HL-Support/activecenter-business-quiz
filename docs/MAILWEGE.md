@@ -110,14 +110,24 @@ DKIM einrichten oder die Signatur entfernen.
 ## 4. Tags
 
 Bis zum 28.08.2026 trug **keine einzige** der 837 Mails einen Postmark-Tag. Deshalb musste
-jede Auswertung Betreffzeilen zurückrechnen. Im Repo gesetzt sind seither:
+jede Auswertung Betreffzeilen zurückrechnen.
+
+> 🔴 **Korrektur am 31.08.2026.** Diese Tabelle führte vier Tags als „im Repo gesetzt" —
+> tatsächlich war nur `hot_lead` in Produktion. Die drei übrigen lagen auf einem
+> Arbeitszweig; die Seite beschrieb einen Zustand, den es nicht gab. Beim Nachzählen der
+> Nutzlasten fiel ausserdem eine **fünfte** Versandstelle auf, die ganz ohne Tag sendete
+> und in keiner Aufstellung stand. Alle fünf sind seit PR #126 live, und ein Wächter hält
+> den Stand fest, statt ihn zu dokumentieren: `scripts/tests/postmark-tags.test.js`.
+
+Im Repo gesetzt — **alle fünf Postmark-Nutzlasten**, seit 31.08.2026 live:
 
 | Tag | Wo gesetzt |
 | --- | --- |
 | `hot_lead` | `api/lead-outbox-worker.js`, `buildHotLeadEmail` |
 | `hot_lead_legacy` | `api/bridge.js`, `notify_all_videos_completed` (toter Pfad, siehe §5) |
-| `alert_missing_member_id` | `api/bridge.js` |
-| `alert_points_result_failed` | `api/bridge.js` |
+| `alert_missing_member_id` | `api/bridge.js`, `sendIdentityAlertEmail` |
+| `alert_points_result_failed` | `api/bridge.js`, `sendPointsResultAlertEmail` |
+| `alert_lead_system_health` | `api/lead-system-health.js` — **war bis 31.08. ohne Tag** |
 
 In n8n gesetzt am 28.08.2026, 15:17 (neue `versionId`, Workflow blieb aktiv):
 
@@ -137,8 +147,9 @@ Zwei Eigenheiten der n8n-API, die dabei Zeit kosten:
   `400 must NOT have additional properties` abgelehnt, `executionOrder`,
   `saveManualExecutions`, `callerPolicy`, `timezone` und `availableInMCP` gehen durch.
 - **n8n ergänzt `settings`, es ersetzt sie nicht.** Ein PUT mit einer Teilmenge lässt die
-  übrigen Schlüssel stehen — nachgemessen: `binaryMode` und `timeSavedMode` überlebten
-  einen PUT, der sie nicht enthielt. Ein abgelehnter PUT (400) schreibt gar nichts und ist
+  übrigen Schlüssel stehen — am 31.08.2026 **erneut bestätigt**: Ein PUT ohne
+  `availableInMCP`, `binaryMode` und `timeSavedMode` liess alle drei unverändert stehen
+  (danach ausgelesen). Wer eine Teilmenge sendet, verliert also nichts. Ein abgelehnter PUT (400) schreibt gar nichts und ist
   deshalb als gefahrlose Tastprobe brauchbar.
 
 ---

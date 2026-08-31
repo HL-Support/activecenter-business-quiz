@@ -45,6 +45,35 @@ Protokoll **null** Zeilen — nicht weil der Schatten schweigt, sondern weil der
 Container noch keinen Verkehr gesehen hat. Genau darauf bin ich am 31.08. einmal
 hereingefallen. Erst Verkehr erzeugen, dann lesen.
 
+### 🔴 Wann A5 — das Umschalten — kommt
+
+**Die Belege für A5 entstehen nur zwischen zwei Deploys.** Ein Deploy ersetzt den
+Container, und mit ihm ist das Protokoll leer. Am 31.08. ist das zweimal passiert: nach
+dem A4-Start standen null Zeilen da, nach dem Tags-Deploy wieder nur eine. **Das ist kein
+Fehler — es ist die Eigenschaft, an der sich das Sammeln bricht.**
+
+Daraus folgt ein klares Tor, statt eines Datums:
+
+| Bedingung | Warum |
+| --- | --- |
+| **Mindestens 48 Stunden ohne Deploy** | sonst faengt das Sammeln immer wieder bei null an |
+| **≥ 300 Vergleiche der Stelle `funnel`** mit `abweichungen: []` | der Funnel erzeugt bei **jedem** Seitenaufruf einen Vergleich — das ist in ein bis zwei Tagen erreicht |
+| **≥ 5 Vergleiche der Stelle `mail`** mit `abweichungen: []` | bei rund zwei Hot-Leads am Tag also etwa drei Tage |
+| **0 Zeilen mit `mysql_fehler`** | ein einziger Ausfall der Quelle verschiebt das Umschalten |
+
+**Reihenfolge des Umschaltens — riskanteste Stelle zuletzt, je eine Env-Änderung:**
+
+1. `COACH_LOOKUP_SOURCE_ABSCHLUSS=mysql` — seltenster Pfad
+2. `COACH_LOOKUP_SOURCE_SUBMIT=mysql`
+3. `COACH_LOOKUP_SOURCE_FUNNEL=mysql` — häufigster, aber am besten belegt
+4. `COACH_LOOKUP_SOURCE_MAIL=mysql` — **zuletzt**, weil dort ein Fehler am teuersten ist
+
+Zwischen den Schritten jeweils **einen Tag** beobachten. Erst wenn alle vier stehen, wird
+`COACH_LOOKUP_SOURCE=mysql` gesetzt und die Übersteuerungen werden entfernt.
+
+🟡 **Das Umschalten selbst ist kein Deploy**, sondern eine Env-Änderung — und damit in
+Sekunden zurücknehmbar. Genau dafür wurde der Schalter gebaut.
+
 ---
 
 ## 1. Reihenfolge und Tore
