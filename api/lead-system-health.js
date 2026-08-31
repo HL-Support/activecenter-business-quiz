@@ -269,6 +269,7 @@ async function sendAlertEmail(health) {
             .join('\n')
             .replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char])}</pre>`,
           MessageStream: POSTMARK_MESSAGE_STREAM,
+          Tag: 'alert_lead_system_health',
           Metadata: {
             alert_type: 'lead_system_health',
             issue_count: String(health.issues.length),
