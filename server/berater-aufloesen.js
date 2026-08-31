@@ -172,4 +172,35 @@ function notiere(schattenNotiz, befund) {
   }
 }
 
-module.exports = { STELLEN, QUELLEN, FRIST_MS, schalter, beraterAufloesen };
+/**
+ * Baut die haltbare Schattennotiz.
+ *
+ * 🔴 Warum es sie gibt: Der Vergleich lebte nur im Containerprotokoll — und ein Deploy
+ * ersetzt den Container. Am 31.08.2026 sind so binnen zwei Stunden zweimal alle
+ * gesammelten Vergleiche verschwunden. Ohne haltbaren Speicher duerfte das Projekt bis
+ * zum Umschalten nicht mehr deployen; das waere eine absurde Einschraenkung.
+ *
+ * Der Datenzugang wird eingespeist (`rpc`), damit dieses Modul ihn nicht kennen muss.
+ * Ziel: `leads.notiere_berater_vergleich` (sql/berater-vergleich.sql), aggregiert je Tag.
+ */
+function schattenNotizUeberRpc(rpc) {
+  if (typeof rpc !== 'function') return undefined;
+  return (befund) =>
+    rpc('notiere_berater_vergleich', {
+      p_stelle: String(befund.stelle || '?').slice(0, 40),
+      p_slug: String(befund.slug || '?').slice(0, 80),
+      p_quelle: String(befund.quelle || '?').slice(0, 40),
+      p_schatten: String(befund.schatten || 'aus').slice(0, 40),
+      // Kanonisch sortiert, damit dieselbe Abweichung immer dieselbe Zeile trifft.
+      p_abweichungen: [...(befund.abweichungen || [])].sort().join(',').slice(0, 400),
+    });
+}
+
+module.exports = {
+  STELLEN,
+  QUELLEN,
+  FRIST_MS,
+  schalter,
+  beraterAufloesen,
+  schattenNotizUeberRpc,
+};
