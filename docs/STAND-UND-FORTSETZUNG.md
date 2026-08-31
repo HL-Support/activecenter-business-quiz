@@ -1,28 +1,37 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
-> ## 🟢 Stand 31.08.2026, 13:40 MESZ — Schattenlauf gegen MySQL, haltbar gespeichert
+> ## 🟢 Stand 31.08.2026, 16:00 MESZ — alles am laufenden System gemessen
+>
+> **Der Umbau „weg von der Bridge" ist zur Hälfte gebaut und zur Hälfte scharf.**
+> 🔴 **Nichts davon entscheidet bisher etwas:** Die Bridge bestimmt weiterhin die
+> Berateridentität, und der Opt-in geht unverändert den alten Weg.
 >
 > | Prüfung | Messung |
 > | --- | --- |
-> | Produktion | `0135ef3`, `/health/ready` grün, `quelle: plattform` |
+> | Quiz-Produktion | `3d6bf87`, `/health/ready` grün, `quelle: plattform` |
 > | Funnel | `lookup_subdomain` antwortet unverändert (`found=true`, `source=user`) |
-> | MySQL-View | `prod_quiz.quiz_berater`, **255 Zeilen**; Rechte: nur `SELECT` auf diese View |
+> | MySQL-View | `prod_quiz.quiz_berater`, **255 Zeilen**; Rechte: nur `SELECT` darauf |
 > | Gleichheit zur Bridge | **25 Berater Feld für Feld: 25 zeichengleich, 0 Abweichungen** |
-> | Schattenlauf | läuft; Vergleiche in `leads.berater_vergleich`, **0 mit Abweichung** |
-> | **Haltbarkeit** | 5 Vergleiche erzeugt → deployt → **immer noch 5**. Kein Verlust mehr |
-> | Postmark-Tags | **alle fünf** Nutzlasten tragen einen Tag, Wächter-Test hält den Stand |
+> | Schattenlauf | **35** Vergleiche, 9 Berater, **0 Abweichungen**, 0 `mysql_fehler` |
+> | Haltbarkeit | 5 Vergleiche → Deploy → **immer noch 5**. Keine Deploy-Sperre |
+> | Contacts-Route | `/webhook/quiz` live: ohne Signatur **406**, falsche **401** |
+> | Andere Contacts-Routen | **unverändert** (`typeform`, `survey`, `assessment`, `vouchers`, `postmark`) |
+> | Tests | Quiz **296 grün** · contacts **162 grün / 843 Zusicherungen** |
 >
-> **A1–A4 sind erledigt, A5 wartet nur noch auf Menge.** Die vier Stellen fragen über
-> **einen** Auflöser; 🔴 **die Bridge entscheidet weiterhin**, MySQL wird nur mitgemessen.
+> **Sieben Auslieferungen am 31.08.:** #124 MySQL-Leseweg · #125 ein Auflöser für vier
+> Stellen · #126 Postmark-Tags · #127 haltbarer Schattenvergleich · #128 Mailvorlagen ·
+> #129 ungarische Zuordnungen · `f7882db` eigener Contacts-Eingang.
 >
-> 🟢 **Es gibt keine Deploy-Sperre.** Der Vergleich liegt jetzt in der Datenbank statt im
-> Containerprotokoll und überlebt jeden Deploy — nachgewiesen. Am Projekt darf normal
-> weitergearbeitet werden.
+> **Schalterstand:** `COACH_LOOKUP_SOURCE=beide` (Bridge entscheidet),
+> `COACH_LOOKUP_SCHATTEN=mysql` (nur messen), `CONTACTS_QUIZ_*` **nicht gesetzt**
+> (neuer Sendeweg noch nicht scharf).
 >
-> **Offen:** A5 (Env-Umschaltung, Tor in
-> [plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md)), Strang B (Route im
-> contacts-Repo zuerst), Strang M (Opt-in-Mails kommen **weiterhin aus n8n**, nicht aus
-> dem Repo).
+> 🔴 **Die Opt-in-Mails kommen weiterhin aus n8n**, nicht aus dem Repo. Nur Mail 3
+> (Hot Lead) läuft über die Outbox; der Verzug von 2–5 Minuten besteht unverändert.
+>
+> **Nächster Schritt: B3** — der Absender im Quiz, hinter der vorhandenen Outbox.
+> Vollständiger Fortsetzungsplan, Tore und offene Entscheidungen:
+> **[plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md)** §0 und §0a.
 
 
 **Letzte inhaltliche Überarbeitung: 28.08.2026, nachts — nach dem vollständigen Audit.**

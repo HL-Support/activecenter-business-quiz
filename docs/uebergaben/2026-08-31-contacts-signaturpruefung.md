@@ -87,8 +87,14 @@ Empfänger sollte dieselbe Haltung haben.
 ## Befund 3 — Die alte Route `/webhook/typeform` prüft in der Praxis nicht scharf
 
 **Beleg:** im Quelltext von `SurveyWebhookController.php:23-28` als Schattenbetrieb-Befund
-vermerkt; an ihr hängen laut demselben Kommentar **13 fremde Formulare mit über 1400
-Übermittlungen in 60 Tagen**.
+vermerkt.
+
+🔴 **Nachgemessen am 31.08.2026, und die Lage ist besser als der Kommentar sagt.** Am
+Bestand ausgezählt (60 Tage, `typeform_surveys`): Die grossen Absender liegen längst auf
+den neuen Routen — Vitalanalyse 711 (`/webhook/assessment`), Umfragen 202
+(`/webhook/survey`), Hautanalyse 127 (`/webhook/assessment`). Auf der **alten** Route
+liegen nur noch das Erfolgscode-Quiz mit **679** — und 13 weitere Kennungen mit zusammen
+**60**, die meisten zuletzt im **Juli**.
 
 **Kein Handlungsbedarf für euch** — nur zur Einordnung: Das Erfolgscode-Quiz (mit 698
 Übermittlungen der grösste Absender dort) **koppelt sich ab** und bekommt eine eigene Route
@@ -98,6 +104,20 @@ verliert die alte Route in absehbarer Zeit ihre beiden grössten Nutzer** — ei
 Zeitpunkt, sie danach ganz stillzulegen.
 
 ---
+
+> ### ✅ Nachtrag 31.08.2026: eine Route prüft jetzt richtig
+>
+> `POST /webhook/quiz` ist ausgeliefert (Commit `f7882db` auf `coolify-deploy`). Sie erbt
+> **nichts** von den Befunden oben:
+>
+> - eigenes Geheimnis `QUIZ_WEBHOOK_SECRET`, in der Coolify-App `contacts` **gesetzt**,
+> - eigener Kopf `X-Quiz-Signature`,
+> - **fail-closed**: ohne Geheimnis 503 statt „akzeptiert alles",
+> - Gebietsabgrenzung in beide Richtungen.
+>
+> Nachgemessen nach dem Deploy: ohne Signatur **406**, mit falscher **401**. Die übrigen
+> Routen antworten unverändert. Sie kann als Vorlage dienen, wenn ihr Befund 1 und 2
+> angeht.
 
 ## Reihenfolge, wenn ihr es anfasst
 

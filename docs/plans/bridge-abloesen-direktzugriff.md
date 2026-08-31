@@ -330,8 +330,11 @@ sollen. Das ist eine Produktentscheidung, keine Aufräumentscheidung — und dan
 
 - **`db-bridge.php` bleibt unangetastet** — sie bedient 15 weitere Projekte, u. a. die
   landing-page.
-- **`/webhook/typeform` bleibt unangetastet** — dort hängen 12 weitere Formulare. Wir
-  koppeln uns ab, wir räumen nicht auf.
+- **`/webhook/typeform` bleibt unangetastet.** Wir koppeln uns ab, wir räumen nicht auf.
+  🟡 **Gemessen am 31.08.2026:** Dort liegen ausser uns nur noch 13 Kennungen mit
+  zusammen **60** Übermittlungen in 60 Tagen, die meisten zuletzt im Juli. Die grossen
+  Nachbarn (Vitalanalyse 711, Hautanalyse 127, Umfragen 202) sind längst auf den neuen
+  Routen. Nach unserer Abkopplung ist die alte Route praktisch leer.
   🟡 **Zur Einordnung (Markus, 31.08.):** Der Wellnesscheck (580 Übermittlungen) ist die
   **alte Vitalanalyse** und wird in etwa zwei Monaten abgeschaltet; danach macht alles die
   neue Vitalanalyse. Zusammen mit unserer Abkopplung (698) verliert die alte Route damit

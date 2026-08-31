@@ -104,9 +104,21 @@ Outbox wäre für uns ein Rückschritt.)*
 
 ## Zur Einordnung: die alte Route verliert bald ihre beiden grössten Nutzer
 
-An `/webhook/typeform` hängen laut `SurveyWebhookController.php:17-21` **13 fremde Formulare
-mit über 1400 Übermittlungen in 60 Tagen**; die zwei grössten sind das **Erfolgscode-Quiz
-(698)** und der **Wellnesscheck (580)**.
+> 🔴 **Nachgemessen am 31.08.2026 — die Zahl aus dem Quelltextkommentar ist überholt.**
+> Am Bestand ausgezählt (60 Tage, `typeform_surveys`): Die grossen Absender liegen längst
+> auf den **neuen** Routen. Auf der alten ist nur noch das Quiz wirklich aktiv.
+>
+> | Formular | Übermittlungen | Weg |
+> | --- | --- | --- |
+> | Vitalanalyse `Dw4acDUx` | 711 | `/webhook/assessment` |
+> | **Erfolgscode-Quiz `hC2yTcU8`** | **679** | 🔴 alt — unseres |
+> | Umfragen Lifestyle `lLS1eAMh` | 202 | `/webhook/survey` |
+> | Hautanalyse `zlWcZxat` | 127 | `/webhook/assessment` |
+> | 13 weitere Kennungen | zusammen **60** | alt, meist zuletzt im Juli |
+
+Der Quelltextkommentar in `SurveyWebhookController.php:17-21` nennt noch 13 fremde Formulare
+mit über 1400 Übermittlungen. Das stimmte, als er geschrieben wurde — inzwischen sind die
+grossen Absender auf euren und unseren neuen Routen.
 
 - Das Quiz koppelt sich ab und bekommt eine eigene Route — Plan liegt vor.
 - Der Wellnesscheck ist die **alte Vitalanalyse** und wird laut Markus in etwa zwei Monaten

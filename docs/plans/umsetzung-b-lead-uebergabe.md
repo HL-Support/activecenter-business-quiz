@@ -361,21 +361,35 @@ Survey- und Assessment-Tests laufen unverändert. Der ~200 Zeilen grosse Schema-
 Tests liegt jetzt als `tests/Concerns/BautKontakteSchema` in **einem** Baustein statt in
 zwei Kopien.
 
-### 🔴 Noch nicht ausgeliefert
+### ✅ Ausgeliefert am 31.08.2026
 
-Der Zweig `webhook-quiz` liegt **lokal committet** im contacts-Repo. Nicht gepusht, nicht
-deployt — zwei Gründe:
+| Prüfung | Ergebnis |
+| --- | --- |
+| Commit | `f7882db` auf `coolify-deploy`, Deploy **finished**, App `running:healthy` |
+| `/webhook/quiz` ohne Signatur | **406** |
+| `/webhook/quiz` falsche Signatur | **401** |
+| `/webhook/typeform`, `/survey`, `/assessment`, `/vouchers`, `/postmark` | **unverändert** |
+| Verkehr nach dem Deploy | Vitalanalyse, Hautanalyse und Umfragen liefen normal weiter |
+| Testsuite contacts | **162 Tests / 843 Zusicherungen grün** |
 
-- Das Repo liegt auf einer **fremden GitLab-Adresse** (`rizwan.sarfraz/contacts-activecenter`).
-- Ein Deploy von `contacts` betrifft **13 weitere Formulare**.
+`QUIZ_WEBHOOK_SECRET` ist in der Coolify-App `contacts` gesetzt (Wert in `agent-secrets`
+unter `quiz_contacts_webhook`).
 
-**Vor dem Scharfschalten zu setzen** (Reihenfolge zwingend — erst Empfänger, dann Absender):
+🔴 **Der Absender ist noch NICHT scharf.** `CONTACTS_QUIZ_URL` und
+`CONTACTS_QUIZ_WEBHOOK_SECRET` sind im Quiz **bewusst nicht gesetzt** — das ist B3.
+Solange sie fehlen, geht der Opt-in unverändert über die Bridge.
 
-1. `QUIZ_WEBHOOK_SECRET` in der Coolify-App **contacts** — sonst antwortet die Route
-   fail-closed mit 503.
-2. `CONTACTS_QUIZ_WEBHOOK_SECRET` und `CONTACTS_QUIZ_URL` in **business-leads-prod**.
+#### Zwei Fehler, beim Nachmessen an den echten Daten gefunden
 
-Der Wert ist erzeugt und liegt in `agent-secrets` unter `quiz_contacts_webhook`.
+1. 🔴 **Erfundene Kennungen.** Der Registry-Eintrag trug zunächst
+   `form_id: 'business-leads-quiz'` / `public_id: 'quiz'`. Der Bestand trägt aber
+   **`hC2yTcU8`** und **`survey_id 12`** — 678 Zeilen in 60 Tagen. Mit den erfundenen
+   Werten wäre ab dem Umschalten ein **zweiter, unverbundener Formulartyp** entstanden;
+   Auswertungen und die Leseschnittstellen des Altsystems hätten den Quiz-Bestand
+   zweigeteilt gesehen. Korrigiert — neue Zeilen schliessen nahtlos an.
+2. **Fehlende Gegenrichtung.** Beide Schlüsselräume liegen in derselben Datei. Ohne Sperre
+   könnte, wer das dort geteilte — und öffentlich bekannte — Geheimnis kennt, Kartei-Zeilen
+   im Namen des Quiz erzeugen. `SurveyWebhookController` weist unseren Schlüssel jetzt ab.
 
 ---
 
@@ -426,8 +440,7 @@ einziges Mal** vor.
 
 ### Was das für `/webhook/quiz` heisst
 
-- **`QuizIntake` übernimmt `zuordnen()` von `SurveyIntake` unverändert**, inklusive beider
-  Korrekturen und der 4-Monats-Frist (`config('surveys.doppelvergabe_bestellfrist_monate')`).
+- **Die neue Route benutzt `SurveyIntake` unverändert** — mit beiden Korrekturen und der 4-Monats-Frist (`config('surveys.doppelvergabe_bestellfrist_monate')`).
   Damit sind „dieselben Prüfungen wie bisher" **und** „wie bei Umfragen" zugleich erfüllt.
 - **Der Vertrag muss `meta.memberId` führen** — ohne sie kann contacts weder auflösen noch
   vergleichen.
@@ -644,17 +657,24 @@ wenn der Beweis des vorigen **vorliegt** — Fristen verkürzen nie die Prüfung
 
 **Was das contacts-Projekt baut** (Vorbild `/webhook/survey`, alte Route unangetastet):
 
-| Artefakt | Inhalt |
-| --- | --- |
-| `routes/webhook.php` | `Route::post('quiz', QuizWebhookController)` — **daneben**, nicht statt |
-| `QuizWebhookController` | eigene **fail-closed** Signaturprüfung gegen `config('quiz.webhook_secrets')` (§7) — ausdrücklich **nicht** `Webhook::validatePayload` |
-| `QuizPayload` | prüft und normalisiert den Vertrag, entscheidet nichts; unbekanntes `meta.quiz` ⇒ 422 |
-| `LegacyQuizResponse` | die **einzige** Stelle, an der Typeform-Form entsteht; `hidden` deterministisch aus `meta` + `attribution` (§3a Regel 6); beide Listen aus **einer** Schleife |
-| `QuizIntake` | drei Fälle + Doppelvergabe-Kontrolle wie `SurveyIntake`; Duplikat vor Fallentscheidung + 1062-Fang; Kartei-Zeile nach §3d (`hash` = `meta.hash`) |
-| `config/quiz.php` | Registry: `'erfolgscode' => [form_id 'hC2yTcU8', public_id '12', voucher_type null, contact_email false, coach_email false]` + Kommentar, **warum** die Schalter aus sind (Post Processor sendet; `true` hiesse Doppelversand) |
-| Index | `SHOW INDEX` bestätigt `typeform_surveys_submission_id_unique` in Produktion; **nur falls er fehlt:** Migration, die ihn anlegt (Bestand vorher auf Dubletten prüfen) |
-| Tests | nach dem Muster der 23 `SurveyWebhookTest`-Prüfungen: Signatur (fehlt/falsch/ohne Secret ⇒ 406/401/503), unbekannter Schlüssel, Idempotenz + Wettlauf, drei Fälle, `hash`-Vorrang, **Mailschalter-Wache** (kein Mailversand, egal was passiert) |
-| Env | `QUIZ_WEBHOOK_SECRET` in der Coolify-App `contacts` **vor** dem Routen-Deploy setzen (ohne ihn antwortet die Route 503 — das ist ungefährlich, aber der Beweis braucht ihn) |
+> 🔴 **Diese Liste war der PLAN. Gebaut wurde weniger — siehe §3a.** Sie bleibt als
+> Begründung stehen, aber `QuizPayload`, `QuizIntake` und `LegacyQuizResponse` **gibt es
+> nicht**: Der Quiz-Payload passte ohne Änderung in `SurveyPayload`, und die Zuordnung
+> liegt unverändert in `SurveyIntake`. Wer hier weiterbaut, baut sie **nicht** nach.
+
+| Artefakt | Geplant | Tatsächlich (31.08.2026) |
+| --- | --- | --- |
+| `routes/webhook.php` | `Route::post('quiz', …)` daneben | ✅ so gebaut |
+| `QuizWebhookController` | eigene **fail-closed** Prüfung, nicht `Webhook::validatePayload` | ✅ so gebaut, dazu eine **Gebietsabgrenzung** in beide Richtungen |
+| `QuizPayload` | eigener Vertragsprüfer | ❌ **nicht gebaut** — `SurveyPayload` passt; das Quiz schickt `gender: 'undisclosed'` |
+| `LegacyQuizResponse` | eigene Typeform-Form | ❌ **nicht gebaut** — `LegacySurveyResponse` erledigt das |
+| `QuizIntake` | eigene Fachlogik | ❌ **nicht gebaut** — `SurveyIntake` unverändert. Eine Regel, ein Ort |
+| Registry | `form_id 'hC2yTcU8'`, `public_id '12'`, Schalter aus | ✅ als `quiz-erfolgscode` in `config/surveys.php` |
+| `config/quiz.php` | — | ✅ Geheimnis, Kopfname, **Gebietsliste** |
+| Index | `typeform_surveys_submission_id_unique` prüfen | ✅ existiert bereits (`SurveyIntake.php:438`) |
+| Tests | nach dem Muster der `SurveyWebhookTest` | ✅ **12 neue**, Suite 162 grün |
+| Env | `QUIZ_WEBHOOK_SECRET` **vor** dem Deploy setzen | ✅ gesetzt, dann deployt |
+
 | Empfohlen | Übergangswache „Kreuz-Duplikat": existiert binnen 7 Tagen bereits eine Zeile mit demselben `hash`, antworte `duplicate:true` statt eine zweite anzulegen. Zweck: schliesst das Flip-Fenster-Restrisiko (§9/B5). Kaveat ehrlich benennen: `qz_`-Hashes sind zu 1270/1271 eindeutig — die Wache kann theoretisch eine echte Neuteilnahme in der 7-Tage-Frist verwerfen; deshalb Fenster klein und Protokolleintrag je Treffer |
 
 **Beweis (alles am laufenden Dienst, nichts davon bleibt stehen):**

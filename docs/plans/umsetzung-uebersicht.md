@@ -12,96 +12,141 @@ Umsetzungspläne. Wer hier anfängt, liest in dieser Reihenfolge:
 
 ---
 
-## 0. Stand am 31.08.2026, 12:10 MESZ — was live ist
+## 0. Stand am 31.08.2026, 16:00 MESZ — alles am laufenden System gemessen
+
+### Was live ist
 
 | Schritt | Stand | Beweis |
 | --- | --- | --- |
-| **A1** — View, Benutzer, Rechte in MySQL | ✅ **erledigt** | `prod_quiz.quiz_berater`: **255 Zeilen**. `SHOW GRANTS` für `quiz@10.0.1.5`: genau `USAGE` + `SELECT` auf die eine View. Definition und Rückweg: [`sql/legacy-views.sql`](../../sql/legacy-views.sql) |
-| **A2** — `server/legacy/`, Treiber, Grenzzaun | ✅ **live** (PR #124) | **25 zufällige Berater Feld für Feld gegen die echte Bridge: 25 zeichengleich, 0 Abweichungen** |
-| **`vergleiche()`-Korrektur** | ✅ **live** (PR #124) | Der `country`-Fehlalarm ist aus der Produktion raus |
-| **A3** — vier Stellen auf **einen** Auflöser | ✅ **live** (PR #125) | Produktion `e7aa22a`, dreimal über Zeit; Funnel antwortet unverändert (`found=true`, `source=user`) |
-| **A4** — Schattenlauf gegen MySQL | 🟡 **läuft seit 31.08. 12:05** | `COACH_LOOKUP_SCHATTEN=mysql`, MySQL-Zugang gesetzt. Erste vier Vergleiche in Produktion: **alle `abweichungen: []`** |
-| **A5** | 🔴 offen | braucht A4-Belege über Tage |
-| **B, M** | 🔴 offen | siehe §2e |
+| **A1** View, Benutzer, Rechte in MySQL | ✅ | `prod_quiz.quiz_berater`: **255 Zeilen**. `SHOW GRANTS` für `quiz@10.0.1.5`: genau `USAGE` + `SELECT` auf die eine View. Definition: [`sql/legacy-views.sql`](../../sql/legacy-views.sql) |
+| **A2** `server/legacy/`, Treiber, Grenzzaun | ✅ PR #124 | **25 zufällige Berater Feld für Feld gegen die echte Bridge: 25 zeichengleich, 0 Abweichungen** |
+| **A3** vier Stellen auf **einen** Auflöser | ✅ PR #125 | Funnel antwortet unverändert (`found=true`, `source=user`) |
+| **A4** Schattenlauf gegen MySQL | 🟡 **läuft** | `COACH_LOOKUP_SOURCE=beide`, `COACH_LOOKUP_SCHATTEN=mysql` |
+| Schattenvergleich **haltbar** | ✅ PR #127 | 5 Vergleiche erzeugt → deployt → **immer noch 5** |
+| Postmark-Tags | ✅ PR #126 | alle **fünf** Nutzlasten tragen einen Tag, Wächter-Test hält den Stand |
+| **M1** Mailvorlagen im Repo | ✅ PR #128 | Rumpf zeichengleich mit dem laufenden Workflow, Driftwächter + goldene Muster |
+| **M2a** ungarische Zuordnungen | ✅ PR #129 | Ziel „Unbekannt" → **„Szabadság"**, Barriere `""` → **`confidence`** |
+| **B2** eigener Contacts-Eingang | ✅ `f7882db` | `/webhook/quiz`: ohne Signatur **406**, falsche **401**; andere Routen unverändert |
 
-### Der Schattenlauf, wie er gerade in Produktion steht
+**Quiz-Produktion:** `3d6bf87`, `/health/ready` grün, `quelle: plattform`.
+**Tests:** Quiz **296 grün** · contacts **162 grün / 843 Zusicherungen**.
+
+### Schalterstand in Produktion (Quiz)
 
 ```
-[berater-vergleich] {"slug":"markus","stelle":"funnel","quelle":"bridge","schatten":"mysql","abweichungen":[]}
-[berater-vergleich] {"slug":"trix24","stelle":"funnel","quelle":"bridge","schatten":"mysql","abweichungen":[]}
-[berater-vergleich] {"slug":"ingeunterthiner",…,"abweichungen":[]}
-[berater-vergleich] {"slug":"default",…,"abweichungen":[]}
+COACH_LOOKUP_SOURCE   = beide      → die BRIDGE entscheidet
+COACH_LOOKUP_SCHATTEN = mysql      → MySQL wird nur gemessen
+LEGACY_MYSQL_*        = gesetzt
+BRIDGE_URL            = gesetzt    → der alte Weg ist unverändert da
+CONTACTS_QUIZ_*       = NICHT gesetzt → der neue Sendeweg ist noch nicht scharf
 ```
 
-🔴 **Die Bridge entscheidet weiterhin.** MySQL wird nur mitgemessen. Ablesen über die
-Coolify-API (nicht SSH — die gibt es auf der Box nicht):
+### Der Schattenvergleich, Stand jetzt
 
-```bash
-curl -s -H "Authorization: Bearer <coolify.apiToken>"   "https://coolify.hl-support.biz/api/v1/applications/yhoacszoiofuq6dg4mykyr7b/logs?lines=200000"   | grep berater-vergleich
-```
+| Stelle | Befund | Vergleiche | Berater |
+| --- | --- | --- | --- |
+| `funnel` | **`<deckungsgleich>`** | **35** | 9 |
 
-🟡 **Eine Falle beim Nachmessen:** Ein Deploy ersetzt den Container. Direkt danach sind im
-Protokoll **null** Zeilen — nicht weil der Schatten schweigt, sondern weil der neue
-Container noch keinen Verkehr gesehen hat. Genau darauf bin ich am 31.08. einmal
-hereingefallen. Erst Verkehr erzeugen, dann lesen.
+**0 Abweichungen, 0 `mysql_fehler`.** Für `mail` gibt es noch **keine** Vergleiche — die
+entstehen nur bei einer Hot-Lead-Mail (rund zwei am Tag).
 
-### Wann A5 — das Umschalten — kommt
-
-> 🔴 **Korrektur vom 31.08.2026, nachmittags.** Hier stand, das Projekt duerfe bis A5
-> **48 Stunden nicht deployen**, weil ein Deploy den Container ersetzt und das Protokoll
-> leert. Das war richtig beobachtet, aber die falsche Schlussfolgerung: Statt das Projekt
-> einzufrieren, gehoert der Beweis haltbar gemacht. Genau dafuer war der
-> `schattenNotiz`-Haken im Aufloeser gebaut — er war nur nicht angeschlossen.
->
-> **Seit PR #127 ist er es.** Die Vergleiche liegen in `leads.berater_vergleich` und
-> ueberleben Deploys. Nachgewiesen: 5 Vergleiche erzeugt, deployt, danach **immer noch 5**.
-> **Es gibt keine Deploy-Sperre.**
-
-**Das Tor fuer A5 — Mengen, kein Datum:**
-
-| Bedingung | Warum |
-| --- | --- |
-| **≥ 300 Vergleiche der Stelle `funnel`**, alle `abweichungen = ''` | der Funnel erzeugt bei **jedem** Seitenaufruf einen — das ist in ein bis zwei Tagen erreicht |
-| **≥ 5 Vergleiche der Stelle `mail`**, alle `abweichungen = ''` | bei rund zwei Hot-Leads am Tag also etwa drei Tage |
-| **0 Zeilen mit `mysql_fehler`** | ein einziger Ausfall der Quelle verschiebt das Umschalten |
-
-Ablesen — ohne Serverzugang zum App-Host, direkt an der Plattform-DB:
+Ablesen (Plattform-DB, kein Zugang zum App-Host nötig):
 
 ```sql
 SELECT stelle,
        CASE WHEN abweichungen = '' THEN '<deckungsgleich>' ELSE abweichungen END AS befund,
-       sum(anzahl) AS vergleiche,
-       count(DISTINCT slug) AS berater,
-       min(zuerst_am), max(zuletzt_am)
+       sum(anzahl) AS vergleiche, count(DISTINCT slug) AS berater, max(zuletzt_am)
   FROM leads.berater_vergleich
- WHERE tag >= current_date - 7
- GROUP BY 1, 2
- ORDER BY 3 DESC;
+ GROUP BY 1, 2 ORDER BY 3 DESC;
 ```
 
-**Reihenfolge des Umschaltens — riskanteste Stelle zuletzt, je eine Env-Aenderung:**
+### n8n, Stand jetzt
 
-1. `COACH_LOOKUP_SOURCE_ABSCHLUSS=mysql` — seltenster Pfad
-2. `COACH_LOOKUP_SOURCE_SUBMIT=mysql`
-3. `COACH_LOOKUP_SOURCE_FUNNEL=mysql` — haeufigster, aber am besten belegt
-4. `COACH_LOOKUP_SOURCE_MAIL=mysql` — **zuletzt**, weil ein Fehler dort am teuersten ist
+| Workflow | Zustand |
+| --- | --- |
+| `AC - Lead Post Processor` (`9RZdrLxfA8IRhd55`) | **aktiv** — verschickt weiter Mail 1 und 2 |
+| `AC - Berater-Verzeichnis spiegeln` (`IFOqAOYbUp8Zwnlk`) | aktiv, alle 15 Min |
+| `Update "Result" by hash` (`7Xg6NsE5H3UWgSNc`) | aktiv — der Rangschreibweg |
 
-Zwischen den Schritten jeweils **einen Tag** beobachten. Erst wenn alle vier stehen, wird
-`COACH_LOOKUP_SOURCE=mysql` gesetzt und die Uebersteuerungen werden entfernt.
+🔴 **Die Opt-in-Mails kommen weiterhin aus n8n, nicht aus dem Repo.** Nur Mail 3 (Hot Lead)
+läuft über die Outbox. Der Verzug von 2–5 Minuten besteht unverändert.
 
-🟡 **Das Umschalten selbst ist kein Deploy**, sondern eine Env-Aenderung — in Sekunden
-zuruecknehmbar. Genau dafuer wurde der Schalter gebaut.
+---
+
+## 0a. 🔴 Wie es weitergeht — der nächste Schritt zuerst
+
+**Der nächste Schritt ist B3: den Absender im Quiz bauen.** Er ist der einzige, der
+nirgends blockiert ist, und er macht den Weg für alles Weitere frei.
+
+### B3 — der Absender, hinter der vorhandenen Outbox
+
+| | |
+| --- | --- |
+| **Was** | Das Quiz sendet den Opt-in an `POST https://contacts.hl-support.biz/webhook/quiz` statt über `forward_webhook` an die Bridge |
+| **Wo** | `api/bridge.js`, die zwei `forward_webhook`-Stellen (`:4094` im Typeform-Adapter, `:4199`) — **hinter** `api/lead-outbox-worker.js`, nicht davor |
+| **Vertrag** | ausgeschrieben in [umsetzung-b-lead-uebergabe.md §3](umsetzung-b-lead-uebergabe.md); Registry-Schlüssel **`quiz-erfolgscode`**, Kopf `X-Quiz-Signature`, HMAC über den **exakten rohen** Rumpf |
+| **Env** | `CONTACTS_QUIZ_URL` und `CONTACTS_QUIZ_WEBHOOK_SECRET` (Wert in `agent-secrets` → `quiz_contacts_webhook`) |
+| **Schalter** | `aus` \| `schatten` \| `an` — im Schattenlauf wird gebaut und protokolliert, aber **nie gesendet** |
+
+🔴 **Die drei Dinge, die B3 richtig machen muss:**
+
+1. **`submissionId` serverseitig erzeugen und im Outbox-Auftrag einfrieren** — nicht je
+   Versuch neu. Sonst erzeugt jede Wiederholung einen zweiten Kontakt. Der `qz_`-Hash
+   taugt **nicht** als Idempotenzschlüssel (klientengesteuert, kein UUID-Format); er
+   gehört als `meta.hash` mit, aber als Lesegriff, nicht als Schlüssel.
+2. **`coach_member_id` und `case` aus der Antwort speichern** — daran hängt Strang M.
+   Ein 2xx **ohne** `contact_id` ist ein Befund und gehört gemeldet.
+3. **Zustellprotokoll vor dem Senden**, in `safely()` gekapselt. Ein Protokoll ist nie ein
+   Datenpfad.
+
+**Beweis vor dem Umschalten:** Ein echtes Opt-in landet **einmal** in Contacts; die
+Wiederholung liefert `duplicate: true`; über beide Wege nachgezählt stimmt die Summe.
+
+### Danach, in dieser Reihenfolge
+
+| # | Schritt | Wartet auf | Bemerkung |
+| --- | --- | --- | --- |
+| **A5** | Quelle je Stelle auf `mysql` | das Tor unten | reine Env-Änderung, **kein Deploy** |
+| **B4** | Absender scharf (`an`) | B3 + Schattenlauf | Notausstieg: Env löschen |
+| **B5** | `forward_webhook`, `BRIDGE_*` und toten Code ausbauen | B4 ruhig | erst dann |
+| **M2** | Vorlagen an die Outbox anschliessen | B4 | M1 liegt fertig |
+| **M3–M8** | Mails senden, Nebenaufgaben verteilen, Poller abschalten | M2 | 🔴 der teuerste Pfad |
+
+🟡 **A5 und B3 dürfen parallel laufen** — verschiedene Pfade. **A/B und M nicht.**
+
+### Das Tor für A5
+
+| Bedingung | Stand 31.08. 16:00 |
+| --- | --- |
+| ≥ 300 `funnel`-Vergleiche, alle `abweichungen = ''` | **35** — ein bis zwei Tage |
+| ≥ 5 `mail`-Vergleiche, alle sauber | **0** — rund drei Tage |
+| 0 Zeilen mit `mysql_fehler` | ✅ **0** |
+| **kein** `nur_in_der_bridge` mit `source='contact'` | ✅ bisher **0** — käme es vor, ist vor dem Umschalten von `_FUNNEL` eine zweite, schmale Kontakt-View nachzurüsten (Plan A §4) |
+
+**Umschaltreihenfolge, riskanteste Stelle zuletzt, je eine Env-Änderung mit einem Tag
+Abstand:** `_ABSCHLUSS` → `_SUBMIT` → `_FUNNEL` → `_MAIL`. Erst wenn alle vier stehen,
+`COACH_LOOKUP_SOURCE=mysql` setzen und die Übersteuerungen entfernen.
+
+### Was Markus entscheiden muss
+
+1. **Telefonlücke** (§2a): Rückfall für die Mailstrecke verbieten — *oder* den Spiegel um
+   die Telefonspalten erweitern. **Empfehlung: verbieten**, die Outbox kann warten.
+   *Markus am 31.08.: „wiederholen besser" — damit ist das entschieden, aber noch nicht gebaut.*
+2. **Mautic-Geheimnis rotieren** (M8): Es stand im Klartext im Repo und ist damit in der
+   Git-Historie. Schwärzen entfernt es dort **nicht**.
+3. **Rotation des geteilten Contacts-Geheimnisses** — Sache des contacts-Projekts, Übergabe
+   liegt vor.
 
 ---
 
 ## 1. Reihenfolge und Tore
 
 ```text
-A0 ─ messen ──► A1 ─🔴 braucht Markus ─► A2 ─► A3 ─► A4 ─► A5
-                                                            │
-B1 ─ Vertrag ─► B2 ─ Contacts zuerst ─► B3 ─► B4 ───────────┤
-                                                            ▼
-                                              M1 … M8  (erst wenn B4 ruhig läuft)
+A0 ✅ ─► A1 ✅ ─► A2 ✅ ─► A3 ✅ ─► A4 🟡 laeuft ─► A5 (Env-Umschaltung)
+                                                          │
+B1 ✅ ─► B2 ✅ ausgeliefert ─► B3 ◄── NAECHSTER SCHRITT ─► B4 ─► B5
+                                                          │
+                              M1 ✅ ─► M2a ✅ ─► M2 … M8  (erst wenn B4 ruhig laeuft)
 ```
 
 **Harte Tore:**
