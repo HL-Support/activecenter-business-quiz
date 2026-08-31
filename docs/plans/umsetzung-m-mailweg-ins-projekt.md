@@ -666,6 +666,44 @@ Kontakt-Historie liest.
 
 **Ohne Strang B wäre M ein Rückschritt, kein Fortschritt.**
 
+### ✅ M1 ist erledigt (31.08.2026, PR #128)
+
+Die Vorlagen liegen im Repo: `server/optin-mail-bibliothek.js`, Rumpf **zeichengleich**
+mit dem Extrakt, ein Driftwächter prüft das bei jedem Testlauf. Dazu goldene Muster für
+vier Sprachen. **Aufgerufen wird nichts** — reine Vorbereitung.
+
+Bestätigt dabei: Mail 2 ist übersetzt, **Mail 1 an den Berater ist durchgehend deutsch**.
+
+#### 🔴 Befund: ungarische Opt-in-Mails verlieren heute Inhalte
+
+Beim Port hat der Linter einen echten Fehler in der **laufenden** Bibliothek aufgedeckt —
+am laufenden Workflow gegengeprüft, nicht nur am Extrakt:
+
+In das Rückgabeobjekt von `getLocalizedLeadEmailPresentation` ist ein Block ungarischer
+Zuordnungen hineingeraten (Zeilen 1154–1165), wo er wirkungslos ist — inklusive eines
+**doppelten Schlüssels** `biztonsag`. Damit **fehlen** diese Einträge in der kanonischen
+Zuordnung, die nur Deutsch, Italienisch, Englisch und Spanisch kennt.
+
+| Begriff | Rückfall über Teilzeichenketten fängt ihn? |
+| --- | --- |
+| `kornyezet`, `lehetoseg` | ✅ ja |
+| `biztonsag` (Barriere) | 🔴 **nein** |
+| `szabadsag`, `hatas`, `stabilitas`, `novekedes` (alle Ziele) | 🔴 **keiner** |
+
+**Wirkung heute:** Ungarische Leads bekommen eine Mail ohne Zielsetzung und teilweise ohne
+die Angabe, was sie zurückhält.
+
+🔴 **Bewusst nicht im Port behoben.** Der Port muss zeichengleich bleiben, sonst ist
+„dieselbe Mail wie heute" nicht mehr beweisbar. Die Korrektur ist ein **eigener Schritt**
+(neu: **M2a**) mit eigenem Vorher-Nachher-Beleg — sie ändert nutzersichtbaren Inhalt und
+gehört nicht in einen Umbau versteckt.
+
+**M2a, wenn es angefasst wird:** Die ungarischen Schlüssel gehören in
+`LEAD_BARRIER_SLUG_MAP` bzw. `LEAD_EMAIL_ASPIRATION_KEYS`, der Fremdblock aus dem
+Rückgabeobjekt raus, der doppelte `biztonsag` aufgelöst (Barriere `confidence`,
+Ziel `security` — sie gehören in **verschiedene** Tabellen). Beweis: dieselbe Mail für
+`de`/`it`/`en` wie vorher, für `hu` mit gefüllten Feldern.
+
 ### Was trotzdem **jetzt schon** geht — ohne B, ohne Laufzeitwirkung
 
 | Schritt | Warum unabhängig |
