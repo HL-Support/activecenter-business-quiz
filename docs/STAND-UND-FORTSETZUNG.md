@@ -1,63 +1,38 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
-> ## 🟢 Stand 31.08.2026, 16:00 MESZ — alles am laufenden System gemessen
+> ## 🟡 Stand 31.08.2026, 19:30 MESZ — B4 läuft, alles Übrige ist ausgeliefert und still
 >
-> **Der Umbau „weg von der Bridge" ist zur Hälfte gebaut und zur Hälfte scharf.**
-> 🔴 **Nichts davon entscheidet bisher etwas:** Die Bridge bestimmt weiterhin die
-> Berateridentität, und der Opt-in geht unverändert den alten Weg.
+> **Der Umbau „weg von der Bridge" ist gebaut. Entscheiden tut er noch nichts:** Die
+> Bridge bestimmt weiterhin die Berateridentität (A4 misst nur), und der Opt-in geht
+> weiterhin über `forward_webhook` an die alte Route (B4 misst nur).
 >
-> | Prüfung | Messung |
-> | --- | --- |
-> | Quiz-Produktion | `3d6bf87`, `/health/ready` grün, `quelle: plattform` |
-> | Funnel | `lookup_subdomain` antwortet unverändert (`found=true`, `source=user`) |
-> | MySQL-View | `prod_quiz.quiz_berater`, **255 Zeilen**; Rechte: nur `SELECT` darauf |
-> | Gleichheit zur Bridge | **25 Berater Feld für Feld: 25 zeichengleich, 0 Abweichungen** |
-> | Schattenlauf | **35** Vergleiche, 9 Berater, **0 Abweichungen**, 0 `mysql_fehler` |
-> | Haltbarkeit | 5 Vergleiche → Deploy → **immer noch 5**. Keine Deploy-Sperre |
-> | Contacts-Route | `/webhook/quiz` live: ohne Signatur **406**, falsche **401** |
-> | Andere Contacts-Routen | **unverändert** (`typeform`, `survey`, `assessment`, `vouchers`, `postmark`) |
-> | Tests | Quiz **296 grün** · contacts **162 grün / 843 Zusicherungen** |
+> ### Was läuft
 >
-> **Sieben Auslieferungen am 31.08.:** #124 MySQL-Leseweg · #125 ein Auflöser für vier
-> Stellen · #126 Postmark-Tags · #127 haltbarer Schattenvergleich · #128 Mailvorlagen ·
-> #129 ungarische Zuordnungen · `f7882db` eigener Contacts-Eingang.
+> | | Stand | Beleg |
+> | --- | --- | --- |
+> | Quiz-Produktion | **`bb64238`** (PR #130) | `/health/live` dreimal über eine Minute bestätigt, `/health/ready` grün, `quelle: plattform` |
+> | contacts-Produktion | **`10e9251`** | alle sechs Webhook-Routen antworten wie vor dem Deploy |
+> | Arbeitszweig | `nurture-auf-plattform-db` @ `2317132` | Quiz **319 Tests** grün, contacts **166** grün; Lint und `verify` grün |
+> | A4 Schattenlauf Berater | 🟡 läuft | **49** Vergleiche, 9 Berater, `<deckungsgleich>`, 0 `mysql_fehler` |
+> | B4 Schattenlauf Übergabe | 🟡 **seit 17:50 scharf** | erste echte Zeile: Lead `qz_f5cb45dd…`, Berater `trix24`, „Der Architekt"/„Wirkung", 8 Antwortpaare |
+> | Aufträge `contacts_quiz_submission` | **0** | im Schatten wird nie gesendet |
+> | Rang-Aufträge `mysql_*` | **0 tote** | Referenzwert für B5 |
 >
-> **Schalterstand:** `COACH_LOOKUP_SOURCE=beide` (Bridge entscheidet),
-> `COACH_LOOKUP_SCHATTEN=mysql` (nur messen), `CONTACTS_QUIZ_*` **nicht gesetzt**
-> (neuer Sendeweg noch nicht scharf).
+> ### Schalterstand in Produktion (Quiz-App `yhoacszoiofuq6dg4mykyr7b`)
 >
-> 🔴 **Die Opt-in-Mails kommen weiterhin aus n8n**, nicht aus dem Repo. Nur Mail 3
-> (Hot Lead) läuft über die Outbox; der Verzug von 2–5 Minuten besteht unverändert.
+> ```
+> COACH_LOOKUP_SOURCE          = beide       → die BRIDGE entscheidet, MySQL wird gemessen
+> COACH_LOOKUP_SCHATTEN        = mysql
+> CONTACTS_QUIZ_MODUS          = schatten    → bauen und protokollieren, NIE senden
+> CONTACTS_QUIZ_URL            = gesetzt     ┐ beide schon gesetzt, damit B5
+> CONTACTS_QUIZ_WEBHOOK_SECRET = gesetzt     ┘ EINE einzige Änderung ist
+> LEADS_DB_MODUS               = direkt
+> BRIDGE_URL                   = gesetzt     → der alte Weg ist unverändert da
+> ```
 >
-> ### 🟡 Stand 31.08.2026, 18:00 MESZ — B4 läuft: der Schattenlauf ist scharf
+> ### 🔴 Was in den nächsten Tagen zu tun ist — sonst misst B4 ein leeres Fenster
 >
-> `CONTACTS_QUIZ_MODUS=schatten` ist gesetzt, dazu Adresse und Geheimnis — damit ist das
-> spätere Scharfschalten (B5) **eine einzige** Env-Änderung. Der neue Weg **sendet nichts**.
->
-> **Was am laufenden System bewiesen ist** (nicht behauptet, jede Zeile gemessen):
->
-> | Beweis | Ergebnis |
-> | --- | --- |
-> | Schreibende Probe über `/webhook/quiz` | `200`, `case: neu`, `contact_id 3684234`, `survey_id 43215`, `coach_member_id 25851739` |
-> | Wiederholung mit demselben Rumpf | **`duplicate: true`** mit **denselben** Kennungen — Idempotenz greift |
-> | 🔴 **K3**: `hidden` der Kartei-Zeile | trägt `profile_label: "Der Macher"`, `main_aspiration_label: "Freiheit"`, `barrier_slug`, `session_hash`, `berater_slug` — **nicht „Unbekannt"** |
-> | Post Processor (§5) | nimmt die Zeile im nächsten Lauf auf, Modell trägt das **richtige** Profil |
-> | Mail 1 + Mail 2 | beide `ErrorCode 0` — an `info+b3probe@` und `info@global-sce.com` |
-> | Rang-Aktualisierer (§6) | `matchedRows: 1` auf den Probe-Hash |
-> | Schattenzweig (§9a) | schreibt: Protokollzeile `status='schatten'`, voller Payload, **0 Aufträge** |
-> | Probespuren | vollständig entfernt: Kartei 0, Mautic 0, Plattform-DB 0 |
->
-> ⚠️ Die zwei `lead_processing_jobs`-Zeilen der Proben **bleiben absichtlich stehen**: Der
-> Kandidaten-SELECT filtert über `lpj.id IS NULL`, nicht über `deleted_at`. Wer sie
-> entfernt, macht die weich gelöschte Kartei-Zeile wieder zum Kandidaten — und Mail 1 und
-> Mail 2 gingen ein zweites Mal raus.
->
-> **Zwei neue Werkzeuge:**
-> `scripts/contacts-quiz-probe.js` (Trockenlauf ist Standard; `--ueber-adapter` misst den
-> Schattenzweig durch den echten Opt-in-Eingang) und
-> `scripts/contacts-quiz-nachzaehlen.js` (§10-Zählung, liegt auf dem Wächter-Host).
->
-> 🔴 **Täglich zu tun, solange B4 läuft** — sonst misst der Schattenlauf ein leeres Fenster:
+> **Täglich einmal** (dauert eine Minute):
 >
 > ```bash
 > ssh root@167.233.251.217 'cd /opt/waechter-nurture && docker run --rm --env-file .env \
@@ -65,67 +40,114 @@
 >   node /w/contacts-quiz-nachzaehlen.js --modus schatten --ab 2026-09-01'
 > ```
 >
-> `--modus` ist Pflicht: ohne ihn sieht ein **Totalausfall** des Sendewegs genauso aus wie
-> ein ruhiger Tag. `--ab 2026-09-01`, weil der 31.08. ein halber Tag ist.
+> Erwartet je vollem Tag: **Schatten = Opt-ins**, `gescheitert` und `offen` je 0, keine
+> toten Aufträge. Exitcode 1 heisst Befund.
 >
-> **Tor zu B5:** ≥ 3 Werktage Schatten mit 0 Abweichungen · 0 tote Aufträge ·
-> und die B2-Beweise oben (liegen vor).
+> `--modus` ist **Pflicht**: ohne ihn ist ein Tag mit null Übermittlungen unauffällig — und
+> damit sähe ein Totalausfall des Sendewegs genauso aus wie ein ruhiger Tag. Das ist der
+> Fehler, an dem der Nurture-Versand drei Wochen stillstand. `--ab 2026-09-01`, weil der
+> 31.08. nur ein halber Tag im Schatten war.
 >
-> ### Nachtrag 31.08.2026, abends — B3 ist **ausgeliefert** und wirkungslos, wie geplant
+> **Tor zu B5** (alle vier, jedes einzeln abgehakt):
+> ≥ 3 Werktage Schatten mit 0 Abweichungen · 0 tote Aufträge beider Typfamilien ·
+> keine offenen `failed` · am Umschalttag kein anderer Eingriff in Versandwege.
 >
-> | Prüfung | Messung |
+> **B5 selbst ist dann eine einzige Env-Änderung:** `CONTACTS_QUIZ_MODUS=an`, App-Neustart,
+> kein Deploy. Notausstieg: Variable löschen. Danach die Sofortprobe aus Plan B §9/B5.
+>
+> ### Die fünf Mails — welche kommt woher (31.08. an drei Proben ausgezählt)
+>
+> | Mail | An | Woher | Steuerung |
+> | --- | --- | --- | --- |
+> | „Neuer Erfolgs-Code von: …" | Berater | n8n, Postmark *Leadgen* | n8n — **soll so** |
+> | „Dein Erfolgs-Code und dein Zugang" | Interessent | n8n, Postmark *Leadgen* | n8n — **soll so** |
+> | „Neuer Kontakteintrag" | Berater | ActiveCenter (`NotificationService`) | seit 31.08. `kartei_benachrichtigung=false` |
+> | „Neuer Kontakt aus: Business" | Berater | contacts selbst | `noemail` (alt) / `coach_email=false` (neu) |
+> | „Deine Anfrage zu unserer Geschäftsmöglichkeit" | Interessent | contacts selbst | `noemail` (alt) / `contact_email=false` (neu) |
+>
+> 🔴 **Über `/webhook/quiz` verschickt contacts NULL Mails** — alle drei Registry-Schalter
+> stehen auf `false`, im ausgelieferten Container nachgemessen. Die zwei Mails eines Leads
+> kommen ausschliesslich aus n8n.
+>
+> ⚠️ **Bis B5 bekommt der Berater weiterhin „Neuer Kontakteintrag"**, weil der Opt-in noch
+> über den alten Weg läuft und der Aufruf dort ausserhalb jeder `noemail`-Prüfung steht
+> (`TypeformWebhookController.php:368`). Mit B5 hört sie auf. Sie zusätzlich im alten
+> Controller abzuschalten wäre ein zweiter Eingriff auf demselben Versandweg, während der
+> Schattenlauf misst — Plan B §9b verbietet das.
+>
+> ### Werkzeuge, die es seit dem 31.08. gibt
+>
+> | Werkzeug | Wozu |
 > | --- | --- |
-> | Quiz-Produktion | **`bb64238`** (PR #130), `/health/live` dreimal über eine Minute bestätigt |
-> | `/health/ready` | grün, `quelle: plattform` |
-> | Schalterstand | `CONTACTS_QUIZ_*` **nicht gesetzt** ⇒ Modus `aus` |
-> | Zustellprotokoll | **0 Zeilen** · Aufträge `contacts_quiz_submission` **0** |
-> | Funnel | `lookup_subdomain` unverändert (`found=true`, `source=user`) |
-> | Schattenvergleich A4 | **49** Vergleiche, 9 Berater, weiterhin `<deckungsgleich>` |
-> | Rang-Aufträge | **0 tote** (Referenzwert für B4/B5) |
-> | contacts | `721f525` ausgeliefert, alle sechs Routen antworten wie vor dem Deploy |
-> | Datenseite | `sql/contacts-quiz-uebergabe.sql` auf `hl_support` angewandt, Funktionsbeweis mit `ROLLBACK` bestanden |
-> | Wächter | Serverkopie mit **W6** nachgezogen (Sicherung `*.bak-vor-w6-20260831`), Lauf grün |
+> | `scripts/contacts-quiz-probe.js` | Probe-Übermittlung mit dem **echten** Payload-Bau. Trockenlauf ist Standard. `--ueber-adapter` misst den Schattenzweig durch den echten Opt-in-Eingang |
+> | `scripts/contacts-quiz-nachzaehlen.js` | die §10-Zählung; liegt auch auf dem Wächter-Host |
+> | Wächter **W6** | tote Übergaben = ALARM, hängende und Protokollzeilen ohne Kennung = WARNUNG |
 >
-> **Nächster Schritt: B4** — `CONTACTS_QUIZ_MODUS=schatten` setzen, App neu starten,
-> über mehrere Tage messen. Kein Deploy, Rückweg ist das Löschen der Variable.
+> ### Was am 31.08. bewiesen wurde (alles am laufenden System)
 >
-> <details><summary>Was beim Bauen aufgefallen ist (Hergang)</summary>
+> <details><summary>Die Beweiskette im Einzelnen</summary>
 >
-> **Gebaut, getestet, noch nicht ausgeliefert:** der Absender an `/webhook/quiz`
-> (`server/legacy/kontakte.js`), der Vertragspayload (`api/bridge.js`), die Datenseite
-> (`sql/contacts-quiz-uebergabe.sql`, Schema `leads`), die Auftragsart
-> `contacts_quiz_submission` im Worker und der Modus-Schalter `CONTACTS_QUIZ_MODUS` mit
-> Standard **`aus`**. Quiz-Tests **315 grün** (vorher 296), Lint und `verify` grün.
-> Der Vertrag ist jetzt schriftlich festgeschrieben:
-> **[contacts-quiz-webhook-vertrag.md](contacts-quiz-webhook-vertrag.md)** — er gilt,
-> nicht §3 des Plans.
+> | Beweis | Ergebnis |
+> | --- | --- |
+> | Schreibende Probe über `/webhook/quiz` | `200`, `case: neu`, `contact_id 3684234`, `survey_id 43215`, `coach_member_id 25851739` |
+> | Wiederholung mit demselben Rumpf | **`duplicate: true`** mit denselben Kennungen — Idempotenz greift |
+> | 🔴 **K3** | `hidden` der Kartei-Zeile trägt `profile_label "Der Macher"`, `main_aspiration_label "Freiheit"`, `barrier_slug`, `session_hash`, `berater_slug` — **nicht „Unbekannt"** |
+> | Post Processor (Plan B §5) | nimmt die Zeile im nächsten Lauf auf, Modell trägt das richtige Profil |
+> | Mails | beide `ErrorCode 0`; eine an den Berater, **eine an den Interessenten** |
+> | Rang-Aktualisierer (§6) | `matchedRows: 1`, `points_result` in der Kartei gesetzt |
+> | Schattenzweig (§9a) | schreibt `status='schatten'` mit vollem Payload, 0 Aufträge |
+> | Datenseite | `sql/contacts-quiz-uebergabe.sql` angewandt, Funktionsbeweis mit `ROLLBACK`, danach 0/0/0 |
+> | Probespuren | Kartei weich gelöscht, Mautic entfernt, Plattform-DB bereinigt |
 >
-> 🔴 **Beim Nachlesen der ausgelieferten Gegenstelle sind drei Abweichungen aufgefallen.**
-> Zwei sind eingearbeitet (sie liest `meta.survey`, nicht `meta.quiz`; der Kopf heisst
-> `X-Quiz-Signature`). Die dritte ist ein Mangel drüben: **`meta` wird nicht nach
-> `form_response.hidden` gespiegelt** — der Post Processor liest dort 19 Felder,
-> `LegacySurveyResponse` schreibt 8. Beim Umschalten stünde in Mail 1 und Mail 2
-> **„Unbekannt"** statt Profil und Ziel, ohne jede Meldung. Das ist die Fehlerklasse von
-> M2a. Übergeben als
-> [uebergaben/2026-08-31-contacts-hidden-abbildung.md](uebergaben/2026-08-31-contacts-hidden-abbildung.md);
-> es blockiert **B5**, nicht B3 und nicht B4.
+> ⚠️ Die `lead_processing_jobs` der Proben **bleiben absichtlich stehen**: Der
+> Kandidaten-SELECT filtert über `lpj.id IS NULL`, **nicht** über `deleted_at`. Wer sie
+> entfernt, macht die weich gelöschte Kartei-Zeile wieder zum Kandidaten — und die Mails
+> gehen erneut raus. Gilt für jede künftige Probe.
 >
-> ✅ **Alles drei erledigt** — die Messungen stehen oben in der Tabelle.
+> </details>
 >
-> 🔴 **Eine Panne beim Funktionsbeweis, festgehalten statt weggelassen:** Der erste
-> Probelauf wurde über eine zusammengesetzte Zeichenkette an `psql` übergeben; dabei
-> gingen die Backslashes der `\echo`-Anweisungen verloren, `BEGIN` lief ins Leere und
-> einzelne Anweisungen wurden **autocommittet**. Hinterlassen hat das genau zwei
-> Zeilen — eine Probezeile in `lead_state` und eine Schattenzeile im Protokoll —,
-> beide aus demselben Lauf, beide über ihre vollständigen Schlüssel wieder entfernt
-> (`lead_state` 6385 → 6384). Keine Aufträge, keine Ereignisse, keine Antwortzeilen
-> betroffen. **Lehre: SQL geht nur noch als Datei über base64, nie über eine
-> zusammengesetzte Zeichenkette** — das ist Falle 10 in einer neuen Verkleidung.
+> ### Drei Fehler dieses Tages, festgehalten statt weggelassen
+>
+> <details><summary>Weil jeder davon wiederkommen kann</summary>
+>
+> 1. **SQL als zusammengesetzte Zeichenkette.** Der erste Funktionsbeweis ging als
+>    JS-Template an `psql`; dabei gingen die Backslashes der `\echo`-Zeilen verloren,
+>    `BEGIN` lief ins Leere und einzelne Anweisungen wurden **autocommittet** — obwohl am
+>    Ende ein `ROLLBACK` stand. Zurück blieben genau zwei Zeilen, beide aus demselben Lauf,
+>    beide gezielt entfernt (`lead_state` 6385 → 6384).
+>    **Lehre: SQL geht nur noch als Datei über base64.** Das ist Falle 10 in neuer
+>    Verkleidung.
+> 2. **Eine Probe, die anders aussieht als der Ernstfall.** Die Probe über `--ueber-adapter`
+>    schickte `variables` nicht mit, also auch kein `noemail: 1` — und löste über den alten
+>    Weg zwei Mails aus, die der echte Funnel nie verschickt. Kein Systemfehler, ein
+>    Werkzeugfehler. Ein Test hält die Probe-Variablen jetzt gegen die des Browsers.
+> 3. **Ein Test, der nichts prüfte.** Die Abschaltung von „Neuer Kontakteintrag" sollte über
+>    `Http::assertNothingSent()` belegt werden — aber die Benachrichtigung geht über
+>    `dispatch(closure)`, und mit `Queue::fake()` wird die Closure nie ausgeführt. Der Test
+>    wäre **immer** grün gewesen. Aufgefallen ist es nur, weil der Gegentest durchfiel.
+>    Jetzt prüfen beide Richtungen die Einreihung.
+>
+> Dazu ein Befund über den Beobachtungsweg: Die Interessenten-Mail der dritten Probe ist im
+> Postfach nicht sichtbar geworden, obwohl Postmark sie als zugestellt führt (250 OK vom
+> Mailhost, kein Bounce, keine Sperre). Was hinter der Annahme im Postfach passiert, ist von
+> aussen **nicht** messbar. Für den Funnel folgenlos — echte Interessenten haben dieselbe
+> Mail am selben Tag bekommen. **Wer den Empfang beweisen will, nimmt ein echtes Postfach,
+> keine Plus-Adresse.**
 >
 > </details>
 >
 > Vollständiger Fortsetzungsplan, Tore und offene Entscheidungen:
-> **[plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md)** §0 und §0a.
+> **[plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md)** §0 und §0a ·
+> Vertrag: **[contacts-quiz-webhook-vertrag.md](contacts-quiz-webhook-vertrag.md)** ·
+> Mailbild: **[MAILWEGE.md](MAILWEGE.md)**
+>
+> ### Was weiterhin bei Markus liegt
+>
+> 1. **Telefonlücke** (Übersicht §2a): entschieden „wiederholen" — noch **nicht gebaut**.
+>    Betrifft erst Strang M.
+> 2. **Mautic-Geheimnis rotieren** (M8): stand im Klartext im Repo und damit in der
+>    Git-Historie; Schwärzen entfernt es dort nicht.
+> 3. **Rotation des geteilten Contacts-Geheimnisses** — Sache des contacts-Projekts.
 
 
 **Letzte inhaltliche Überarbeitung: 28.08.2026, nachts — nach dem vollständigen Audit.**

@@ -11,6 +11,39 @@ Messen. Die Fallen dazu stehen unten in §5.
 
 ---
 
+## 0. 🔴 Nachtrag 31.08.2026: es sind nicht fünf, sondern acht
+
+Beim Beweislauf für Strang B kamen **drei weitere** Mails zum Vorschein. Sie stammen nicht
+aus n8n und nicht aus diesem Repo, sondern aus dem contacts-Projekt bzw. aus ActiveCenter —
+und keine von ihnen stand bisher in diesem Dokument.
+
+| Mail | Empfänger | Wer sendet | Absender-Server | Steuerung |
+| --- | --- | --- | --- | --- |
+| „Neuer Kontakteintrag" | Berater | ActiveCenter, angestossen von `NotificationService::sendTypeformNotification` | `mail@cm.hl-support.biz` | 🔴 hing an **gar nichts**; seit 31.08. an `kartei_benachrichtigung` |
+| „Neuer Kontakt aus: Business" | Berater | contacts, `NewContactCreated` | Postmark **HL-Support** | `noemail` (alte Route) / `coach_email` (neue) |
+| „Deine Anfrage zu unserer Geschäftsmöglichkeit" | Lead | contacts, `sendEmailToContact` | `mail@cm.hl-support.biz` | `noemail` (alte Route) / `contact_email` (neue) |
+
+**Warum sie im Alltag nicht auffielen:** Das Quiz schickt bei jedem Opt-in
+`noemail: 1` mit (`src/lib/core.js:1573-1579`), und das blockt im alten Controller die
+unteren beiden (`TypeformWebhookController.php:432` und `:533`). Die **erste** blockt es
+nicht — ihr Aufruf steht bei `:368` ausserhalb jeder Prüfung. Sie kommt also bis heute bei
+jedem Quiz-Lead an.
+
+🔴 **Über die neue Route `/webhook/quiz` verschickt contacts NULL Mails.** Alle drei
+Registry-Schalter stehen auf `false` (`config/surveys.php`, Eintrag `quiz-erfolgscode`) —
+im ausgelieferten Container nachgemessen. Ab B5 bleiben also genau die zwei n8n-Mails übrig.
+
+⚠️ **Bis B5 kommt „Neuer Kontakteintrag" weiter**, weil der Opt-in noch die alte Route
+nimmt. Sie zusätzlich dort abzuschalten wäre ein zweiter Eingriff auf demselben
+Versandweg, während der Schattenlauf misst — Plan B §9b verbietet das.
+
+**Und eine Korrektur an §5 des B-Plans:** Dort stand, die Probe löse „Mail 1+2 an
+`info@global-sce.com`" aus. Gemessen: Nur **eine** geht an den Berater, die andere an den
+**Interessenten**. Der Eindruck entstand, weil die Probe eine Plus-Adresse desselben
+Postfachs benutzte.
+
+---
+
 ## 1. Die fünf Mails des Funnels
 
 | # | Mail | Auslöser | Empfänger | **Wer sendet** | Postmark-Server / Stream |
@@ -47,6 +80,25 @@ normal und kein Störungszeichen. Gemessen am 28.08.: 08:42→08:46 · 09:49→0
 `hl_support`. Das ist für die Migration wesentlich: Entscheidung 3 in
 [STAND-UND-FORTSETZUNG](STAND-UND-FORTSETZUNG.md) sieht die Outbox als **einzigen**
 Übergabepunkt zur Kartei vor — dieser zweite Pfad ist dort noch nicht abgebildet.
+
+✅ **Nachtrag 31.08.2026:** Genau das ist jetzt gebaut. Ab `CONTACTS_QUIZ_MODUS=an` (B5)
+lautet der erste Abschnitt:
+
+```text
+Quiz-Submit
+  → api/bridge.js  (Modus `an`: KEIN forward_webhook mehr)
+  → leads.reihe_contacts_quiz_ein(...)   Auftrag mit eingefrorenem Rumpf + submissionId
+  → [Outbox-Takt, ~1 Minute]
+  → api/lead-outbox-worker.js  →  POST https://contacts.hl-support.biz/webhook/quiz
+  → dieselbe Tabelle prod_contacts_activesupport.typeform_surveys
+  → ab hier unverändert: Post Processor, Mail 1 und Mail 2
+```
+
+**Die Kartei-Zeile entsteht dadurch ~1 Minute später**, Mail 1+2 also bis ~6 statt ~5
+Minuten nach dem Opt-in. Kein Störungszeichen. Der Rang-Aktualisierer findet die Zeile
+weiterhin (`matchedRows: 1` am 31.08. bewiesen); ein `mysql_initial_rank`, der vorher
+feuert, läuft einmal ins Leere und wird vom 2-Minuten-Backoff aufgefangen — erwartbar sind
+einzelne `failed`, aber **kein einziger `dead`**.
 
 ---
 
@@ -241,6 +293,20 @@ curl -s -H "X-Postmark-Account-Token: <postmark.accountToken>" \
 curl -s -H "X-Postmark-Server-Token: <Token des Servers>" \
   "https://api.postmarkapp.com/messages/outbound?count=100&offset=0&fromdate=2026-08-28&todate=2026-08-29"
 ```
+
+**Ist eine Mail auch ANGEKOMMEN?** Das beantwortet Postmark nur bis zum Mailhost:
+
+```bash
+curl -s -H "X-Postmark-Server-Token: <Token>" \
+  "https://api.postmarkapp.com/messages/outbound/<MessageID>/details"
+```
+
+`MessageEvents` zeigt `Delivered` mit der Antwort des Zielservers (`250 ... queued as
+<ID>`) und, falls der Empfänger sie geöffnet hat, `Opened`. **Was danach im Postfach
+geschieht — Ordner, Regeln, Behandlung einer Plus-Adresse — ist von aussen nicht
+messbar.** Am 31.08.2026 galt eine Probe-Mail als zugestellt (250 OK, kein Bounce, keine
+Sperrliste) und war im Postfach trotzdem nicht sichtbar. 🔴 **Wer den EMPFANG beweisen
+will, nimmt ein echtes Postfach, keine Plus-Adresse.**
 
 **Läuft der Post-Processor?** Er muss alle 5 Minuten `success` melden; ein Lauf mit Versand
 dauert spürbar länger als die Leerläufe (7 s gegen 2–3 s):
