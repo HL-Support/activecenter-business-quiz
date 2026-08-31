@@ -637,6 +637,56 @@ Abhängigkeit — sie gilt trotzdem (§10).
 
 ## 10. Reihenfolge und Abhängigkeiten zu Strang A und B
 
+### 🔴 Warum M auf B warten muss — die harte Abhängigkeit, am Quelltext belegt
+
+**Gemessen am 31.08.2026.** Die Abhängigkeit ist keine Vorsichtsregel, sondern eine
+Datenlücke:
+
+Der Berater, dem ein Kontakt **am Ende gehört**, steht erst nach der Übergabe fest. Bei
+der Übergabe läuft die Doppelvergabe-Kontrolle (beraterübergreifende Suche,
+4-Monats-Bestellfrist) und die Abo-Umleitung an die Upline — **dabei kann sich der Berater
+ändern**, und genau dafür gibt es die Kontrolle.
+
+| Route | Antwort | Erfährt das Quiz den aufgelösten Berater? |
+| --- | --- | --- |
+| **alt** `/webhook/typeform` | **leerer Rumpf** (`TypeformWebhookController::onReceive` endet auf `return;`) | 🔴 **nein** |
+| **neu** `/webhook/quiz` | trägt `coach_member_id` und `case` | 🟢 ja |
+
+**Beide Opt-in-Mails hängen daran**, nicht nur Mail 1:
+
+- **Mail 1** geht an den Berater — bei einer Umleitung an den **falschen**, wenn das Quiz
+  nur den Slug kennt.
+- **Mail 2** geht zwar an den Lead, trägt aber die Berateridentität im Inhalt (u. a. den
+  **WhatsApp-Link aus dem Berater-Telefon**, §2a der Übersicht).
+
+Solange die alte Route leer antwortet, könnte das Quiz die Mails also nur mit dem
+**Slug-Berater** verschicken — und würde bei jeder Umleitung still den Falschen
+benachrichtigen. Das ist schlechter als der heutige Poller, der den Berater aus der
+Kontakt-Historie liest.
+
+**Ohne Strang B wäre M ein Rückschritt, kein Fortschritt.**
+
+### Was trotzdem **jetzt schon** geht — ohne B, ohne Laufzeitwirkung
+
+| Schritt | Warum unabhängig |
+| --- | --- |
+| **M1/M2** — Vorlagen aus der n8n-Bibliothek portieren, mit Golden-Tests | Reiner Code plus Tests; nichts wird verschickt. Der Vergleich „zeichengleich zur heutigen Mail" lässt sich vollständig ohne B führen |
+| **Inventur der Nebenaufgaben** vervollständigen (Mautic, ZeroBounce, Resume-Token, Jobverwaltung) | Lesen und Zuordnen |
+| **M8 — Mautic-Geheimnis rotieren** | Der Wert stand im Klartext im Repo und ist damit verbrannt; die Rotation hängt an nichts |
+
+### Reihenfolge, die daraus folgt
+
+```text
+A5  (Env-Umschaltung)         ── unabhängig, jederzeit sobald das Tor erreicht ist
+B1 → B2 (contacts) → B3 → B4  ── der kritische Pfad
+                                  │
+M1/M2 (Vorlagen, jetzt schon) ────┤
+                                  ▼
+                         M3 … M8 (senden, Poller abschalten)
+```
+
+
+
 | Strang | Stand 31.08.2026 | Verhältnis zu M |
 | --- | --- | --- |
 | **A** — Berateridentität direkt aus MySQL (bridge-Plan §6, A1–A5) | geplant | **Kein Blocker für M.** M liest den Berater aus `leads.berater` (dem Spiegel der B-Reihe des Benachrichtigungsplans, seit 30.08. in Betrieb). 🔴 Berührung: M1 erweitert **denselben Spiegel** — M1 und A-Schritte nie am selben Tag; und falls A später den Spiegel durch Direktzugriff ersetzt, müssen die M-Felder (inkl. Telefon) in der A1-View mitgeführt werden — Notiz gehört in A1 |
