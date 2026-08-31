@@ -470,6 +470,27 @@ test('die Probe sendet nur auf ausdrueckliche Anweisung', () => {
   assert.match(quelle, /require\('\.\.\/server\/legacy\/kontakte'\)/);
 });
 
+test('🔴 die Probe traegt dieselben variables wie der echte Browser — samt noemail', () => {
+  const quelle = fs.readFileSync(path.join(wurzel, 'scripts/contacts-quiz-probe.js'), 'utf8');
+  const client = fs.readFileSync(path.join(wurzel, 'src/lib/core.js'), 'utf8');
+
+  // 🔴 Am 31.08.2026 fehlte diese Liste in der Probe. Ueber `--ueber-adapter` lief sie
+  // damit durch den ALTEN Weg ohne `noemail` — und loeste zwei Mails aus, die der echte
+  // Funnel NIE verschickt ("Neuer Kontakt aus: Business" an den Berater und "Deine
+  // Anfrage zu unserer Geschaeftsmoeglichkeit" an den Interessenten). Eine Probe, die
+  // anders aussieht als der Ernstfall, erzeugt Gespenster.
+  for (const schluessel of ['contact_country', 'score', 'noemail', 'main_aspiration']) {
+    assert.ok(
+      new RegExp(`key: '${schluessel}'`).test(quelle),
+      `die Probe muss die Variable ${schluessel} mitschicken`
+    );
+    assert.ok(
+      new RegExp(`key: '${schluessel}'`).test(client),
+      `Gegenprobe: der Browser schickt ${schluessel} auch`
+    );
+  }
+});
+
 test('das Nachzaehlen kann den Totalausfall vom Ruhezustand unterscheiden', () => {
   const quelle = fs.readFileSync(
     path.join(wurzel, 'scripts/contacts-quiz-nachzaehlen.js'),

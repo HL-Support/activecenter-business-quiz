@@ -108,6 +108,23 @@ const optIn = {
     utm_source: 'b3-probe',
     utm_medium: 'nachweis',
   },
+  calculated: { score: 0 },
+  // 🔴 DIESE LISTE MUSS BLEIBEN — sie ist der Unterschied zwischen einer Probe und einem
+  // Zerrbild. `noemail: 1` schaltet im ALTEN Weg zwei Mails ab
+  // (`sendEmailToContact`, `sendEmailToCoachOnNewContactCreated`); der Browser schickt sie
+  // bei jedem echten Opt-in mit (src/lib/core.js:1573-1579).
+  //
+  // Am 31.08.2026 fehlte sie hier — und prompt verschickte die Probe ueber
+  // `--ueber-adapter` eine Mail ("Neuer Kontakt aus: Business"), die der echte Funnel NIE
+  // ausloest. Eine Probe, die anders aussieht als der Ernstfall, misst den Ernstfall
+  // nicht; sie erzeugt Gespenster, denen man dann hinterherlaeuft.
+  variables: [
+    { key: 'contact_country', type: 'text', text: 'AT' },
+    { key: 'score', type: 'number', number: 0 },
+    { key: 'noemail', type: 'number', number: 1 },
+    { key: 'main_aspiration', type: 'text', text: 'freedom' },
+    { key: 'main_aspiration_label', type: 'text', text: 'Freiheit' },
+  ],
 };
 
 function zeile(schluessel, wert) {

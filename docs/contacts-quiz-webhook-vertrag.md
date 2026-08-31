@@ -316,3 +316,26 @@ Quiz `false`, Umfragen unverändert `(nicht gesetzt ⇒ true)`.
 ⚠️ Der Test dazu prüft die **Einreihung**, nicht den HTTP-Aufruf: Die Benachrichtigung
 geht über `dispatch(closure)`, und mit `Queue::fake()` wird die Closure nie ausgeführt —
 ein `Http::assertNothingSent()` wäre immer grün gewesen und hätte nichts bewiesen.
+
+### 9a. Welche Mail woher kommt — am 31.08.2026 an drei Proben ausgezählt
+
+| Mail | Absender-Server | An | Wer verschickt sie | Steuerung |
+| --- | --- | --- | --- | --- |
+| „Neuer Erfolgs-Code von: …" | Postmark **Leadgen** | Berater | n8n Post Processor | n8n |
+| „Dein Erfolgs-Code und dein Zugang" | Postmark **Leadgen** | Interessent | n8n Post Processor | n8n |
+| „Neuer Kontakteintrag" | ActiveCenter | Berater | `NotificationService` | 🔴 **jetzt** `kartei_benachrichtigung` |
+| „Neuer Kontakt aus: Business" | Postmark **HL-Support** | Berater | contacts `NewContactCreated` | `noemail` (alt) / `coach_email` (neu) |
+| „Deine Anfrage zu unserer Geschäftsmöglichkeit" | ActiveCenter | Interessent | contacts `sendEmailToContact` | `noemail` (alt) / `contact_email` (neu) |
+
+🔴 **Über `/webhook/quiz` verschickt contacts NULL Mails.** Alle drei Schalter der Registry
+stehen auf `false` — im ausgelieferten Container nachgemessen. Die zwei Mails, die ein Lead
+auslöst, kommen ausschliesslich aus n8n.
+
+**Ein Zerrbild und seine Lehre:** Die letzten beiden Zeilen der Tabelle tauchten bei einer
+Probe auf, die über `--ueber-adapter` durch den **alten** Weg lief. Ursache war nicht das
+System, sondern die Probe: Sie schickte `variables` gar nicht mit, also auch kein
+`noemail: 1` — und genau das blockt im alten Controller diese beiden Mails
+(`:432` und `:533`). Der echte Browser sendet die Liste bei jedem Opt-in
+(`src/lib/core.js:1573-1579`). Seither trägt die Probe sie ebenfalls, und ein Test hält
+beide Seiten gegeneinander. **Eine Probe, die anders aussieht als der Ernstfall, misst den
+Ernstfall nicht — sie erzeugt Gespenster, denen man hinterherläuft.**
