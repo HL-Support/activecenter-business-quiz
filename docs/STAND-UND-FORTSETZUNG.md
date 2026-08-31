@@ -141,6 +141,22 @@
 > Vertrag: **[contacts-quiz-webhook-vertrag.md](contacts-quiz-webhook-vertrag.md)** ·
 > Mailbild: **[MAILWEGE.md](MAILWEGE.md)**
 >
+> ### Nurture: nachgemessen am 31.08. abends
+>
+> Der Versand ist **gesund** — alle 2 h, alle Läufe grün, 914 von 1118 Menschen haben
+> mindestens eine Mail. Der Augustvorfall ist in der Kurve sichtbar (20.–25.08. Stillstand)
+> und am 26.08. mit 137 Mails abgearbeitet; die 125 am 29.08. sind die Aktivierung der
+> zweiten Erinnerungen, kein zweiter Vorfall.
+>
+> Die Dauerwarnung des Wächters („9 fällige ohne Mail") ist vollständig aufgeklärt:
+> 4× keine Vorlage in ihrer Sprache · 4× im Mautic angehalten · 1× kein Mautic-Kontakt.
+> **Kein technischer Ausfall.**
+>
+> 🔴 **Eine Entscheidung steht an:** Die Strecke kennt nur `de`, `it`, `en`. Sieben Menschen
+> in `hu`/`fr`/`ru` fallen strukturell durch — Vorlagen bauen oder bewusst verzichten und in
+> die Baseline aufnehmen, damit W2 nicht dauerhaft gelb bleibt.
+> Vollständig: [audits/2026-08-31-nurture-standortbestimmung.md](audits/2026-08-31-nurture-standortbestimmung.md)
+>
 > ### Was weiterhin bei Markus liegt
 >
 > 1. **Telefonlücke** (Übersicht §2a): entschieden „wiederholen" — noch **nicht gebaut**.
