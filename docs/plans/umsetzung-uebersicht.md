@@ -83,9 +83,21 @@ läuft über die Outbox. Der Verzug von 2–5 Minuten besteht unverändert.
 
 ## 0a. 🔴 Wie es weitergeht — der nächste Schritt zuerst
 
-> ## ✅ B3 ist gebaut (31.08.2026, abends) — und hat einen Blocker für B5 zutage gefördert
+> ## ✅ B3 ist AUSGELIEFERT (31.08.2026, abends) — und wirkungslos, wie geplant
 >
-> **Gebaut, getestet, nicht ausgeliefert:** Vertrag festgeschrieben
+> **Quiz `bb64238` (PR #130), contacts `721f525`.** Gemessen: `CONTACTS_QUIZ_*` nicht
+> gesetzt ⇒ Modus `aus` · Zustellprotokoll **0 Zeilen** · Aufträge **0** · Funnel
+> unverändert · Schattenvergleich A4 bei **49** Vergleichen weiter deckungsgleich ·
+> **0 tote** Rang-Aufträge · contacts antwortet auf allen sechs Routen wie vor dem
+> Deploy · `sql/contacts-quiz-uebergabe.sql` angewandt und mit `ROLLBACK` bewiesen ·
+> Wächter-Serverkopie mit **W6** nachgezogen.
+>
+> **Nächster Schritt: B4** — `CONTACTS_QUIZ_MODUS=schatten`, App neu starten, über
+> mehrere Tage messen. Kein Deploy; Rückweg ist das Löschen der Variable.
+>
+> <details><summary>Wie es gebaut wurde und was dabei auffiel</summary>
+>
+> **Gebaut und getestet:** Vertrag festgeschrieben
 > ([contacts-quiz-webhook-vertrag.md](../contacts-quiz-webhook-vertrag.md)), Absender
 > `server/legacy/kontakte.js`, Vertragspayload in `api/bridge.js`, Datenseite
 > `sql/contacts-quiz-uebergabe.sql`, Auftragsart im Worker, Modus-Schalter mit Standard
@@ -110,6 +122,8 @@ läuft über die Outbox. Der Verzug von 2–5 Minuten besteht unverändert.
 > **Die drei offenen Punkte des Plans sind entschieden:** §12.1 Kandidaten-SELECT
 > beantwortet und am laufenden n8n belegt · §12.4 Schema **`leads`** · §12.5
 > `max_attempts` **8** (Deckung 4 h 22 min statt 82 min).
+>
+> </details>
 
 ### B3 — der Absender, hinter der vorhandenen Outbox (die Vorgabe, an der gebaut wurde)
 

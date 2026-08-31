@@ -29,7 +29,25 @@
 > 🔴 **Die Opt-in-Mails kommen weiterhin aus n8n**, nicht aus dem Repo. Nur Mail 3
 > (Hot Lead) läuft über die Outbox; der Verzug von 2–5 Minuten besteht unverändert.
 >
-> ### Nachtrag 31.08.2026, abends — B3 ist gebaut, und B5 hat einen Blocker
+> ### Nachtrag 31.08.2026, abends — B3 ist **ausgeliefert** und wirkungslos, wie geplant
+>
+> | Prüfung | Messung |
+> | --- | --- |
+> | Quiz-Produktion | **`bb64238`** (PR #130), `/health/live` dreimal über eine Minute bestätigt |
+> | `/health/ready` | grün, `quelle: plattform` |
+> | Schalterstand | `CONTACTS_QUIZ_*` **nicht gesetzt** ⇒ Modus `aus` |
+> | Zustellprotokoll | **0 Zeilen** · Aufträge `contacts_quiz_submission` **0** |
+> | Funnel | `lookup_subdomain` unverändert (`found=true`, `source=user`) |
+> | Schattenvergleich A4 | **49** Vergleiche, 9 Berater, weiterhin `<deckungsgleich>` |
+> | Rang-Aufträge | **0 tote** (Referenzwert für B4/B5) |
+> | contacts | `721f525` ausgeliefert, alle sechs Routen antworten wie vor dem Deploy |
+> | Datenseite | `sql/contacts-quiz-uebergabe.sql` auf `hl_support` angewandt, Funktionsbeweis mit `ROLLBACK` bestanden |
+> | Wächter | Serverkopie mit **W6** nachgezogen (Sicherung `*.bak-vor-w6-20260831`), Lauf grün |
+>
+> **Nächster Schritt: B4** — `CONTACTS_QUIZ_MODUS=schatten` setzen, App neu starten,
+> über mehrere Tage messen. Kein Deploy, Rückweg ist das Löschen der Variable.
+>
+> <details><summary>Was beim Bauen aufgefallen ist (Hergang)</summary>
 >
 > **Gebaut, getestet, noch nicht ausgeliefert:** der Absender an `/webhook/quiz`
 > (`server/legacy/kontakte.js`), der Vertragspayload (`api/bridge.js`), die Datenseite
@@ -50,8 +68,19 @@
 > [uebergaben/2026-08-31-contacts-hidden-abbildung.md](uebergaben/2026-08-31-contacts-hidden-abbildung.md);
 > es blockiert **B5**, nicht B3 und nicht B4.
 >
-> **Offen, damit B3 als ausgeliefert gilt:** SQL auf der Plattform-DB anwenden ·
-> deployen · Gegenprobe „es ändert sich nichts".
+> ✅ **Alles drei erledigt** — die Messungen stehen oben in der Tabelle.
+>
+> 🔴 **Eine Panne beim Funktionsbeweis, festgehalten statt weggelassen:** Der erste
+> Probelauf wurde über eine zusammengesetzte Zeichenkette an `psql` übergeben; dabei
+> gingen die Backslashes der `\echo`-Anweisungen verloren, `BEGIN` lief ins Leere und
+> einzelne Anweisungen wurden **autocommittet**. Hinterlassen hat das genau zwei
+> Zeilen — eine Probezeile in `lead_state` und eine Schattenzeile im Protokoll —,
+> beide aus demselben Lauf, beide über ihre vollständigen Schlüssel wieder entfernt
+> (`lead_state` 6385 → 6384). Keine Aufträge, keine Ereignisse, keine Antwortzeilen
+> betroffen. **Lehre: SQL geht nur noch als Datei über base64, nie über eine
+> zusammengesetzte Zeichenkette** — das ist Falle 10 in einer neuen Verkleidung.
+>
+> </details>
 >
 > Vollständiger Fortsetzungsplan, Tore und offene Entscheidungen:
 > **[plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md)** §0 und §0a.
