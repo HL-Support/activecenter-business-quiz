@@ -124,22 +124,57 @@ bevor das Quiz auch nur eine Zeile dorthin schickt.
 
 ---
 
-## 5. Zielbild für das Quiz
+## 5. Zielbild für das Quiz (Entscheidung Markus, 31.08.2026)
+
+**Leitsatz:** *Nicht Altes umflicken, sondern im Repo ein sauberes System bauen — und mit
+dem Altsystem nur noch das Nötigste austauschen.*
 
 ```text
-Berateridentität   Quiz → eigene View in MySQL (10.0.1.3), SELECT-only, host-gebunden
-                   statt: Quiz → db-bridge.php → users ⋈ organizations
-
-Lead-Übergabe      Quiz → Outbox → POST /webhook/quiz (HMAC, submissionId, Paar-Format)
-                   statt: Quiz → db-bridge.php → /webhook/typeform → typeform_surveys
-                          → n8n-Poller alle 5 Min
+        ┌──────────────────── business_leads_quiz ────────────────────┐
+        │  Leadzustand, Outbox, ALLE Mails, Nurture-Auslöser          │
+        │  eigene Postgres (leads.*)                                  │
+        └───────────┬────────────────────────────────┬────────────────┘
+                    │ liest (nur SELECT)             │ meldet (HMAC, idempotent)
+                    ▼                                ▼
+      MySQL-View auf 10.0.1.3                POST /webhook/quiz
+      Berateridentität, sonst nichts         Kartei-Zeile — Mailschalter AUS
 ```
 
-**Ein Unterschied zu den Vorbildern, bewusst:** `analysen` und `Umfragen` haben **keinen**
-serverseitigen Wiederholungsweg — sie verlassen sich auf eine „Sendewache" im Frontend plus
-Idempotenz. Das Quiz hat mit `api/lead-outbox-worker.js` bereits eine **Outbox**. Die zu
-opfern wäre ein Rückschritt. Richtig ist: **Outbox behalten, neue Route dahinter hängen** —
-die Idempotenz per `submissionId` macht Wiederholungen dann gefahrlos.
+**Zwei bewusste Abweichungen von den Vorbildern:**
+
+1. **Die Outbox bleibt.** `analysen` und `Umfragen` haben keinen serverseitigen
+   Wiederholungsweg (Sendewache im Frontend + Idempotenz). Das Quiz hat mit
+   `api/lead-outbox-worker.js` bereits eine Outbox — die zu opfern wäre ein Rückschritt.
+   Richtig: **Outbox behalten, neue Route dahinter**. `submissionId` macht Wiederholungen
+   gefahrlos.
+2. 🔴 **Die Mails bleiben im Projekt.** Bei `Umfragen` verschickt Contacts die Berater-Mail
+   selbst (`SurveyMailer.php`, drei Schalter). Für das Quiz gilt das **nicht**: Alles, was
+   mit dem Lead zu tun hat — Zustand, Mails, Nurture — wird **im Repo verwaltet**. Contacts
+   bekommt die Daten, weil die Kartei sie braucht, und **sonst nichts**: Bei der neuen Route
+   werden die Mailschalter **abgeschaltet**. Das Quiz verschickt Mail 1 und Mail 2 künftig
+   über die eigene Outbox, so wie es Mail 3 heute schon tut.
+
+**Was damit an Legacy übrig bleibt — und nur das:**
+
+| Richtung | Was | Warum es bleiben muss |
+| --- | --- | --- |
+| Lesen | Berateridentität aus einer MySQL-View | Die Stammdaten liegen in `prod_activesupport`; dieses System wandert nicht mit |
+| Schreiben | eine Kartei-Zeile über `/webhook/quiz` | Der Berater sieht seine Leads im CRM von Contacts |
+
+Kein Poller, keine Bridge, kein Rückruf ins Quiz, keine zweite Mailquelle.
+
+### Das Geheimnis bekommt einen eigenen, sprechenden Namen
+
+Nicht das geteilte `TYPEFORM_*` erben — der Name ist ohnehin ein Erbstück, mit Typeform hat
+der Weg nichts mehr zu tun. Für die neue Route:
+
+- Absender (Quiz): `CONTACTS_QUIZ_WEBHOOK_SECRET`, Ziel in `CONTACTS_QUIZ_URL`
+- Empfänger (contacts): eigener Konfigwert je Route, **nicht** `typeform.webhook.secret`
+
+🔴 Warum das nicht verhandelbar ist: Der heute geteilte Wert steht im Klartext im
+contacts-Repo und ist in Produktion nicht überschrieben — siehe
+[uebergaben/2026-08-31-contacts-signaturpruefung.md](../uebergaben/2026-08-31-contacts-signaturpruefung.md).
+Diesen Wert zu erben hiesse, mit einem öffentlich bekannten Geheimnis zu starten.
 
 ---
 
@@ -172,6 +207,22 @@ Bis A3 steht, gilt jene Reihe unverändert — **nie beide gleichzeitig**.
 
 ---
 
+### Strang C — die Mails ins Projekt holen, dann den Poller abschalten
+
+Ergibt sich aus der Entscheidung „alles Lead-Bezogene im Repo". Erst anfangen, wenn B4
+ruhig läuft.
+
+| # | Schritt | Beweis |
+| --- | --- | --- |
+| **C1** | **Mail 1 (Berater) und Mail 2 (Lead) in die Outbox holen** — dieselben Vorlagen, dieselben Texte, aber als Auftragsart neben `coach_hot_lead_email`. Vorlagen aus der n8n-Bibliothek übernehmen (1.708 Zeilen, 53 Funktionen, Extrakt liegt in `audits/c1-postprocessor-extrakt/`). | Zeichengleiche Mail im Schattenlauf: dieselbe Betreffzeile, derselbe HTML-Rumpf wie heute — verglichen, nicht angenommen |
+| **C2** | **Die Nebenaufgaben verteilen**, die heute der Post Processor miterledigt: Mautic-Kontakt, Adressprüfung (ZeroBounce über `/api/validate-email`), Resume-Token. 🔴 Das ist der eigentliche Aufwand, nicht die Mails. | Jede Aufgabe hat nachweislich ein neues Zuhause |
+| **C3** | **Poller abschalten** (`AC - Lead Post Processor`, 36 Knoten) | Opt-in → Mail ohne die 2–5 Minuten Verzug; keine Zeile mehr in `lead_processing_jobs` |
+
+Danach ist der Verzug weg, die 1.708-Zeilen-Bibliothek in n8n ist weg, und der Lead nimmt
+**einen** Weg statt zwei.
+
+---
+
 ## 7. Was das für den Mailweg bedeutet
 
 Heute kommen die beiden Opt-in-Mails **nicht** aus diesem Repo:
@@ -197,6 +248,56 @@ Nebeneffekt von Strang B — und er gehört erst angefasst, wenn B4 ruhig läuft
 
 ---
 
+## 7a. Frage: Node-Server behalten oder auf Next.js umbauen?
+
+**Empfehlung: behalten. Nicht das Gerüst austauschen, sondern das Innere aufräumen.**
+
+Gemessen am 31.08.2026:
+
+| | Quiz heute |
+| --- | --- |
+| Laufzeitabhängigkeiten | **vier**: `jsonwebtoken`, `postgres`, `react`, `react-dom` |
+| Bau | eigenes `build.js`, Docker, Coolify |
+| Auslieferungsnachweis | CI beweist den Deploy über `/health/live` gegen `SOURCE_COMMIT` |
+| Prüfungen | 262 Tests, Lint grün |
+| 🔴 Grösste Datei | **`api/bridge.js` mit 4.544 Zeilen** (von ~10.000 in `api/` + `server/`) |
+
+**Warum kein Next.js:**
+
+1. **Das Problem ist kein Gerüstproblem.** Der Schmerz sitzt in einer 4.544-Zeilen-Datei mit
+   14 Aktionen — Next.js würde die verschieben, nicht auflösen.
+2. **Vier Abhängigkeiten sind ein Vermögenswert.** Kleine Angriffsfläche, schneller Bau,
+   kein Gerüst-Aktualisierungszwang. Next.js brächte Hunderte.
+3. **Nichts an Next.js löst hier ein echtes Problem.** Serverseitiges Rendern und SEO sind
+   für einen Funnel hinter Berater-Slugs kein Thema; die Seite wird beworben, nicht
+   gefunden.
+4. **Was `Umfragen` gut macht, ist gerüstunabhängig:** `legacy/`-Grenze, Views, HMAC,
+   Idempotenz, Zustellprotokoll, Lint-Grenze. Das lässt sich hier eins zu eins übernehmen —
+   `analysen` beweist es, dort läuft dasselbe Muster in CommonJS ohne Next.js.
+5. **Ein Gerüstwechsel ist der riskanteste Eingriff überhaupt** bei einer Anwendung, die mit
+   Werbebudget läuft — und er hat für den Nutzer **keinen** sichtbaren Gewinn.
+
+**Was stattdessen „neu und sauber" heisst — im Sinne des Leitsatzes:**
+
+| Bleibt | Wird neu gebaut |
+| --- | --- |
+| Node-Server, `postgres`, React, Docker/Coolify | `legacy/` als einzige Tür nach draussen, mit Lint-Grenze |
+| Die Outbox (`lead-outbox-worker.js`) | Der Auflöser für die Berateridentität |
+| Der CI-Deploy-Nachweis über `/health/live` | Die eigene Contacts-Route samt Vertrag |
+| Die 262 Tests | **`api/bridge.js` zerlegen** — je Aktion ein Modul mit eigenem Test |
+
+🔴 **`api/bridge.js` ist das eigentliche „Alte", das nicht weiter umgeflickt werden
+sollte.** Von seinen 14 Aktionen gehen nur noch zwei nach draussen; der Rest ist längst
+lokale Postgres-Logik, die nur noch in dieser Datei wohnt. Beim Umbau der zwei
+Aussenaktionen ist der natürliche Moment, die Datei aufzulösen — nicht in einem eigenen
+Grossvorhaben, sondern Aktion für Aktion, jede mit dem Test, den sie heute nicht hat.
+
+**Wann Next.js richtig wäre:** wenn pro Berater echte, indexierbare Landeseiten entstehen
+sollen. Das ist eine Produktentscheidung, keine Aufräumentscheidung — und dann baut man sie
+**daneben**, nicht als Umschreibung des Funnels.
+
+---
+
 ## 8. Risiken und Rückweg
 
 | Risiko | Warum es zählt | Gegenmittel |
@@ -218,6 +319,11 @@ Nebeneffekt von Strang B — und er gehört erst angefasst, wenn B4 ruhig läuft
   landing-page.
 - **`/webhook/typeform` bleibt unangetastet** — dort hängen 12 weitere Formulare. Wir
   koppeln uns ab, wir räumen nicht auf.
+  🟡 **Zur Einordnung (Markus, 31.08.):** Der Wellnesscheck (580 Übermittlungen) ist die
+  **alte Vitalanalyse** und wird in etwa zwei Monaten abgeschaltet; danach macht alles die
+  neue Vitalanalyse. Zusammen mit unserer Abkopplung (698) verliert die alte Route damit
+  **beide grössten Nutzer** — sie stillzulegen wird danach realistisch. Das ist Sache des
+  contacts-Projekts, nicht unsere.
 - Er migriert **keine Daten**. Das Quiz liest nur.
 - Er löst **`prod_activesupport` nicht ab** — nur den Umweg über PHP.
 
