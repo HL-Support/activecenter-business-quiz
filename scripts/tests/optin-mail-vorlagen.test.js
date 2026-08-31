@@ -89,15 +89,52 @@ function zeile(uebersteuern = {}) {
   };
 }
 
-const SPRACHEN = ['de', 'it', 'en', 'hu'];
+/**
+ * 🔴 `hu_begriffe` ist der Fall, an dem M2a haengt — und der zuerst gefehlt hat.
+ * Die uebrigen Faelle schicken deutsche Vokabeln und schalten nur die Sprache um; damit
+ * blieb der ungarische Zuordnungsfehler unsichtbar, obwohl er live war. Dieser Fall
+ * schickt echte ungarische Begriffe.
+ */
+const SPRACHEN = ['de', 'it', 'en', 'hu', 'hu_begriffe'];
+
+const UNGARISCHE_BEGRIFFE = { ziel: 'szabadsag', barriere: 'biztonsag' };
 
 function modellFuer(sprache) {
   const roh = zeile();
   const inhalt = JSON.parse(roh.form_response);
-  inhalt.hidden.lang = sprache;
+  inhalt.hidden.lang = sprache === 'hu_begriffe' ? 'hu' : sprache;
+
+  if (sprache === 'hu_begriffe') {
+    inhalt.variables = inhalt.variables.map((v) =>
+      v.key === 'main_aspiration' ? { ...v, value: UNGARISCHE_BEGRIFFE.ziel } : v
+    );
+    inhalt.hidden.lead_barrier = UNGARISCHE_BEGRIFFE.barriere;
+    inhalt.answers = [
+      { field: { ref: 'lead_q6_barrier' }, type: 'choice', choice: { label: UNGARISCHE_BEGRIFFE.barriere } },
+    ];
+  }
+
   roh.form_response = JSON.stringify(inhalt);
   return bibliothek.buildLeadModel(roh, { videoBaseUrl: 'https://business.activecenter.info' });
 }
+
+// 🟡 Zur Einordnung der Muster: In der Berater-Mail steht bei ALLEN Sprachen
+// "Typ: Unbekannt" und "Zielsetzung: Unbekannt" — auch bei `de`. Das ist kein
+// Sprachfehler, sondern eine Grenze dieses synthetischen Datensatzes: Die Berater-Mail
+// liest Felder, die eine echte Kartei-Zeile mitbringt und dieser Muster-Datensatz nicht.
+// Was M2a wirklich bewirkt, prueft der Test darunter an den aufgeloesten Slugs.
+
+// M2a-Wächter: Ungarische Begriffe müssen aufgelöst werden, nicht auf „unbekannt" fallen.
+test('ungarische Begriffe werden aufgeloest (M2a)', () => {
+  const model = modellFuer('hu_begriffe');
+  assert.equal(model.main_aspiration_slug, 'freedom', 'szabadsag muss auf freedom zeigen');
+  assert.equal(model.barrier_slug, 'confidence', 'biztonsag muss als Barriere auf confidence zeigen');
+  assert.notEqual(
+    String(model.localized_main_aspiration_label).toLowerCase(),
+    'unbekannt',
+    'Die Zielsetzung darf in der ungarischen Mail nicht "unbekannt" sein'
+  );
+});
 
 function gerendert() {
   const ergebnis = {};
