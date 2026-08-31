@@ -356,7 +356,7 @@
      "parameters": [
       {
        "name": "Authorization",
-       "value": "Basic YWRtaW46QWN0aXZlY2VudGVyMTIzKw=="
+       "value": "Basic <GESCHWAERZT-2026-08-31-siehe-agent-secrets.mautic_api>"
       }
      ]
     },
@@ -460,7 +460,7 @@
      "parameters": [
       {
        "name": "Authorization",
-       "value": "Basic YWRtaW46QWN0aXZlY2VudGVyMTIzKw=="
+       "value": "Basic <GESCHWAERZT-2026-08-31-siehe-agent-secrets.mautic_api>"
       },
       {
        "name": "Content-Type",
@@ -492,7 +492,7 @@
      "parameters": [
       {
        "name": "Authorization",
-       "value": "Basic YWRtaW46QWN0aXZlY2VudGVyMTIzKw=="
+       "value": "Basic <GESCHWAERZT-2026-08-31-siehe-agent-secrets.mautic_api>"
       },
       {
        "name": "Content-Type",
@@ -570,7 +570,7 @@
      "parameters": [
       {
        "name": "Authorization",
-       "value": "Basic YWRtaW46QWN0aXZlY2VudGVyMTIzKw=="
+       "value": "Basic <GESCHWAERZT-2026-08-31-siehe-agent-secrets.mautic_api>"
       }
      ]
     },
@@ -1733,7 +1733,7 @@
       "parameters": [
        {
         "name": "Authorization",
-        "value": "Basic YWRtaW46QWN0aXZlY2VudGVyMTIzKw=="
+        "value": "Basic <GESCHWAERZT-2026-08-31-siehe-agent-secrets.mautic_api>"
        }
       ]
      },
@@ -1837,7 +1837,7 @@
       "parameters": [
        {
         "name": "Authorization",
-        "value": "Basic YWRtaW46QWN0aXZlY2VudGVyMTIzKw=="
+        "value": "Basic <GESCHWAERZT-2026-08-31-siehe-agent-secrets.mautic_api>"
        },
        {
         "name": "Content-Type",
@@ -1869,7 +1869,7 @@
       "parameters": [
        {
         "name": "Authorization",
-        "value": "Basic YWRtaW46QWN0aXZlY2VudGVyMTIzKw=="
+        "value": "Basic <GESCHWAERZT-2026-08-31-siehe-agent-secrets.mautic_api>"
        },
        {
         "name": "Content-Type",
@@ -1947,7 +1947,7 @@
       "parameters": [
        {
         "name": "Authorization",
-        "value": "Basic YWRtaW46QWN0aXZlY2VudGVyMTIzKw=="
+        "value": "Basic <GESCHWAERZT-2026-08-31-siehe-agent-secrets.mautic_api>"
        }
       ]
      },
