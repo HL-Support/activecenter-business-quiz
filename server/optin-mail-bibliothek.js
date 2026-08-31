@@ -614,6 +614,15 @@ const LEAD_BARRIER_SLUG_MAP = {
   chance: 'opportunity',
   opportunita: 'opportunity',
   oportunidad: 'opportunity',
+  // Ungarisch. Lag bis 31.08.2026 im Rueckgabeobjekt von
+  // getLocalizedLeadEmailPresentation und war damit wirkungslos.
+  kornyezet: 'community',
+  'megfelelo-kornyezet': 'community',
+  'hianyzik-a-kornyezet': 'community',
+  biztonsag: 'confidence',
+  'hianyzik-a-biztonsag': 'confidence',
+  lehetoseg: 'opportunity',
+  'hianyzik-a-lehetoseg': 'opportunity',
 };
 
 function normalizeBarrierSlug(rawValue) {
@@ -653,6 +662,12 @@ const LEAD_EMAIL_ASPIRATION_KEYS = {
   croissance: 'growth',
   rost: 'growth',
   \u0440\u043e\u0441\u0442: 'growth',
+  // Ungarisch. Siehe Anmerkung bei den Barrieren.
+  szabadsag: 'freedom',
+  hatas: 'impact',
+  biztonsag: 'security',
+  stabilitas: 'security',
+  novekedes: 'growth',
 };
 
 function normalizeAspirationKey(rawValue) {
@@ -1176,18 +1191,6 @@ function getLocalizedLeadEmailPresentation(model) {
     code: firstNonEmpty([localizedProfile.code, base.code], base.code),
     element: firstNonEmpty([localizedProfile.element, base.element], base.element),
     tagline: firstNonEmpty([localizedProfile.tagline, base.tagline], base.tagline),
-  kornyezet: 'community',
-  'megfelelo-kornyezet': 'community',
-  'hianyzik-a-kornyezet': 'community',
-  biztonsag: 'confidence',
-  'hianyzik-a-biztonsag': 'confidence',
-  lehetoseg: 'opportunity',
-  'hianyzik-a-lehetoseg': 'opportunity',
-  szabadsag: 'freedom',
-  hatas: 'impact',
-  biztonsag: 'security',
-  stabilitas: 'security',
-  novekedes: 'growth',
   };
 }
 
