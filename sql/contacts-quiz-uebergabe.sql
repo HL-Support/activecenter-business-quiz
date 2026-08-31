@@ -200,6 +200,14 @@ AS $$
 DECLARE
   v_id bigint;
 BEGIN
+  -- 🔴 Ohne Schluessel gibt es keinen Protokolleintrag — und der Aufrufer soll das
+  -- LESEN koennen. Am 31.08.2026 beim Funktionsbeweis passiert: ein leerer Schluessel
+  -- scheiterte erst an der Spaltenbedingung, und die Meldung sprach von einer
+  -- NOT-NULL-Verletzung statt von dem, was wirklich fehlte.
+  IF p_submission_id IS NULL THEN
+    RAISE EXCEPTION 'submission_id_fehlt';
+  END IF;
+
   INSERT INTO leads.contacts_zustellprotokoll AS z
          (submission_id, lead_hash, outbox_job_id, target_url, status, payload,
           member_id, first_name, email, attempt_count, last_attempt_at)
@@ -247,6 +255,9 @@ DECLARE
   v_id     bigint;
   v_status text := COALESCE(p_status, 'failed');
 BEGIN
+  IF p_submission_id IS NULL THEN
+    RAISE EXCEPTION 'submission_id_fehlt';
+  END IF;
   IF v_status NOT IN ('success', 'duplicate', 'failed') THEN
     RAISE EXCEPTION 'unbekannter_status:%', v_status;
   END IF;
