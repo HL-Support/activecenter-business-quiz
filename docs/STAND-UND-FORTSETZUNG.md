@@ -39,6 +39,13 @@
 > den *synchronen Fremdaufruf im Sendemoment*, nicht die Abhängigkeit: die wandert in den
 > 15-Minuten-Spiegel. Ausführlich in §4b des Plans.
 >
+> 🔴 **Entscheidung Markus, 31.08.:** Das Quiz soll direkt aus MySQL lesen. Inventur und
+> Umstellungsplan: **[plans/bridge-abloesen-direktzugriff.md](plans/bridge-abloesen-direktzugriff.md)**.
+> Kurzfassung der Inventur — es sind nur noch **zwei** Aktionen an **sechs** Stellen:
+> `lookup_subdomain` (4×, echtes MySQL-Lesen) und `forward_webhook` (2×, **kein** MySQL,
+> sondern HTTP-Weiterleitung an `contacts.hl-support.biz`). Alles andere läuft längst gegen
+> die Plattform-Postgres. Die landing-page behält die Bridge — sie ist nicht migriert.
+>
 > ⚠️ Der Arbeitszweig `nurture-auf-plattform-db` liegt **30 Commits vor** und **1 hinter**
 > `origin/main` (der B1-Merge). Deploys laufen nur von `main`.
 

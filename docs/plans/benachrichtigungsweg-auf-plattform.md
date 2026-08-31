@@ -151,6 +151,13 @@ Weg holt den Coach per **SQL-JOIN**, der Zielweg (`api/lead-outbox-worker.js:669
 >
 > **Was „die Bridge ganz weg" bedeuten würde:** die Kontakte-/Mitgliedermigration selbst —
 > ein eigenes Vorhaben, kein Schritt in diesem Plan.
+>
+> 🔴 **Nachtrag 31.08.2026, Entscheidung Markus:** Das Quiz soll die Berateridentität
+> **direkt aus MySQL** holen, statt über die Bridge — der Container erreicht `10.0.1.3:3306`
+> vom Coolify-Host aus (belegt). Die Inventur aller verbliebenen Bridge-Verwendungen und der
+> Umstellungsplan stehen in **[bridge-abloesen-direktzugriff.md](bridge-abloesen-direktzugriff.md)**.
+> Dessen Schritt **BR3 löst B3/B4 ab** — bis dahin gilt die B-Reihe unten unverändert
+> weiter. **Nicht beide gleichzeitig laufen lassen.**
 
 **Ausgangslage.** `api/lead-outbox-worker.js:669` holte die Berateridentität per HTTP von
 `ac-reconnect.com/db-bridge.php` — der letzte Fremdaufruf im Benachrichtigungsweg.
