@@ -173,6 +173,27 @@ ssh root@167.233.251.217 'cd /opt/waechter-nurture && docker run --rm \
 Das sendet **keinen** Herzschlag — den schickt nur `lauf.sh`. Zum Prüfen also genau so
 laufen lassen, nicht `lauf.sh` aufrufen.
 
+### Nachzählen der Contacts-Übergabe (Plan B §10, seit 31.08.2026)
+
+Auf demselben Host liegt `contacts-quiz-nachzaehlen.js`. Es vergleicht **Opt-ins gegen
+Übermittlungen** — solange B4/B5 laufen, täglich:
+
+```bash
+ssh root@167.233.251.217 'cd /opt/waechter-nurture && docker run --rm --env-file .env \
+  -v /opt/waechter-nurture:/w:ro node:24-alpine \
+  node /w/contacts-quiz-nachzaehlen.js --modus schatten --ab 2026-09-01'
+```
+
+🔴 **`--modus` ist keine Zierde.** Ohne ihn ist ein Tag mit null Übermittlungen
+unauffällig — und damit sähe ein **Totalausfall** des Sendewegs genauso aus wie „der Modus
+ist aus". Das ist exakt der Fehler, an dem der Nurture-Versand drei Wochen unbemerkt
+stillstand. `--ab` schließt den Tag des Umschaltens aus; der ist immer ein halber und
+erzeugt sonst einen Fehlalarm, den man wegzuerklären lernt.
+
+Exitcode 1 bei Befund, 0 sauber. Zwei Zähler des Plans kann es **nicht** bilden und sagt
+das auch: die Postmark-Tags (anderer Server, Zeitstempel EDT) und die Kartei-Zählung
+(Legacy-MySQL von hier nicht lesbar).
+
 🔴 **Der Wächter läuft als Dateikopie, nicht aus dem Repo.** Wer
 `scripts/waechter-nurture.js`, die Baseline oder `scripts/stats-logs-baseline.js` ändert,
 muss die Kopie auf dem Server nachziehen — sonst wacht in Produktion der alte Stand.

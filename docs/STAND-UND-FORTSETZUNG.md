@@ -29,6 +29,48 @@
 > 🔴 **Die Opt-in-Mails kommen weiterhin aus n8n**, nicht aus dem Repo. Nur Mail 3
 > (Hot Lead) läuft über die Outbox; der Verzug von 2–5 Minuten besteht unverändert.
 >
+> ### 🟡 Stand 31.08.2026, 18:00 MESZ — B4 läuft: der Schattenlauf ist scharf
+>
+> `CONTACTS_QUIZ_MODUS=schatten` ist gesetzt, dazu Adresse und Geheimnis — damit ist das
+> spätere Scharfschalten (B5) **eine einzige** Env-Änderung. Der neue Weg **sendet nichts**.
+>
+> **Was am laufenden System bewiesen ist** (nicht behauptet, jede Zeile gemessen):
+>
+> | Beweis | Ergebnis |
+> | --- | --- |
+> | Schreibende Probe über `/webhook/quiz` | `200`, `case: neu`, `contact_id 3684234`, `survey_id 43215`, `coach_member_id 25851739` |
+> | Wiederholung mit demselben Rumpf | **`duplicate: true`** mit **denselben** Kennungen — Idempotenz greift |
+> | 🔴 **K3**: `hidden` der Kartei-Zeile | trägt `profile_label: "Der Macher"`, `main_aspiration_label: "Freiheit"`, `barrier_slug`, `session_hash`, `berater_slug` — **nicht „Unbekannt"** |
+> | Post Processor (§5) | nimmt die Zeile im nächsten Lauf auf, Modell trägt das **richtige** Profil |
+> | Mail 1 + Mail 2 | beide `ErrorCode 0` — an `info+b3probe@` und `info@global-sce.com` |
+> | Rang-Aktualisierer (§6) | `matchedRows: 1` auf den Probe-Hash |
+> | Schattenzweig (§9a) | schreibt: Protokollzeile `status='schatten'`, voller Payload, **0 Aufträge** |
+> | Probespuren | vollständig entfernt: Kartei 0, Mautic 0, Plattform-DB 0 |
+>
+> ⚠️ Die zwei `lead_processing_jobs`-Zeilen der Proben **bleiben absichtlich stehen**: Der
+> Kandidaten-SELECT filtert über `lpj.id IS NULL`, nicht über `deleted_at`. Wer sie
+> entfernt, macht die weich gelöschte Kartei-Zeile wieder zum Kandidaten — und Mail 1 und
+> Mail 2 gingen ein zweites Mal raus.
+>
+> **Zwei neue Werkzeuge:**
+> `scripts/contacts-quiz-probe.js` (Trockenlauf ist Standard; `--ueber-adapter` misst den
+> Schattenzweig durch den echten Opt-in-Eingang) und
+> `scripts/contacts-quiz-nachzaehlen.js` (§10-Zählung, liegt auf dem Wächter-Host).
+>
+> 🔴 **Täglich zu tun, solange B4 läuft** — sonst misst der Schattenlauf ein leeres Fenster:
+>
+> ```bash
+> ssh root@167.233.251.217 'cd /opt/waechter-nurture && docker run --rm --env-file .env \
+>   -v /opt/waechter-nurture:/w:ro node:24-alpine \
+>   node /w/contacts-quiz-nachzaehlen.js --modus schatten --ab 2026-09-01'
+> ```
+>
+> `--modus` ist Pflicht: ohne ihn sieht ein **Totalausfall** des Sendewegs genauso aus wie
+> ein ruhiger Tag. `--ab 2026-09-01`, weil der 31.08. ein halber Tag ist.
+>
+> **Tor zu B5:** ≥ 3 Werktage Schatten mit 0 Abweichungen · 0 tote Aufträge ·
+> und die B2-Beweise oben (liegen vor).
+>
 > ### Nachtrag 31.08.2026, abends — B3 ist **ausgeliefert** und wirkungslos, wie geplant
 >
 > | Prüfung | Messung |
