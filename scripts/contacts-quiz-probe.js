@@ -20,7 +20,15 @@
  *
  * 🔴 STANDARD IST TROCKENLAUF. Ohne `--senden` wird nichts uebermittelt; das Skript zeigt
  * nur, was es senden wuerde. Eine Probe erzeugt einen ECHTEN Kontakt in der Kartei und
- * loest Mail 1 und Mail 2 an den Berater aus — das passiert nie versehentlich.
+ * loest zwei Mails aus — eine an den Berater, eine an den Interessenten. Das passiert nie
+ * versehentlich.
+ *
+ * ⚠️ ZUR PROBE-ADRESSE (`--email`): Der Standard ist eine Plus-Adresse, damit die Probe im
+ * Posteingang erkennbar bleibt. Am 31.08.2026 kam die Mail an `info+b3probe@` an, die an
+ * `info+b3probe3@` dagegen nicht sichtbar — obwohl Postmark beide als zugestellt fuehrt
+ * (250 OK vom selben Mailhost, kein Bounce, keine Sperre). Was hinter der Annahme im
+ * Postfach passiert, ist von aussen NICHT messbar. Wer den Empfang der Interessenten-Mail
+ * beweisen will, nimmt deshalb ein echtes, eigenes Postfach — keine Plus-Adresse.
  *
  *   node --env-file=.env.probe scripts/contacts-quiz-probe.js
  *   node --env-file=.env.probe scripts/contacts-quiz-probe.js --senden
