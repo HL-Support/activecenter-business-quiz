@@ -290,3 +290,52 @@ mit `env_missing` und sendet **niemals** unsigniert oder ersatzweise woandershin
 Empfänger: `contacts-activecenter-legacy` `f7882db` (`QuizWebhookController.php`,
 `SurveyPayload.php`, `SurveyIntake.php`, `LegacySurveyResponse.php`, `config/quiz.php`,
 `config/surveys.php`).
+
+---
+
+## 9. Nachtrag 31.08.2026 — die dritte Mail
+
+Beim ersten Probelauf kam heraus: Je Lead gingen **drei** Mails an den Berater, nicht zwei.
+
+| Mail | Woher | Steuerbar über |
+| --- | --- | --- |
+| „Neuer Kontakteintrag" | `NotificationService::sendTypeformNotification` → ActiveCenter-Benachrichtigungsweg | 🔴 **bisher gar nichts** |
+| „Neuer Kontakt aus: Business" | Post Processor, Mail 1 | n8n |
+| Zugangsmail | Post Processor, Mail 2 | n8n |
+
+Die erste hängt weder an `contact_email` noch an `coach_email`. Am Quelltext des **alten**
+Weges nachgesehen: Dort steht derselbe Aufruf (`TypeformWebhookController.php:368`)
+ebenfalls **außerhalb** jeder `noemail`-Prüfung — jene deckt nur `sendEmailToContact`
+(`:432`) und `sendEmailToCoachOnNewContactCreated` (`:533`). Das Quiz bekam diese Mail
+also auch bisher; es ist keine Regression des Umbaus, sondern eine verdeckte Kopplung.
+
+**Behoben** (contacts `10e9251`): Registry-Schalter `kartei_benachrichtigung`, Standard
+`true`, für `quiz-erfolgscode` auf `false`. Im ausgelieferten Container nachgemessen —
+Quiz `false`, Umfragen unverändert `(nicht gesetzt ⇒ true)`.
+
+⚠️ Der Test dazu prüft die **Einreihung**, nicht den HTTP-Aufruf: Die Benachrichtigung
+geht über `dispatch(closure)`, und mit `Queue::fake()` wird die Closure nie ausgeführt —
+ein `Http::assertNothingSent()` wäre immer grün gewesen und hätte nichts bewiesen.
+
+### 9a. Welche Mail woher kommt — am 31.08.2026 an drei Proben ausgezählt
+
+| Mail | Absender-Server | An | Wer verschickt sie | Steuerung |
+| --- | --- | --- | --- | --- |
+| „Neuer Erfolgs-Code von: …" | Postmark **Leadgen** | Berater | n8n Post Processor | n8n |
+| „Dein Erfolgs-Code und dein Zugang" | Postmark **Leadgen** | Interessent | n8n Post Processor | n8n |
+| „Neuer Kontakteintrag" | ActiveCenter | Berater | `NotificationService` | 🔴 **jetzt** `kartei_benachrichtigung` |
+| „Neuer Kontakt aus: Business" | Postmark **HL-Support** | Berater | contacts `NewContactCreated` | `noemail` (alt) / `coach_email` (neu) |
+| „Deine Anfrage zu unserer Geschäftsmöglichkeit" | ActiveCenter | Interessent | contacts `sendEmailToContact` | `noemail` (alt) / `contact_email` (neu) |
+
+🔴 **Über `/webhook/quiz` verschickt contacts NULL Mails.** Alle drei Schalter der Registry
+stehen auf `false` — im ausgelieferten Container nachgemessen. Die zwei Mails, die ein Lead
+auslöst, kommen ausschliesslich aus n8n.
+
+**Ein Zerrbild und seine Lehre:** Die letzten beiden Zeilen der Tabelle tauchten bei einer
+Probe auf, die über `--ueber-adapter` durch den **alten** Weg lief. Ursache war nicht das
+System, sondern die Probe: Sie schickte `variables` gar nicht mit, also auch kein
+`noemail: 1` — und genau das blockt im alten Controller diese beiden Mails
+(`:432` und `:533`). Der echte Browser sendet die Liste bei jedem Opt-in
+(`src/lib/core.js:1573-1579`). Seither trägt die Probe sie ebenfalls, und ein Test hält
+beide Seiten gegeneinander. **Eine Probe, die anders aussieht als der Ernstfall, misst den
+Ernstfall nicht — sie erzeugt Gespenster, denen man hinterherläuft.**

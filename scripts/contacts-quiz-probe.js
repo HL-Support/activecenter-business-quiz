@@ -20,7 +20,15 @@
  *
  * 🔴 STANDARD IST TROCKENLAUF. Ohne `--senden` wird nichts uebermittelt; das Skript zeigt
  * nur, was es senden wuerde. Eine Probe erzeugt einen ECHTEN Kontakt in der Kartei und
- * loest Mail 1 und Mail 2 an den Berater aus — das passiert nie versehentlich.
+ * loest zwei Mails aus — eine an den Berater, eine an den Interessenten. Das passiert nie
+ * versehentlich.
+ *
+ * ⚠️ ZUR PROBE-ADRESSE (`--email`): Der Standard ist eine Plus-Adresse, damit die Probe im
+ * Posteingang erkennbar bleibt. Am 31.08.2026 kam die Mail an `info+b3probe@` an, die an
+ * `info+b3probe3@` dagegen nicht sichtbar — obwohl Postmark beide als zugestellt fuehrt
+ * (250 OK vom selben Mailhost, kein Bounce, keine Sperre). Was hinter der Annahme im
+ * Postfach passiert, ist von aussen NICHT messbar. Wer den Empfang der Interessenten-Mail
+ * beweisen will, nimmt deshalb ein echtes, eigenes Postfach — keine Plus-Adresse.
  *
  *   node --env-file=.env.probe scripts/contacts-quiz-probe.js
  *   node --env-file=.env.probe scripts/contacts-quiz-probe.js --senden
@@ -108,6 +116,23 @@ const optIn = {
     utm_source: 'b3-probe',
     utm_medium: 'nachweis',
   },
+  calculated: { score: 0 },
+  // 🔴 DIESE LISTE MUSS BLEIBEN — sie ist der Unterschied zwischen einer Probe und einem
+  // Zerrbild. `noemail: 1` schaltet im ALTEN Weg zwei Mails ab
+  // (`sendEmailToContact`, `sendEmailToCoachOnNewContactCreated`); der Browser schickt sie
+  // bei jedem echten Opt-in mit (src/lib/core.js:1573-1579).
+  //
+  // Am 31.08.2026 fehlte sie hier — und prompt verschickte die Probe ueber
+  // `--ueber-adapter` eine Mail ("Neuer Kontakt aus: Business"), die der echte Funnel NIE
+  // ausloest. Eine Probe, die anders aussieht als der Ernstfall, misst den Ernstfall
+  // nicht; sie erzeugt Gespenster, denen man dann hinterherlaeuft.
+  variables: [
+    { key: 'contact_country', type: 'text', text: 'AT' },
+    { key: 'score', type: 'number', number: 0 },
+    { key: 'noemail', type: 'number', number: 1 },
+    { key: 'main_aspiration', type: 'text', text: 'freedom' },
+    { key: 'main_aspiration_label', type: 'text', text: 'Freiheit' },
+  ],
 };
 
 function zeile(schluessel, wert) {
