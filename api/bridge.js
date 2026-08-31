@@ -31,6 +31,12 @@ const {
   supabaseRequest: sharedSupabaseRequest,
   supabaseRpc: sharedSupabaseRpc,
 } = require('../server/lead-system');
+
+// Ein Aufloeser fuer die Berateridentitaet - derselbe wie im Mailweg.
+// Welche Quelle entscheidet, steuert COACH_LOOKUP_SOURCE; Standard 'bridge'.
+const { beraterAusVerzeichnis, vergleiche } = require('../server/berater-verzeichnis');
+const { beraterAusMysql } = require('../server/legacy/berater');
+const { STELLEN, beraterAufloesen } = require('../server/berater-aufloesen');
 const dbTransport = require('../server/db-transport');
 // Seit Phase 1 (/berater-info) gibt es genau EINEN Erzeuger fuer Coach-Insights-Links.
 // Die frueheren lokalen Kopien in dieser Datei und im Outbox-Worker waren nicht
@@ -425,12 +431,31 @@ async function readMysqlTable(table, where, limit = 1) {
   return Array.isArray(data.data) ? data.data : [];
 }
 
+/**
+ * Die Quellen fuer den Aufloeser. Die Bridge bleibt der Standard; Verzeichnis und
+ * MySQL kommen nur zum Zug, wenn der Schalter sie benennt.
+ */
+function beraterQuellen(subdomain, forwardedFor, userAgent) {
+  return {
+    bridge: () =>
+      proxyToBridge({ action: 'lookup_subdomain', subdomain }, forwardedFor, userAgent),
+    verzeichnis: (slug) => beraterAusVerzeichnis(slug, supabaseJson),
+    mysql: (slug) => beraterAusMysql(slug),
+  };
+}
+
+async function beraterHolen(subdomain, stelle, forwardedFor, userAgent) {
+  return beraterAufloesen({
+    slug: subdomain,
+    stelle,
+    env: process.env,
+    vergleiche,
+    quellen: beraterQuellen(subdomain, forwardedFor, userAgent),
+  });
+}
+
 async function resolveConsultantLookup(subdomain, forwardedFor, userAgent) {
-  const direct = await proxyToBridge(
-    { action: 'lookup_subdomain', subdomain },
-    forwardedFor,
-    userAgent
-  );
+  const direct = await beraterHolen(subdomain, STELLEN.FUNNEL, forwardedFor, userAgent);
   if (direct.status === 200 && direct.data?.found) {
     const memberId = safeString(direct.data.member_id || direct.data.herbalife_id, 80);
     const refId = safeString(direct.data.ref_id || memberId, 80);
@@ -2234,11 +2259,7 @@ async function ensureBusinessSubmissionIdentity(input, forwardedFor, userAgent) 
   }
 
   if (!memberId) {
-    const lookup = await proxyToBridge(
-      { action: 'lookup_subdomain', subdomain: slug },
-      forwardedFor,
-      userAgent
-    );
+    const lookup = await beraterHolen(slug, STELLEN.SUBMIT, forwardedFor, userAgent);
 
     if (lookup.status >= 500) {
       return { ok: false, status: 503, error: 'coach_lookup_unavailable' };
@@ -3097,11 +3118,7 @@ async function loadCompletionNotificationContext(payload, forwardedFor, userAgen
     payload.berater_slug || payload.slug || session.berater_slug || trackingSession.berater_slug,
     80
   );
-  const coachResult = await proxyToBridge(
-    { action: 'lookup_subdomain', subdomain: slug || 'default' },
-    forwardedFor,
-    userAgent
-  );
+  const coachResult = await beraterHolen(slug || 'default', STELLEN.ABSCHLUSS, forwardedFor, userAgent);
 
   return { leadHash, sessionHash, session, slug, coach: coachResult.data || {} };
 }
