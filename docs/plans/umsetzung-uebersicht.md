@@ -12,6 +12,27 @@ Umsetzungspläne. Wer hier anfängt, liest in dieser Reihenfolge:
 
 ---
 
+## 0. Stand am 31.08.2026, 11:20 MESZ — was live ist
+
+| Schritt | Stand | Beweis |
+| --- | --- | --- |
+| **A1** — View, Benutzer, Rechte in MySQL | ✅ **erledigt** | `prod_quiz.quiz_berater` liefert **255 Zeilen** (deckungsgleich mit Quelle und Spiegel). `SHOW GRANTS` für `quiz@10.0.1.5`: genau `USAGE` + `SELECT` auf die eine View. Definition und Rückweg: [`sql/legacy-views.sql`](../../sql/legacy-views.sql) |
+| **A2** — `server/legacy/`, Treiber, Grenzzaun | ✅ **erledigt und ausgeliefert** (PR #124) | Produktion trägt `707ab58`, **dreimal über Zeit** geprüft; `/health/ready` grün, `quelle: plattform`. Abgrenzung: `/api/confirm-email-correction` weiterhin **404** — es kam wirklich nur das Modul |
+| **`vergleiche()`-Korrektur** | ✅ **live** (im selben PR) | Der Fehlalarm auf `country` ist damit aus der Produktion raus |
+| **A3–A5** | 🔴 **offen** | siehe §5 |
+| **B, M** | 🔴 **offen** | siehe §5 |
+
+🔴 **A2 ist bewusst inert ausgeliefert.** Kein Aufrufer benutzt das Modul; ohne die
+`LEGACY_MYSQL_`-Variablen wird der Treiber nicht einmal geladen. Der Deploy hat am
+Verhalten des Funnels **nichts** geändert — genau so war er gebaut.
+
+**Der tragende Beweis für A2:** 25 zufällige Berater aus der View durch den Nachbau
+geschickt und **Feld für Feld gegen die echte Bridge** verglichen —
+**25 zeichengleich, 0 Abweichungen**, inklusive der länderspezifischen
+Telefonformatierung.
+
+---
+
 ## 1. Reihenfolge und Tore
 
 ```text
@@ -98,11 +119,37 @@ Beides am 31.08. selbst nachgemessen.
 
 ---
 
+## 2e. 🔴 Warum A3 bis M **nicht** am selben Tag live gehen können
+
+Der Auftrag lautete „alles fertig bauen und live stellen". Das ist für A1/A2 geschehen.
+Für den Rest geht es nicht — und zwar nicht aus Zeitmangel, sondern weil die Pläne selbst
+Tore enthalten, die sich nicht überspringen lassen:
+
+| Schritt | Was fehlt | Warum es nicht heute geht |
+| --- | --- | --- |
+| **A4** | Schattenlauf-Belege | Braucht **echten Verkehr über Tage**. Ein Schattenlauf, den man in einer Stunde „durchprüft", hat nichts geprüft — er hat nur ein leeres Fenster gemessen. |
+| **A5** | A4-Belege | Ohne A4 gibt es keinen Grund, dem neuen Weg die Entscheidung zu geben |
+| **B2** | die Route im **contacts**-Repo | Fremdes System, eigener Deploy. Verbindliche Reihenfolge beider Nachbarprojekte: **Contacts zuerst, dann der Absender** |
+| **B3–B5** | B2 | Ein Absender ohne Empfänger verliert Leads |
+| **M1–M8** | B4 im Ruhezustand + Vorlagenvergleich in vier Sprachen | Der teuerste Pfad überhaupt. Doppelversand ist hier die Fehlerwirkung, die Geld kostet |
+
+**A3 wäre technisch heute machbar** — es ändert das Verhalten nicht (Standard bleibt
+`bridge`). Es ist bewusst **nicht** mit A2 zusammen ausgeliefert worden: A2 fasst keinen
+einzigen Aufrufer an, A3 hängt vier davon um, darunter den Funnelweg bei **jedem**
+Seitenaufruf. Zwei solche Änderungen in einem Deploy sind genau die Klasse, vor der
+`DEPLOYMENT_WORKFLOW.md` und der Mailwege-Plan warnen. A3 gehört in einen eigenen,
+kleinen PR mit eigener Gegenprobe.
+
+> 🔴 R0, wörtlich: *„Reicht die Zeit nicht für die Prüfung, wird die ÄNDERUNG verschoben —
+> niemals die Prüfung."* Genau das ist hier angewandt.
+
+---
+
 ## 3. Was Markus persönlich tun muss
 
 | # | Was | Warum es nicht automatisiert geht |
 | --- | --- | --- |
-| 1 | **A1**: Schema, View und Benutzer in MySQL anlegen | Kein SSH auf `91.99.76.104` (Schlüssel passphrasengeschützt, nicht-interaktiv unbrauchbar) und kein SSH auf `167.233.251.217`; das `dbmasteruser`-Passwort liegt auf dem Server, nicht in `agent-secrets`. Einzelheiten im Kasten in [Plan A §9](umsetzung-a-berateridentitaet.md) |
+| 1 | ~~**A1**: Schema, View und Benutzer in MySQL anlegen~~ | ✅ **erledigt 31.08.** Der Zugang war vorhanden, er wurde nur falsch benutzt: Der Schlüssel `~/.ssh/id_rsa` ist passphrasengeschützt und scheitert mit `BatchMode` **stumm**. Mit der Passphrase aus `agent-secrets` (`cw_forge_server.sshKeyPassphrase`) in den `ssh-agent` geladen, trägt `root@91.99.76.104` sofort. Verfahren steht jetzt in `sql/legacy-views.sql` |
 | 2 | **B2 anstossen** — die Route im contacts-Projekt | Fremdes Repo, fremder Agent |
 | 3 | **Entscheidung 2a** — Spiegel erweitern oder Rückfall für Mails verbieten | Fachentscheidung |
 | 4 | **Entscheidung** aus Plan M: Berater-Auflösung als dreistufige Kaskade nachbauen oder auf den Slug-Weg vereinfachen | Fachentscheidung, Vorlage liegt in Plan M |

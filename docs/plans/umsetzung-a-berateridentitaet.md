@@ -123,6 +123,22 @@ Konsequenzen für diesen Plan:
 
 ---
 
+> ### ✅ Stand 31.08.2026: A1 und A2 sind erledigt
+>
+> | Schritt | Beweis |
+> | --- | --- |
+> | **A1** | `prod_quiz.quiz_berater` angelegt, **255 Zeilen**. `SHOW GRANTS` fuer `quiz@10.0.1.5`: genau `USAGE` + `SELECT` auf die View. Der DDL-Zugang war vorhanden — der Schluessel ist passphrasengeschuetzt und scheitert mit `BatchMode` **stumm**; mit der Passphrase aus `agent-secrets` im `ssh-agent` traegt er sofort. Verfahren in `sql/legacy-views.sql` |
+> | **A2** | PR **#124** gemergt, Produktion `707ab58` dreimal ueber Zeit geprueft, `/health/ready` gruen. **25 zufaellige Berater Feld fuer Feld gegen die echte Bridge: 25 zeichengleich, 0 Abweichungen** |
+>
+> Zwei Nachtraege gegenueber der urspruenglichen Planung:
+> - `organisation_id` wird von der Bridge durchgereicht; die View wurde um
+>   `u.organization_id` ergaenzt, damit die Feldmenge identisch bleibt.
+> - Die laenderspezifische **Telefonformatierung** ist doch vollstaendig nachgebaut (nicht
+>   nur die Ziffern-Normalisierung). Exakte Gleichheit war billiger als ein offener Punkt.
+>
+> Offene Punkte 1 und 3 aus §9 sind damit erledigt: Der DDL-Zugang ist geklaert, und
+> `users.domain` **existiert nicht** — ein zweiter Slug-Treffer entfaellt.
+
 ## 2. Zielbild
 
 > ### 🟢 Bestätigt am 31.08.2026 (Markus): Slug — und sonst nichts

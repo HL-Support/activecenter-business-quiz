@@ -1,5 +1,30 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
+> ## 🟢 Stand 31.08.2026, 11:20 MESZ — MySQL-Leseweg gebaut und ausgeliefert
+>
+> | Prüfung | Messung |
+> | --- | --- |
+> | Produktion | `707ab58` (PR **#124**), **dreimal über Zeit** gleich |
+> | `/health/ready` | `status: ready`, `quelle: plattform` |
+> | Abgrenzung | `/api/confirm-email-correction` → **404** — es kam nur das Modul |
+> | MySQL-View | `prod_quiz.quiz_berater`, **255 Zeilen**, deckungsgleich mit Quelle und Spiegel |
+> | Rechte | `quiz@10.0.1.5`: genau `USAGE` + `SELECT` auf die eine View |
+> | **Gleichheit zur Bridge** | **25 zufällige Berater, Feld für Feld: 25 zeichengleich, 0 Abweichungen** |
+>
+> **A1** (View, Benutzer, Rechte) und **A2** (`server/legacy/`, Treiber, Grenzzaun) sind
+> erledigt; die `vergleiche()`-Korrektur ist damit ebenfalls live — der Fehlalarm auf
+> `country` ist aus der Produktion raus.
+>
+> 🔴 **A2 ist bewusst inert ausgeliefert:** Kein Aufrufer benutzt das Modul, ohne die
+> `LEGACY_MYSQL_`-Variablen wird der Treiber nicht einmal geladen. Am Verhalten des
+> Funnels hat sich **nichts** geändert.
+>
+> **Offen:** A3 (vier Aufrufstellen auf einen Auflöser), A4/A5 (Schattenlauf und
+> Umschalten — brauchen echten Verkehr über Tage), Strang B (Route im contacts-Repo
+> zuerst) und Strang M. Reihenfolge, Tore und die Begründung, warum das nicht an einem Tag
+> geht, stehen in [plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md).
+
+
 > ## 🟡 Stand 31.08.2026, 06:45 MESZ — Berateridentität: B1 ausgeliefert, B2 läuft
 >
 > Nachgemessen am laufenden System, nicht übernommen:
