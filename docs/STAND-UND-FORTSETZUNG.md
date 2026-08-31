@@ -1,5 +1,28 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
+> ## 🟡 Nachtrag 31.08.2026, 18:00 MESZ — B4 läuft, der Schattenlauf ist scharf
+>
+> `CONTACTS_QUIZ_MODUS=schatten` gesetzt, dazu Adresse und Geheimnis — B5 ist damit **eine
+> einzige** Env-Änderung. Der neue Weg **sendet nichts**.
+>
+> **Am laufenden System bewiesen:** schreibende Probe `200 / case: neu / contact_id 3684234`,
+> Wiederholung ⇒ **`duplicate: true`** mit denselben Kennungen · 🔴 **K3 belegt** — die
+> Kartei-Zeile trägt `profile_label "Der Macher"`, `main_aspiration_label "Freiheit"`,
+> `barrier_slug`, `session_hash`, `berater_slug`, **nicht „Unbekannt"** · Post Processor
+> nimmt sie auf, Mail 1 + Mail 2 beide `ErrorCode 0` · Rang-Aktualisierer `matchedRows: 1` ·
+> Schattenzweig schreibt (isoliert gemessen), **0 Aufträge** · alle Probespuren entfernt.
+>
+> **Zwei Werkzeuge:** `scripts/contacts-quiz-probe.js` (Trockenlauf ist Standard) und
+> `scripts/contacts-quiz-nachzaehlen.js` (§10-Zählung, liegt auf dem Wächter-Host).
+>
+> 🔴 **Täglich, solange B4 läuft** — sonst misst der Schattenlauf ein leeres Fenster:
+> `contacts-quiz-nachzaehlen.js --modus schatten --ab 2026-09-01`. Ohne `--modus` sieht ein
+> **Totalausfall** genauso aus wie ein ruhiger Tag.
+>
+> ⚠️ Probespuren: `lead_processing_jobs` bleibt **stehen**. Der Kandidaten-SELECT filtert
+> über `lpj.id IS NULL`, nicht über `deleted_at` — wer die Auftragszeile entfernt, macht die
+> weich gelöschte Kartei-Zeile wieder zum Kandidaten und die Mails gehen erneut raus.
+>
 > ## 🟡 Nachtrag 31.08.2026 — B3 ist ausgeliefert, aber inaktiv
 >
 > Der Absender an `contacts /webhook/quiz` liegt im Repo und läuft mit. **Er tut

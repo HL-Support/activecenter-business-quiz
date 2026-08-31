@@ -749,7 +749,50 @@ Zwei weitere Abweichungen sind im Absender bereits eingearbeitet: die Gegenstell
 | Rückweg | Deploy zurück; da der Pfad inaktiv ist, ohne Betriebsfolge |
 | Was schiefgehen kann | Schalter-Standard versehentlich nicht `aus` → der Paritäts-Deploy-Beweis fängt genau das; ein Test erzwingt `aus` bei fehlender Env |
 
-### B4 — Schattenlauf (senden tut weiter NUR der alte Weg)
+### ✅ B2-Beweise 2–4 erbracht (31.08.2026, abends)
+
+Alles am **laufenden** System, mit dem echten Payload-Bau des Repos
+(`scripts/contacts-quiz-probe.js` — eine von Hand getippte Probe hätte nur sich selbst
+gemessen).
+
+| Beweis | Ergebnis |
+| --- | --- |
+| 2. schreibende Probe | `200`, `case: neu`, `contact_id 3684234`, `survey_id 43215`, `coach_member_id 25851739`; Wiederholung ⇒ **`duplicate: true`** mit denselben Kennungen |
+| 3. Post Processor (§5) | nimmt die Zeile im nächsten Lauf auf; Modell trägt `profile_label "Der Macher"`, `main_aspiration_label "Freiheit"`, `barrier_slug "confidence"` — **nicht „Unbekannt"**. Mail 1 + Mail 2 beide `ErrorCode 0` |
+| 4. Rang (§6) | `matchedRows: 1` auf den Probe-Hash; `points_result` in der Kartei gesetzt |
+| 5. Probespuren | Kartei weich gelöscht, Mautic entfernt, Plattform-DB bereinigt |
+
+🔴 **Damit ist auch K3 belegt** — die Kartei-Zeile trägt in `form_response.hidden` alle
+zwanzig Felder, die der Post Processor liest. Ohne die Korrektur im contacts-Repo hätten
+Mail 1 und Mail 2 „Unbekannt" getragen, ohne jede Meldung.
+
+⚠️ **Zwei Zeilen bleiben absichtlich stehen:** die `lead_processing_jobs` der Proben. Der
+Kandidaten-SELECT filtert über `lpj.id IS NULL`, **nicht** über `deleted_at` — wer sie
+entfernt, macht die weich gelöschte Zeile wieder zum Kandidaten, und die Mails gingen
+erneut raus. Das gilt für jede künftige Probe.
+
+**Nebenbefund, der beim Aufräumen auffiel:** Der Post Processor ruft über
+`HTTP - Generate Resume Token` in das Quiz zurück, und dieser Aufruf **legt eine
+`lead_state`-Zeile an**. Eine Probe hinterlässt also auch dort etwas — beim ersten
+Aufräumen war das übersehen worden und fiel erst beim zweiten Durchgang auf.
+
+### ✅ B4 läuft seit dem 31.08.2026, ~17:50 MESZ
+
+`CONTACTS_QUIZ_MODUS=schatten`, dazu `CONTACTS_QUIZ_URL` und
+`CONTACTS_QUIZ_WEBHOOK_SECRET` — beide gleich mitgesetzt, damit B5 **eine einzige**
+Änderung ist. App neu gestartet, `/health/ready` grün.
+
+**Der Schattenzweig ist isoliert gemessen** (`--ueber-adapter`, durch den echten
+Opt-in-Eingang): Protokollzeile `status='schatten'` mit vollem Vertragspayload, **0
+Aufträge**. Das war nötig, weil der Zweig in `ohneFolgen()` gekapselt ist — ein Tippfehler
+im RPC-Namen wäre stumm geblieben, und man hätte am nächsten Tag „0 Zeilen" gemessen und
+für „kein Verkehr" gehalten.
+
+**Tägliche Messung:** `scripts/contacts-quiz-nachzaehlen.js --modus schatten --ab <Tag+1>`
+auf dem Wächter-Host. 🔴 `--modus` ist Pflicht — ohne ihn sieht ein Totalausfall des
+Sendewegs genauso aus wie ein ruhiger Tag.
+
+### B4 — Schattenlauf (senden tut weiter NUR der alte Weg) — die Vorgabe
 
 | | |
 | --- | --- |

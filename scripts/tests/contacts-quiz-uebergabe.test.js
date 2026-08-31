@@ -450,6 +450,44 @@ test('die Einreihung erzeugt den Schluessel genau einmal und friert den Rumpf ei
   assert.doesNotMatch(sql, /DROP TABLE (?!leads\.contacts_zustellprotokoll)/);
 });
 
+// ---------------------------------------------------------------------------------------
+// 8. Die Werkzeuge fuer B4 und B5
+// ---------------------------------------------------------------------------------------
+
+test('die Probe sendet nur auf ausdrueckliche Anweisung', () => {
+  const quelle = fs.readFileSync(path.join(wurzel, 'scripts/contacts-quiz-probe.js'), 'utf8');
+
+  // 🔴 Eine Probe erzeugt einen ECHTEN Kontakt und loest Mail 1 und Mail 2 aus. Das darf
+  // nie versehentlich passieren — also ist der Trockenlauf der Standard.
+  assert.match(quelle, /const SENDEN = process\.argv\.includes\('--senden'\)/);
+  assert.match(quelle, /if \(!SENDEN\)/);
+  assert.match(quelle, /TROCKENLAUF/);
+
+  // Sie benutzt den ECHTEN Payload-Bau, nicht einen nachgebauten. Sonst misst sie sich
+  // selbst statt des Wegs.
+  assert.match(quelle, /require\('\.\.\/api\/bridge'\)/);
+  assert.match(quelle, /buildContactsQuizPayload/);
+  assert.match(quelle, /require\('\.\.\/server\/legacy\/kontakte'\)/);
+});
+
+test('das Nachzaehlen kann den Totalausfall vom Ruhezustand unterscheiden', () => {
+  const quelle = fs.readFileSync(
+    path.join(wurzel, 'scripts/contacts-quiz-nachzaehlen.js'),
+    'utf8'
+  );
+
+  // 🔴 Ohne diese Pruefung saehe „der Sendeweg ist tot" genauso aus wie „der Modus ist
+  // aus" — der Fehler, an dem der Nurture-Versand drei Wochen unbemerkt stillstand.
+  assert.match(quelle, /MODUS_ERWARTET !== 'aus' && optins > 0 && uebermittelt === 0/);
+  assert.match(quelle, /KEINE einzige Uebermittlung/);
+  // Der Tag des Umschaltens ist ein halber und wird nicht beurteilt.
+  assert.match(quelle, /if \(AB && tag < AB\) continue;/);
+  // Die zwei Zaehler, die es hier NICHT geben kann, werden benannt statt weggelassen.
+  assert.match(quelle, /Nicht von hier messbar/);
+  // Es gibt genau EINEN Weg zur Datenbank — denselben wie beim Waechter.
+  assert.match(quelle, /require\('\.\/waechter-datenquelle\.js'\)/);
+});
+
 test('der Adapter bleibt im Standardfall Zeichen fuer Zeichen der alte Weg', () => {
   const quelle = fs.readFileSync(path.join(wurzel, 'api/bridge.js'), 'utf8');
 

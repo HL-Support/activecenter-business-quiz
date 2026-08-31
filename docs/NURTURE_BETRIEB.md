@@ -144,8 +144,55 @@ Wächter läuft nicht mehr. Damit wird auch der Wächter bewacht.
   Heilweg: `node scripts/backfill-antworten.js` (Trockenlauf zeigt den Plan; füllt nur
   fehlende Refs, nie Vorhandenes).
 
+- **W6 — Übergaben an contacts, die nirgends ankommen** (seit B3, 31.08.2026). Ab dem
+  Modus `an` entsteht die Kartei-Zeile eines Opt-ins nicht mehr im selben Aufruf, sondern
+  über die Outbox. Ein Auftrag, der nach acht Versuchen (~4 h 22 min) stirbt, heisst:
+  Lead vollständig in `lead_state`, aber **keine Kartei-Zeile, keine Mail 1, keine
+  Mail 2** — und niemand merkt es. Drei getrennte Befunde: `dead` = **ALARM**;
+  `failed`/`pending`/`processing` älter als 2 h = WARNUNG; Protokollzeilen ohne
+  `contact_id` älter als 2 h = WARNUNG (die fangen zusätzlich den Fall „2xx ohne
+  Kennung" ab, den stillen Fehler vom 26.08.2026).
+  Nur im Plattform-Modus messbar; im Modus `aus` gibt es schlicht keine Zeilen.
+  Heilweg bei `dead`: Ursache im Zustellprotokoll nachsehen
+  (`leads.contacts_zustellprotokoll`, `error_message`/`http_status`), beheben, dann
+  abtropfen lassen — dank `submissionId` ist jede Wiederholung gefahrlos.
+
 Prüfen ohne Datenbankzugriff: `node scripts/waechter-nurture.js --selbsttest` — 8 Fälle,
 darunter ausdrücklich „der echte Vorfall wäre erkannt worden".
+
+🔴 **`node` gibt es auf dem Wächter-Host NICHT** (gemessen 31.08.2026). Der Lauf geht
+ausschliesslich über den Container, genau wie `lauf.sh` es tut — ein `node
+waechter-nurture.js` auf der Box scheitert mit `command not found`:
+
+```bash
+ssh root@167.233.251.217 'cd /opt/waechter-nurture && docker run --rm \
+  --env-file /opt/waechter-nurture/.env -v /opt/waechter-nurture:/w:ro \
+  node:24-alpine node /w/waechter-nurture.js'
+```
+
+Das sendet **keinen** Herzschlag — den schickt nur `lauf.sh`. Zum Prüfen also genau so
+laufen lassen, nicht `lauf.sh` aufrufen.
+
+### Nachzählen der Contacts-Übergabe (Plan B §10, seit 31.08.2026)
+
+Auf demselben Host liegt `contacts-quiz-nachzaehlen.js`. Es vergleicht **Opt-ins gegen
+Übermittlungen** — solange B4/B5 laufen, täglich:
+
+```bash
+ssh root@167.233.251.217 'cd /opt/waechter-nurture && docker run --rm --env-file .env \
+  -v /opt/waechter-nurture:/w:ro node:24-alpine \
+  node /w/contacts-quiz-nachzaehlen.js --modus schatten --ab 2026-09-01'
+```
+
+🔴 **`--modus` ist keine Zierde.** Ohne ihn ist ein Tag mit null Übermittlungen
+unauffällig — und damit sähe ein **Totalausfall** des Sendewegs genauso aus wie „der Modus
+ist aus". Das ist exakt der Fehler, an dem der Nurture-Versand drei Wochen unbemerkt
+stillstand. `--ab` schließt den Tag des Umschaltens aus; der ist immer ein halber und
+erzeugt sonst einen Fehlalarm, den man wegzuerklären lernt.
+
+Exitcode 1 bei Befund, 0 sauber. Zwei Zähler des Plans kann es **nicht** bilden und sagt
+das auch: die Postmark-Tags (anderer Server, Zeitstempel EDT) und die Kartei-Zählung
+(Legacy-MySQL von hier nicht lesbar).
 
 🔴 **Der Wächter läuft als Dateikopie, nicht aus dem Repo.** Wer
 `scripts/waechter-nurture.js`, die Baseline oder `scripts/stats-logs-baseline.js` ändert,
