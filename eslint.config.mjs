@@ -20,7 +20,19 @@ const commonGlobals = {
 
 export default [
   {
-    ignores: ['node_modules/', 'dist/', 'build/', '.vercel/', 'code_details/**'],
+    ignores: [
+      'node_modules/',
+      'dist/',
+      'build/',
+      '.vercel/',
+      'code_details/**',
+      // Aus n8n gezogene Code-Belege: Fragmente, die nur im n8n-Code-Knoten laufen —
+      // kein Projektquelltext, sondern Beweismaterial. Sie werden bewusst NICHT nach den
+      // Regeln dieses Projekts formatiert: Jede Aenderung daran entwertet den Beweis,
+      // dass der Extrakt zeichengleich mit dem laufenden Workflow ist.
+      // Siehe docs/audits/c1-postprocessor-extrakt/BEFUND.md.
+      'docs/audits/**/*.js',
+    ],
   },
   js.configs.recommended,
   prettier,
