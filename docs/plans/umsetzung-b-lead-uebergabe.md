@@ -323,6 +323,62 @@ Contacts ──(Unique-Index submission_id)──► genau EINE Kartei-Zeile, so
 
 ---
 
+## 3a. ✅ B2 ist gebaut (31.08.2026) — und schlanker als geplant
+
+**Der Plan sah eigene Bausteine `QuizPayload`/`QuizIntake` vor. Das war zu viel.**
+Beim Bauen zeigte sich, dass der Quiz-Payload **ohne Änderung** in `SurveyPayload` passt —
+einziger Punkt: Das Quiz erhebt kein Geschlecht und schickt `undisclosed`, den dafür
+vorgesehenen dritten Wert.
+
+Damit ist B2 eine eigene **Tür**, aber kein eigenes **Regelwerk**:
+
+| Baustein | Entscheidung |
+| --- | --- |
+| `routes/webhook.php` | neue Zeile `POST /webhook/quiz` |
+| `QuizWebhookController` | prüft, grenzt ab, reicht weiter — sonst nichts |
+| `config/quiz.php` | eigenes Geheimnis, eigener Kopfname, Gebietsliste |
+| `config/surveys.php` | ein Registry-Eintrag `quiz-erfolgscode`, **beide Mailschalter aus** |
+| Fachlogik | **unverändert `SurveyIntake`** |
+
+🔴 **Warum keine zweite Fachlogik.** Wem ein Kontakt gehört, ist eine Regel von *Contacts*,
+nicht des einzelnen Absenders: beraterübergreifend suchen, vier Monate Bestellfrist,
+Abo-Umleitung. Diese Regel ein zweites Mal hinzuschreiben hiesse, sie ab dem nächsten Tag
+in zwei Fassungen zu haben — genau die Falle, an der der Post Processor mit seinen drei
+Code-Knoten schon einmal auseinandergelaufen ist. **Eine Regel, ein Ort.**
+
+### Drei Dinge, die diese Route anders macht als ihre Nachbarn
+
+1. **Eigenes Geheimnis** (`QUIZ_WEBHOOK_SECRET`) und eigener Kopf `X-Quiz-Signature`.
+2. **fail-closed:** Ohne Geheimnis wird **nichts** angenommen (503). Die Nachbarprüfung
+   kehrt in dem Fall kommentarlos zurück und akzeptiert alles.
+3. **Gebietsabgrenzung** über `quiz.erlaubte_schluessel` — ohne sie wäre das eigene
+   Geheimnis wertlos, weil man damit in die Reiter des Umfragen-Projekts schreiben könnte.
+
+### Geprüft
+
+**12 neue Tests**, volle Suite **161 Tests / 840 Zusicherungen grün** — die bestehenden
+Survey- und Assessment-Tests laufen unverändert. Der ~200 Zeilen grosse Schema-Aufbau der
+Tests liegt jetzt als `tests/Concerns/BautKontakteSchema` in **einem** Baustein statt in
+zwei Kopien.
+
+### 🔴 Noch nicht ausgeliefert
+
+Der Zweig `webhook-quiz` liegt **lokal committet** im contacts-Repo. Nicht gepusht, nicht
+deployt — zwei Gründe:
+
+- Das Repo liegt auf einer **fremden GitLab-Adresse** (`rizwan.sarfraz/contacts-activecenter`).
+- Ein Deploy von `contacts` betrifft **13 weitere Formulare**.
+
+**Vor dem Scharfschalten zu setzen** (Reihenfolge zwingend — erst Empfänger, dann Absender):
+
+1. `QUIZ_WEBHOOK_SECRET` in der Coolify-App **contacts** — sonst antwortet die Route
+   fail-closed mit 503.
+2. `CONTACTS_QUIZ_WEBHOOK_SECRET` und `CONTACTS_QUIZ_URL` in **business-leads-prod**.
+
+Der Wert ist erzeugt und liegt in `agent-secrets` unter `quiz_contacts_webhook`.
+
+---
+
 ## 4a. 🔴 Die Zuordnung: welchem Berater der Kontakt am Ende gehört
 
 **Entscheidung Markus, 31.08.2026, und am Quelltext beider Wege nachgeprüft.**
