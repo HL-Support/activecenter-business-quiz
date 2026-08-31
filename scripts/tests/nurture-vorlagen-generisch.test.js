@@ -100,6 +100,35 @@ test('der Rahmen ist in jeder Sprache vollständig — halb übersetzt ist schle
   }
 });
 
+test('🔴 die Lesefassung ist aktuell — sonst gibt jemand einen Text frei, der nie verschickt wird', () => {
+  // Die Berater lesen `nurture-email-templates-<lang>.md` gegen, verschickt wird aber, was
+  // in `generisch-hu-fr-ru.js` steht. Driften die beiden auseinander, ist die Freigabe
+  // wertlos — und niemand merkt es, weil beide für sich plausibel aussehen.
+  const { execFileSync } = require('node:child_process');
+  const wurzel = path.join(__dirname, '../..');
+  const vorher = {};
+  for (const sprache of NEUE_SPRACHEN) {
+    const p = path.join(wurzel, 'nurture/vorlagen', `nurture-email-templates-${sprache}.md`);
+    assert.ok(fs.existsSync(p), `Lesefassung für ${sprache} fehlt — mit --markdown erzeugen`);
+    vorher[sprache] = fs.readFileSync(p, 'utf8');
+  }
+
+  execFileSync(process.execPath, ['scripts/nurture-vorlagen-anlegen.js', '--markdown'], {
+    cwd: wurzel,
+    stdio: 'pipe',
+  });
+
+  for (const sprache of NEUE_SPRACHEN) {
+    const p = path.join(wurzel, 'nurture/vorlagen', `nurture-email-templates-${sprache}.md`);
+    assert.equal(
+      fs.readFileSync(p, 'utf8'),
+      vorher[sprache],
+      `Die Lesefassung für ${sprache} ist veraltet. Neu erzeugen: `
+        + 'node scripts/nurture-vorlagen-anlegen.js --markdown'
+    );
+  }
+});
+
 test('das Anlegeskript schreibt nur auf ausdrückliche Anweisung', () => {
   const quelle = fs.readFileSync(
     path.join(__dirname, '../..', 'scripts/nurture-vorlagen-anlegen.js'),

@@ -15,6 +15,12 @@
  *   node scripts/nurture-vorlagen-anlegen.js                     # Trockenlauf
  *   node scripts/nurture-vorlagen-anlegen.js --anlegen
  *   node scripts/nurture-vorlagen-anlegen.js --anlegen --sprachen hu
+ *   node scripts/nurture-vorlagen-anlegen.js --markdown          # Lesefassung schreiben
+ *
+ * 🔴 `--markdown` schreibt die Texte als `nurture/vorlagen/nurture-email-templates-<lang>.md`.
+ * Das ist die Fassung, die ein muttersprachlicher Berater GEGENLESEN kann — ein
+ * JS-Modul kann er nicht. Ein Test hält beide Seiten deckungsgleich, damit die Lesefassung
+ * nicht still veraltet und jemand eine Übersetzung freigibt, die so gar nicht verschickt wird.
  *
  * Erwartet MAUTIC_BASIS und MAUTIC_AUTH (Basic-Auth-Kopf) in der Umgebung.
  * Am Ende druckt es den Block, der in EMAIL_MAP des n8n-Workflows gehört.
@@ -154,7 +160,84 @@ function baueHtml(teile, inhalt, phase, emailId, sprache) {
   ].join('\n');
 }
 
+/**
+ * Baut die Lesefassung einer Sprache. Bewusst OHNE HTML: Wer gegenliest, soll den Text
+ * beurteilen, nicht das Layout. Die Platzhalter bleiben stehen — sie sind Teil des Satzes
+ * und müssen im Zielsatz an der richtigen Stelle stehen.
+ */
+function baueMarkdown(sprache) {
+  const NAMEN = { hu: 'Ungarisch', fr: 'Französisch', ru: 'Russisch', de: 'Deutsch' };
+  const zeilen = [
+    `# Nurture-Mails — ${NAMEN[sprache] || sprache} (generische Fassung)`,
+    '',
+    '> 🔴 **Diese Datei wird erzeugt, nicht von Hand gepflegt.**',
+    '> Quelle: `nurture/vorlagen/generisch-hu-fr-ru.js`. Neu schreiben mit',
+    '> `node scripts/nurture-vorlagen-anlegen.js --markdown`. Wer hier etwas ändert,',
+    '> ändert nichts an dem, was verschickt wird — die Änderung gehört in die Quelldatei.',
+    '',
+    '## Worum es beim Gegenlesen geht',
+    '',
+    'Diese acht Mails gehen an Interessenten, die das Quiz in dieser Sprache ausgefüllt',
+    'haben. Sie kommen im Namen ihres Beraters. Bitte prüfe vor allem:',
+    '',
+    '1. **Klingt es wie ein Mensch?** Nicht wie eine Übersetzung, nicht wie Werbung.',
+    '2. **Stimmt die Anrede?** Überall Du-Form, durchgehend.',
+    '3. **Ist etwas sachlich falsch oder verspricht zu viel?**',
+    '4. **Stehen die Platzhalter an der richtigen Stelle im Satz?**',
+    '   `{contactfield=…}` wird beim Versand ersetzt — durch den Vornamen, das Profil-Label,',
+    '   den Namen des Beraters. Sie dürfen NICHT übersetzt oder verschoben werden, aber der',
+    '   Satz drumherum muss grammatikalisch zu ihnen passen.',
+    '',
+    'Was NICHT geprüft werden muss: Layout, Farben, Knopfform. Die sind für alle Sprachen',
+    'gleich und kommen aus derselben Vorlage.',
+    '',
+    '---',
+    '',
+  ];
+
+  for (const phase of PHASEN) {
+    const t = TEXTE[phase][sprache];
+    const de = TEXTE[phase].de;
+    zeilen.push(`## ${phase.toUpperCase()}`, '');
+    zeilen.push(`**Betreff:** ${t.betreff}`, '');
+    zeilen.push(`*(deutsche Referenz: ${de.betreff})*`, '');
+    zeilen.push(`${t.gruss} {contactfield=firstname},`, '');
+    t.absaetze.forEach((a) => zeilen.push(a, ''));
+    zeilen.push(`**Knopf:** ${t.knopf}`, '');
+    zeilen.push(`${t.team}`, '');
+    zeilen.push('---', '');
+  }
+
+  const r = RAHMEN[sprache];
+  zeilen.push(
+    '## Fester Rahmen (Beraterkasten und Fusszeile)',
+    '',
+    '| | Text |',
+    '| --- | --- |',
+    `| Überschrift Beraterkasten | ${r.ansprechpartner} |`,
+    `| Telefon | ${r.telefon} |`,
+    `| E-Mail | ${r.email} |`,
+    `| Hinweis Fusszeile | ${r.vorLink}\`<Adresse>\`${r.nachLink} |`,
+    `| Abmeldelink | ${r.abmelden} |`,
+    `| Impressum | ${r.impressum} |`,
+    ''
+  );
+  return zeilen.join('\n');
+}
+
 (async () => {
+  // Die Lesefassung braucht kein Mautic — sie entsteht allein aus der Quelldatei.
+  if (process.argv.includes('--markdown')) {
+    const fs = require('fs');
+    const path = require('path');
+    for (const sprache of SPRACHEN) {
+      const ziel = path.join(__dirname, '..', 'nurture', 'vorlagen', `nurture-email-templates-${sprache}.md`);
+      fs.writeFileSync(ziel, baueMarkdown(sprache));
+      console.log(`  geschrieben: ${path.relative(path.join(__dirname, '..'), ziel).split(path.sep).join('/')}`);
+    }
+    process.exit(0);
+  }
+
   if (!BASIS || !AUTH) {
     console.error('  🔴 MAUTIC_BASIS oder MAUTIC_AUTH fehlt.');
     process.exit(2);
