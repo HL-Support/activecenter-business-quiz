@@ -689,7 +689,57 @@ wenn der Beweis des vorigen **vorliegt** — Fristen verkürzen nie die Prüfung
 **Rückweg:** Deploy des contacts-Repos zurückrollen — kein Absender nutzt die Route, die
 alte Route ist unberührt. **Frühwarnung:** contacts-Testsuite; 503/401-Zähler im Log.
 
-### B3 — Absender im Quiz bauen, **inaktiv** ausliefern
+### B3 — ✅ gebaut am 31.08.2026 (noch nicht ausgeliefert)
+
+| Artefakt | Wo |
+| --- | --- |
+| Vertrag festgeschrieben (B1 nachgeholt) | [docs/contacts-quiz-webhook-vertrag.md](../contacts-quiz-webhook-vertrag.md) |
+| Absender (prüfen, signieren, senden, auswerten) | `server/legacy/kontakte.js` |
+| Vertragspayload | `api/bridge.js`, `buildContactsQuizPayload` — **neben** `buildBusinessTypeformPayload`, siehe Abweichung unten |
+| Datenseite | `sql/contacts-quiz-uebergabe.sql` (Schema `leads`) — **noch nicht angewandt** |
+| Auftragsart `contacts_quiz_submission` | `api/lead-outbox-worker.js` |
+| Modus-Schalter | `api/bridge.js`, Adapterzweig; Standard **`aus`** |
+| Tests | `scripts/tests/contacts-quiz-uebergabe.test.js` — 19 neu, Suite **315 grün** |
+
+**Die drei offenen Punkte aus §12, jetzt entschieden:**
+
+- **§12.1** (Kandidaten-SELECT) — beantwortet und belegt, Vertrag §6. `form_id IN ('hC2yTcU8')`,
+  `submitted_at >= activation_time`, `lpj.id IS NULL`, INNER JOIN auf `contacts`. Am
+  laufenden n8n gelesen und gegen die Repo-Sicherung geprüft: zeichengleich.
+- **§12.4** (Schema-Ort) — **`leads`**, über eine Datei in `sql/` nach dem Vorbild von
+  `sql/berater-vergleich.sql`, anzuwenden mit `leads_migrate` und `SET ROLE leads_owner`.
+- **§12.5** (`max_attempts`) — **8**. Backoff 2/5/15/60/60/… ⇒ Deckung **4 h 22 min**
+  statt 82 Minuten. Ein Ausfall über einen Vormittag kostet keine Leads; länger als ein
+  halber Tag soll ein Auftrag aber sichtbar sterben statt still weiterzulaufen.
+
+**Eine bewusste Abweichung vom Plan:** Der Payload-Bau liegt **nicht** in
+`server/legacy/kontakte.js`, sondern in `api/bridge.js`. Grund: Die Semantik der sechs
+Fragen — welche Frage in welcher Sprache, welche Option welchen internen Wert trägt —
+liegt vollständig dort (`BUSINESS_SCHEMA`, `BUSINESS_COPY`, `questionDefinitions`,
+`matchOption`). Sie im Legacy-Ordner ein zweites Mal hinzuschreiben hieße, zwei Wahrheiten
+über dieselben sechs Fragen zu haben; genau dieses Muster hat den Antwortverlust drei
+Monate lang versteckt. Der Vertragspayload entsteht jetzt in **derselben Schleife** und
+aus **denselben Quellen** wie der Typeform-Payload — ein Test misst die Feldparität
+zwischen beiden, statt sie zu behaupten. Im Legacy-Ordner liegt, was mit dem fertigen
+Rumpf geschieht.
+
+🔴 **Und ein Befund, der B5 blockiert (nicht B3, nicht B4):** Die ausgelieferte
+Gegenstelle spiegelt `meta` **nicht** nach `form_response.hidden`. Der Post Processor
+liest dort 19 Felder, `LegacySurveyResponse` schreibt 8. Würde heute umgeschaltet, ständen
+in Mail 1 und Mail 2 **„Unbekannt"** statt Profil und Ziel — dieselbe Fehlerklasse wie
+M2a, und ebenso stumm. Ausgeschrieben als Korrektur K3 im Vertrag, übergeben als
+[2026-08-31-contacts-hidden-abbildung.md](../uebergaben/2026-08-31-contacts-hidden-abbildung.md).
+Zwei weitere Abweichungen sind im Absender bereits eingearbeitet: die Gegenstelle liest
+**`meta.survey`** (nicht `meta.quiz`) und erwartet den Kopf **`X-Quiz-Signature`**.
+
+**Was noch offen ist, bevor B4 beginnen kann:**
+
+1. `sql/contacts-quiz-uebergabe.sql` auf der Plattform-DB anwenden (`leads_migrate`,
+   Zugang nur von `10.0.1.5`).
+2. Deployen und die Gegenprobe fahren: gleiches Opt-in-Verhalten, gleicher Forward,
+   Protokolltabelle bleibt **leer**.
+
+**Der ursprüngliche Plantext von B3, zum Nachlesen:**
 
 | | |
 | --- | --- |
@@ -711,7 +761,9 @@ alte Route ist unberührt. **Frühwarnung:** contacts-Testsuite; 503/401-Zähler
 
 ### B5 — 🔴 Umschalten
 
-**Vorbedingungen (Checkliste, jede einzeln abgehakt):** B2-Beweise 1–5 liegen vor ·
+**Vorbedingungen (Checkliste, jede einzeln abgehakt):** 🔴 **K3 in contacts behoben und an
+einer Probezeile bewiesen** (Mail 1+2 mit richtigem Profil und Ziel, nicht „Unbekannt" —
+[Übergabe](../uebergaben/2026-08-31-contacts-hidden-abbildung.md)) · B2-Beweise 1–5 liegen vor ·
 B4 lief ≥ 3 Werktage mit 0 Abweichungen · beide Geheimnisse gesetzt und per Probe geprüft ·
 keine offenen `failed`/`dead`-Aufträge · **am selben Tag kein anderer Eingriff** in
 Versand- oder Übermittlungswege · Umschaltzeit nachts/verkehrsarm (Opt-in-Pausen ≥ 3 h

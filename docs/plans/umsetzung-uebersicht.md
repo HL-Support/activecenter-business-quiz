@@ -26,7 +26,8 @@ Umsetzungspläne. Wer hier anfängt, liest in dieser Reihenfolge:
 | Postmark-Tags | ✅ PR #126 | alle **fünf** Nutzlasten tragen einen Tag, Wächter-Test hält den Stand |
 | **M1** Mailvorlagen im Repo | ✅ PR #128 | Rumpf zeichengleich mit dem laufenden Workflow, Driftwächter + goldene Muster |
 | **M2a** ungarische Zuordnungen | ✅ PR #129 | Ziel „Unbekannt" → **„Szabadság"**, Barriere `""` → **`confidence`** |
-| **B2** eigener Contacts-Eingang | ✅ `f7882db` | `/webhook/quiz`: ohne Signatur **406**, falsche **401**; andere Routen unverändert |
+| **B2** eigener Contacts-Eingang | ✅ `f7882db` | `/webhook/quiz`: ohne Signatur **406**, falsche **401**; andere Routen unverändert. 🔴 **Nachtrag 31.08. abends:** unvollständig — `meta` wird nicht nach `hidden` gespiegelt (§0a) |
+| **B3** Absender im Quiz, inaktiv | 🟡 **gebaut, nicht ausgeliefert** | Suite **315 grün** (vorher 296), Lint und `verify` grün; ohne `CONTACTS_QUIZ_MODUS` gilt der Standard `aus` |
 
 **Quiz-Produktion:** `3d6bf87`, `/health/ready` grün, `quelle: plattform`.
 **Tests:** Quiz **296 grün** · contacts **162 grün / 843 Zusicherungen**.
@@ -38,8 +39,15 @@ COACH_LOOKUP_SOURCE   = beide      → die BRIDGE entscheidet
 COACH_LOOKUP_SCHATTEN = mysql      → MySQL wird nur gemessen
 LEGACY_MYSQL_*        = gesetzt
 BRIDGE_URL            = gesetzt    → der alte Weg ist unverändert da
-CONTACTS_QUIZ_*       = NICHT gesetzt → der neue Sendeweg ist noch nicht scharf
+CONTACTS_QUIZ_MODUS   = NICHT gesetzt → Standard `aus`, exakt heutiges Verhalten
+CONTACTS_QUIZ_URL     = NICHT gesetzt
+CONTACTS_QUIZ_WEBHOOK_SECRET = NICHT gesetzt (Wert liegt in agent-secrets)
 ```
+
+Der Modus ist ausschliessend — `aus` | `schatten` | `an`, ein `if`, kein „und". Steht er
+auf `an`, fehlt aber Adresse oder Geheimnis, verhält sich der Adapter wie `aus` und meldet
+laut; der Worker stellt bereits eingereihte Aufträge auf `failed`/`env_missing`, nie auf
+einen Ersatzweg. Der Schattenlauf braucht kein Geheimnis — er sendet nie.
 
 ### Der Schattenvergleich, Stand jetzt
 
@@ -75,29 +83,61 @@ läuft über die Outbox. Der Verzug von 2–5 Minuten besteht unverändert.
 
 ## 0a. 🔴 Wie es weitergeht — der nächste Schritt zuerst
 
-**Der nächste Schritt ist B3: den Absender im Quiz bauen.** Er ist der einzige, der
-nirgends blockiert ist, und er macht den Weg für alles Weitere frei.
+> ## ✅ B3 ist gebaut (31.08.2026, abends) — und hat einen Blocker für B5 zutage gefördert
+>
+> **Gebaut, getestet, nicht ausgeliefert:** Vertrag festgeschrieben
+> ([contacts-quiz-webhook-vertrag.md](../contacts-quiz-webhook-vertrag.md)), Absender
+> `server/legacy/kontakte.js`, Vertragspayload in `api/bridge.js`, Datenseite
+> `sql/contacts-quiz-uebergabe.sql`, Auftragsart im Worker, Modus-Schalter mit Standard
+> **`aus`**. Suite **315 grün** (vorher 296), Lint und `verify` grün.
+>
+> 🔴 **Beim Nachlesen der ausgelieferten Gegenstelle sind drei Abweichungen vom Plan
+> aufgefallen.** Zwei sind im Absender eingearbeitet (sie liest `meta.survey`, nicht
+> `meta.quiz`; der Kopf heisst `X-Quiz-Signature`). Die dritte ist ein Mangel der
+> Gegenstelle: **`meta` wird nicht nach `form_response.hidden` gespiegelt.** Der Post
+> Processor liest dort 19 Felder, `LegacySurveyResponse` schreibt 8. Würde heute
+> umgeschaltet, ständen in Mail 1 und Mail 2 **„Unbekannt"** statt Profil und Ziel —
+> dieselbe Fehlerklasse wie M2a, und ebenso stumm.
+> Übergabe: [2026-08-31-contacts-hidden-abbildung.md](../uebergaben/2026-08-31-contacts-hidden-abbildung.md).
+>
+> **Das blockiert B5, nicht B3 und nicht B4.** Der Absender ist inaktiv, der Schattenlauf
+> misst nur den eigenen Payload.
+>
+> **Offen, damit B3 als ausgeliefert gilt:** SQL auf der Plattform-DB anwenden
+> (`leads_migrate`, Zugang nur von `10.0.1.5`) · deployen · Gegenprobe „es ändert sich
+> nichts" (gleiches Opt-in-Verhalten, gleicher Forward, Protokolltabelle bleibt leer).
+>
+> **Die drei offenen Punkte des Plans sind entschieden:** §12.1 Kandidaten-SELECT
+> beantwortet und am laufenden n8n belegt · §12.4 Schema **`leads`** · §12.5
+> `max_attempts` **8** (Deckung 4 h 22 min statt 82 min).
 
-### B3 — der Absender, hinter der vorhandenen Outbox
+### B3 — der Absender, hinter der vorhandenen Outbox (die Vorgabe, an der gebaut wurde)
 
 | | |
 | --- | --- |
 | **Was** | Das Quiz sendet den Opt-in an `POST https://contacts.hl-support.biz/webhook/quiz` statt über `forward_webhook` an die Bridge |
 | **Wo** | `api/bridge.js`, die zwei `forward_webhook`-Stellen (`:4094` im Typeform-Adapter, `:4199`) — **hinter** `api/lead-outbox-worker.js`, nicht davor |
-| **Vertrag** | ausgeschrieben in [umsetzung-b-lead-uebergabe.md §3](umsetzung-b-lead-uebergabe.md); Registry-Schlüssel **`quiz-erfolgscode`**, Kopf `X-Quiz-Signature`, HMAC über den **exakten rohen** Rumpf |
+| **Vertrag** | 🔴 gilt jetzt in [contacts-quiz-webhook-vertrag.md](../contacts-quiz-webhook-vertrag.md), **nicht** mehr §3 des Plans; Registry-Schlüssel **`quiz-erfolgscode`** in `meta.survey`, Kopf `X-Quiz-Signature`, HMAC über den **exakten rohen** Rumpf |
 | **Env** | `CONTACTS_QUIZ_URL` und `CONTACTS_QUIZ_WEBHOOK_SECRET` (Wert in `agent-secrets` → `quiz_contacts_webhook`) |
 | **Schalter** | `aus` \| `schatten` \| `an` — im Schattenlauf wird gebaut und protokolliert, aber **nie gesendet** |
 
-🔴 **Die drei Dinge, die B3 richtig machen muss:**
+🔴 **Die drei Dinge, die B3 richtig machen muss — alle drei umgesetzt:**
 
-1. **`submissionId` serverseitig erzeugen und im Outbox-Auftrag einfrieren** — nicht je
+1. ✅ **`submissionId` serverseitig erzeugen und im Outbox-Auftrag einfrieren** — nicht je
    Versuch neu. Sonst erzeugt jede Wiederholung einen zweiten Kontakt. Der `qz_`-Hash
    taugt **nicht** als Idempotenzschlüssel (klientengesteuert, kein UUID-Format); er
    gehört als `meta.hash` mit, aber als Lesegriff, nicht als Schlüssel.
-2. **`coach_member_id` und `case` aus der Antwort speichern** — daran hängt Strang M.
+   → `leads.reihe_contacts_quiz_ein`: Advisory-Lock, SELECT-vor-INSERT, `gen_random_uuid()`
+   nur im INSERT-Zweig, und der Schlüssel wandert per `jsonb_set` in den eingefrorenen
+   Rumpf. Der Worker baut nichts — er signiert und sendet dieselben Bytes.
+2. ✅ **`coach_member_id` und `case` aus der Antwort speichern** — daran hängt Strang M.
    Ein 2xx **ohne** `contact_id` ist ein Befund und gehört gemeldet.
-3. **Zustellprotokoll vor dem Senden**, in `safely()` gekapselt. Ein Protokoll ist nie ein
-   Datenpfad.
+   → zwei eigene Spalten im Protokoll; nachgemessen: die **Duplikat**-Antwort trägt beide
+   nicht mehr (`SurveyIntake.php:419-428`), wer sie nicht beim ersten Erfolg speichert,
+   bekommt sie nie wieder. Ein 2xx ohne Kennung wird als Fehlschlag gewertet.
+3. ✅ **Zustellprotokoll vor dem Senden**, folgenlos gekapselt. Ein Protokoll ist nie ein
+   Datenpfad. → `ohneFolgen(...)` im Worker; ein Test hält die Reihenfolge fest und lässt
+   die Protokollfelder aus einem echten Payload entstehen.
 
 **Beweis vor dem Umschalten:** Ein echtes Opt-in landet **einmal** in Contacts; die
 Wiederholung liefert `duplicate: true`; über beide Wege nachgezählt stimmt die Summe.
@@ -107,7 +147,9 @@ Wiederholung liefert `duplicate: true`; über beide Wege nachgezählt stimmt die
 | # | Schritt | Wartet auf | Bemerkung |
 | --- | --- | --- | --- |
 | **A5** | Quelle je Stelle auf `mysql` | das Tor unten | reine Env-Änderung, **kein Deploy** |
-| **B4** | Absender scharf (`an`) | B3 + Schattenlauf | Notausstieg: Env löschen |
+| **B3'** | SQL anwenden, deployen, Gegenprobe „nichts ändert sich" | — | der Rest von B3; ohne Deploy ist der Code nirgends |
+| **B4** | Schattenlauf (`CONTACTS_QUIZ_MODUS=schatten`) | B3' | misst nur; Rückweg: Env löschen, kein Deploy |
+| **B5** | Absender scharf (`an`) | 🔴 **K3 in contacts behoben** + B4 ruhig | Notausstieg: Env löschen |
 | **B5** | `forward_webhook`, `BRIDGE_*` und toten Code ausbauen | B4 ruhig | erst dann |
 | **M2** | Vorlagen an die Outbox anschliessen | B4 | M1 liegt fertig |
 | **M3–M8** | Mails senden, Nebenaufgaben verteilen, Poller abschalten | M2 | 🔴 der teuerste Pfad |

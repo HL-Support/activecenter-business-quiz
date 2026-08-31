@@ -36,6 +36,14 @@ const {
 // Welche Quelle entscheidet, steuert COACH_LOOKUP_SOURCE; Standard 'bridge'.
 const { beraterAusVerzeichnis, vergleiche } = require('../server/berater-verzeichnis');
 const { beraterAusMysql } = require('../server/legacy/berater');
+// Strang B / B3: die EINE Tuer zur Kontaktkartei. Der Standardmodus ist `aus` — ein
+// Deploy ohne CONTACTS_QUIZ_MODUS aendert am Opt-in-Weg nichts.
+const {
+  REGISTRY_SCHLUESSEL,
+  pruefeVertrag,
+  wirksamerModus,
+  ziel: contactsQuizZiel,
+} = require('../server/legacy/kontakte');
 const {
   STELLEN,
   beraterAufloesen,
@@ -3686,6 +3694,181 @@ function buildBusinessTypeformPayload(input) {
   };
 }
 
+// =====================================================================================
+// Strang B / B3: der Vertragspayload fuer die eigene Route contacts /webhook/quiz
+//
+// 🔴 WARUM DAS HIER STEHT UND NICHT IN server/legacy/kontakte.js
+// Der Plan sah den Payload-Bau im Legacy-Ordner vor. Beim Bauen zeigte sich: Die
+// Semantik der Antworten — welche Frage in welcher Sprache, welche Option welchen
+// internen Wert traegt — liegt vollstaendig hier (BUSINESS_SCHEMA, BUSINESS_COPY,
+// questionDefinitions, matchOption). Sie dort ein zweites Mal hinzuschreiben hiesse, zwei
+// Wahrheiten ueber dieselben sechs Fragen zu haben. Genau dieses Muster hat den
+// Antwortverlust drei Monate lang versteckt (Falle 1). Also: der Vertragspayload entsteht
+// in DERSELBEN Schleife und aus DENSELBEN Quellen wie der Typeform-Payload; im
+// Legacy-Ordner liegt, was mit dem fertigen Rumpf geschieht (pruefen, signieren, senden).
+//
+// Vertrag: docs/contacts-quiz-webhook-vertrag.md
+// =====================================================================================
+
+/** Die zwoelf Werbe-Felder, die 1:1 mitreisen. Unausgewertet — contacts legt sie ab. */
+const CONTACTS_QUIZ_ATTRIBUTION_FELDER = [
+  ['utm_source', 120],
+  ['utm_medium', 120],
+  ['utm_campaign', 180],
+  ['utm_content', 180],
+  ['utm_campaign_id', 120],
+  ['utm_adset_id', 120],
+  ['utm_ad_id', 120],
+  ['utm_term', 180],
+  ['fbclid', 500],
+  ['fbc', 500],
+  ['fbp', 120],
+  ['event_source_url', 1000],
+];
+
+function buildContactsQuizPayload(input, webhookPayload) {
+  const hidden = { ...((input && input.hidden) || {}), ...typeformHidden(webhookPayload) };
+  const lang = normalizeLang(hidden.lang || input.lang);
+  const copy = BUSINESS_COPY[lang] || BUSINESS_COPY.de;
+  const questions = questionDefinitions(lang);
+  const selectedAnswers = Array.isArray(input.selected_answers) ? input.selected_answers : [];
+  const profile = input.profile && typeof input.profile === 'object' ? input.profile : {};
+
+  // Genau der Text, der heute als Antwort `lead_profile_result` hinausgeht — der Post
+  // Processor liest ihn seit jeher als Profil-Label.
+  const profileLabel = String(profile.name || profile.animal || profile.code || '').trim();
+  const normalizedProfile = normalizeBusinessProfile(
+    profile.code,
+    profile.name,
+    input.profile_code,
+    input.profile_label
+  );
+
+  const derivedAspiration = selectedAnswers
+    .map((answer) => normalizeAspiration(answer && answer.aspiration))
+    .find(Boolean);
+  const mainAspiration =
+    normalizeAspiration(input.main_aspiration || hidden.main_aspiration) || derivedAspiration || '';
+  const aspirationLabels = BUSINESS_ASPIRATION_LABELS[lang] || BUSINESS_ASPIRATION_LABELS.de;
+  const mainAspirationLabel = String(
+    (mainAspiration && aspirationLabels[mainAspiration]) ||
+      input.main_aspiration_label ||
+      hidden.main_aspiration_label ||
+      ''
+  ).trim();
+
+  // 🔴 Frage und Antwort entstehen als PAAR, in einer Schleife, aus einer Quelle. Der
+  // Index-Verrutsch-Defekt der alten Route ist damit strukturell ausgeschlossen.
+  const answers = [];
+  if (profileLabel) {
+    answers.push({
+      key: 'profile',
+      question: copy.result_badge,
+      answer: profileLabel,
+      values: normalizedProfile?.code ? [normalizedProfile.code] : [],
+    });
+  }
+  if (mainAspirationLabel) {
+    answers.push({
+      key: 'main_aspiration',
+      question: copy.main_aspiration_title,
+      answer: mainAspirationLabel,
+      values: mainAspiration ? [mainAspiration] : [],
+    });
+  }
+
+  let barriere = '';
+  selectedAnswers.forEach((answer, index) => {
+    if (!answer || typeof answer !== 'object') return;
+    const schemaField = fieldByKey(`q${index + 1}`);
+    const question = questions[index];
+    if (!schemaField || !question) return;
+    // Dieselbe Zuordnung wie in buildBusinessTypeformPayload — trifft sie dort nicht,
+    // trifft sie hier auch nicht. Beide Wege lassen dieselbe Antwort weg statt zu raten.
+    const matchedOption = matchOption(question, answer);
+    const matchedIndex = question.options.indexOf(matchedOption);
+    const choiceDef = matchedIndex >= 0 ? schemaField.choices[matchedIndex] : null;
+    if (!matchedOption || !choiceDef) return;
+
+    const wert = matchedOption.type || matchedOption.aspiration || matchedOption.barrier || '';
+    if (matchedOption.barrier) barriere = matchedOption.barrier;
+    answers.push({
+      key: schemaField.key,
+      question: question.text,
+      answer: matchedOption.label,
+      values: wert ? [wert] : [],
+    });
+  });
+
+  const attributionQuelle = normalizeMetaAttributionFallback({
+    ...(input.attribution || {}),
+    ...hidden,
+    ...input,
+  });
+  const attribution = {};
+  for (const [feld, laenge] of CONTACTS_QUIZ_ATTRIBUTION_FELDER) {
+    const wert = safeTrackingString(attributionQuelle, feld, laenge);
+    if (wert) attribution[feld] = wert;
+  }
+
+  const submittedAt = safeString(
+    webhookPayload?.form_response?.submitted_at || input.submitted_at || nowIso(),
+    40
+  );
+  const memberId = safeString(hidden.member_id || input.member_id, 50);
+
+  return {
+    meta: {
+      // K1: Die Gegenstelle liest `meta.survey`. Ein `meta.quiz` wuerde sie mit 422
+      // abweisen — nachgelesen in SurveyPayload.php:88-92.
+      survey: REGISTRY_SCHLUESSEL,
+      // Bleibt leer: Die Datenbank setzt sie beim ERSTEN Einreihen und friert sie ein.
+      submissionId: null,
+      hash: safeString(hidden.lead_hash || hidden.hash || input.lead_hash, 96),
+      sessionHash: safeString(hidden.session_hash || hidden.tracking_hash, 96) || undefined,
+      token: safeString(input.token || webhookPayload?.form_response?.token, 100) || undefined,
+      memberId,
+      refId: safeString(hidden.ref_id, 50) || memberId,
+      slug: safeString(hidden.berater_slug || hidden.slug, 80) || undefined,
+      language: lang,
+      country: safeString(hidden.c || input.country, 5).toUpperCase() || undefined,
+      title: copy.webhook_title,
+      // ⚠️ Diese fuenf spiegelt die Gegenstelle heute NICHT nach form_response.hidden
+      // (Korrektur K3 des Vertrags). Sie reisen trotzdem mit: Ohne sie kann contacts die
+      // Luecke gar nicht schliessen, und ihr Fehlen ist bereits uebergeben.
+      profileCode: normalizedProfile?.code || undefined,
+      profileLabel: profileLabel || undefined,
+      mainAspiration: mainAspiration || undefined,
+      mainAspirationLabel: mainAspirationLabel || undefined,
+      barrier: barriere || undefined,
+      startedAt: safeString(input.landed_at || submittedAt, 40),
+      submittedAt,
+    },
+    contact: {
+      firstName: normalizePersonName(input.first_name, 120) || '',
+      email: safeString(input.email, 190).toLowerCase(),
+      // Das Quiz erhebt kein Geschlecht. `undisclosed` ist der dafuer vorgesehene dritte
+      // Wert der Gegenstelle — geraten wird nichts.
+      gender: 'undisclosed',
+    },
+    attribution,
+    answers,
+  };
+}
+
+/**
+ * Fuehrt etwas aus, das NIEMALS den Sendepfad gefaehrden darf (Protokoll, Schattenlauf).
+ * Ein Protokoll ist nie ein Datenpfad — die Regel des Vorbilds, hier als Funktion.
+ */
+async function ohneFolgen(was, arbeit) {
+  try {
+    return await arbeit();
+  } catch (fehler) {
+    console.warn(`[contacts-quiz] ${was} fehlgeschlagen (folgenlos):`, fehler.message);
+    return null;
+  }
+}
+
 module.exports = async function handler(req, res) {
   // Kein Wildcard-CORS mehr. Ist der Origin nicht erlaubt, wird der ACAO-Header GAR
   // NICHT gesetzt - der Browser blockt dann selbst. Same-Origin- und Server-zu-Server-Aufrufe
@@ -4112,7 +4295,71 @@ module.exports = async function handler(req, res) {
       .trim()
       .toLowerCase();
     const usesLeadSystemV2 = leadSystemFlag === '1' || leadSystemFlag === 'true';
-    const [result] = await Promise.all([
+    const finalLeadHash = safeString(
+      webhookHidden.lead_hash || webhookHidden.hash || submissionPayload.lead_hash,
+      96
+    );
+
+    // -----------------------------------------------------------------------------
+    // Strang B / B3 — der Modus-Schalter.
+    //
+    //   fehlt / aus  exakt heutiges Verhalten (Forward ueber die Bridge). STANDARD.
+    //   schatten     heutiges Verhalten PLUS haltbares Schattenprotokoll; nie gesendet.
+    //   an           Outbox -> contacts /webhook/quiz; KEIN Forward an die alte Route.
+    //
+    // 🔴 Der Modus ist ausschliessend — ein `if`, kein „und". Dieselbe Uebermittlung
+    // ueber beide Routen hiesse zwei Kartei-Zeilen und damit Mail 1+2 DOPPELT; das ist
+    // die teuerste Fehlerwirkung dieses Umbaus (Plan B §9b).
+    // -----------------------------------------------------------------------------
+    const schalter = wirksamerModus(process.env);
+    if (schalter.grund === 'env_missing') {
+      console.warn(
+        `[contacts-quiz] Modus '${schalter.gewuenscht}' gewuenscht, aber CONTACTS_QUIZ_URL ` +
+          'oder CONTACTS_QUIZ_WEBHOOK_SECRET fehlt — das Opt-in geht den alten Weg.'
+      );
+    }
+    let contactsModus = schalter.modus;
+    if (contactsModus === 'an' && !usesLeadSystemV2) {
+      // Der Auftrag verweist auf lead_state; ohne Lead-System v2 gibt es dort keine
+      // Zeile. Fail-safe in Richtung des alten, bewiesenen Weges.
+      console.warn('[contacts-quiz] Modus an, aber lead_system_v2 aus — alter Weg.');
+      contactsModus = 'aus';
+    }
+
+    // Steht hier ein Grund, ist dieses Opt-in im Modus `an` ueber den Notweg gegangen.
+    // Der Wert reist in der Antwort mit und steht im Protokoll des Containers.
+    let contactsQuizRueckfall = null;
+    let vertragspayload = null;
+    if (contactsModus !== 'aus') {
+      try {
+        vertragspayload = pruefeVertrag(
+          buildContactsQuizPayload(submissionPayload, webhookPayload)
+        );
+      } catch (fehler) {
+        vertragspayload = null;
+        console.warn('[contacts-quiz] Payload-Bau fehlgeschlagen:', fehler.message);
+        meldeFehler(fehler, {
+          bereich: 'bridge',
+          route: 'forward_typeform_adapter/contacts_quiz_payload',
+          level: 'error',
+        });
+        // Im Schatten ist das folgenlos. Im Modus `an` faellt dieses EINE Opt-in auf die
+        // alte Route zurueck: Es ist noch nichts gesendet, also bleibt es bei genau einem
+        // Weg je Uebermittlung — und der Lead geht nicht verloren, nur weil sein Payload
+        // nicht baubar war.
+        if (contactsModus === 'an') {
+          console.error('[contacts-quiz] Rueckfall auf die alte Route: Payload unvollstaendig');
+          contactsModus = 'aus';
+          contactsQuizRueckfall = `payload_unvollstaendig:${safeString(fehler.message, 200)}`;
+        }
+      }
+    }
+
+    // 🔴 Der Notweg. Er wird an genau zwei Stellen benutzt: hier unten als Normalweg
+    // (Modus `aus`/`schatten`) und weiter unten, wenn im Modus `an` etwas VOR dem
+    // Einreihen scheitert. Beide Male gilt: gesendet wurde bis dahin nichts, also ist es
+    // ein Weg und nicht zwei.
+    const sendeUeberAlteRoute = () =>
       proxyToBridge(
         {
           action: 'forward_webhook',
@@ -4122,7 +4369,13 @@ module.exports = async function handler(req, res) {
         },
         forwardedFor,
         userAgent
-      ),
+      );
+
+    const ueberAlteRoute = contactsModus !== 'an';
+    let [result] = await Promise.all([
+      ueberAlteRoute
+        ? sendeUeberAlteRoute()
+        : Promise.resolve({ status: 200, data: { success: true, weg: 'webhook_quiz' } }),
       usesLeadSystemV2
         ? Promise.resolve(null)
         : persistBusinessSubmissionForResume(submissionPayload).catch((err) =>
@@ -4132,14 +4385,16 @@ module.exports = async function handler(req, res) {
 
     let leadSystemV2Persisted = null;
     if (result.status >= 200 && result.status < 300) {
-      const finalLeadHash = safeString(
-        webhookHidden.lead_hash || webhookHidden.hash || submissionPayload.lead_hash,
-        96
-      );
-      const finalBusinessLeadContext = await loadFinalBusinessLeadContext(finalLeadHash).catch((err) => {
-        console.warn('loadFinalBusinessLeadContext failed:', err.message);
-        return { found: false, reason: 'mysql_final_readback_error', error: err.message };
-      });
+      // Der Rueckleseweg holt die Kartei-Zeile, die die ALTE Route eben angelegt hat. Im
+      // Modus `an` gibt es sie noch nicht — die Kennungen traegt der Worker nach, sobald
+      // contacts geantwortet hat. Ihn hier trotzdem zu fragen, waere ein garantierter
+      // Fehltreffer und ein unnoetiger Griff in die Legacy-MySQL.
+      const finalBusinessLeadContext = ueberAlteRoute
+        ? await loadFinalBusinessLeadContext(finalLeadHash).catch((err) => {
+            console.warn('loadFinalBusinessLeadContext failed:', err.message);
+            return { found: false, reason: 'mysql_final_readback_error', error: err.message };
+          })
+        : { found: false, reason: 'contacts_quiz_outbox_pending' };
       leadSystemV2Persisted = await persistBusinessSubmissionToLeadStateV2(
         submissionPayload,
         webhookPayload,
@@ -4148,6 +4403,83 @@ module.exports = async function handler(req, res) {
         console.warn('persistBusinessSubmissionToLeadStateV2 failed:', err.message);
         return { persisted: false, error: err.message };
       });
+    }
+
+    // Einreihen — NACH lead_state, weil der Auftrag per Fremdschluessel darauf verweist.
+    let contactsQuizAuftrag = null;
+    if (contactsModus === 'an' && vertragspayload) {
+      if (!leadSystemV2Persisted || leadSystemV2Persisted.persisted !== true) {
+        // Ohne lead_state kann kein Auftrag entstehen. Gesendet wurde bis hier nichts —
+        // also holt der Notweg dieses Opt-in nach, statt es fallen zu lassen.
+        contactsQuizRueckfall = `lead_state_fehlt:${safeString(
+          leadSystemV2Persisted?.error || leadSystemV2Persisted?.reason,
+          200
+        )}`;
+      } else {
+        // 🔴 Ein Fehlschlag wird GENAU EINMAL wiederholt, bevor der Notweg greift. Der
+        // Grund ist der Fall „eingereiht, aber die Antwort ging verloren": Die Einreihung
+        // ist je lead_hash idempotent (Advisory-Lock + SELECT-vor-INSERT), der zweite
+        // Anlauf findet denselben Auftrag. Ohne diese Wiederholung koennte der Notweg
+        // eine bereits eingereihte Uebermittlung ein zweites Mal senden — und doppelte
+        // Kartei-Zeilen sind die teuerste Fehlerwirkung dieses Umbaus.
+        for (let versuch = 1; versuch <= 2 && !contactsQuizAuftrag; versuch += 1) {
+          try {
+            const zeilen = await supabaseRpc('reihe_contacts_quiz_ein', {
+              p_lead_hash: finalLeadHash,
+              p_payload: vertragspayload,
+            });
+            const zeile = Array.isArray(zeilen) ? zeilen[0] || {} : zeilen || {};
+            contactsQuizAuftrag = {
+              job_id: zeile.job_id ?? null,
+              submission_id: zeile.submission_id ?? null,
+              neu: zeile.neu ?? null,
+            };
+          } catch (fehler) {
+            console.error(
+              `[contacts-quiz] Einreihen fehlgeschlagen (Versuch ${versuch}/2):`,
+              fehler.message
+            );
+            if (versuch === 2) {
+              meldeFehler(fehler, {
+                bereich: 'bridge',
+                route: 'forward_typeform_adapter/reihe_contacts_quiz_ein',
+                level: 'error',
+              });
+              contactsQuizRueckfall = `einreihen_fehlgeschlagen:${safeString(fehler.message, 200)}`;
+            }
+          }
+        }
+      }
+
+      // 🔴 Der Notweg. Ohne ihn waere jeder Fehler vor dem Einreihen ein verlorener Lead:
+      // Die alte Route ist im Modus `an` uebersprungen worden, es gibt also keine
+      // Kartei-Zeile, keine Mail 1+2 und keinen Berater, der davon erfaehrt. Weil bis
+      // hierher NICHTS gesendet wurde, bleibt es bei genau einem Weg je Uebermittlung.
+      // In der Tageszaehlung (Plan B §10) taucht so ein Opt-in als Zeile der ALTEN Route
+      // auf — sichtbar, nicht still.
+      if (!contactsQuizAuftrag) {
+        console.error('[contacts-quiz] 🔴 Notweg: dieses Opt-in geht ueber die alte Route —', contactsQuizRueckfall);
+        const nachgeholt = await sendeUeberAlteRoute();
+        result = {
+          ...nachgeholt,
+          data: { ...(nachgeholt.data || {}), weg: 'forward_webhook_notweg' },
+        };
+      }
+    }
+
+    // Der Schattenlauf. Vollstaendig folgenlos gekapselt — er ist eine Messung, kein
+    // Datenpfad, und darf den Sendeweg unter keinen Umstaenden gefaehrden.
+    if (contactsModus === 'schatten' && vertragspayload) {
+      await ohneFolgen('Schattenprotokoll', () =>
+        supabaseRpc('protokolliere_contacts_quiz_schatten', {
+          p_lead_hash: finalLeadHash,
+          p_target_url: contactsQuizZiel(process.env) || '-',
+          p_payload: vertragspayload,
+          p_member_id: safeString(webhookHidden.member_id, 120) || null,
+          p_first_name: normalizePersonName(submissionPayload.first_name, 120) || null,
+          p_email: safeString(submissionPayload.email, 190).toLowerCase() || null,
+        })
+      );
     }
 
     // Meta CAPI — server-side Lead event, non-blocking, fires after lead is persisted
@@ -4206,6 +4538,10 @@ module.exports = async function handler(req, res) {
       adapter_key: adapterKey,
       lead_system_v2_persisted: leadSystemV2Persisted,
       payload: webhookPayload,
+      // Nur gesetzt, wenn der neue Weg tatsaechlich gegriffen hat. Im Standardmodus
+      // `aus` steht hier nichts — die Antwort ist dann Zeichen fuer Zeichen die alte.
+      ...(contactsQuizAuftrag ? { contacts_quiz: contactsQuizAuftrag } : {}),
+      ...(contactsQuizRueckfall ? { contacts_quiz_rueckfall: contactsQuizRueckfall } : {}),
     };
     return res.status(result.status).json(result.data);
   }
@@ -4564,3 +4900,8 @@ module.exports.supabaseRpc = supabaseRpc;
 module.exports.persistBusinessSubmissionToLeadStateV2 = persistBusinessSubmissionToLeadStateV2;
 module.exports.Q6_BARRIER_BY_OPT = Q6_BARRIER_BY_OPT;
 module.exports.normalizeBusinessProfile = normalizeBusinessProfile;
+// Strang B / B3: der Vertragspayload fuer contacts /webhook/quiz. Exportiert, damit die
+// Feldparitaet gegen den heute gesendeten Typeform-Payload GEMESSEN und nicht behauptet
+// werden kann (scripts/tests/contacts-quiz-uebergabe.test.js).
+module.exports.buildBusinessTypeformPayload = buildBusinessTypeformPayload;
+module.exports.buildContactsQuizPayload = buildContactsQuizPayload;

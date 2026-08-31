@@ -29,7 +29,30 @@
 > 🔴 **Die Opt-in-Mails kommen weiterhin aus n8n**, nicht aus dem Repo. Nur Mail 3
 > (Hot Lead) läuft über die Outbox; der Verzug von 2–5 Minuten besteht unverändert.
 >
-> **Nächster Schritt: B3** — der Absender im Quiz, hinter der vorhandenen Outbox.
+> ### Nachtrag 31.08.2026, abends — B3 ist gebaut, und B5 hat einen Blocker
+>
+> **Gebaut, getestet, noch nicht ausgeliefert:** der Absender an `/webhook/quiz`
+> (`server/legacy/kontakte.js`), der Vertragspayload (`api/bridge.js`), die Datenseite
+> (`sql/contacts-quiz-uebergabe.sql`, Schema `leads`), die Auftragsart
+> `contacts_quiz_submission` im Worker und der Modus-Schalter `CONTACTS_QUIZ_MODUS` mit
+> Standard **`aus`**. Quiz-Tests **315 grün** (vorher 296), Lint und `verify` grün.
+> Der Vertrag ist jetzt schriftlich festgeschrieben:
+> **[contacts-quiz-webhook-vertrag.md](contacts-quiz-webhook-vertrag.md)** — er gilt,
+> nicht §3 des Plans.
+>
+> 🔴 **Beim Nachlesen der ausgelieferten Gegenstelle sind drei Abweichungen aufgefallen.**
+> Zwei sind eingearbeitet (sie liest `meta.survey`, nicht `meta.quiz`; der Kopf heisst
+> `X-Quiz-Signature`). Die dritte ist ein Mangel drüben: **`meta` wird nicht nach
+> `form_response.hidden` gespiegelt** — der Post Processor liest dort 19 Felder,
+> `LegacySurveyResponse` schreibt 8. Beim Umschalten stünde in Mail 1 und Mail 2
+> **„Unbekannt"** statt Profil und Ziel, ohne jede Meldung. Das ist die Fehlerklasse von
+> M2a. Übergeben als
+> [uebergaben/2026-08-31-contacts-hidden-abbildung.md](uebergaben/2026-08-31-contacts-hidden-abbildung.md);
+> es blockiert **B5**, nicht B3 und nicht B4.
+>
+> **Offen, damit B3 als ausgeliefert gilt:** SQL auf der Plattform-DB anwenden ·
+> deployen · Gegenprobe „es ändert sich nichts".
+>
 > Vollständiger Fortsetzungsplan, Tore und offene Entscheidungen:
 > **[plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md)** §0 und §0a.
 

@@ -31,6 +31,13 @@ const {
   vergleiche,
 } = require('../server/berater-verzeichnis');
 const { beraterAusMysql } = require('../server/legacy/berater');
+// Strang B / B3: die EINE Tuer zur Kontaktkartei (contacts /webhook/quiz).
+const {
+  konfiguriert: contactsQuizKonfiguriert,
+  ziel: contactsQuizZiel,
+  sendeAnContacts,
+  werteAntwortAus,
+} = require('../server/legacy/kontakte');
 const {
   STELLEN,
   beraterAufloesen,
@@ -51,7 +58,12 @@ const BRAND_LOGO_URL = 'https://hl-support.biz/storage/images/cwemaillogo-1bcb4f
 const BRAND_PRIVACY_URL = 'https://hl-support.biz/impressum-datenschutz/';
 
 const MYSQL_SYNC_TYPES = new Set(['mysql_initial_rank', 'mysql_rank_update']);
-const SUPPORTED_SYNC_TYPES = new Set([...MYSQL_SYNC_TYPES, 'coach_hot_lead_email']);
+const CONTACTS_QUIZ_SYNC_TYPE = 'contacts_quiz_submission';
+const SUPPORTED_SYNC_TYPES = new Set([
+  ...MYSQL_SYNC_TYPES,
+  'coach_hot_lead_email',
+  CONTACTS_QUIZ_SYNC_TYPE,
+]);
 
 function getHeader(req, name) {
   const wanted = name.toLowerCase();
@@ -958,15 +970,151 @@ async function sendHotLeadCoachEmail(job) {
   };
 }
 
+/**
+ * Fuehrt etwas aus, das NIEMALS die Zustellung gefaehrden darf. Ein Protokoll ist nie ein
+ * Datenpfad — faellt es aus, laeuft die Zustellung unveraendert weiter und es wird gewarnt.
+ * Lehre des Vorbilds (analysen/legacy/zustellprotokoll.js).
+ */
+async function ohneFolgen(was, arbeit) {
+  try {
+    return await arbeit();
+  } catch (fehler) {
+    console.warn(`[contacts-quiz] ${was} fehlgeschlagen (folgenlos):`, fehler.message);
+    return null;
+  }
+}
+
+/**
+ * Strang B / B3 — die Uebergabe eines Opt-ins an contacts /webhook/quiz.
+ *
+ * 🔴 Der Auftrag traegt seinen Rumpf EINGEFROREN mit (context_data.payload, samt der beim
+ * Einreihen erzeugten submissionId). Er wird hier weder gebaut noch ergaenzt: Jede
+ * Wiederholung sendet exakt dieselben Bytes, also dieselbe Signatur und denselben
+ * Idempotenzschluessel. Baute der Worker den Rumpf neu, entstuende bei jeder Wiederholung
+ * ein zweiter Kontakt samt zweiter Mail — die teuerste Fehlerwirkung dieses Umbaus.
+ */
+async function sendeContactsQuizUebermittlung(job) {
+  const leadHash = safeString(job.lead_hash, 96);
+  if (!isLeadHash(leadHash)) {
+    throw new Error(`invalid_lead_hash:${leadHash}`);
+  }
+
+  const kontext = job.context_data || {};
+  const submissionId = safeString(kontext.submission_id, 64);
+  const rumpf = kontext.payload;
+  if (!submissionId) {
+    throw new Error('contacts_quiz_submission_id_fehlt');
+  }
+  if (!rumpf || typeof rumpf !== 'object' || !rumpf.meta) {
+    throw new Error('contacts_quiz_payload_fehlt');
+  }
+  if (safeString(rumpf.meta.submissionId, 64) !== submissionId) {
+    // Auftrag und Rumpf muessen denselben Schluessel tragen — sonst wuerde die
+    // Gegenstelle etwas anderes wiedererkennen, als der Auftrag zu senden glaubt.
+    throw new Error('contacts_quiz_submission_id_uneinig');
+  }
+
+  // 🔴 fail-closed: ohne Adresse oder Geheimnis wird NICHTS gesendet. Der Auftrag
+  // scheitert sichtbar und bleibt liegen — es gibt keinen Ersatzweg.
+  if (!contactsQuizKonfiguriert(process.env)) {
+    throw new Error('env_missing:CONTACTS_QUIZ_URL_ODER_SECRET');
+  }
+  const adresse = contactsQuizZiel(process.env);
+
+  // Zeile VOR dem Senden. Wer erst danach protokolliert, hat von genau den Faellen keine
+  // Zeile, die ihn interessieren — denen, bei denen das Senden nicht zurueckkam.
+  await ohneFolgen('Protokollzeile vor dem Senden', () =>
+    supabaseRpc('protokolliere_contacts_quiz_versuch', {
+      p_submission_id: submissionId,
+      p_lead_hash: leadHash,
+      p_outbox_job_id: job.id,
+      p_target_url: adresse,
+      p_payload: rumpf,
+      p_member_id: safeString(rumpf.meta.memberId, 120) || null,
+      p_first_name: safeString(rumpf.contact?.firstName, 120) || null,
+      p_email: safeString(rumpf.contact?.email, 190) || null,
+    })
+  );
+
+  let antwort;
+  let befund;
+  try {
+    antwort = await sendeAnContacts(rumpf, process.env);
+    befund = werteAntwortAus(antwort);
+  } catch (fehler) {
+    await ohneFolgen('Protokollzeile nach dem Fehlschlag', () =>
+      supabaseRpc('protokolliere_contacts_quiz_ergebnis', {
+        p_submission_id: submissionId,
+        p_status: 'failed',
+        p_error_message: safeString(fehler.message, 1000),
+      })
+    );
+    throw fehler;
+  }
+
+  await ohneFolgen('Protokollzeile nach der Antwort', () =>
+    supabaseRpc('protokolliere_contacts_quiz_ergebnis', {
+      p_submission_id: submissionId,
+      p_status: befund.status,
+      p_http_status: befund.httpStatus,
+      p_contact_id: befund.contactId,
+      p_survey_id: befund.surveyId,
+      p_coach_member_id: befund.coachMemberId,
+      p_fall: befund.fall,
+      p_response_body: safeString(antwort.roh, 4000),
+      p_error_message: befund.fehler,
+    })
+  );
+
+  if (!befund.erfolg) {
+    // 🔴 Auch ein 2xx ohne contact_id landet hier. Ein Erfolg ohne Kennung ist keiner —
+    // die Wiederholung ist dank submissionId gefahrlos und liefert sie nach.
+    throw new Error(safeString(befund.fehler, 500) || 'contacts_quiz_ohne_kennung');
+  }
+
+  // Die Kennungen zurueck an den Lead. Das ist ein Datenpfad und deshalb NICHT gekapselt:
+  // Scheitert er, scheitert der Auftrag und wird wiederholt — die Gegenstelle antwortet
+  // dann `duplicate: true` mit denselben Kennungen.
+  await supabaseRequest(`lead_state?lead_hash=eq.${encodeURIComponent(leadHash)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify({
+      mysql_contact_id: befund.contactId,
+      mysql_survey_id: befund.surveyId,
+      sync_status: 'contacts_quiz_synced',
+      updated_at: new Date().toISOString(),
+    }),
+  });
+
+  return {
+    success: true,
+    lead_hash: leadHash,
+    submission_id: submissionId,
+    duplicate: befund.duplikat,
+    http_status: befund.httpStatus,
+    contact_id: befund.contactId,
+    survey_id: befund.surveyId,
+    // Wem der Kontakt nach der Doppelvergabe-Kontrolle gehoert. Daran haengt Strang M;
+    // die Duplikat-Antwort traegt es nicht mehr, deshalb steht es hier UND im Protokoll.
+    coach_member_id: befund.coachMemberId,
+    case: befund.fall,
+  };
+}
+
 async function processJob(job, workerId) {
   try {
     if (!SUPPORTED_SYNC_TYPES.has(job.sync_type)) {
       throw new Error(`unsupported_sync_type:${job.sync_type}`);
     }
 
-    const responseData = MYSQL_SYNC_TYPES.has(job.sync_type)
-      ? await callN8nUpdateResult(job)
-      : await sendHotLeadCoachEmail(job);
+    let responseData;
+    if (MYSQL_SYNC_TYPES.has(job.sync_type)) {
+      responseData = await callN8nUpdateResult(job);
+    } else if (job.sync_type === CONTACTS_QUIZ_SYNC_TYPE) {
+      responseData = await sendeContactsQuizUebermittlung(job);
+    } else {
+      responseData = await sendHotLeadCoachEmail(job);
+    }
     await supabaseRpc('mark_outbox_done', {
       p_job_id: job.id,
       p_worker_id: workerId,
