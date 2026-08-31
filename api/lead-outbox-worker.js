@@ -30,15 +30,14 @@ const {
   normalisiereSlug,
   vergleiche,
 } = require('../server/berater-verzeichnis');
+const { beraterAusMysql } = require('../server/legacy/berater');
+const { STELLEN, beraterAufloesen } = require('../server/berater-aufloesen');
 
 const N8N_UPDATE_RESULT_URL = process.env.N8N_UPDATE_RESULT_URL;
 const N8N_UPDATE_RESULT_SECRET = String(process.env.N8N_UPDATE_RESULT_SECRET || '').trim();
 const WORKER_SECRET = process.env.LEAD_OUTBOX_WORKER_SECRET || process.env.BRIDGE_KEY;
 const BRIDGE_URL = process.env.BRIDGE_URL || 'https://ac-reconnect.com/db-bridge.php';
 const BRIDGE_KEY = process.env.BRIDGE_KEY;
-const COACH_LOOKUP_SOURCE = String(process.env.COACH_LOOKUP_SOURCE || 'bridge')
-  .trim()
-  .toLowerCase();
 const POSTMARK_SERVER_TOKEN = process.env.POSTMARK_SERVER_TOKEN;
 const POSTMARK_FROM = process.env.POSTMARK_FROM || 'Activecenter-Support <mail@mail.hl-support.biz>';
 const POSTMARK_MESSAGE_STREAM = process.env.POSTMARK_MESSAGE_STREAM || 'outbound';
@@ -693,42 +692,30 @@ async function lookupCoachUeberBridge(normalizedSlug) {
   return data;
 }
 
-// 🔴 COACH_LOOKUP_SOURCE steuert, woher die Berateridentitaet kommt:
-//   'bridge'  (Standard) HTTP an ac-reconnect.com/db-bridge.php - Verhalten wie bisher
-//   'beide'   beides abfragen, die BRIDGE entscheidet weiterhin, Abweichungen werden
-//             protokolliert. Der Schattenlauf vor dem Umschalten.
-//   'verzeichnis' nur leads.berater - kein Fremdaufruf mehr
-// Der Standard ist bewusst 'bridge': ein Deploy ohne gesetzte Variable aendert nichts.
+// 🔴 Die Berateridentitaet kommt aus EINEM Aufloeser — fuer alle vier Stellen des
+// Projekts derselbe (server/berater-aufloesen.js). Welche Quelle entscheidet, steuert
+// COACH_LOOKUP_SOURCE; der Standard ist 'bridge', ein Deploy ohne Variable aendert nichts.
+// Der Altwert 'beide' wird weiter verstanden (Bridge entscheidet, Verzeichnis wird
+// gemessen), damit der laufende Schattenlauf nicht abreisst.
 async function lookupCoach(slug) {
   const normalizedSlug = normalisiereSlug(slug);
 
-  if (COACH_LOOKUP_SOURCE === 'verzeichnis') {
-    return beraterAusVerzeichnis(normalizedSlug, supabaseJson);
-  }
+  const { data } = await beraterAufloesen({
+    slug: normalizedSlug,
+    stelle: STELLEN.MAIL,
+    env: process.env,
+    vergleiche,
+    quellen: {
+      bridge: async () => {
+        const berater = await lookupCoachUeberBridge(normalizedSlug);
+        return { status: 200, data: berater || { found: false } };
+      },
+      verzeichnis: (s) => beraterAusVerzeichnis(s, supabaseJson),
+      mysql: (s) => beraterAusMysql(s),
+    },
+  });
 
-  const ausBridge = await lookupCoachUeberBridge(normalizedSlug);
-
-  if (COACH_LOOKUP_SOURCE === 'beide') {
-    // Nur messen, nie entscheiden. Ein Fehler im Verzeichnisweg darf den Versand
-    // nicht gefaehrden - deshalb faengt der Schattenvergleich alles ab.
-    try {
-      const ausVerzeichnis = await beraterAusVerzeichnis(normalizedSlug, supabaseJson);
-      const abweichungen = vergleiche(ausBridge, ausVerzeichnis);
-      console.warn(
-        '[berater-vergleich] ' +
-          JSON.stringify({
-            slug: normalizedSlug,
-            bridge_gefunden: Boolean(ausBridge),
-            verzeichnis_gefunden: Boolean(ausVerzeichnis),
-            abweichungen,
-          })
-      );
-    } catch (error) {
-      console.warn(`[berater-vergleich] Verzeichnisweg fehlgeschlagen: ${error.message}`);
-    }
-  }
-
-  return ausBridge;
+  return data && data.found ? data : null;
 }
 
 async function sendPostmark(message) {
@@ -865,6 +852,7 @@ function buildHotLeadEmail({ lead, coach, answers, job }) {
     HtmlBody: html,
     TextBody: text,
     MessageStream: POSTMARK_MESSAGE_STREAM,
+    Tag: 'hot_lead',
     Metadata: {
       lead_hash: lead.lead_hash,
       member_id: safeString(lead.member_id, 80),
