@@ -290,3 +290,29 @@ mit `env_missing` und sendet **niemals** unsigniert oder ersatzweise woandershin
 Empfänger: `contacts-activecenter-legacy` `f7882db` (`QuizWebhookController.php`,
 `SurveyPayload.php`, `SurveyIntake.php`, `LegacySurveyResponse.php`, `config/quiz.php`,
 `config/surveys.php`).
+
+---
+
+## 9. Nachtrag 31.08.2026 — die dritte Mail
+
+Beim ersten Probelauf kam heraus: Je Lead gingen **drei** Mails an den Berater, nicht zwei.
+
+| Mail | Woher | Steuerbar über |
+| --- | --- | --- |
+| „Neuer Kontakteintrag" | `NotificationService::sendTypeformNotification` → ActiveCenter-Benachrichtigungsweg | 🔴 **bisher gar nichts** |
+| „Neuer Kontakt aus: Business" | Post Processor, Mail 1 | n8n |
+| Zugangsmail | Post Processor, Mail 2 | n8n |
+
+Die erste hängt weder an `contact_email` noch an `coach_email`. Am Quelltext des **alten**
+Weges nachgesehen: Dort steht derselbe Aufruf (`TypeformWebhookController.php:368`)
+ebenfalls **außerhalb** jeder `noemail`-Prüfung — jene deckt nur `sendEmailToContact`
+(`:432`) und `sendEmailToCoachOnNewContactCreated` (`:533`). Das Quiz bekam diese Mail
+also auch bisher; es ist keine Regression des Umbaus, sondern eine verdeckte Kopplung.
+
+**Behoben** (contacts `10e9251`): Registry-Schalter `kartei_benachrichtigung`, Standard
+`true`, für `quiz-erfolgscode` auf `false`. Im ausgelieferten Container nachgemessen —
+Quiz `false`, Umfragen unverändert `(nicht gesetzt ⇒ true)`.
+
+⚠️ Der Test dazu prüft die **Einreihung**, nicht den HTTP-Aufruf: Die Benachrichtigung
+geht über `dispatch(closure)`, und mit `Queue::fake()` wird die Closure nie ausgeführt —
+ein `Http::assertNothingSent()` wäre immer grün gewesen und hätte nichts bewiesen.
