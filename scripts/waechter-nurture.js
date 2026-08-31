@@ -17,7 +17,7 @@
  * den Ausfall nicht anzeigen. Deshalb misst dieser Wächter ausschliesslich Zustände, die
  * sich im Fehlerfall zwangsläufig ändern.
  *
- * ZWEI PRÜFUNGEN
+ * SECHS PRÜFUNGEN
  * --------------
  * W1  Kappungsnähe. PostgREST begrenzt serverseitig (`db-max-rows`, hier 1000). Kommen
  *     genau so viele Zeilen zurück wie die Grenze, wurde GARANTIERT abgeschnitten — das
@@ -28,6 +28,12 @@
  * W2  Ergebnis statt Vorgang. Gibt es fällige Empfänger, die seit Stunden keine Mail
  *     bekommen? Und liegt die letzte Sendung länger zurück, als bei fälligen Kandidaten
  *     erklärbar wäre?
+ *
+ * W3  Strukturell Unerreichbare · W4 Anzeigen-Konversion · W5 unvollständige Antwortsätze.
+ *
+ * W6  Übergaben an contacts, die nirgends ankommen (seit B3, 31.08.2026). Ab dem Modus
+ *     `an` entsteht die Kartei-Zeile über die Outbox; ein toter Auftrag heisst: Lead da,
+ *     aber kein Berater erfährt davon. Nur im Plattform-Modus messbar.
  *
  * REIN LESEND. Supabase über die Management-API mit erzwungenem `read_only`.
  *
@@ -417,13 +423,106 @@ async function w5AntwortsaetzeUnvollstaendig() {
   return befunde;
 }
 
+/**
+ * W6 — Übergaben an contacts, die nirgends ankommen (Strang B, ab B3).
+ *
+ * 🔴 Warum es diese Prüfung gibt: Ab dem Modus `an` entsteht die Kartei-Zeile eines
+ * Opt-ins NICHT mehr im selben Aufruf, sondern über die Outbox. Scheitert die Zustellung
+ * dauerhaft, stirbt der Auftrag nach acht Versuchen (~4 h 22 min) — und dann steht der
+ * Lead vollständig in `lead_state`, aber der Berater erfährt nie von ihm: keine
+ * Kartei-Zeile, keine Mail 1, keine Mail 2. Genau die Klasse „stiller Verlust", die
+ * dieses Projekt schon dreimal getroffen hat, nur an einer neuen Stelle.
+ *
+ * Drei Befunde, absichtlich getrennt:
+ *   - `dead`: endgültig verloren, bis jemand ihn abtropfen lässt   -> ALARM
+ *   - `failed`/`pending` älter als 2 h: hängt, aber lebt noch      -> WARNUNG
+ *   - Protokollzeilen ohne `contact_id` älter als 2 h              -> WARNUNG
+ *
+ * Die dritte Prüfung ist keine Wiederholung der zweiten: Sie schlägt auch dann an, wenn
+ * contacts mit 2xx antwortet, aber ohne Kennung — der stille Fehler vom 26.08.2026.
+ *
+ * Ist der Modus `aus` (heute), gibt es schlicht keine Zeilen und die Prüfung schweigt.
+ */
+async function w6ContactsUebergabe() {
+  // Die Tabellen liegen ausschliesslich auf der Plattform. Im Supabase-Modus wuerde die
+  // Abfrage den ganzen Waechter abbrechen — deshalb hier ein sauberes Nichts statt eines
+  // Fehlers. Supabase ist seit dem 28.08. ohnehin eingefroren.
+  if (!istPlattform()) return [];
+
+  const befunde = [];
+
+  const auftraege = await frage(`
+    select status, count(*) as n,
+           round(extract(epoch from (now() - min(created_at))) / 3600) as aeltester_h
+      from leads.lead_sync_outbox
+     where sync_type = 'contacts_quiz_submission'
+       and status in ('dead', 'failed', 'pending', 'processing')
+     group by status`);
+
+  const je = (s) => auftraege.find((z) => z.status === s) || { n: 0, aeltester_h: 0 };
+  const tot = Number(je('dead').n || 0);
+  if (tot > 0) {
+    befunde.push({
+      stufe: 'ALARM',
+      name: 'Contacts-Übergabe endgültig gescheitert',
+      zeilen: tot,
+      wo: 'leads.lead_sync_outbox, sync_type = contacts_quiz_submission, status = dead',
+      text: `${tot} Opt-ins sind NICHT in der Kontaktkartei angekommen und werden nicht `
+        + 'mehr wiederholt — für sie gibt es keine Mail 1 und keine Mail 2. Der Lead selbst '
+        + 'steht in lead_state, er ist also nicht weg, aber niemand erfährt von ihm. '
+        + 'Ursache im Zustellprotokoll nachsehen (leads.contacts_zustellprotokoll, '
+        + 'error_message/http_status), beheben, dann abtropfen lassen: next_attempt_at '
+        + 'zurücksetzen und status auf pending, oder den eingefrorenen Payload einzeln '
+        + 'senden. Dank submissionId ist beides beliebig wiederholbar.',
+    });
+  }
+
+  const haengend = ['failed', 'pending', 'processing']
+    .map((s) => ({ status: s, ...je(s) }))
+    .filter((z) => Number(z.n) > 0 && Number(z.aeltester_h) >= 2);
+  if (haengend.length) {
+    befunde.push({
+      stufe: 'WARNUNG',
+      name: 'Contacts-Übergabe hängt',
+      zeilen: haengend.reduce((s, z) => s + Number(z.n), 0),
+      wo: 'leads.lead_sync_outbox, sync_type = contacts_quiz_submission',
+      text: haengend.map((z) => `${z.n}× ${z.status} (ältester ${z.aeltester_h} h)`).join(', ')
+        + ' — die Wiederholungen decken 4 h 22 min ab. Wer länger hängt, wird sterben. '
+        + 'Läuft der Outbox-Worker? Antwortet contacts?',
+    });
+  }
+
+  const protokoll = await frage(`
+    select count(*) as n,
+           round(extract(epoch from (now() - min(created_at))) / 3600) as aeltester_h
+      from leads.contacts_zustellprotokoll
+     where status in ('pending', 'failed')
+       and contact_id is null
+       and created_at < now() - interval '2 hours'`);
+  const offen = Number((protokoll[0] || {}).n || 0);
+  if (offen > 0) {
+    befunde.push({
+      stufe: 'WARNUNG',
+      name: 'Zustellprotokoll ohne Kennung',
+      zeilen: offen,
+      wo: 'leads.contacts_zustellprotokoll',
+      text: `${offen} Übermittlungen älter als 2 Stunden haben keine contact_id — `
+        + `ältester ${(protokoll[0] || {}).aeltester_h} h. Ein 2xx ohne Kennung ist kein `
+        + 'Erfolg; genau dieser stille Fehler steckte am 26.08.2026 in der alten Route.',
+    });
+  }
+
+  return befunde;
+}
+
 (async () => {
   const w1 = await w1Kappungsnaehe();
   const w2 = await w2ErgebnisStattVorgang();
   const w3 = await w3StrukturellUnerreichbar();
   const w4 = await w4AnzeigenKonversion();
   const w5 = await w5AntwortsaetzeUnvollstaendig();
-  const alle = [...w1, ...w2.befunde, ...w3, ...w4, ...w5];
+  const w6 = await w6ContactsUebergabe();
+  const alle = [...w1, ...w2.befunde, ...w3, ...w4, ...w5, ...w6];
   const still = process.argv.includes('--still');
 
   const jsonIndex = process.argv.indexOf('--json');
