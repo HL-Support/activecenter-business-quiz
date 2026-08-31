@@ -182,6 +182,12 @@ Diesen Wert zu erben hiesse, mit einem öffentlich bekannten Geheimnis zu starte
 
 Jeder Schritt hat einen Beweis, der **vor** dem nächsten erbracht wird.
 
+> **Die drei Stränge sind einzeln ausgearbeitet.** Dieses Dokument ist die Übersicht; die
+> Schritt-für-Schritt-Pläne mit Beweisen, Rückwegen und Frühwarnungen stehen in:
+> **[umsetzung-a-berateridentitaet.md](umsetzung-a-berateridentitaet.md)** ·
+> **[umsetzung-b-lead-uebergabe.md](umsetzung-b-lead-uebergabe.md)** ·
+> **[umsetzung-m-mailweg-ins-projekt.md](umsetzung-m-mailweg-ins-projekt.md)**
+
 ### Strang A — Berateridentität (Lesen)
 
 | # | Schritt | Beweis |
@@ -207,16 +213,23 @@ Bis A3 steht, gilt jene Reihe unverändert — **nie beide gleichzeitig**.
 
 ---
 
-### Strang C — die Mails ins Projekt holen, dann den Poller abschalten
+### Strang M — die Mails ins Projekt holen, dann den Poller abschalten
 
 Ergibt sich aus der Entscheidung „alles Lead-Bezogene im Repo". Erst anfangen, wenn B4
 ruhig läuft.
 
+> 🔴 **Warum M und nicht C:** „C1" ist in
+> [benachrichtigungsweg-auf-plattform.md](benachrichtigungsweg-auf-plattform.md) bereits für
+> den Postprozessor-Extrakt vergeben. Eine Doppelbelegung wäre genau die Art Falle, in die
+> eine spätere Sitzung tritt.
+
 | # | Schritt | Beweis |
 | --- | --- | --- |
-| **C1** | **Mail 1 (Berater) und Mail 2 (Lead) in die Outbox holen** — dieselben Vorlagen, dieselben Texte, aber als Auftragsart neben `coach_hot_lead_email`. Vorlagen aus der n8n-Bibliothek übernehmen (1.708 Zeilen, 53 Funktionen, Extrakt liegt in `audits/c1-postprocessor-extrakt/`). | Zeichengleiche Mail im Schattenlauf: dieselbe Betreffzeile, derselbe HTML-Rumpf wie heute — verglichen, nicht angenommen |
-| **C2** | **Die Nebenaufgaben verteilen**, die heute der Post Processor miterledigt: Mautic-Kontakt, Adressprüfung (ZeroBounce über `/api/validate-email`), Resume-Token. 🔴 Das ist der eigentliche Aufwand, nicht die Mails. | Jede Aufgabe hat nachweislich ein neues Zuhause |
-| **C3** | **Poller abschalten** (`AC - Lead Post Processor`, 36 Knoten) | Opt-in → Mail ohne die 2–5 Minuten Verzug; keine Zeile mehr in `lead_processing_jobs` |
+| **M1** | **Mail 1 (Berater) und Mail 2 (Lead) in die Outbox holen** — dieselben Vorlagen, dieselben Texte, als Auftragsart neben `coach_hot_lead_email`. Vorlagen aus der n8n-Bibliothek (1.708 Zeilen, 53 Funktionen; Extrakt in `audits/c1-postprocessor-extrakt/`). | Zeichengleiche Mail im Schattenlauf: gleicher Betreff, gleicher HTML-Rumpf — verglichen, nicht angenommen |
+| **M2** | **Die Nebenaufgaben verteilen**, die der Post Processor miterledigt: Mautic-Kontakt, Adressprüfung (ZeroBounce), Resume-Token, Jobverwaltung. 🔴 Das ist der eigentliche Aufwand, nicht die Mails. | Jede Aufgabe hat nachweislich ein neues Zuhause |
+| **M3** | **Poller deaktivieren** (`AC - Lead Post Processor`, 36 Knoten) — deaktivieren, nicht löschen. | Opt-in → Mail ohne die 2–5 Minuten Verzug; keine neue Zeile mehr in `lead_processing_jobs` |
+
+Ausgearbeitet in **[umsetzung-m-mailweg-ins-projekt.md](umsetzung-m-mailweg-ins-projekt.md)**.
 
 Danach ist der Verzug weg, die 1.708-Zeilen-Bibliothek in n8n ist weg, und der Lead nimmt
 **einen** Weg statt zwei.
