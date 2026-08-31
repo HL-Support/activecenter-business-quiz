@@ -363,10 +363,41 @@ Zahlen in diesem Dokument (Nachtrag).
 (eingebaut, `Code - Zeilen pruefen`); zusätzlich nach der Änderung zwei Takte (30 min)
 die Ausführungsliste beobachten.
 
-🟡 **Falls Messung 2 nennenswerte Abweichungen zeigt** (Kaskade ≠ Slug), ist das eine
-**Entscheidungsvorlage für Markus**, bevor M4 gebaut wird: entweder die Kaskadenlogik
-gegen die Plattform-Daten nachbauen (E-Mail-Match über `lead_state`) oder den Slug-Weg
-als neue Wahrheit festlegen. Nicht stillschweigend entscheiden.
+### 🔴 Entscheidung Markus, 31.08.2026 — die Kaskade ist damit erledigt
+
+Die offene Frage „Kaskade nachbauen oder auf Slug vereinfachen" ist **beantwortet**, und
+zwar anders, als sie hier gestellt war. Sie zerfällt in zwei Dinge, die nicht am selben Ort
+gehören:
+
+**1. Die Seitenauflösung geht über den Slug — ausschliesslich.** Wer auf die Seite kommt,
+übergibt nur den Slug; daraus werden über `users.sub_domain` die Beraterdaten gelesen, und
+damit hat die Seite ihren Berater. Hier gibt es **keine** Kaskade und soll keine geben.
+Strang A ist damit richtig gebaut.
+
+**2. Die Zuordnung des Kontakts passiert beim SENDEN, nicht beim Anzeigen.** Dort läuft die
+Doppelvergabe-Kontrolle — beraterübergreifende Suche über die E-Mail, drei Fälle,
+4-Monats-Bestellfrist, Abo-Umleitung an die Upline. **Dabei kann sich der Berater ändern,
+und das ist gewollt.** Diese Prüfungen bleiben vollständig erhalten; sie ziehen nur von
+n8n nach `QuizIntake` in contacts um — dieselbe Logik, die Umfragen unter
+`SurveyIntake::zuordnen()` bereits fährt. Einzelheiten und Belege:
+[umsetzung-b-lead-uebergabe.md §4a](umsetzung-b-lead-uebergabe.md).
+
+**Damit ändert sich I3 in der Inventur oben:** Der Berater kommt künftig **nicht** aus einer
+SQL-Kaskade über die Kontakt-Historie, sondern
+- für die **Anzeige** aus dem Slug (Strang A), und
+- für den **Versand** aus dem Feld `coach_member_id`, das die Antwort von `/webhook/quiz`
+  zurückmeldet.
+
+🔴 **Für M4 heisst das konkret:** Der Outbox-Auftrag für **Mail 1** darf **nicht** an den
+Berater des Slugs adressiert werden, sondern an den **zurückgemeldeten**. Sonst
+benachrichtigen wir bei jeder Umleitung den Falschen — und Umleitungen sind kein
+Randfall, sondern der Zweck der Kontrolle. Der Auftrag entsteht deshalb **erst nach**
+erfolgreicher Übergabe und trägt den Empfänger aus der Antwort.
+
+Die Messung „wie oft weicht die Kaskade vom Slug ab" (Messung 2) bleibt trotzdem
+sinnvoll — **nicht mehr als Entscheidungsgrundlage**, sondern als Erwartungswert: Sie sagt
+voraus, wie oft `case = fremder_kontakt_bleibt` künftig auftreten wird. Weicht die
+Wirklichkeit später stark davon ab, ist etwas falsch verdrahtet.
 
 ### M2 — Vorlagen-Port mit Golden-Tests (kein Laufzeit-Effekt)
 

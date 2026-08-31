@@ -125,6 +125,25 @@ Konsequenzen für diesen Plan:
 
 ## 2. Zielbild
 
+> ### 🟢 Bestätigt am 31.08.2026 (Markus): Slug — und sonst nichts
+>
+> *„Es muss ja über den Slug gehen. Wenn jemand auf die Homepage kommt, übergibt er nur den
+> Slug, nichts anderes. Der Slug sucht dann in der MySQL-Tabelle unter `sub_domain` bei
+> `users` die Beraterdaten. Dann hat die Seite die Beraterdaten."*
+>
+> Die Auflösung in diesem Strang ist damit **bewusst einstufig**. Die dreistufige Kaskade
+> des Post Processors (Kontakt-Historie → E-Mail-Treffer → Slug) wird hier **nicht**
+> nachgebaut — sie gehört nicht in die Anzeige.
+>
+> 🔴 **Sie verschwindet aber nicht**, sondern zieht dorthin, wo sie hingehört: in die
+> **Übergabe**. Beim Senden läuft weiterhin die volle Doppelvergabe-Kontrolle
+> (beraterübergreifende Suche, drei Fälle, 4-Monats-Bestellfrist, Abo-Umleitung), und dabei
+> **kann sich der Berater ändern**. Das ist gewollt und bleibt vollständig erhalten — siehe
+> [umsetzung-b-lead-uebergabe.md §4a](umsetzung-b-lead-uebergabe.md).
+>
+> **Für Strang A folgt daraus nichts** ausser der Bestätigung, dass die schmale View
+> genügt: Sie muss nur den Slug auflösen können, nicht Kontakte zuordnen.
+
 ```text
                        ┌──────────── server/berater-aufloeser.js ────────────┐
  S1 Funnel ──────────► │  EIN Auflöser, Quelle per Schalter:                 │

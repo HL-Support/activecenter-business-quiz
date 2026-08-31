@@ -323,6 +323,83 @@ Contacts ──(Unique-Index submission_id)──► genau EINE Kartei-Zeile, so
 
 ---
 
+## 4a. 🔴 Die Zuordnung: welchem Berater der Kontakt am Ende gehört
+
+**Entscheidung Markus, 31.08.2026, und am Quelltext beider Wege nachgeprüft.**
+
+Die **Seitenauflösung** geht ausschliesslich über den **Slug** — wer auf die Seite kommt,
+bringt nur ihn mit, und daraus werden die Beraterdaten gelesen (Strang A, `users.sub_domain`).
+Dort gibt es **keine** Kaskade und soll auch keine geben.
+
+🔴 **Beim Senden ist es etwas anderes.** Dort muss dieselbe Doppelvergabe-Kontrolle laufen
+wie bisher — und dabei **kann sich der Berater ändern**. Das ist gewollt und darf nicht
+verlorengehen.
+
+### Was der alte Weg heute tut (`TypeformWebhookController.php:129-200`)
+
+1. Sucht **beraterübergreifend**: `email` **ODER** (`phone_prefix` + `phone_number`),
+   `latest('created_at')` gewinnt.
+2. Verzweigt in die Szenarien 1–7 (`logger("Scenario …")`), Kern:
+   gehört der Kontakt demselben Berater → nur Formular; gehört er einem anderen → neuer
+   Kontakt, **ausser** bei Bestellung binnen **4 Monaten** (`isLastOrderIn(4)`), dann bleibt
+   er beim bisherigen.
+3. **Abo-Umleitung** gibt es dort ebenfalls (`:546`): hat der angefragte Berater kein Abo,
+   geht der Kontakt an die nächste Upline **mit** Abo.
+
+### Was Umfragen daraus gemacht hat (`SurveyIntake.php:203-253`)
+
+Dieselben Regeln, auf drei Fälle eingedampft — mit zwei bewussten **Korrekturen**:
+
+| Fall | Bedingung | Wirkung |
+| --- | --- | --- |
+| `neu` | kein Kontakt gefunden | Kontakt + Kartei-Zeile |
+| `eigener_kontakt` | gehört diesem Berater | nur Kartei-Zeile, Kontakt angereichert |
+| `fremder_kontakt_bleibt` | gehört einem anderen **und** Bestellung binnen Frist | bleibt beim bisherigen Berater, Umleitung wird vermerkt und gemeldet |
+| `fremder_kontakt_neu` | gehört einem anderen, keine Bestellung in Frist | neuer Kontakt beim neuen Berater |
+
+🔴 **Korrektur 1:** Verglichen wird mit dem **aufgelösten** Berater, nicht mit der
+eingereichten Kennung. Der alte Weg vergleicht gegen `$hidden['member_id']` — bei einem
+abo-umgeleiteten Kontakt entsteht dadurch ein **zweiter Kontakt beim selben Berater**.
+
+🔴 **Korrektur 2:** Ein **fremder** Kontakt wird **nicht** angereichert. Bis zum 27.08.2026
+wanderten Telefonnummer und E-Mail aus einer fremden Einreichung in den Kontakt eines
+Dritten.
+
+Szenario 5 des alten Wegs — die komplizierteste Verzweigung — kam in 14 Tagen **kein
+einziges Mal** vor.
+
+### Was das für `/webhook/quiz` heisst
+
+- **`QuizIntake` übernimmt `zuordnen()` von `SurveyIntake` unverändert**, inklusive beider
+  Korrekturen und der 4-Monats-Frist (`config('surveys.doppelvergabe_bestellfrist_monate')`).
+  Damit sind „dieselben Prüfungen wie bisher" **und** „wie bei Umfragen" zugleich erfüllt.
+- **Der Vertrag muss `meta.memberId` führen** — ohne sie kann contacts weder auflösen noch
+  vergleichen.
+- 🟢 **Telefon ist für das Quiz kein Verlust.** Der alte Weg sucht zwar auch per Telefon,
+  aber **das Quiz erhebt beim Lead gar keine Nummer** (nachgeprüft: die `phone`-Stellen in
+  `App.jsx:1243/1514/1517` sind das **Berater**-Telefon für den WhatsApp-Link). Die
+  Dublettensuche läuft für Quiz-Einreichungen also schon heute nur über die E-Mail — der
+  neue Vertrag verliert dadurch nichts. Nimmt das Quiz je eine Nummer auf, sind
+  `contact.phonePrefix`/`phoneNumber` in den Vertrag aufzunehmen; der Platz ist vorgesehen.
+
+### 🔴 Folge für Strang M: die Mail geht an den **aufgelösten** Berater
+
+Die Antwort trägt `coach_member_id` (Kennung des Beraters, dem der Kontakt am Ende gehört)
+und `case` (welcher der vier Fälle eintrat) — `SurveyIntake.php` in der Antwort von
+`handle()`.
+
+Wenn Mail 1 nach Strang M im Quiz entsteht, **darf sie nicht an den Berater des Slugs
+gehen**, sondern an den, den contacts zurückmeldet. Sonst benachrichtigen wir bei jeder
+Umleitung den Falschen. Deshalb gilt für den Vertrag:
+
+- `coach_member_id` und `case` aus der Antwort werden **gespeichert** (Zustellprotokoll und
+  `lead_state`), nicht nur protokolliert.
+- Der Outbox-Auftrag für Mail 1 wird **erst nach** erfolgreicher Übergabe erzeugt und nimmt
+  den **zurückgemeldeten** Berater als Empfänger.
+- Ein `case` von `fremder_kontakt_bleibt` ist ein **Umleitungsfall** und gehört gezählt.
+
+---
+
 ## 5. Kopplung 1: der Post Processor (Mail 1 + Mail 2) muss die neue Zeile finden
 
 - Die neue Route schreibt in **dieselbe Tabelle** `typeform_surveys` (Model
