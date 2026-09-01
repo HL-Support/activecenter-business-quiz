@@ -100,10 +100,13 @@ danebenlegen (`lead_donotcontact`).
 *Ausgezählt am 31.08.2026 am laufenden Workflow und an `leads.lead_events`. Vollständige
 Standortbestimmung: [audits/2026-08-31-nurture-standortbestimmung.md](audits/2026-08-31-nurture-standortbestimmung.md).*
 
-**Acht aktive Phasen.** Jede fächert nach **einer** Dimension in vier Varianten auf:
+**Neun aktive Phasen** (seit 01.09.2026, `a1` aus dem Conversion-Plan AP5). Die
+Bestandsphasen fächern nach **einer** Dimension in vier Varianten auf; `a1` ist
+bewusst variantenlos — EINE generische Fassung je Sprache, in allen sechs:
 
 | Phase | Auslöser | Auffächerung nach |
 | --- | --- | --- |
+| `a1` | 2–24 h nach Opt-in, kein `video_started`, nur 08–21 Uhr Berlin | keine (generisch, Mautic 186–191) |
 | `a2` | 12 h nach Opt-in, kein Video | Hauptziel (`freedom`, `impact`, `security`, `growth`) |
 | `a3` | 48 h nach `a2`, tagsüber | Barriere (`vehicle`, `community`, `confidence`, `opportunity`) |
 | `b1` | 24 h nach Video 1 | Profil (`feuer`, `wind`, `wasser`, `fels`) |
@@ -121,8 +124,15 @@ sie nicht. Wer die Strecke verlängern will, aktiviert sie zuerst dort.
 
 | Sprachen | Tiefe | Vorlagen je Sprache |
 | --- | --- | --- |
-| `de`, `it`, `en` | vier Varianten je Phase | 37 (inkl. der inaktiven `a4`/`a5`) |
-| `hu`, `fr`, `ru` | **eine generische Fassung je Phase** | 8 (Mautic 162–185) |
+| `de`, `it`, `en` | vier Varianten je Phase, `a1` generisch | 38 (inkl. der inaktiven `a4`/`a5`) |
+| `hu`, `fr`, `ru` | **eine generische Fassung je Phase** | 9 (Mautic 162–185 + `a1` 189–191) |
+
+`a1`-Texte: `nurture/vorlagen/a1-kein-videostart.js` (Lesefassungen
+`nurture/vorlagen/nurture-a1-<lang>.md`). Timing und Zielgruppe der Phase liegen
+im Sender (`Code - Determine Phase`): 2–24 h nach `form_submitted_at`, kein
+`video_started`, kein CTA, Fenster 08–21 Uhr Berlin, einmalig; `a2` (12 h)
+bleibt dahinter unverändert bestehen. Die 24-h-Obergrenze verhindert beim
+Scharfschalten einen Schwall an Altleads.
 
 Der Sender fällt auf die generische Fassung zurück:
 

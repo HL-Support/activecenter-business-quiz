@@ -47,6 +47,16 @@ if (sentPhases.includes(leadData.phase)) {
 }
 
 const EMAIL_MAP = {
+  a1: {
+    // AP5: Erinnerung 'kein Videostart' - EINE generische Fassung je Sprache.
+    // Quelle: nurture/vorlagen/a1-kein-videostart.js, angelegt 01.09.2026.
+    de: { _single: 186 },
+    it: { _single: 187 },
+    en: { _single: 188 },
+    fr: { _single: 189 },
+    ru: { _single: 190 },
+    hu: { _single: 191 },
+  },
   a2: {
     de: { freedom: 13, impact: 14, security: 15, growth: 16 },
     it: { freedom: 98, impact: 99, security: 100, growth: 101 },
@@ -122,7 +132,7 @@ const EMAIL_MAP = {
 };
 
 const PHASE_DIM = {
-  a2: 'main_goal', a3: 'barrier', a4: 'profile', a5: '_single',
+  a1: '_single', a2: 'main_goal', a3: 'barrier', a4: 'profile', a5: '_single',
   b1: 'profile', b2: 'profile', c1: 'main_goal', c2: 'profile', d1: 'main_goal', d2: 'barrier',
 };
 

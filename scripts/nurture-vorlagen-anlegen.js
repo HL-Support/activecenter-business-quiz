@@ -28,7 +28,10 @@
  * Exitcode 0 = fertig · 1 = etwas ist schiefgegangen · 2 = nicht durchführbar.
  */
 
-const { PHASEN, TEXTE, RAHMEN } = require('../nurture/vorlagen/generisch-hu-fr-ru.js');
+// `--modul` erlaubt weitere Textmodule mit derselben Struktur (PHASEN/TEXTE/RAHMEN),
+// z. B. `a1-kein-videostart.js` (AP5). Standard bleibt die generische Strecke.
+const MODUL = argument('modul', 'generisch-hu-fr-ru.js');
+const { PHASEN, TEXTE, RAHMEN } = require(`../nurture/vorlagen/${MODUL}`);
 
 const ANLEGEN = process.argv.includes('--anlegen');
 const REFERENZ_ID = Number(argument('referenz', '13'));
@@ -36,6 +39,9 @@ const SPRACHEN = String(argument('sprachen', 'hu,fr,ru'))
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
+// Lesefassungs-Dateiname: das a1-Modul darf die Lesefassung der Bestandsstrecke
+// (`nurture-email-templates-<lang>.md`) nicht ueberschreiben.
+const MARKDOWN_PRAEFIX = argument('markdown-praefix', 'nurture-email-templates-');
 
 function argument(name, standard) {
   const i = process.argv.indexOf(`--${name}`);
@@ -166,7 +172,7 @@ function baueHtml(teile, inhalt, phase, emailId, sprache) {
  * und müssen im Zielsatz an der richtigen Stelle stehen.
  */
 function baueMarkdown(sprache) {
-  const NAMEN = { hu: 'Ungarisch', fr: 'Französisch', ru: 'Russisch', de: 'Deutsch' };
+  const NAMEN = { hu: 'Ungarisch', fr: 'Französisch', ru: 'Russisch', de: 'Deutsch', it: 'Italienisch', en: 'Englisch' };
   const zeilen = [
     `# Nurture-Mails — ${NAMEN[sprache] || sprache} (generische Fassung)`,
     '',
@@ -231,7 +237,7 @@ function baueMarkdown(sprache) {
     const fs = require('fs');
     const path = require('path');
     for (const sprache of SPRACHEN) {
-      const ziel = path.join(__dirname, '..', 'nurture', 'vorlagen', `nurture-email-templates-${sprache}.md`);
+      const ziel = path.join(__dirname, '..', 'nurture', 'vorlagen', `${MARKDOWN_PRAEFIX}${sprache}.md`);
       fs.writeFileSync(ziel, baueMarkdown(sprache));
       console.log(`  geschrieben: ${path.relative(path.join(__dirname, '..'), ziel).split(path.sep).join('/')}`);
     }

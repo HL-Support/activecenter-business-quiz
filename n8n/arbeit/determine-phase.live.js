@@ -7,13 +7,14 @@ const rows = flach($input.all());
 if (!rows || !rows.length) return [];
 
 const now = Date.now();
+const H2 = 2 * 60 * 60 * 1000;
 const H24 = 24 * 60 * 60 * 1000;
 const H12 = 12 * 60 * 60 * 1000;
 const H48 = 48 * 60 * 60 * 1000;
 
 // A2/B1/C1/D1 bleiben die normalen ersten Erinnerungen.
 // A3/B2/C2/D2 sind jetzt vollst?ndig aktiv: 48h nach der ersten Erinnerung, tagsueber.
-const ACTIVE_PHASES = ['a2', 'b1', 'c1', 'd1', 'a3', 'b2', 'c2', 'd2'];
+const ACTIVE_PHASES = ['a1', 'a2', 'b1', 'c1', 'd1', 'a3', 'b2', 'c2', 'd2'];
 const SECOND_PHASES = ['a3', 'b2', 'c2', 'd2'];
 // The recovery send cap is applied only after contact, DNC, template, coach and resume-link validation.
 
@@ -30,6 +31,10 @@ const secondPhaseWindowOpen = berlinHour >= 6 && berlinHour < 18;
 const allEvents = flach($('Supabase - Get Test Events').all());
 const testEvents = allEvents.filter(e => e.event_name === 'test_lead_marked' || e.event_name === 'test_lead_unmarked');
 const sentEvents = allEvents.filter(e => e.event_name === 'nurture_sent');
+// AP5 (a1): Wer Video 1 schon GESTARTET hat, braucht keine Starterinnerung.
+const videoStartHashes = new Set(
+  allEvents.filter(e => e.event_name === 'video_started').map(e => e.lead_hash).filter(Boolean)
+);
 
 // Group all sessions by person (email_normalized)
 const groups = {};
@@ -121,6 +126,18 @@ for (const email in groups) {
     } else if (!a2SentAt) {
       const ref = winner.form_submitted_at;
       if (ref && (now - new Date(ref).getTime()) >= H12) phase = 'a2';
+      else if (ref) {
+        // AP5 (Conversion-Plan 2026-09-01): a1 = Erinnerung 'kein Videostart',
+        // 2-24 h nach dem Opt-in, nur 08-21 Uhr Berlin, einmalig. Die
+        // 24-h-Obergrenze verhindert beim Scharfschalten einen Schwall an
+        // Altleads - die laufen weiter ueber a2; a2 (12 h) bleibt dahinter
+        // unveraendert bestehen.
+        const alterMs = now - new Date(ref).getTime();
+        const a1SentAt = latestSentForPerson(email, sessions, 'a1');
+        const hatVideoStart = sessions.some(s => s.lead_hash && videoStartHashes.has(s.lead_hash));
+        const a1Fenster = berlinHour >= 8 && berlinHour < 21;
+        if (!a1SentAt && !hatVideoStart && a1Fenster && alterMs >= H2 && alterMs < H24) phase = 'a1';
+      }
     }
   } else if (rank === 1) {
     const b1SentAt = latestSentForPerson(email, sessions, 'b1');

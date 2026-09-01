@@ -278,6 +278,27 @@ versionId 6cc5bb81…, Vorher-Stand in
 - Akzeptanz: Trockenlauf im n8n gegen Testleads; keine Doppelversände
   (Phase-Marker analog `a2SentAt`).
 
+**✅ Umgesetzt und live seit 01.09.2026 ~21:40 (Sender RqKSRTgFv8mv04H2,
+versionId cc063a21…, Vorher-Stand in
+`n8n/backups/ac-quiz-nurture-email-sender-2026-09-01-vor-a1.json`):**
+- Neue Phase `a1`: 2–24 h nach `form_submitted_at`, kein `video_started`, kein
+  CTA, Fenster 08–21 Uhr Berlin, einmalig (Dedupe doppelt: `nurture_sent`-Event
+  + Mautic `ac_nurture_sent_phases`). `a2` (12 h) bleibt unverändert dahinter.
+  Die 24-h-Obergrenze verhindert beim Scharfschalten den Altlead-Schwall; der
+  Send-Cap (25/Phase, 60/Lauf) greift auch für `a1`.
+- 6 Mautic-Vorlagen 186–191 (`AC Nurture - A1 - <LANG> - generisch`), EINE
+  generische Fassung je Sprache, Knopf `target=videos` via Resume-Link-Feld.
+  Texte: `nurture/vorlagen/a1-kein-videostart.js`, Lesefassungen
+  `nurture/vorlagen/nurture-a1-<lang>.md` (fr/ru/hu noch nicht muttersprachlich
+  gegengelesen — gleiche Lage wie generische Strecke).
+- Trockenlauf: 11 Szenarien gegen die gepatchte Phasenlogik
+  (`scripts/n8n-validate-ap5-phase.js`) — Fenster, Altersgrenzen, video_started,
+  CTA, Testlead-Ausschluss, a2-Vorrang, Bestandsphasen unberührt: alle grün.
+- Deploy nach agent-core-Protokoll (API-PUT + Container-Neustart). Erste echte
+  Kandidaten frühestens beim 08:00-Berlin-Lauf am 02.09. — **Nachkontrolle:
+  ersten Morgenlauf im n8n prüfen (Phase a1 im Lauf, keine Fehler).**
+- „Fast durch“-Variante bewusst NICHT hier: fließt in `a2`/b-Phasen (AP8).
+
 ### AP6 — Kleine Robustheit + Messbarkeit (Frontend)
 1. `result_viewed`-Event beim Mount der Ergebnisseite (analog `optin_viewed`,
    `App.jsx:534-543`) — macht das 25-%-Leck trennbar.
