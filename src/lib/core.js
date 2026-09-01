@@ -1343,17 +1343,23 @@ export function isPaidLeadAttribution() {
   }
 }
 
+// Die reine Zuteilung, getrennt exportiert: so kann der Vertragstest
+// Determinismus und ~50/50-Aufteilung messen, ohne den Schalter anzufassen.
+export function optinExperimentVariantFromHash(hash) {
+  const value = String(hash || '');
+  if (!value) return null;
+  let sum = 0;
+  for (let i = 0; i < value.length; i += 1) sum = (sum + value.charCodeAt(i)) % 9973;
+  return sum % 2 === 0 ? 'a' : 'b';
+}
+
 // 'a' | 'b' solange der Test laeuft UND die Person ueber eine Anzeige kam,
 // sonst null (unveraendertes Optin, keine Kennzeichnung in den Ereignissen).
 // Deterministisch aus dem lead_hash: dieselbe Person sieht bei Wiederkehr
 // dieselbe Variante, ohne dass irgendetwas Neues gespeichert wird.
 export function getOptinExperimentVariant(slug = getCurrentSlug()) {
   if (!OPTIN_PHONE_EXPERIMENT.enabled || !isPaidLeadAttribution()) return null;
-  const hash = String(getActiveLeadRun(slug)?.lead_hash || '');
-  if (!hash) return null;
-  let sum = 0;
-  for (let i = 0; i < hash.length; i += 1) sum = (sum + hash.charCodeAt(i)) % 9973;
-  return sum % 2 === 0 ? 'a' : 'b';
+  return optinExperimentVariantFromHash(getActiveLeadRun(slug)?.lead_hash);
 }
 
 async function performQuizSubmission(

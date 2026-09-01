@@ -44,6 +44,33 @@ System für weniger Nutzen.
   `submissionPayload.phone` an). Ohne Eingabe fehlt der Schlüssel komplett —
   Verhalten wie heute.
 
+## Vertragstests
+
+`scripts/tests/optin-phone-experiment.test.js` bewacht seit dem 01.09.2026:
+
+1. Der Schalter wird **aus** ausgeliefert; ohne Aktivierung keine Variante.
+2. Nur Anzeigen-Traffic nimmt teil (Medium, Quelle, fbclid-Rückfall) — Organik nie.
+3. Die Zuteilung (`optinExperimentVariantFromHash`, pur und getrennt exportiert)
+   ist deterministisch und teilt einen realistischen Hash-Korpus 45–55 %.
+4. Ohne Extras trägt **kein** Submit-Weg einen Experiment- oder Telefonschlüssel —
+   der schlafende Zweig verändert nichts.
+5. Mit Variante B reiten `phone`/`experiment_*`/`phone_provided` korrekt mit.
+
+Die Schalter-Tests sind zustandsabhängig formuliert: Nach dem Aktivierungs-Commit
+prüfen dieselben Tests die eingeschaltete Verdrahtung, statt rot zu werden.
+
+## Vorschau (visuelle Abnahme von Variante B, ohne Deploy)
+
+Lokal, nichts committen:
+
+1. In `src/lib/core.js` `enabled: true` setzen (nur im Arbeitsverzeichnis).
+2. `npm run build && node server/app-server.js`
+3. `http://localhost:3000/markus?utm_medium=paid_social` öffnen — je nach
+   ausgewürfeltem `lead_hash` erscheint A oder B; für die jeweils andere Variante
+   den localStorage-Eintrag `acLeadRun:markus` löschen und neu laden, bis der
+   Hash die andere Parität trifft.
+4. Arbeitskopie zurücksetzen (`git checkout -- src/lib/core.js`).
+
 ## Auswertung
 
 ```sql
@@ -70,8 +97,27 @@ Schutzvergleich der Optin-Rate erkennt in dieser Zeit nur grobe Einbrüche
 (≥ 10 Punkte). Früher abbrechen, wenn B sichtbar einbricht; nicht früher
 feiern, wenn B vorn liegt.
 
+### Wächter der Aufteilung (nach der ersten Woche prüfen)
+
+`optin_gesehen` je Variante aus obiger SQL muss nahe 50/50 liegen. Liegt eine
+Variante bei den dann erwartbaren ~25–30 Teilnehmern je Seite klar vorn
+(gröber als 65/35), ist das kein Zufall zum Weitermessen, sondern ein
+Zuweisungsfehler: **stoppen und die Zuteilung prüfen**, bevor Wochen in schiefe
+Daten laufen. (Der Fachbegriff dafür ist Sample Ratio Mismatch.)
+
+### Testdisziplin im Messfenster
+
+Während der Laufzeit **keine anderen Änderungen** an Optin-Screen, Result-Seite
+oder den Texten davor — die Phasen aus `CONVERSION_OPTIMIERUNG_PLAN.md` kommen
+danach, nicht parallel. Eine Änderung zur Zeit, sonst ist unklar, was wirkt.
+
 ## Aktivierung (nach Review der Vorschau)
 
+0. 🔴 **Voraussetzung — Entscheidung Markus:** erst nach der B5-Umschaltung
+   (`CONTACTS_QUIZ_MODUS=an`) **und** einem ruhigen Fenster von einigen Tagen.
+   Das Telefonfeld verändert den Opt-in-Payload Richtung contacts — genau den
+   Weg, den der B4/B5-Schattenlauf vermisst. Plan B §9b: nie zwei Änderungen
+   gleichzeitig auf demselben Versandweg.
 1. `enabled: false` → `true` in `src/lib/core.js`, Commit, PR, CI-Deploy.
 2. Startdatum hier nachtragen: ____
 3. Cockpit (ads.hl-support.biz): Experiment-Kasten einschalten — Markus' Agent
