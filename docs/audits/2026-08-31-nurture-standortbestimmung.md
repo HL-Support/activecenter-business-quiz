@@ -139,6 +139,30 @@ const emailId = EMAIL_MAP[phase]?.[lang]?.[variantKey]
 Deutsch, Italienisch und Englisch behalten ihre vier Varianten je Phase — für sie ändert
 sich **nichts**. hu/fr/ru laufen über `_single`.
 
+### ✅ Am 01.09.2026 nachgemessen: es hat getragen
+
+Der erste Lauf nach der Änderung (31.08., 22:01 MESZ) hat die vier Menschen erreicht, die
+seit Wochen bis Monaten nichts bekamen — bestätigt über Postmark, nicht nur über das
+Ereignisprotokoll:
+
+| Empfänger | Sprache | Betreff | Zustellung |
+| --- | --- | --- | --- |
+| Judit Mária | hu | „itt a sikerkódod" (Vorlage 162) | Delivered |
+| Csilla | hu | „itt a sikerkódod" (162) | **Delivered + Opened** |
+| Andrii | ru | „твой код успеха" (178) | Delivered |
+| El Mehdi | fr | „voici ton code de réussite" (170) | **Delivered + Opened** |
+
+**Zwei von vier haben die Mail geöffnet.** Dazu ging eine fünfte hinaus: der ungarische
+Lead, der bereits eine Mail hatte, ist auf `c1` weitergerückt (Vorlage 166) — die Strecke
+läuft in der neuen Sprache also nicht nur an, sie geht weiter.
+
+Weitere Belege: **keine neuen Abbruchgründe** seit der Änderung · Deutsch unverändert
+(`a3`/17, `b2`/32, `c2`/35, `d1`/41 im selben Zeitraum) · die Wächterwarnung W2 ist von
+**9 auf 5** gefallen, der älteste offene Formulareingang von 11.06. auf 17.06.
+
+Die verbliebenen fünf sind genau die vorhergesagten: vier im Mautic angehalten, einer ohne
+Mautic-Kontakt. Sie gehören in die Baseline.
+
 ### ⚠️ Vermerk für spätere Optimierung
 
 Das ist bewusst die vereinfachte Fassung. Zwei Dinge gehören nachgeholt, sobald es sich

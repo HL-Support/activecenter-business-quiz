@@ -14,7 +14,7 @@
 > | contacts-Produktion | **`10e9251`** | alle sechs Webhook-Routen antworten wie vor dem Deploy |
 > | Arbeitszweig | `nurture-auf-plattform-db` @ `2317132` | Quiz **319 Tests** grün, contacts **166** grün; Lint und `verify` grün |
 > | A4 Schattenlauf Berater | 🟡 läuft | **49** Vergleiche, 9 Berater, `<deckungsgleich>`, 0 `mysql_fehler` |
-> | B4 Schattenlauf Übergabe | 🟡 **seit 17:50 scharf** | erste echte Zeile: Lead `qz_f5cb45dd…`, Berater `trix24`, „Der Architekt"/„Wirkung", 8 Antwortpaare |
+> | B4 Schattenlauf Übergabe | 🟡 **läuft** | **01.09.: 2 Opt-ins, 2 Schattenzeilen — deckungsgleich.** 0 gescheitert, 0 offen |
 > | Aufträge `contacts_quiz_submission` | **0** | im Schatten wird nie gesendet |
 > | Rang-Aufträge `mysql_*` | **0 tote** | Referenzwert für B5 |
 >
@@ -151,6 +151,12 @@
 > Die Dauerwarnung des Wächters („9 fällige ohne Mail") ist vollständig aufgeklärt:
 > 4× keine Vorlage in ihrer Sprache · 4× im Mautic angehalten · 1× kein Mautic-Kontakt.
 > **Kein technischer Ausfall.**
+>
+> ✅ **Am 01.09. nachgemessen — es hat getragen.** Der erste Lauf nach der Änderung
+> erreichte alle vier: Judit Mária und Csilla (hu), Andrii (ru), El Mehdi (fr) — über
+> Postmark als zugestellt bestätigt, **zwei davon geöffnet**. Eine fünfte ging an den
+> ungarischen Lead, der auf `c1` weitergerückt ist. Keine neuen Abbruchgründe, Deutsch
+> unverändert, W2 von **9 auf 5** Warnfällen gefallen.
 >
 > ✅ **Die Sprachlücke ist geschlossen.** Die Strecke kannte nur `de`, `it`, `en`; sieben
 > Menschen in `hu`/`fr`/`ru` fielen strukturell durch. Jetzt gibt es für diese drei je eine
