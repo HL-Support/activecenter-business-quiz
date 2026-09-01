@@ -34,7 +34,7 @@ const basis = (over = {}) => ({
   video1_completed_at: null,
   video2_completed_at: null,
   video3_completed_at: null,
-  last_seen_at: new Date(now - 1 * H).toISOString(),
+  last_seen_at: new Date(now - H).toISOString(),
   berater_slug: 'markus',
   profile_code: 'feuer',
   main_aspiration: 'freedom',
@@ -45,7 +45,7 @@ const basis = (over = {}) => ({
 
 const faelle = [
   ['Optin 3h, kein Videostart, 14 Uhr -> a1', { rows: [basis()] }, ['a1:lead@example.com']],
-  ['Optin 1h -> nichts (zu frueh)', { rows: [basis({ form_submitted_at: new Date(now - 1 * H).toISOString() })] }, []],
+  ['Optin 1h -> nichts (zu frueh)', { rows: [basis({ form_submitted_at: new Date(now - H).toISOString() })] }, []],
   ['Optin 3h MIT video_started -> nichts', { rows: [basis()], events: [{ event_name: 'video_started', lead_hash: 'h1', event_at: new Date(now - 2 * H).toISOString(), payload: {} }] }, []],
   ['Optin 13h ohne a2 -> a2 (Vorrang vor a1)', { rows: [basis({ form_submitted_at: new Date(now - 13 * H).toISOString() })] }, ['a2:lead@example.com']],
   ['a1 schon gesendet, Optin 5h -> nichts', { rows: [basis({ form_submitted_at: new Date(now - 5 * H).toISOString() })], events: [{ event_name: 'nurture_sent', lead_hash: 'h1', event_at: new Date(now - 2 * H).toISOString(), payload: { phase: 'a1', email: 'lead@example.com' } }] }, []],

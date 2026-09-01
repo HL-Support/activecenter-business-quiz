@@ -33,6 +33,9 @@ export default [
       // zeichengleich mit dem laufenden Workflow ist.
       // Siehe docs/audits/c1-postprocessor-extrakt/BEFUND.md.
       'docs/audits/**/*.js',
+      // Gleiches Prinzip: zeichengleiche Arbeitskopien der laufenden n8n-Code-Knoten
+      // (Post-Processor, Nurture-Sender) — `return` auf oberster Ebene, `$input`.
+      'n8n/arbeit/**',
       // Eigenstaendige Anwendungen mit eigenem Werkzeugkasten (Next.js, JSX in .js).
       // Sie werden nicht vom Quiz gebaut und nicht von dessen ESLint-Regeln bedient.
       'nurture/review-app/**',
