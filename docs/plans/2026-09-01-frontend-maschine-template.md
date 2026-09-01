@@ -281,6 +281,19 @@ verhandelbar (R0).
    schon nach `e2e-artifacts/`).
    Abnahme E0: alle neuen Wächter laufen GRÜN gegen den unveränderten Code.
 
+**Teilung E0a/E0b (Befund 01.09. abends):** Die Scroll-/Result-E2E-Suiten samt
+`stubOptin`/`driveQuizToOptin`-Infrastruktur existieren erst auf dem noch
+unfertigen Nurture-Zweig — `scripts/e2e/lib.js` auf `main` ist die alte
+188-Zeilen-Fassung. Darum: **E0a = Punkt 1 (Golden-Payload) sofort auf `main`**
+(die Submission-Funktionen ändert der Nurture-Strang nicht, das Golden überlebt
+den Merge; Datei `scripts/tests/muster/submit-payloads.golden.json`,
+Aktualisierung nur bewusst über `GOLDEN_AKTUALISIEREN=1` mit PR-Begründung).
+**E0b = Punkte 2–4 (Browser-Ereignis-Matrix, Style-Schnappschuss, Screenshots)
+erst nach dem Nurture-Merge**, aufsetzend auf der erweiterten E2E-Bibliothek —
+sonst entstünde eine zweite, driftende Kopie der Harness-Helfer (Falle-1-Klasse).
+Das E-Mail-Korrektur-Golden (`email_correction_pending`) kommt ebenfalls in E0b,
+weil dieser Codepfad erst mit dem Nurture-Merge auf `main` liegt.
+
 ### E1 — Ablauf-Maschine herauslösen
 
 `src/maschine/ablauf.js`: Schrittfolge + Übergangsregeln aus QuizFlow
@@ -424,8 +437,10 @@ zugehalten, nicht per Erinnerung.
    A/B-Plan); n8n-/Mail-Arbeit (AP4/AP5/AP8) läuft unabhängig weiter.
 4. Notbremse je Etappe: Revert des Etappen-PRs (klein, konfliktarm); die
    E0-Wächter bleiben dabei stehen, denn sie beschreiben den SOLL-Zustand.
-5. Nach E6: Telefon-A/B aktivieren (Ein-Zeilen-Commit laut dessen Checkliste),
-   erst danach Template-2-Entscheidung.
+5. ~~Nach E6: Telefon-A/B aktivieren~~ **Markus, 01.09. abends: Der
+   Telefon-Test ruht bis auf Weiteres** („brauchen wir mal nicht, erst den
+   ganzen Rest"). Der Zweig bleibt schlafend und bewacht; kein Messfenster
+   blockiert damit die Etappen oder F1.
 
 ## §5 Bekannte Fallen dieses Umbaus (aus der Kontrolle, nicht aus Vermutung)
 

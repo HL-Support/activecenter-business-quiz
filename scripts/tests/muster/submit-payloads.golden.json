@@ -1,0 +1,404 @@
+{
+  "hinweis": "Golden-Master der Submit-Payloads (E0a). Aktualisierung NUR bewusst: GOLDEN_AKTUALISIEREN=1, Begruendung in den PR.",
+  "standard_optin": [
+    {
+      "url": "/api/bridge",
+      "body": {
+        "action": "forward_typeform_adapter",
+        "adapter_key": "business_leads_quiz_v1",
+        "meta": {
+          "attribution": {
+            "event_source_url": "https://business.activecenter.info/markus?utm_medium=paid_social&utm_source=fb&utm_campaign=golden",
+            "fbc": "",
+            "fbclid": "",
+            "fbp": "",
+            "utm_ad_id": "",
+            "utm_adset_id": "",
+            "utm_campaign": "golden",
+            "utm_campaign_id": "",
+            "utm_content": "",
+            "utm_medium": "paid_social",
+            "utm_source": "fb",
+            "utm_term": ""
+          },
+          "email": "anna@example.com",
+          "firstName": "anna",
+          "lang": "de",
+          "leadHash": "qz_goldenprobe1234567890abcd",
+          "mainAspiration": "freedom",
+          "mainAspirationLabel": "asp_tag_freedom",
+          "metaEventId": "capi_qz_goldenprobe1234567890abcd",
+          "sessionHash": "ac_goldensitzung1234567890",
+          "token": "tfgoldentoken1234567890",
+          "visitorId": "av_goldenbesucher12345678"
+        },
+        "payload": {
+          "calculated": {
+            "score": 0
+          },
+          "email": "anna@example.com",
+          "event_id": "EVTGOLDEN1234567890",
+          "event_source_url": "https://business.activecenter.info/markus?utm_medium=paid_social&utm_source=fb&utm_campaign=golden",
+          "fbc": "",
+          "fbclid": "",
+          "fbp": "",
+          "first_name": "anna",
+          "hidden": {
+            "berater_slug": "markus",
+            "c": "DE",
+            "client_seed": "11111111-2222-3333-4444-555555555555",
+            "event_source_url": "https://business.activecenter.info/markus?utm_medium=paid_social&utm_source=fb&utm_campaign=golden",
+            "fbc": "",
+            "fbclid": "",
+            "fbp": "",
+            "hash": "qz_goldenprobe1234567890abcd",
+            "lang": "de",
+            "lead_hash": "qz_goldenprobe1234567890abcd",
+            "lead_system_v2_enabled": "1",
+            "main_aspiration": "freedom",
+            "main_aspiration_label": "asp_tag_freedom",
+            "member_id": "25851739",
+            "ref_id": "25851739",
+            "schema_version": "ac_tracking_v1",
+            "session_hash": "ac_goldensitzung1234567890",
+            "slug": "markus",
+            "survey_id": "12",
+            "tracking_hash": "ac_goldensitzung1234567890",
+            "utm_ad_id": "",
+            "utm_adset_id": "",
+            "utm_campaign": "golden",
+            "utm_campaign_id": "",
+            "utm_content": "",
+            "utm_medium": "paid_social",
+            "utm_source": "fb",
+            "utm_term": "",
+            "visitor_id": "av_goldenbesucher12345678"
+          },
+          "landed_at": "<zeitstempel>",
+          "main_aspiration": "freedom",
+          "main_aspiration_label": "asp_tag_freedom",
+          "profile": {
+            "code": "feuer",
+            "name": "Der Macher"
+          },
+          "selected_answers": [
+            {
+              "label": "Antwort R",
+              "type": "R"
+            },
+            {
+              "label": "Antwort G",
+              "type": "G"
+            },
+            {
+              "label": "Antwort B",
+              "type": "B"
+            },
+            {
+              "aspiration": "freedom",
+              "label": "Freiheit"
+            },
+            {
+              "aspiration": "growth",
+              "label": "Wachstum"
+            },
+            {
+              "barrier": "confidence",
+              "label": "Selbstvertrauen"
+            }
+          ],
+          "submitted_at": "<zeitstempel>",
+          "token": "tfgoldentoken1234567890",
+          "utm_ad_id": "",
+          "utm_adset_id": "",
+          "utm_campaign": "golden",
+          "utm_campaign_id": "",
+          "utm_content": "",
+          "utm_medium": "paid_social",
+          "utm_source": "fb",
+          "utm_term": "",
+          "variables": [
+            {
+              "key": "contact_country",
+              "text": "DE",
+              "type": "text"
+            },
+            {
+              "key": "score",
+              "number": 0,
+              "type": "number"
+            },
+            {
+              "key": "noemail",
+              "number": 1,
+              "type": "number"
+            },
+            {
+              "key": "main_aspiration",
+              "text": "freedom",
+              "type": "text"
+            },
+            {
+              "key": "main_aspiration_label",
+              "text": "asp_tag_freedom",
+              "type": "text"
+            }
+          ]
+        },
+        "target": "https://contacts.hl-support.biz/webhook/typeform"
+      }
+    },
+    {
+      "url": "/api/lead-track",
+      "body": {
+        "event_name": "form_submitted",
+        "lead_hash": "qz_goldenprobe1234567890abcd",
+        "payload": {
+          "berater_slug": "markus",
+          "client_seed": "11111111-2222-3333-4444-555555555555",
+          "email": "anna@example.com",
+          "event_at": "<zeitstempel>",
+          "event_source_url": "https://business.activecenter.info/markus?utm_medium=paid_social&utm_source=fb&utm_campaign=golden",
+          "event_uid": "<event_uid>",
+          "fbc": "",
+          "fbclid": "",
+          "fbp": "",
+          "first_name": "anna",
+          "form_email": "anna@example.com",
+          "form_first_name": "anna",
+          "form_submitted_at": "<zeitstempel>",
+          "funnel_key": "business",
+          "initial_barrier": "confidence",
+          "is_internal_traffic": false,
+          "is_resume": false,
+          "lang": "de",
+          "lead_hash": "qz_goldenprobe1234567890abcd",
+          "main_aspiration": "freedom",
+          "main_aspiration_label": "asp_tag_freedom",
+          "member_id": "25851739",
+          "profile_code": "feuer",
+          "profile_label": "Der Macher",
+          "queue_attempts": "<queue_attempts>",
+          "queued_at": "<queued_at>",
+          "ref_id": "25851739",
+          "source_app": "business_leads_quiz",
+          "submitted_at": "<zeitstempel>",
+          "utm_ad_id": "",
+          "utm_adset_id": "",
+          "utm_campaign": "golden",
+          "utm_campaign_id": "",
+          "utm_content": "",
+          "utm_medium": "paid_social",
+          "utm_source": "fb",
+          "utm_term": "",
+          "visitor_id": "av_goldenbesucher12345678"
+        }
+      }
+    }
+  ],
+  "variante_b_mit_telefon": [
+    {
+      "url": "/api/bridge",
+      "body": {
+        "action": "forward_typeform_adapter",
+        "adapter_key": "business_leads_quiz_v1",
+        "meta": {
+          "attribution": {
+            "event_source_url": "https://business.activecenter.info/markus?utm_medium=paid_social&utm_source=fb&utm_campaign=golden",
+            "fbc": "",
+            "fbclid": "",
+            "fbp": "",
+            "utm_ad_id": "",
+            "utm_adset_id": "",
+            "utm_campaign": "golden",
+            "utm_campaign_id": "",
+            "utm_content": "",
+            "utm_medium": "paid_social",
+            "utm_source": "fb",
+            "utm_term": ""
+          },
+          "email": "anna@example.com",
+          "experiment": {
+            "name": "optin_phone_v1",
+            "variant": "b"
+          },
+          "firstName": "anna",
+          "lang": "de",
+          "leadHash": "qz_goldenprobe1234567890abcd",
+          "mainAspiration": "freedom",
+          "mainAspirationLabel": "asp_tag_freedom",
+          "metaEventId": "capi_qz_goldenprobe1234567890abcd",
+          "phone": "+49 151 2345678",
+          "sessionHash": "ac_goldensitzung1234567890",
+          "token": "tfgoldentoken1234567890",
+          "visitorId": "av_goldenbesucher12345678"
+        },
+        "payload": {
+          "calculated": {
+            "score": 0
+          },
+          "email": "anna@example.com",
+          "event_id": "EVTGOLDEN1234567890",
+          "event_source_url": "https://business.activecenter.info/markus?utm_medium=paid_social&utm_source=fb&utm_campaign=golden",
+          "fbc": "",
+          "fbclid": "",
+          "fbp": "",
+          "first_name": "anna",
+          "hidden": {
+            "berater_slug": "markus",
+            "c": "DE",
+            "client_seed": "11111111-2222-3333-4444-555555555555",
+            "event_source_url": "https://business.activecenter.info/markus?utm_medium=paid_social&utm_source=fb&utm_campaign=golden",
+            "fbc": "",
+            "fbclid": "",
+            "fbp": "",
+            "hash": "qz_goldenprobe1234567890abcd",
+            "lang": "de",
+            "lead_hash": "qz_goldenprobe1234567890abcd",
+            "lead_system_v2_enabled": "1",
+            "main_aspiration": "freedom",
+            "main_aspiration_label": "asp_tag_freedom",
+            "member_id": "25851739",
+            "ref_id": "25851739",
+            "schema_version": "ac_tracking_v1",
+            "session_hash": "ac_goldensitzung1234567890",
+            "slug": "markus",
+            "survey_id": "12",
+            "tracking_hash": "ac_goldensitzung1234567890",
+            "utm_ad_id": "",
+            "utm_adset_id": "",
+            "utm_campaign": "golden",
+            "utm_campaign_id": "",
+            "utm_content": "",
+            "utm_medium": "paid_social",
+            "utm_source": "fb",
+            "utm_term": "",
+            "visitor_id": "av_goldenbesucher12345678"
+          },
+          "landed_at": "<zeitstempel>",
+          "main_aspiration": "freedom",
+          "main_aspiration_label": "asp_tag_freedom",
+          "profile": {
+            "code": "feuer",
+            "name": "Der Macher"
+          },
+          "selected_answers": [
+            {
+              "label": "Antwort R",
+              "type": "R"
+            },
+            {
+              "label": "Antwort G",
+              "type": "G"
+            },
+            {
+              "label": "Antwort B",
+              "type": "B"
+            },
+            {
+              "aspiration": "freedom",
+              "label": "Freiheit"
+            },
+            {
+              "aspiration": "growth",
+              "label": "Wachstum"
+            },
+            {
+              "barrier": "confidence",
+              "label": "Selbstvertrauen"
+            }
+          ],
+          "submitted_at": "<zeitstempel>",
+          "token": "tfgoldentoken1234567890",
+          "utm_ad_id": "",
+          "utm_adset_id": "",
+          "utm_campaign": "golden",
+          "utm_campaign_id": "",
+          "utm_content": "",
+          "utm_medium": "paid_social",
+          "utm_source": "fb",
+          "utm_term": "",
+          "variables": [
+            {
+              "key": "contact_country",
+              "text": "DE",
+              "type": "text"
+            },
+            {
+              "key": "score",
+              "number": 0,
+              "type": "number"
+            },
+            {
+              "key": "noemail",
+              "number": 1,
+              "type": "number"
+            },
+            {
+              "key": "main_aspiration",
+              "text": "freedom",
+              "type": "text"
+            },
+            {
+              "key": "main_aspiration_label",
+              "text": "asp_tag_freedom",
+              "type": "text"
+            }
+          ]
+        },
+        "target": "https://contacts.hl-support.biz/webhook/typeform"
+      }
+    },
+    {
+      "url": "/api/lead-track",
+      "body": {
+        "event_name": "form_submitted",
+        "lead_hash": "qz_goldenprobe1234567890abcd",
+        "payload": {
+          "berater_slug": "markus",
+          "client_seed": "11111111-2222-3333-4444-555555555555",
+          "email": "anna@example.com",
+          "event_at": "<zeitstempel>",
+          "event_source_url": "https://business.activecenter.info/markus?utm_medium=paid_social&utm_source=fb&utm_campaign=golden",
+          "event_uid": "<event_uid>",
+          "experiment_name": "optin_phone_v1",
+          "experiment_variant": "b",
+          "fbc": "",
+          "fbclid": "",
+          "fbp": "",
+          "first_name": "anna",
+          "form_email": "anna@example.com",
+          "form_first_name": "anna",
+          "form_submitted_at": "<zeitstempel>",
+          "funnel_key": "business",
+          "initial_barrier": "confidence",
+          "is_internal_traffic": false,
+          "is_resume": false,
+          "lang": "de",
+          "lead_hash": "qz_goldenprobe1234567890abcd",
+          "main_aspiration": "freedom",
+          "main_aspiration_label": "asp_tag_freedom",
+          "member_id": "25851739",
+          "phone": "+49 151 2345678",
+          "phone_provided": "1",
+          "profile_code": "feuer",
+          "profile_label": "Der Macher",
+          "queue_attempts": "<queue_attempts>",
+          "queued_at": "<queued_at>",
+          "ref_id": "25851739",
+          "source_app": "business_leads_quiz",
+          "submitted_at": "<zeitstempel>",
+          "utm_ad_id": "",
+          "utm_adset_id": "",
+          "utm_campaign": "golden",
+          "utm_campaign_id": "",
+          "utm_content": "",
+          "utm_medium": "paid_social",
+          "utm_source": "fb",
+          "utm_term": "",
+          "visitor_id": "av_goldenbesucher12345678"
+        }
+      }
+    }
+  ]
+}
