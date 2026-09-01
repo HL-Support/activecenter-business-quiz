@@ -24,6 +24,7 @@ import {
   resetLeadRun as resetRun,
   getActiveLeadRun,
   getOptinExperimentVariant,
+  getOptinPreviewVariant,
   isLeadSystemV2Active,
   deriveQuizBarrier,
 } from '../lib/core.js';
@@ -453,17 +454,17 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
           form_first_name: C,
           form_email: z,
           form_submitted_at: new Date().toISOString(),
-          ...(ab
+          ...(messung
             ? {
                 experiment_name: 'optin_phone_v1',
-                experiment_variant: ab,
+                experiment_variant: messung,
                 phone_provided: ab === 'b' && phoneVal.trim() ? '1' : '0',
               }
             : {}),
         });
         const submitResult = await Qp(C, z, t, e, r, {
           phone: ab === 'b' ? phoneVal.trim() : '',
-          variant: ab || '',
+          variant: messung || '',
         });
         if (!submitResult || submitResult.success === false || submitResult.error) {
           throw new Error(submitResult?.error || 'submit_failed');
@@ -504,8 +505,13 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
         k(a('optin_submit_error'));
       }
     };
-  // A/B optin_phone_v1: null = Test aus, sonst 'a' (bekannt) / 'b' (Telefonfeld).
-  const ab = React.useMemo(() => getOptinExperimentVariant(n || 'default'), [n]);
+  // A/B optin_phone_v1: `ab` bestimmt die ANZEIGE, `messung` die Kennzeichnung.
+  // Die Vorschau (?optin_vorschau=a|b) erzwingt nur die Ansicht — eine erzwungene
+  // Ansicht wird nie gekennzeichnet, damit Abnahme-Proben die Messung nicht verzerren.
+  const vorschau = React.useMemo(() => getOptinPreviewVariant(), []);
+  const zugeteilt = React.useMemo(() => getOptinExperimentVariant(n || 'default'), [n]);
+  const ab = vorschau || zugeteilt;
+  const messung = vorschau ? null : zugeteilt;
   const [phoneVal, setPhoneVal] = React.useState('');
   React.useEffect(() => {
     Dt('optin_viewed', {
@@ -515,7 +521,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
       main_aspiration: r || 'freedom',
       main_aspiration_label: getAspirationLabel(r || 'freedom'),
       optin_viewed_at: new Date().toISOString(),
-      ...(ab ? { experiment_name: 'optin_phone_v1', experiment_variant: ab } : {}),
+      ...(messung ? { experiment_name: 'optin_phone_v1', experiment_variant: messung } : {}),
     });
   }, [e, r]);
   return React.createElement(

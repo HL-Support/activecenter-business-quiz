@@ -1362,6 +1362,21 @@ export function getOptinExperimentVariant(slug = getCurrentSlug()) {
   return optinExperimentVariantFromHash(getActiveLeadRun(slug)?.lead_hash);
 }
 
+// Vorschau fuer die Abnahme: ?optin_vorschau=a|b erzwingt die ANZEIGE einer
+// Variante, unabhaengig von Schalter, Traffic-Herkunft und Zuteilung.
+// Eine erzwungene Ansicht wird NIE als Experiment gekennzeichnet — Vorschau-
+// Proben tauchen in der Auswertung nicht auf und verzerren nichts.
+export function getOptinPreviewVariant() {
+  try {
+    const value = String(
+      new URLSearchParams(window.location.search || '').get('optin_vorschau') || ''
+    ).toLowerCase();
+    return value === 'a' || value === 'b' ? value : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
 async function performQuizSubmission(
   firstName,
   email,

@@ -59,17 +59,23 @@ System für weniger Nutzen.
 Die Schalter-Tests sind zustandsabhängig formuliert: Nach dem Aktivierungs-Commit
 prüfen dieselben Tests die eingeschaltete Verdrahtung, statt rot zu werden.
 
-## Vorschau (visuelle Abnahme von Variante B, ohne Deploy)
+## Vorschau (visuelle Abnahme, ohne Schalter und ohne Messung)
 
-Lokal, nichts committen:
+`?optin_vorschau=b` (bzw. `=a`) erzwingt die **Anzeige** der Variante —
+unabhängig von Schalter, Traffic-Herkunft und Zuteilung. Eine erzwungene
+Ansicht wird **nie** als Experiment gekennzeichnet: Vorschau-Proben tauchen
+in der Auswertung nicht auf und verzerren nichts.
 
-1. In `src/lib/core.js` `enabled: true` setzen (nur im Arbeitsverzeichnis).
-2. `npm run build && node server/app-server.js`
-3. `http://localhost:3000/markus?utm_medium=paid_social` öffnen — je nach
-   ausgewürfeltem `lead_hash` erscheint A oder B; für die jeweils andere Variante
-   den localStorage-Eintrag `acLeadRun:markus` löschen und neu laden, bis der
-   Hash die andere Parität trifft.
-4. Arbeitskopie zurücksetzen (`git checkout -- src/lib/core.js`).
+* **Sobald der Zweig deployt ist** (Merge mit Schalter aus genügt):
+  `https://quiz.activecenter.info/<slug>?optin_vorschau=b`
+* **Vorher lokal:** `npm run build && node server/app-server.js`, dann
+  `http://localhost:3000/markus?optin_vorschau=b` — kein Editieren des
+  Schalters mehr nötig.
+
+⚠️ Ein **abgeschickter** Vorschau-Test ist ein echter Opt-in: Lead, Mails und
+(falls eingegeben) Telefonnummer laufen den echten Weg — nur ohne
+Experiment-Kennzeichnung. Für Proben gilt die übliche Probenhygiene
+(aufräumen wie am 31.08.; die `lead_processing_jobs` der Probe stehen lassen).
 
 ## Auswertung
 

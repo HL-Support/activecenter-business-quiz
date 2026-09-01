@@ -247,6 +247,48 @@ test('Organik nimmt nicht teil — auch nicht andere Kanaele', () => {
 });
 
 // ---------------------------------------------------------------------------------------
+// 2b. Die Vorschau (?optin_vorschau=a|b) — Ansicht erzwingen, Messung nie beruehren
+// ---------------------------------------------------------------------------------------
+
+test('die Vorschau liest nur a oder b und ignoriert alles andere', () => {
+  assert.equal(loadCore({ search: '?optin_vorschau=b' }).getOptinPreviewVariant(), 'b');
+  assert.equal(loadCore({ search: '?optin_vorschau=A' }).getOptinPreviewVariant(), 'a');
+  assert.equal(loadCore({ search: '?optin_vorschau=c' }).getOptinPreviewVariant(), null);
+  assert.equal(loadCore({ search: '' }).getOptinPreviewVariant(), null);
+});
+
+test('die Vorschau aendert die Zuteilung nicht — sie bleibt Sache von Schalter und Traffic', () => {
+  const core = loadCore({ search: '?optin_vorschau=b' });
+  seedLeadState(core);
+  // Organik mit Vorschau-Parameter: die ANZEIGE darf B sein, die ZUTEILUNG bleibt null.
+  assert.equal(core.getOptinPreviewVariant(), 'b');
+  assert.equal(core.getOptinExperimentVariant(SLUG), null);
+});
+
+test('App.jsx kennzeichnet nur die echte Zuteilung, nie die erzwungene Ansicht', () => {
+  const source = require('node:fs').readFileSync(
+    path.resolve(__dirname, '../../src/app/App.jsx'),
+    'utf8'
+  );
+  // Die Kennzeichnung haengt an `messung` (null bei Vorschau), nie an der Anzeige `ab`.
+  assert.ok(source.includes('getOptinPreviewVariant'), 'App.jsx nutzt den Vorschau-Weg');
+  assert.equal(
+    (source.match(/experiment_variant: messung/g) || []).length,
+    2,
+    'beide Ereignisse kennzeichnen mit der Messgroesse'
+  );
+  assert.equal(
+    /experiment_variant: ab\b/.test(source),
+    false,
+    'die Anzeige-Variante darf nie als Kennzeichnung dienen'
+  );
+  assert.ok(
+    source.includes("variant: messung || ''"),
+    'auch die Submit-Extras tragen nur die echte Zuteilung'
+  );
+});
+
+// ---------------------------------------------------------------------------------------
 // 3. Die Zuteilung
 // ---------------------------------------------------------------------------------------
 
