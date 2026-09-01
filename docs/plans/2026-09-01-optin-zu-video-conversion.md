@@ -191,12 +191,30 @@ Reihenfolge = Priorität. AP1–AP4 sind die erste Welle.
 - **T1 Kartei-Modus:** Auf dem Coolify-App-Server (`167.233.251.217`, SSH 22)
   die Env des business-leads-Containers prüfen: steht der contacts-Quiz-Modus
   auf `an`? Ergebnis in diesem Plan nachtragen.
+  **✅ Ergebnis 01.09.2026 (Coolify-API, App `yhoacszoiofuq6dg4mykyr7b`):
+  `CONTACTS_QUIZ_MODUS=schatten` — der neue Weg sendet NICHT, der Versand läuft
+  weiter über den alten contacts-Webhook + n8n-Cron (5 Min). `CONTACTS_QUIZ_URL`
+  und `CONTACTS_QUIZ_WEBHOOK_SECRET` sind gesetzt; Umschalten auf `an` wäre rein
+  konfigurativ möglich → Cutover-Entscheidung von Markus, nicht Teil dieses
+  Plans. Für AP4.4 gilt damit der „Sonst“-Zweig (Post-Processor-Cron/Trigger
+  prüfen).**
 - **T2 Mail-Link-Ziel:** Mit einem Test-Optin (eigene Adresse) die Zugangsmail
   auslösen, Link klicken **ohne** vorher den Ergebnis-CTA zu klicken. Erwartung:
   Landung direkt auf Video 1. Falls Ergebnisseite: Fehler liegt im n8n-Node
   `HTTP - Generate Resume Token` (Payload `resumeTarget`) oder in der
   Short-Link-Auflösung — fixen, bis T2 grün ist.
+  **✅ Ergebnis 01.09.2026: GRÜN.** Test-Optin `markus+t2video@global-sce.com`
+  (`?test=1`, Slug markus) → Post-Processor-Execution 588266 (18:50 UTC)
+  erzeugte `…/markus?r=6H6jEsbbF&target=videos`; der Link landet im frischen
+  Browser ohne vorherigen CTA-Klick direkt auf Video 1 (Player + „Teil 1:
+  Einführung“). Live-Export bestätigt zudem `resumeTarget: 'videos'` im Node.
+  Kein Fix nötig.
 - **T3 Scroll-Test** aus AP1.1.
+  **✅ Ergebnis 01.09.2026: Befund belegt und gefixt.** Vor dem Fix startete
+  die Ergebnisseite mobil bei 182 px Scroll-Offset (Messwert aus
+  `scripts/e2e/scroll-reset.e2e.js`); Desktop wurde nur durch das Klemmen der
+  kurzen Videoseite „gerettet“. Fix: Scroll-Reset auf allen Step-Wechseln,
+  E2E-Suite als Regression-Wache.
 
 ### AP4 — Zugangsmail umbauen (n8n `AC - Lead Post Processor`)
 Node `Code - Apply Resume Link` (dort liegen `LEAD_EMAIL_I18N` und
@@ -221,6 +239,26 @@ Node `Code - Apply Resume Link` (dort liegen `LEAD_EMAIL_I18N` und
    (Formular validiert bereits, §2.7).
 7. Akzeptanz: Testmail in DE + 1 weiterer Sprache; Links per T2 verifiziert;
    Postmark-Tags unverändert (`lead_access`).
+
+**✅ Umgesetzt und live seit 01.09.2026 ~21:05 (Workflow 9RZdrLxfA8IRhd55,
+versionId 6cc5bb81…, Vorher-Stand in
+`n8n/backups/ac-lead-post-processor-2026-09-01-vor-ap4.json`):**
+- Betreff/Preheader/Intro/CTA in allen 6 Sprachen neu (Sandbox-Validierung je
+  Sprache: 2 Buttons, erster VOR der Typanalyse; `d:/tmp/validate-ap4-mail.js`).
+- Struktur: Gruß → Intro → Zugangszeile → **Video-Button** → Typanalyse →
+  zweiter identischer Button. `resumeIntro` spricht nicht mehr vom
+  Wiedereinstieg.
+- AP4.4: Post-Processor-Cron 5 → **1 Minute** (T1 ergab `schatten`, alter Weg
+  bleibt Versandweg). Live gemessen: Zugangsmail ~1–2 Min nach Optin.
+- AP4.5: Token-Node mit Retry 3×/2 s; scheitert auch das, geht die Mail mit
+  Standard-Link `…/<slug>` trotzdem raus, Job wird via
+  `last_error='resume_link_fallback_manual_followup'` zur Nacharbeit markiert,
+  Berater-Mail läuft weiter.
+- AP4.6: Gate blockt nur noch `status=invalid` (Node heißt historisch
+  „ZeroBounce“, ruft längst den eigenen Checker `/api/validate-email`).
+- Live-Abnahme mit Test-Optin `markus+ap4mail@global-sce.com` (Execution
+  588387): Betreff neu, Button vor Analyse, Postmark OK, Tag `lead_access`
+  unverändert, Job processed.
 
 ### AP5 — Erinnerung „kein Videostart“ (n8n, neue Phase)
 - **Zielgruppe:** `completed_rank = 0` UND kein `video_started`-Ereignis UND

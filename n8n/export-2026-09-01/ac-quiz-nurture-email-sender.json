@@ -1,0 +1,1842 @@
+{
+  "updatedAt": "2026-08-31T18:36:44.090Z",
+  "createdAt": "2026-05-29T18:14:12.695Z",
+  "id": "RqKSRTgFv8mv04H2",
+  "name": "AC - Quiz Nurture Email Sender",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "cron-trigger",
+      "name": "Cron - Every 2h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Supabase - Get Eligible Leads",
+      "id": "supabase-get-leads",
+      "position": [
+        220,
+        300
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select lead_hash, email_normalized, first_name, mautic_contact_id, completed_rank,\n       cta_type, form_submitted_at, video1_completed_at, video2_completed_at,\n       video3_completed_at, last_seen_at, berater_slug, profile_code,\n       main_aspiration, initial_barrier, lang\nfrom leads.v_lead_state_full\nwhere source_app = 'business_leads_quiz'\n  and funnel_key = 'business'\n  and email_normalized is not null\n  and first_name is not null\norder by first_seen_at desc, lead_hash asc",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "6ARQvSx0fKTy2Mcq",
+          "name": "Plattform-DB leads_n8n (hl_support)"
+        }
+      }
+    },
+    {
+      "id": "code-phase",
+      "name": "Code - Determine Phase",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// 🔴 Bei Seitenblaetterung liefert n8n MEHRERE Elemente, je Seite eines. Die alte Zeile\n// nahm nur items[0].json - also nur die erste Seite. Eine Paginierung ohne diesen Fix\n// haette gar nichts verbessert. flatMap deckt beide Formen ab: ein Element mit Array\n// (unpaginiert) und viele Elemente mit je einem Array oder einem Objekt (paginiert).\nconst flach = (liste) => liste.flatMap(i => Array.isArray(i.json) ? i.json : [i.json]);\nconst rows = flach($input.all());\nif (!rows || !rows.length) return [];\n\nconst now = Date.now();\nconst H24 = 24 * 60 * 60 * 1000;\nconst H12 = 12 * 60 * 60 * 1000;\nconst H48 = 48 * 60 * 60 * 1000;\n\n// A2/B1/C1/D1 bleiben die normalen ersten Erinnerungen.\n// A3/B2/C2/D2 sind jetzt vollst?ndig aktiv: 48h nach der ersten Erinnerung, tagsueber.\nconst ACTIVE_PHASES = ['a2', 'b1', 'c1', 'd1', 'a3', 'b2', 'c2', 'd2'];\nconst SECOND_PHASES = ['a3', 'b2', 'c2', 'd2'];\n// The recovery send cap is applied only after contact, DNC, template, coach and resume-link validation.\n\nlet berlinHour = 10;\ntry {\n  const hourPart = new Intl.DateTimeFormat('de-DE', {\n    timeZone: 'Europe/Berlin', hour: '2-digit', hour12: false\n  }).formatToParts(new Date()).find(part => part.type === 'hour');\n  berlinHour = Number(hourPart && hourPart.value ? hourPart.value : 10);\n} catch (e) {}\nif (!Number.isFinite(berlinHour)) berlinHour = 10;\nconst secondPhaseWindowOpen = berlinHour >= 6 && berlinHour < 18;\n\nconst allEvents = flach($('Supabase - Get Test Events').all());\nconst testEvents = allEvents.filter(e => e.event_name === 'test_lead_marked' || e.event_name === 'test_lead_unmarked');\nconst sentEvents = allEvents.filter(e => e.event_name === 'nurture_sent');\n\n// Group all sessions by person (email_normalized)\nconst groups = {};\nfor (const r of rows) {\n  if (!r || !r.lead_hash) continue;\n  const key = (r.email_normalized || '').toLowerCase().trim();\n  if (!key) continue;\n  (groups[key] = groups[key] || []).push(r);\n}\n\n// Test-lead exclusion (newest test event per lead_hash / email wins; events are event_at desc)\nconst testHash = {}; const testEmail = {};\nfor (const e of testEvents) {\n  const lh = e.lead_hash;\n  const em = ((e.payload && e.payload.email) || '').toLowerCase().trim();\n  if (lh && !(lh in testHash)) testHash[lh] = e.event_name;\n  if (em && !(em in testEmail)) testEmail[em] = e.event_name;\n}\nconst isTestMarked = (email, sessions) =>\n  testEmail[email] === 'test_lead_marked' ||\n  sessions.some(s => testHash[s.lead_hash] === 'test_lead_marked');\n\nconst latestSentForPerson = (email, sessions, phase) => {\n  const hashes = new Set(sessions.map(s => s.lead_hash).filter(Boolean));\n  let latest = 0;\n  for (const e of sentEvents) {\n    const p = e.payload || {};\n    const eventPhase = String(p.phase || '').toLowerCase();\n    if (eventPhase !== phase) continue;\n    const payloadEmail = String(p.email || p.email_normalized || '').toLowerCase().trim();\n    const matches = (e.lead_hash && hashes.has(e.lead_hash)) || (payloadEmail && payloadEmail === email);\n    if (!matches) continue;\n    const ts = new Date(e.event_at || 0).getTime();\n    if (Number.isFinite(ts) && ts > latest) latest = ts;\n  }\n  return latest || null;\n};\n\n// 🔴 Kontakte, die in der MySQL-Kontaktkartei geloescht wurden, duerfen KEINE Mail mehr\n// bekommen. PostgreSQL fuehrt diesen Zustand nicht - die Kartei ist die Wahrheit ueber die\n// Person. Belegt am 25.08.2026: 12 Mails gingen an 6 Menschen NACH ihrer Loeschung, einer\n// meldete sich daraufhin selbst ab.\n// Faellt die Abfrage aus, wird BEWUSST nicht versendet statt im Zweifel zu mailen.\nlet geloeschteHashes = new Set();\n{\n  const roh = $('MySQL - Geloeschte Kontakte').first().json.hashes;\n  const liste = typeof roh === 'string' ? JSON.parse(roh || '[]') : (Array.isArray(roh) ? roh : []);\n  geloeschteHashes = new Set(liste.filter(Boolean));\n}\n\nconst results = [];\nfor (const email in groups) {\n  const sessions = groups[email];\n  // exclude test-marked leads (never send)\n  if (isTestMarked(email, sessions)) continue;\n\n  // exclude contacts deleted in the MySQL Kontaktkartei (never send)\n  if (sessions.some(s => s.lead_hash && geloeschteHashes.has(s.lead_hash))) continue;\n\n  // Rule 1: any CTA anywhere -> no video nurture\n  if (sessions.some(s => s.cta_type)) continue;\n\n  // Rule 2 + 4: highest completed_rank; tie -> newest last_seen_at\n  let winner = null, maxRank = -1;\n  for (const s of sessions) {\n    const rank = (s.completed_rank == null) ? 0 : Number(s.completed_rank);\n    if (rank > maxRank) { maxRank = rank; winner = s; }\n    else if (rank === maxRank && winner) {\n      const a = new Date(s.last_seen_at || 0).getTime();\n      const b = new Date(winner.last_seen_at || 0).getTime();\n      if (a > b) winner = s;\n    }\n  }\n  if (!winner) continue;\n  const rank = maxRank;\n\n  // Rule 5: recipient (mautic_contact_id or email) + name + lead_hash\n  const mid = (sessions.find(s => s.mautic_contact_id) || {}).mautic_contact_id || '';\n  const firstName = winner.first_name || (sessions.find(s => s.first_name) || {}).first_name || '';\n  if ((!mid && !email) || !firstName || !winner.lead_hash) continue;\n\n  let phase = null;\n\n  if (rank === 0) {\n    const a2SentAt = latestSentForPerson(email, sessions, 'a2');\n    const a3SentAt = latestSentForPerson(email, sessions, 'a3');\n    if (a2SentAt && !a3SentAt && secondPhaseWindowOpen && (now - a2SentAt) >= H48) {\n      phase = 'a3';\n    } else if (!a2SentAt) {\n      const ref = winner.form_submitted_at;\n      if (ref && (now - new Date(ref).getTime()) >= H12) phase = 'a2';\n    }\n  } else if (rank === 1) {\n    const b1SentAt = latestSentForPerson(email, sessions, 'b1');\n    const b2SentAt = latestSentForPerson(email, sessions, 'b2');\n    if (b1SentAt && !b2SentAt && secondPhaseWindowOpen && (now - b1SentAt) >= H48) {\n      phase = 'b2';\n    } else if (!b1SentAt) {\n      const ref = winner.video1_completed_at;\n      if (ref && (now - new Date(ref).getTime()) >= H24) phase = 'b1';\n    }\n  } else if (rank === 2) {\n    const c1SentAt = latestSentForPerson(email, sessions, 'c1');\n    const c2SentAt = latestSentForPerson(email, sessions, 'c2');\n    if (c1SentAt && !c2SentAt && secondPhaseWindowOpen && (now - c1SentAt) >= H48) {\n      phase = 'c2';\n    } else if (!c1SentAt) {\n      const ref = winner.video2_completed_at;\n      if (ref && (now - new Date(ref).getTime()) >= H24) phase = 'c1';\n    }\n  } else if (rank === 3) {\n    const d1SentAt = latestSentForPerson(email, sessions, 'd1');\n    const d2SentAt = latestSentForPerson(email, sessions, 'd2');\n    if (d1SentAt && !d2SentAt && secondPhaseWindowOpen && (now - d1SentAt) >= H48) {\n      phase = 'd2';\n    } else if (!d1SentAt) {\n      const ref = winner.video3_completed_at;\n      if (ref && (now - new Date(ref).getTime()) >= H12) phase = 'd1';\n    }\n  }\n\n  if (!phase) continue;\n  if (!ACTIVE_PHASES.includes(phase)) continue;\n\n  results.push({ json: {\n    mauticContactId: String(mid || ''),\n    email: email,\n    lead_hash: winner.lead_hash,\n    phase: phase,\n    completed_rank: rank,\n    berater_slug: winner.berater_slug || '',\n    profile_code: winner.profile_code || '',\n    main_aspiration: winner.main_aspiration || '',\n    initial_barrier: winner.initial_barrier || '',\n    lang: winner.lang || '',\n    pilot_batch: '',\n    pilot_cap: null,\n    pilot_interval_hours: SECOND_PHASES.includes(phase) ? 48 : null\n  }});\n}\n\nreturn results;",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "split-batches",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "mautic-get-contact",
+      "name": "Mautic - Get Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        300
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      },
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.mauticContactId ? 'https://mautic.hl-support.biz/api/contacts/' + $json.mauticContactId : 'https://mautic.hl-support.biz/api/contacts?search=email:' + encodeURIComponent($json.email) + '&limit=1' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      }
+    },
+    {
+      "id": "code-select-email",
+      "name": "Code - Select Email ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const resp = $json;\nconst leadData = $('Code - Determine Phase').item.json;\n\nlet c = null;\nif (resp.contact) c = resp.contact;\nelse if (resp.contacts) { const arr = Object.values(resp.contacts); c = arr.length ? arr[0] : null; }\nif (!c) return { json: { skip: true, reason: 'contact_not_found', lead_hash: leadData.lead_hash } };\n\n// DNC / Abmeldung: nativer Mautic-Unsubscribe/Bounce fuer Email-Kanal -> niemals senden\nconst dncList = Array.isArray(c.doNotContact) ? c.doNotContact : [];\nif (dncList.some(d => (d.channel || 'email') === 'email')) {\n  return { json: { skip: true, reason: 'dnc_unsubscribed', lead_hash: leadData.lead_hash } };\n}\n\nconst getField = (alias) => {\n  const f = c.fields || {};\n  if (f.all && f.all[alias] !== undefined) {\n    const v = f.all[alias];\n    return (v && typeof v === 'object') ? (v.value != null ? v.value : '') : (v != null ? v : '');\n  }\n  for (const group of Object.values(f)) {\n    if (group && typeof group === 'object' && group[alias] !== undefined) {\n      const v = group[alias];\n      return (v && typeof v === 'object') ? (v.value != null ? v.value : '') : (v != null ? v : '');\n    }\n  }\n  return c[alias] != null ? c[alias] : '';\n};\n\n// 🔴 Mautic liefert Boolean-Felder als ZAHL (1), nicht als Zeichenkette. Die alte Pruefung\n// verglich streng gegen true/'1'/'true' und war damit wirkungslos - der Stoppschalter hat\n// nie jemanden angehalten. Gemessen am 29.08.2026: ac_nurture_stopped kam als number 1\n// zurueck, die Pruefung ergab false. Bis dahin trug niemand die Markierung, es ist also\n// keine Mail zu Unrecht rausgegangen.\nconst nurtureStopped = getField('ac_nurture_stopped');\nconst istGestoppt = nurtureStopped === true || nurtureStopped === 1\n  || ['1', 'true', 'ja', 'yes'].includes(String(nurtureStopped).toLowerCase());\nif (istGestoppt) {\n  return { json: { skip: true, reason: 'nurture_stopped', lead_hash: leadData.lead_hash } };\n}\n\nconst sentRaw = getField('ac_nurture_sent_phases') || '';\nconst sentPhases = sentRaw ? sentRaw.split(',').map(s => s.trim()).filter(Boolean) : [];\n\nif (sentPhases.includes(leadData.phase)) {\n  return { json: { skip: true, reason: 'already_sent:' + leadData.phase, lead_hash: leadData.lead_hash } };\n}\n\nconst EMAIL_MAP = {\n  a2: {\n    de: { freedom: 13, impact: 14, security: 15, growth: 16 },\n    it: { freedom: 98, impact: 99, security: 100, growth: 101 },\n    en: { freedom: 146, impact: 147, security: 148, growth: 149 },\n    hu: { _single: 162 },\n    fr: { _single: 170 },\n    ru: { _single: 178 },\n  },\n  a3: {\n    de: { vehicle: 17, community: 18, confidence: 19, opportunity: 20 },\n    it: { vehicle: 114, community: 115, confidence: 116, opportunity: 117 },\n    en: { vehicle: 130, community: 131, confidence: 132, opportunity: 133 },\n    hu: { _single: 163 },\n    fr: { _single: 171 },\n    ru: { _single: 179 },\n  },\n  a4: {\n    de: { feuer: 21, wind: 22, wasser: 23, fels: 24 },\n    it: { feuer: 21, wind: 22, wasser: 23, fels: 24 },\n    en: { feuer: 21, wind: 22, wasser: 23, fels: 24 },\n  },\n  a5: {\n    de: { _single: 25 }, it: { _single: 25 }, en: { _single: 25 },\n  },\n  b1: {\n    de: { feuer: 26, wind: 27, wasser: 28, fels: 29 },\n    it: { feuer: 102, wind: 103, wasser: 104, fels: 105 },\n    en: { feuer: 150, wind: 151, wasser: 152, fels: 153 },\n    hu: { _single: 164 },\n    fr: { _single: 172 },\n    ru: { _single: 180 },\n  },\n  b2: {\n    de: { feuer: 30, wind: 31, wasser: 32, fels: 33 },\n    it: { feuer: 118, wind: 119, wasser: 120, fels: 121 },\n    en: { feuer: 134, wind: 135, wasser: 136, fels: 137 },\n    hu: { _single: 165 },\n    fr: { _single: 173 },\n    ru: { _single: 181 },\n  },\n  c1: {\n    de: { freedom: 34, impact: 95, security: 96, growth: 97 },\n    it: { freedom: 106, impact: 107, security: 108, growth: 109 },\n    en: { freedom: 154, impact: 155, security: 156, growth: 157 },\n    hu: { _single: 166 },\n    fr: { _single: 174 },\n    ru: { _single: 182 },\n  },\n  c2: {\n    de: { feuer: 35, wind: 36, wasser: 37, fels: 38 },\n    it: { feuer: 122, wind: 123, wasser: 124, fels: 125 },\n    en: { feuer: 138, wind: 139, wasser: 140, fels: 141 },\n    hu: { _single: 167 },\n    fr: { _single: 175 },\n    ru: { _single: 183 },\n  },\n  d1: {\n    de: { freedom: 39, impact: 40, security: 41, growth: 42 },\n    it: { freedom: 110, impact: 111, security: 112, growth: 113 },\n    en: { freedom: 158, impact: 159, security: 160, growth: 161 },\n    hu: { _single: 168 },\n    fr: { _single: 176 },\n    ru: { _single: 184 },\n  },\n  d2: {\n    de: { vehicle: 43, community: 44, confidence: 45, opportunity: 46 },\n    it: { vehicle: 126, community: 127, confidence: 128, opportunity: 129 },\n    en: { vehicle: 142, community: 143, confidence: 144, opportunity: 145 },\n    hu: { _single: 169 },\n    fr: { _single: 177 },\n    ru: { _single: 185 },\n  },\n};\n\nconst PHASE_DIM = {\n  a2: 'main_goal', a3: 'barrier', a4: 'profile', a5: '_single',\n  b1: 'profile', b2: 'profile', c1: 'main_goal', c2: 'profile', d1: 'main_goal', d2: 'barrier',\n};\n\n// Normalize localized/legacy values to canonical variant keys\nconst GOAL_ALIAS = { freiheit:'freedom', liberta:'freedom', 'liberta`':'freedom', wirkung:'impact', impatto:'impact', sicherheit:'security', sicurezza:'security', wachstum:'growth', crescita:'growth', 'mehr-energie':'growth', energy:'growth', energia:'growth', freedom:'freedom', impact:'impact', security:'security', growth:'growth' };\nconst PROFILE_ALIAS = { 'il-realizzatore':'feuer', 'il-connettore':'wind', 'l-ancora':'wasser', 'l-architetto':'fels', 'tipo-a':'feuer', 'tipo-b':'wind', 'tipo-c':'wasser', 'tipo-d':'fels', fire:'feuer', wind:'wind', water:'wasser', rock:'fels' };\nconst BARRIER_ALIAS = { 'fehlende-sicherheit':'confidence', 'manca-sicurezza':'confidence', 'fehlende-moglichkeit':'opportunity', 'fehlendes-umfeld':'community', 'manca-l-ambiente':'community', 'manca-un-sistema':'vehicle', vehicle:'vehicle', community:'community', confidence:'confidence', opportunity:'opportunity' };\nconst norm = (val, map) => { const v=(val||'').toLowerCase(); return map[v] || v; };\n\nconst rawLang = (getField('ac_last_form_language') || leadData.lang || 'de').toLowerCase().replace(/_.*/, '');\n// Sprach-Gate: nur Sprachen mit echten Templates senden. DE, IT und EN sind aktiv.\n// Seit 31.08.2026 auch hu, fr und ru — dort je Phase EINE generische Vorlage\n// (Version A). Quelle der Texte: nurture/vorlagen/generisch-hu-fr-ru.js im\n// Quiz-Repo. 🔴 Wer eine Sprache wieder abschaltet, nimmt sie NUR hier heraus;\n// die Vorlagen bleiben stehen und lassen sich jederzeit wieder zuschalten.\nconst SUPPORTED_LANGS = ['de', 'it', 'en', 'hu', 'fr', 'ru'];\nif (!SUPPORTED_LANGS.includes(rawLang)) {\n  return { json: { skip: true, reason: 'unsupported_language:' + rawLang, lead_hash: leadData.lead_hash } };\n}\nconst lang = rawLang;\nconst profile  = norm(getField('ac_last_profile') || leadData.profile_code, PROFILE_ALIAS);\nconst mainGoal = norm(getField('ac_last_main_goal') || leadData.main_aspiration, GOAL_ALIAS);\nconst barrier  = norm(getField('ac_last_barrier') || leadData.initial_barrier, BARRIER_ALIAS);\n\nconst dim = PHASE_DIM[leadData.phase];\nlet variantKey;\nif (dim === 'main_goal') variantKey = mainGoal;\nelse if (dim === 'profile') variantKey = profile;\nelse if (dim === 'barrier') variantKey = barrier;\nelse variantKey = '_single';\n\n// 🔴 Rueckfall auf die generische Fassung: Sprachen ohne Variantentiefe haben je\n// Phase EINE Vorlage unter `_single`. Wer spaeter eine echte Variante nachtraegt,\n// ueberschreibt damit genau diese Kombination — ohne Umstellung, ohne Deploy.\nconst emailId = EMAIL_MAP[leadData.phase]?.[lang]?.[variantKey]\n  ?? EMAIL_MAP[leadData.phase]?.[lang]?.['_single'];\nif (!emailId) {\n  return { json: { skip: true, reason: 'no_email_id:' + leadData.phase + '/' + lang + '/' + variantKey, lead_hash: leadData.lead_hash } };\n}\n\nconst coachEmail = getField('ac_berater_email') || '';\nif (!coachEmail) {\n  return { json: { skip: true, reason: 'no_coach_data', lead_hash: leadData.lead_hash } };\n}\nconst cleanPart = (value) => String(value || '').trim().replace(/\\s+/g, ' ');\nconst coachName = [cleanPart(getField('ac_berater_vorname')), cleanPart(getField('ac_berater_name'))].filter(Boolean).join(' ').trim();\nconst coachOrg = cleanPart(getField('ac_berater_org_display')) || 'Activecenter';\nconst coachDisplayName = [coachName, coachOrg].filter(Boolean).join(' - ') || 'Activecenter';\n\nconst newSentPhases = [...sentPhases, leadData.phase].join(',');\n\nreturn { json: {\n  skip: false,\n  mauticContactId: c.id,\n  emailId,\n  phase: leadData.phase,\n  lead_hash: leadData.lead_hash,\n  email: leadData.email,\n  berater_slug: leadData.berater_slug || '',\n  language: lang,\n  variantKey,\n  newSentPhases,\n  coachEmail,\n  coachDisplayName,\n  pilot_batch: leadData.pilot_batch || '',\n  pilot_cap: leadData.pilot_cap || null,\n  pilot_interval_hours: leadData.pilot_interval_hours || null,\n}};\n",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "if-skip",
+      "name": "IF - Needs Email",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "skip-check",
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "mautic-send-email",
+      "name": "Mautic - Send Transactional Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        200
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      },
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://mautic.hl-support.biz/api/emails/' + $('Code - Select Email ID').item.json.emailId + '/contact/' + $('Code - Select Email ID').item.json.mauticContactId + '/send' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      }
+    },
+    {
+      "id": "mautic-update-sent-phases",
+      "name": "Mautic - Update Sent Phases",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        200
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      },
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $('Code - Select Email ID').item.json.mauticContactId + '/edit' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "options": {},
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ ac_nurture_sent_phases: $('Code - Select Email ID').item.json.newSentPhases }) }}"
+      }
+    },
+    {
+      "id": "no-op-skip",
+      "name": "No-op (skipped)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        420
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "mautic-set-reply-to",
+      "name": "Mautic - Set Reply-To",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        200
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      },
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://mautic.hl-support.biz/api/emails/' + $('Code - Select Email ID').item.json.emailId + '/edit' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "options": {},
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ replyToAddress: $('Code - Select Email ID').item.json.coachEmail, fromAddress: 'mail@mail.hl-support.biz', fromName: $('Code - Select Email ID').item.json.coachDisplayName || 'Activecenter' }) }}"
+      }
+    },
+    {
+      "name": "Supabase - Get Test Events",
+      "id": "supabase-test-events",
+      "position": [
+        100,
+        160
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select lead_hash, event_name, event_at, payload\nfrom leads.lead_events\nwhere event_name in ('test_lead_marked','test_lead_unmarked','nurture_sent')\norder by event_at desc, event_uid asc",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "6ARQvSx0fKTy2Mcq",
+          "name": "Plattform-DB leads_n8n (hl_support)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "logworthy",
+              "leftValue": "={{ $json.skip === true && !String($json.reason || '').startsWith('already_sent') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "flt-logworthy",
+      "name": "Filter - Log Worthy",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        1180,
+        560
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Supabase - Log Skip",
+      "id": "sb-log-skip",
+      "position": [
+        1400,
+        560
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select leads.record_nurture_skip(\n  ($1::jsonb->>'p_project_key'), ($1::jsonb->>'p_sequence_key'), ($1::jsonb->>'p_lead_hash'),\n  ($1::jsonb->>'p_reason_code'), ($1::jsonb->>'p_phase_key'),\n  ($1::jsonb->>'p_occurred_at')::timestamptz, ($1::jsonb->>'p_telemetry_version')::int\n) as ergebnis",
+        "options": {
+          "queryReplacement": "={{ JSON.stringify(({\n  p_project_key: 'business_leads_quiz',\n  p_sequence_key: 'video_nurture',\n  p_lead_hash: $json.lead_hash,\n  p_reason_code: ($json.reason || 'unknown'),\n  p_phase_key: ($json.phase || null),\n  p_occurred_at: new Date().toISOString(),\n  p_telemetry_version: 2\n})) }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "6ARQvSx0fKTy2Mcq",
+          "name": "Plattform-DB leads_n8n (hl_support)"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Supabase - Log Sent",
+      "id": "sb-log-sent",
+      "position": [
+        1400,
+        760
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select leads.record_nurture_sent(\n  ($1::jsonb->>'p_project_key'), ($1::jsonb->>'p_sequence_key'), ($1::jsonb->>'p_event_uid'),\n  ($1::jsonb->>'p_lead_hash'), ($1::jsonb->>'p_phase_key'), ($1::jsonb->>'p_email_id'),\n  ($1::jsonb->>'p_subject'), ($1::jsonb->>'p_language'), ($1::jsonb->>'p_variant'),\n  ($1::jsonb->>'p_mautic_contact_id'), ($1::jsonb->>'p_occurred_at')::timestamptz,\n  ($1::jsonb->>'p_telemetry_version')::int\n) as ergebnis",
+        "options": {
+          "queryReplacement": "={{ JSON.stringify((() => {\n  const selected = $('Code - Select Email ID').item.json;\n  const subjects = {\"13\":\"{contactfield=firstname}, dein Erfolgscode\",\"14\":\"{contactfield=firstname}, dein Erfolgscode\",\"15\":\"{contactfield=firstname}, dein Erfolgscode\",\"16\":\"{contactfield=firstname}, dein Erfolgscode\",\"26\":\"{contactfield=firstname}, jetzt wird's konkret\",\"27\":\"{contactfield=firstname}, wer dabei ist\",\"28\":\"{contactfield=firstname}, der Plan dahinter\",\"29\":\"{contactfield=firstname}, der Mechanismus\",\"34\":\"{contactfield=firstname}, jetzt wird's pers?nlich\",\"95\":\"{contactfield=firstname}, jetzt wird's pers?nlich\",\"96\":\"{contactfield=firstname}, jetzt wird's pers?nlich\",\"97\":\"{contactfield=firstname}, jetzt wird's pers?nlich\",\"39\":\"{contactfield=firstname}, du hast jetzt alles gesehen\",\"40\":\"{contactfield=firstname}, was du jetzt wei?t\",\"41\":\"{contactfield=firstname}, Sicherheit beginnt mit Klarheit\",\"42\":\"{contactfield=firstname}, du bist nicht zuf?llig hier\",\"98\":\"{contactfield=firstname}, il tuo Codice del Successo\",\"99\":\"{contactfield=firstname}, il tuo Codice del Successo\",\"100\":\"{contactfield=firstname}, il tuo Codice del Successo\",\"101\":\"{contactfield=firstname}, il tuo Codice del Successo\",\"102\":\"{contactfield=firstname}, adesso diventa concreto\",\"103\":\"{contactfield=firstname}, chi c'? dentro\",\"104\":\"{contactfield=firstname}, il piano dietro\",\"105\":\"{contactfield=firstname}, il meccanismo\",\"106\":\"{contactfield=firstname}, adesso diventa personale\",\"107\":\"{contactfield=firstname}, adesso diventa personale\",\"108\":\"{contactfield=firstname}, adesso diventa personale\",\"109\":\"{contactfield=firstname}, adesso diventa personale\",\"110\":\"{contactfield=firstname}, hai visto tutto adesso\",\"111\":\"{contactfield=firstname}, quello che sai adesso\",\"112\":\"{contactfield=firstname}, la sicurezza inizia con la chiarezza\",\"113\":\"{contactfield=firstname}, non sei qui per caso\",\"146\":\"{contactfield=firstname}, your success code\",\"147\":\"{contactfield=firstname}, your success code\",\"148\":\"{contactfield=firstname}, your success code\",\"149\":\"{contactfield=firstname}, your success code\",\"150\":\"{contactfield=firstname}, now it gets concrete\",\"151\":\"{contactfield=firstname}, who is in this with you\",\"152\":\"{contactfield=firstname}, the plan behind it\",\"153\":\"{contactfield=firstname}, the mechanism\",\"154\":\"{contactfield=firstname}, now it gets personal\",\"155\":\"{contactfield=firstname}, now it gets personal\",\"156\":\"{contactfield=firstname}, now it gets personal\",\"157\":\"{contactfield=firstname}, now it gets personal\",\"158\":\"{contactfield=firstname}, you have seen the full picture\",\"159\":\"{contactfield=firstname}, what you know now\",\"160\":\"{contactfield=firstname}, certainty starts with clarity\",\"161\":\"{contactfield=firstname}, you are not here by accident\",\"17\":\"Dein erster Schritt braucht keinen fertigen Plan\",\"18\":\"Du musst das nicht alleine einsch?tzen\",\"19\":\"Du musst noch nicht bereit sein\",\"20\":\"Schau kurz, ob das dein Weg sein kann\",\"30\":\"{contactfield=firstname}, jetzt siehst du das System\",\"31\":\"{contactfield=firstname}, du musst das nicht allein tragen\",\"32\":\"{contactfield=firstname}, der n?chste Schritt ist Struktur\",\"33\":\"{contactfield=firstname}, pr?fe jetzt den Aufbau\",\"35\":\"{contactfield=firstname}, jetzt brauchst du echte Menschen\",\"36\":\"{contactfield=firstname}, schau auf die Menschen\",\"37\":\"{contactfield=firstname}, jetzt siehst du echte Starts\",\"38\":\"{contactfield=firstname}, passt das wirklich zu dir?\",\"43\":\"Dein n?chster Schritt kann klein sein\",\"44\":\"Der n?chste Schritt ist ein kurzes Gespr?ch\",\"45\":\"Mehr Sicherheit entsteht im Gespr?ch\",\"46\":\"Wenn du offen bist, sag kurz Bescheid\",\"114\":\"Il tuo primo passo non richiede un piano perfetto\",\"115\":\"Non devi capirlo tutto da solo\",\"116\":\"Non devi sentirti gi? pronto\",\"117\":\"Guarda se questo percorso pu? fare per te\",\"118\":\"{contactfield=firstname}, ora vedi il sistema\",\"119\":\"{contactfield=firstname}, non devi portarlo avanti da solo\",\"120\":\"{contactfield=firstname}, il prossimo passo ? la struttura\",\"121\":\"{contactfield=firstname}, ora valuta la struttura\",\"122\":\"{contactfield=firstname}, ora servono persone reali\",\"123\":\"{contactfield=firstname}, guarda le persone\",\"124\":\"{contactfield=firstname}, ora vedi partenze vere\",\"125\":\"{contactfield=firstname}, questo percorso fa davvero per te?\",\"126\":\"Il tuo prossimo passo pu? essere piccolo\",\"127\":\"Il prossimo passo ? una breve conversazione\",\"128\":\"La sicurezza cresce parlando\",\"129\":\"Se sei aperto, dai un breve segnale\",\"130\":\"Your first step does not need a finished plan\",\"131\":\"You do not have to figure this out alone\",\"132\":\"You do not have to feel ready yet\",\"133\":\"Take a quick look at whether this could fit\",\"134\":\"{contactfield=firstname}, now you see the system\",\"135\":\"{contactfield=firstname}, you do not have to carry this alone\",\"136\":\"{contactfield=firstname}, the next step is structure\",\"137\":\"{contactfield=firstname}, now check the structure\",\"138\":\"{contactfield=firstname}, now you need real people\",\"139\":\"{contactfield=firstname}, look at the people\",\"140\":\"{contactfield=firstname}, now you see real starts\",\"141\":\"{contactfield=firstname}, does this really fit you?\",\"142\":\"Your next step can be small\",\"143\":\"The next step is a short conversation\",\"144\":\"More certainty comes through a conversation\",\"145\":\"If you are open, send a quick signal\"};\n  const subject = subjects[String(selected.emailId)] || '';\n  return {\n    p_project_key: 'business_leads_quiz',\n    p_sequence_key: 'video_nurture',\n    p_event_uid: 'nurture_sent_contact_' + selected.mauticContactId + '_' + selected.phase,\n    p_lead_hash: selected.lead_hash,\n    p_phase_key: selected.phase,\n    p_email_id: String(selected.emailId || ''),\n    p_subject: subject,\n    p_language: selected.language,\n    p_variant: selected.variantKey,\n    p_mautic_contact_id: String(selected.mauticContactId || ''),\n    p_occurred_at: new Date().toISOString(),\n    p_telemetry_version: 2\n  };\n})()) }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "6ARQvSx0fKTy2Mcq",
+          "name": "Plattform-DB leads_n8n (hl_support)"
+        }
+      }
+    },
+    {
+      "name": "Supabase - Get Resume Session",
+      "id": "supabase-get-resume-session",
+      "position": [
+        1260,
+        140
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select id, session_hash, lead_hash, form_email, funnel, updated_at\nfrom leads.tracking_sessions\nwhere lead_hash = $1\norder by updated_at desc\nlimit 1",
+        "options": {
+          "queryReplacement": "={{ $('Code - Select Email ID').item.json.lead_hash }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "6ARQvSx0fKTy2Mcq",
+          "name": "Plattform-DB leads_n8n (hl_support)"
+        }
+      },
+      "retryOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const selected = $('Code - Select Email ID').item.json;\nconst inputItems = $input.all();\nlet rows = [];\nfor (const item of inputItems) {\n  if (Array.isArray(item.json)) rows.push(...item.json);\n  else if (item.json && item.json.session_hash) rows.push(item.json);\n}\nconst session = rows.find(r => r && r.session_hash);\nreturn { json: {\n  ...selected,\n  skip: false,\n  sessionHash: session?.session_hash || '',\n  resumeTargetRequest: ['d1', 'd2'].includes(selected.phase) ? 'final' : 'videos',\n}};"
+      },
+      "id": "code-build-resume-request",
+      "name": "Code - Build Resume Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1480,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "resume-session-ready",
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-resume-session-ready",
+      "name": "IF - Resume Session Ready",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1700,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://business.activecenter.info/api/bridge",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ action: 'generate_resume_token', payload: { sessionHash: $('Code - Build Resume Request').item.json.sessionHash, leadHash: $('Code - Build Resume Request').item.json.lead_hash, email: $('Code - Build Resume Request').item.json.email, resumeTarget: $('Code - Build Resume Request').item.json.resumeTargetRequest || 'videos', slug: $('Code - Build Resume Request').item.json.berater_slug || '', context: 'business' } }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "bridge-generate-resume-link",
+      "name": "Bridge - Generate Resume Link",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1920,
+        120
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Dwum7g63YfojD3q5",
+          "name": "Bridge Service Key (business.activecenter.info)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const selected = $('Code - Build Resume Request').item.json;\nconst generated = $json || {};\nconst resumeUrl = generated.shortUrl || generated.resumeUrl || '';\nconst target = generated.resumeTarget || '';\nconst step = Number(generated.lastVideoStep || 0);\nconst expectedStepByPhase = { a2: 1, a3: 1, b1: 2, b2: 2, c1: 3, c2: 3, d1: 3, d2: 3 };\nconst expectedStep = expectedStepByPhase[selected.phase] || 1;\n\nconst skip = (reason, extra = {}) => ({ json: {\n  ...selected,\n  ...extra,\n  skip: true,\n  reason,\n  phase: selected.phase,\n  lead_hash: selected.lead_hash,\n}});\n\nif (!generated.success || !resumeUrl) {\n  return skip('resume_link_generation_failed', { bridge_error: generated.error || null });\n}\n\nif (resumeUrl.length > 190) {\n  return skip('resume_link_too_long', {\n    resumeUrlLength: resumeUrl.length,\n    generatedShortKey: generated.shortKey || null,\n    generatedShortUrl: generated.shortUrl || null,\n  });\n}\n\nif (selected.phase === 'd1' || selected.phase === 'd2') {\n  if (target !== 'final' || step !== 3) {\n    return skip('resume_target_mismatch', { generatedResumeTarget: target, generatedLastVideoStep: step, expectedResumeTarget: 'final', expectedLastVideoStep: 3 });\n  }\n} else {\n  if (target !== 'videos' || step < expectedStep) {\n    return skip('resume_target_mismatch', { generatedResumeTarget: target, generatedLastVideoStep: step, expectedResumeTarget: 'videos', expectedLastVideoStep: expectedStep });\n  }\n}\n\nreturn { json: {\n  ...selected,\n  skip: false,\n  resumeUrl,\n  generatedResumeTarget: target,\n  generatedLastVideoStep: step,\n}};"
+      },
+      "id": "code-validate-resume-link",
+      "name": "Code - Validate Resume Link",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2140,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "resume-link-valid",
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-resume-link-valid",
+      "name": "IF - Resume Link Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2360,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $('Code - Validate Resume Link').item.json.mauticContactId + '/edit' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "options": {},
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ ac_last_video_access_url: $('Code - Validate Resume Link').item.json.resumeUrl }) }}"
+      },
+      "id": "mautic-update-resume-link",
+      "name": "Mautic - Update Resume Link",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2580,
+        80
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      }
+    },
+    {
+      "id": "code-single-run-gate",
+      "name": "Code - Single Run Gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const eventItems = $input.all();\nreturn [{ json: { ready: true, event_count: eventItems.length } }];"
+      }
+    },
+    {
+      "id": "code-recovery-send-cap",
+      "name": "Code - Recovery Send Cap",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2360,
+        20
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $json || {};\nif (item.skip) return { json: item };\n\n// 🔴 Seit 26.08.2026 gilt die Bremse fuer ALLE Phasen, nicht nur die Zweitmails.\n// Grund: Die stille Zeilengrenze der Auswahlabfrage hatte 186 Menschen drei Wochen lang\n// unsichtbar gemacht. Nach der Reparatur waeren sie alle in EINEM Lauf angeschrieben\n// worden - ein Schwall, der Zustellbarkeit und Ruf kostet. Bei 25 je Lauf und zwoelf\n// Laeufen taeglich ist ein solcher Rueckstand binnen eines Tages abgearbeitet.\nconst SECOND_PHASES = ['a3', 'b2', 'c2', 'd2'];\nconst ALLE_PHASEN = ['a2', 'b1', 'c1', 'd1', 'a3', 'b2', 'c2', 'd2'];\nif (!ALLE_PHASEN.includes(item.phase)) return { json: item };\n\nconst executionId = String($execution.id || '');\nif (!executionId) throw new Error('Missing n8n execution id for recovery cap');\n\nconst state = $getWorkflowStaticData('global');\nif (!state.nurtureRecoveryCap || state.nurtureRecoveryCap.executionId !== executionId) {\n  state.nurtureRecoveryCap = {\n    executionId,\n    counts: Object.fromEntries(ALLE_PHASEN.map(phase => [phase, 0])),\n  };\n}\n\n// 🔴 Zusaetzlich eine GLOBALE Obergrenze je Lauf. Die Zaehlung je Phase allein liess\n// theoretisch 4x25 + 4x20 = 180 Mails in einem Lauf zu - genau der Schwall, der verhindert\n// werden sollte. Gemessen am 26.08. im ersten reparierten Lauf: 63 Mails, davon a2 und b1\n// mit exakt 25 an ihrer Phasengrenze.\n// 🔴 Am 28.08.2026 fuer den Umbau auf die Plattform-DB auf 5 gedrosselt und am selben\n  // Abend wieder auf 60 geoeffnet (Entscheidung Markus). Belegt VOR dem Oeffnen: vier Laeufe\n  // (06:01, 14:03, 16:03, 18:00 MESZ), zwoelf Mails, kein Fehlereintrag, bei Postmark null\n  // Bounces und zwei Oeffnungen. 60 war auch der Wert vor der Umstellung.\n  // Es warteten zu diesem Zeitpunkt rund 195 faellige Menschen hinter der Bremse.\n  const GESAMT_GRENZE = 60;\nstate.nurtureRecoveryCap.gesamt = Number(state.nurtureRecoveryCap.gesamt || 0);\nif (state.nurtureRecoveryCap.gesamt >= GESAMT_GRENZE) {\n  return { json: { ...item, skip: true, reason: 'gesamt_cap_reached' } };\n}\n\nconst count = Number(state.nurtureRecoveryCap.counts[item.phase] || 0);\nconst GRENZE = SECOND_PHASES.includes(item.phase) ? 20 : 25;\nif (count >= GRENZE) {\n  return { json: { ...item, skip: true, reason: 'recovery_cap_reached' } };\n}\nstate.nurtureRecoveryCap.counts[item.phase] = count + 1;\nstate.nurtureRecoveryCap.gesamt += 1;\nreturn { json: item };"
+      }
+    },
+    {
+      "name": "Supabase - Log Run",
+      "id": "sb-log-nurture-run",
+      "position": [
+        920,
+        140
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select leads.record_nurture_run(\n  ($1::jsonb->>'p_project_key'), ($1::jsonb->>'p_sequence_key'), ($1::jsonb->>'p_execution_id'),\n  ($1::jsonb->>'p_status'), ($1::jsonb->>'p_started_at')::timestamptz,\n  ($1::jsonb->>'p_finished_at')::timestamptz, ($1::jsonb->>'p_workflow_id'),\n  ($1::jsonb->>'p_workflow_version_id'), ($1::jsonb->>'p_candidates_checked')::int,\n  ($1::jsonb->>'p_sent_count')::int, ($1::jsonb->>'p_skipped_count')::int,\n  ($1::jsonb->>'p_failed_count')::int, ($1::jsonb->>'p_error_code'), ($1::jsonb->>'p_error_node'),\n  ($1::jsonb->>'p_telemetry_version')::int\n) as ergebnis",
+        "options": {
+          "queryReplacement": "={{ JSON.stringify((() => {\n  const all = (name) => {\n    try { return $(name).all(); } catch { return []; }\n  };\n  const now = new Date().toISOString();\n  return {\n    p_project_key: 'business_leads_quiz',\n    p_sequence_key: 'video_nurture',\n    p_execution_id: String($execution.id),\n    p_status: 'success',\n    p_started_at: now,\n    p_finished_at: now,\n    p_workflow_id: String($workflow.id),\n    p_workflow_version_id: null,\n    p_candidates_checked: all('Code - Determine Phase').length,\n    p_sent_count: all('Supabase - Log Sent').length,\n    p_skipped_count: all('Supabase - Log Skip').length,\n    p_failed_count: 0,\n    p_error_code: null,\n    p_error_node: null,\n    p_telemetry_version: 1\n  };\n})()) }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "6ARQvSx0fKTy2Mcq",
+          "name": "Plattform-DB leads_n8n (hl_support)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select json_arrayagg(t.hash) as hashes from prod_contacts_activesupport.typeform_surveys t join prod_contacts_activesupport.contacts c on c.id = t.contact_id where t.hash like 'qz\\_%' and c.deleted_at is not null",
+        "options": {}
+      },
+      "id": "mysql-geloeschte-kontakte",
+      "name": "MySQL - Geloeschte Kontakte",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        400,
+        460
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "73WL8zP1Qlctkz12",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron - Every 2h": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Get Test Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Get Eligible Leads": {
+      "main": [
+        [
+          {
+            "node": "Code - Determine Phase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Determine Phase": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Log Run",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mautic - Get Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Select Email ID": {
+      "main": [
+        [
+          {
+            "node": "IF - Needs Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter - Log Worthy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Needs Email": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Get Resume Session",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No-op (skipped)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Send Transactional Email": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Update Sent Phases",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Update Sent Phases": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Log Sent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Set Reply-To": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Send Transactional Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Get Contact": {
+      "main": [
+        [
+          {
+            "node": "Code - Select Email ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Get Test Events": {
+      "main": [
+        [
+          {
+            "node": "Code - Single Run Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No-op (skipped)": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter - Log Worthy": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Log Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Get Resume Session": {
+      "main": [
+        [
+          {
+            "node": "Code - Build Resume Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Build Resume Request": {
+      "main": [
+        [
+          {
+            "node": "IF - Resume Session Ready",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter - Log Worthy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Resume Session Ready": {
+      "main": [
+        [
+          {
+            "node": "Bridge - Generate Resume Link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No-op (skipped)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bridge - Generate Resume Link": {
+      "main": [
+        [
+          {
+            "node": "Code - Validate Resume Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Validate Resume Link": {
+      "main": [
+        [
+          {
+            "node": "Code - Recovery Send Cap",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter - Log Worthy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Resume Link Valid": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Update Resume Link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No-op (skipped)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Update Resume Link": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Set Reply-To",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Single Run Gate": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Geloeschte Kontakte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Recovery Send Cap": {
+      "main": [
+        [
+          {
+            "node": "IF - Resume Link Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Geloeschte Kontakte": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Get Eligible Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "errorWorkflow": "vSpXIyOUK9WIlvxi"
+  },
+  "staticData": {
+    "node:Cron - Every 2h": {
+      "recurrenceRules": [
+        20
+      ],
+      "recurrenceRuleSignatures": [
+        "hours:2"
+      ]
+    },
+    "global": {
+      "nurtureRecoveryCap": {
+        "executionId": "554817",
+        "counts": {
+          "a2": 0,
+          "b1": 1,
+          "c1": 0,
+          "d1": 0,
+          "a3": 0,
+          "b2": 0,
+          "c2": 0,
+          "d2": 0
+        },
+        "gesamt": 1
+      }
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "6f449b4d-82c5-4b31-83e8-436ba1e9a7c0",
+  "activeVersionId": "6f449b4d-82c5-4b31-83e8-436ba1e9a7c0",
+  "versionCounter": 73,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-05-29T18:14:12.695Z",
+      "createdAt": "2026-05-29T18:14:12.695Z",
+      "role": "workflow:owner",
+      "workflowId": "RqKSRTgFv8mv04H2",
+      "projectId": "ROWWTo0FQLcxZajT",
+      "project": {
+        "updatedAt": "2026-03-21T16:42:22.082Z",
+        "createdAt": "2025-12-09T17:32:24.857Z",
+        "id": "ROWWTo0FQLcxZajT",
+        "name": "Unnamed Project",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-08-31T18:36:44.095Z",
+    "createdAt": "2026-08-31T18:36:44.095Z",
+    "versionId": "6f449b4d-82c5-4b31-83e8-436ba1e9a7c0",
+    "workflowId": "RqKSRTgFv8mv04H2",
+    "nodes": [
+      {
+        "id": "cron-trigger",
+        "name": "Cron - Every 2h",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 2
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "Supabase - Get Eligible Leads",
+        "id": "supabase-get-leads",
+        "position": [
+          220,
+          300
+        ],
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "select lead_hash, email_normalized, first_name, mautic_contact_id, completed_rank,\n       cta_type, form_submitted_at, video1_completed_at, video2_completed_at,\n       video3_completed_at, last_seen_at, berater_slug, profile_code,\n       main_aspiration, initial_barrier, lang\nfrom leads.v_lead_state_full\nwhere source_app = 'business_leads_quiz'\n  and funnel_key = 'business'\n  and email_normalized is not null\n  and first_name is not null\norder by first_seen_at desc, lead_hash asc",
+          "options": {}
+        },
+        "credentials": {
+          "postgres": {
+            "id": "6ARQvSx0fKTy2Mcq",
+            "name": "Plattform-DB leads_n8n (hl_support)"
+          }
+        }
+      },
+      {
+        "id": "code-phase",
+        "name": "Code - Determine Phase",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          300
+        ],
+        "parameters": {
+          "jsCode": "// 🔴 Bei Seitenblaetterung liefert n8n MEHRERE Elemente, je Seite eines. Die alte Zeile\n// nahm nur items[0].json - also nur die erste Seite. Eine Paginierung ohne diesen Fix\n// haette gar nichts verbessert. flatMap deckt beide Formen ab: ein Element mit Array\n// (unpaginiert) und viele Elemente mit je einem Array oder einem Objekt (paginiert).\nconst flach = (liste) => liste.flatMap(i => Array.isArray(i.json) ? i.json : [i.json]);\nconst rows = flach($input.all());\nif (!rows || !rows.length) return [];\n\nconst now = Date.now();\nconst H24 = 24 * 60 * 60 * 1000;\nconst H12 = 12 * 60 * 60 * 1000;\nconst H48 = 48 * 60 * 60 * 1000;\n\n// A2/B1/C1/D1 bleiben die normalen ersten Erinnerungen.\n// A3/B2/C2/D2 sind jetzt vollst?ndig aktiv: 48h nach der ersten Erinnerung, tagsueber.\nconst ACTIVE_PHASES = ['a2', 'b1', 'c1', 'd1', 'a3', 'b2', 'c2', 'd2'];\nconst SECOND_PHASES = ['a3', 'b2', 'c2', 'd2'];\n// The recovery send cap is applied only after contact, DNC, template, coach and resume-link validation.\n\nlet berlinHour = 10;\ntry {\n  const hourPart = new Intl.DateTimeFormat('de-DE', {\n    timeZone: 'Europe/Berlin', hour: '2-digit', hour12: false\n  }).formatToParts(new Date()).find(part => part.type === 'hour');\n  berlinHour = Number(hourPart && hourPart.value ? hourPart.value : 10);\n} catch (e) {}\nif (!Number.isFinite(berlinHour)) berlinHour = 10;\nconst secondPhaseWindowOpen = berlinHour >= 6 && berlinHour < 18;\n\nconst allEvents = flach($('Supabase - Get Test Events').all());\nconst testEvents = allEvents.filter(e => e.event_name === 'test_lead_marked' || e.event_name === 'test_lead_unmarked');\nconst sentEvents = allEvents.filter(e => e.event_name === 'nurture_sent');\n\n// Group all sessions by person (email_normalized)\nconst groups = {};\nfor (const r of rows) {\n  if (!r || !r.lead_hash) continue;\n  const key = (r.email_normalized || '').toLowerCase().trim();\n  if (!key) continue;\n  (groups[key] = groups[key] || []).push(r);\n}\n\n// Test-lead exclusion (newest test event per lead_hash / email wins; events are event_at desc)\nconst testHash = {}; const testEmail = {};\nfor (const e of testEvents) {\n  const lh = e.lead_hash;\n  const em = ((e.payload && e.payload.email) || '').toLowerCase().trim();\n  if (lh && !(lh in testHash)) testHash[lh] = e.event_name;\n  if (em && !(em in testEmail)) testEmail[em] = e.event_name;\n}\nconst isTestMarked = (email, sessions) =>\n  testEmail[email] === 'test_lead_marked' ||\n  sessions.some(s => testHash[s.lead_hash] === 'test_lead_marked');\n\nconst latestSentForPerson = (email, sessions, phase) => {\n  const hashes = new Set(sessions.map(s => s.lead_hash).filter(Boolean));\n  let latest = 0;\n  for (const e of sentEvents) {\n    const p = e.payload || {};\n    const eventPhase = String(p.phase || '').toLowerCase();\n    if (eventPhase !== phase) continue;\n    const payloadEmail = String(p.email || p.email_normalized || '').toLowerCase().trim();\n    const matches = (e.lead_hash && hashes.has(e.lead_hash)) || (payloadEmail && payloadEmail === email);\n    if (!matches) continue;\n    const ts = new Date(e.event_at || 0).getTime();\n    if (Number.isFinite(ts) && ts > latest) latest = ts;\n  }\n  return latest || null;\n};\n\n// 🔴 Kontakte, die in der MySQL-Kontaktkartei geloescht wurden, duerfen KEINE Mail mehr\n// bekommen. PostgreSQL fuehrt diesen Zustand nicht - die Kartei ist die Wahrheit ueber die\n// Person. Belegt am 25.08.2026: 12 Mails gingen an 6 Menschen NACH ihrer Loeschung, einer\n// meldete sich daraufhin selbst ab.\n// Faellt die Abfrage aus, wird BEWUSST nicht versendet statt im Zweifel zu mailen.\nlet geloeschteHashes = new Set();\n{\n  const roh = $('MySQL - Geloeschte Kontakte').first().json.hashes;\n  const liste = typeof roh === 'string' ? JSON.parse(roh || '[]') : (Array.isArray(roh) ? roh : []);\n  geloeschteHashes = new Set(liste.filter(Boolean));\n}\n\nconst results = [];\nfor (const email in groups) {\n  const sessions = groups[email];\n  // exclude test-marked leads (never send)\n  if (isTestMarked(email, sessions)) continue;\n\n  // exclude contacts deleted in the MySQL Kontaktkartei (never send)\n  if (sessions.some(s => s.lead_hash && geloeschteHashes.has(s.lead_hash))) continue;\n\n  // Rule 1: any CTA anywhere -> no video nurture\n  if (sessions.some(s => s.cta_type)) continue;\n\n  // Rule 2 + 4: highest completed_rank; tie -> newest last_seen_at\n  let winner = null, maxRank = -1;\n  for (const s of sessions) {\n    const rank = (s.completed_rank == null) ? 0 : Number(s.completed_rank);\n    if (rank > maxRank) { maxRank = rank; winner = s; }\n    else if (rank === maxRank && winner) {\n      const a = new Date(s.last_seen_at || 0).getTime();\n      const b = new Date(winner.last_seen_at || 0).getTime();\n      if (a > b) winner = s;\n    }\n  }\n  if (!winner) continue;\n  const rank = maxRank;\n\n  // Rule 5: recipient (mautic_contact_id or email) + name + lead_hash\n  const mid = (sessions.find(s => s.mautic_contact_id) || {}).mautic_contact_id || '';\n  const firstName = winner.first_name || (sessions.find(s => s.first_name) || {}).first_name || '';\n  if ((!mid && !email) || !firstName || !winner.lead_hash) continue;\n\n  let phase = null;\n\n  if (rank === 0) {\n    const a2SentAt = latestSentForPerson(email, sessions, 'a2');\n    const a3SentAt = latestSentForPerson(email, sessions, 'a3');\n    if (a2SentAt && !a3SentAt && secondPhaseWindowOpen && (now - a2SentAt) >= H48) {\n      phase = 'a3';\n    } else if (!a2SentAt) {\n      const ref = winner.form_submitted_at;\n      if (ref && (now - new Date(ref).getTime()) >= H12) phase = 'a2';\n    }\n  } else if (rank === 1) {\n    const b1SentAt = latestSentForPerson(email, sessions, 'b1');\n    const b2SentAt = latestSentForPerson(email, sessions, 'b2');\n    if (b1SentAt && !b2SentAt && secondPhaseWindowOpen && (now - b1SentAt) >= H48) {\n      phase = 'b2';\n    } else if (!b1SentAt) {\n      const ref = winner.video1_completed_at;\n      if (ref && (now - new Date(ref).getTime()) >= H24) phase = 'b1';\n    }\n  } else if (rank === 2) {\n    const c1SentAt = latestSentForPerson(email, sessions, 'c1');\n    const c2SentAt = latestSentForPerson(email, sessions, 'c2');\n    if (c1SentAt && !c2SentAt && secondPhaseWindowOpen && (now - c1SentAt) >= H48) {\n      phase = 'c2';\n    } else if (!c1SentAt) {\n      const ref = winner.video2_completed_at;\n      if (ref && (now - new Date(ref).getTime()) >= H24) phase = 'c1';\n    }\n  } else if (rank === 3) {\n    const d1SentAt = latestSentForPerson(email, sessions, 'd1');\n    const d2SentAt = latestSentForPerson(email, sessions, 'd2');\n    if (d1SentAt && !d2SentAt && secondPhaseWindowOpen && (now - d1SentAt) >= H48) {\n      phase = 'd2';\n    } else if (!d1SentAt) {\n      const ref = winner.video3_completed_at;\n      if (ref && (now - new Date(ref).getTime()) >= H12) phase = 'd1';\n    }\n  }\n\n  if (!phase) continue;\n  if (!ACTIVE_PHASES.includes(phase)) continue;\n\n  results.push({ json: {\n    mauticContactId: String(mid || ''),\n    email: email,\n    lead_hash: winner.lead_hash,\n    phase: phase,\n    completed_rank: rank,\n    berater_slug: winner.berater_slug || '',\n    profile_code: winner.profile_code || '',\n    main_aspiration: winner.main_aspiration || '',\n    initial_barrier: winner.initial_barrier || '',\n    lang: winner.lang || '',\n    pilot_batch: '',\n    pilot_cap: null,\n    pilot_interval_hours: SECOND_PHASES.includes(phase) ? 48 : null\n  }});\n}\n\nreturn results;",
+          "mode": "runOnceForAllItems"
+        }
+      },
+      {
+        "id": "split-batches",
+        "name": "Split In Batches",
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          660,
+          300
+        ],
+        "parameters": {
+          "batchSize": 1,
+          "options": {}
+        }
+      },
+      {
+        "id": "mautic-get-contact",
+        "name": "Mautic - Get Contact",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          880,
+          300
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        },
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $json.mauticContactId ? 'https://mautic.hl-support.biz/api/contacts/' + $json.mauticContactId : 'https://mautic.hl-support.biz/api/contacts?search=email:' + encodeURIComponent($json.email) + '&limit=1' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "options": {}
+        }
+      },
+      {
+        "id": "code-select-email",
+        "name": "Code - Select Email ID",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1100,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const resp = $json;\nconst leadData = $('Code - Determine Phase').item.json;\n\nlet c = null;\nif (resp.contact) c = resp.contact;\nelse if (resp.contacts) { const arr = Object.values(resp.contacts); c = arr.length ? arr[0] : null; }\nif (!c) return { json: { skip: true, reason: 'contact_not_found', lead_hash: leadData.lead_hash } };\n\n// DNC / Abmeldung: nativer Mautic-Unsubscribe/Bounce fuer Email-Kanal -> niemals senden\nconst dncList = Array.isArray(c.doNotContact) ? c.doNotContact : [];\nif (dncList.some(d => (d.channel || 'email') === 'email')) {\n  return { json: { skip: true, reason: 'dnc_unsubscribed', lead_hash: leadData.lead_hash } };\n}\n\nconst getField = (alias) => {\n  const f = c.fields || {};\n  if (f.all && f.all[alias] !== undefined) {\n    const v = f.all[alias];\n    return (v && typeof v === 'object') ? (v.value != null ? v.value : '') : (v != null ? v : '');\n  }\n  for (const group of Object.values(f)) {\n    if (group && typeof group === 'object' && group[alias] !== undefined) {\n      const v = group[alias];\n      return (v && typeof v === 'object') ? (v.value != null ? v.value : '') : (v != null ? v : '');\n    }\n  }\n  return c[alias] != null ? c[alias] : '';\n};\n\n// 🔴 Mautic liefert Boolean-Felder als ZAHL (1), nicht als Zeichenkette. Die alte Pruefung\n// verglich streng gegen true/'1'/'true' und war damit wirkungslos - der Stoppschalter hat\n// nie jemanden angehalten. Gemessen am 29.08.2026: ac_nurture_stopped kam als number 1\n// zurueck, die Pruefung ergab false. Bis dahin trug niemand die Markierung, es ist also\n// keine Mail zu Unrecht rausgegangen.\nconst nurtureStopped = getField('ac_nurture_stopped');\nconst istGestoppt = nurtureStopped === true || nurtureStopped === 1\n  || ['1', 'true', 'ja', 'yes'].includes(String(nurtureStopped).toLowerCase());\nif (istGestoppt) {\n  return { json: { skip: true, reason: 'nurture_stopped', lead_hash: leadData.lead_hash } };\n}\n\nconst sentRaw = getField('ac_nurture_sent_phases') || '';\nconst sentPhases = sentRaw ? sentRaw.split(',').map(s => s.trim()).filter(Boolean) : [];\n\nif (sentPhases.includes(leadData.phase)) {\n  return { json: { skip: true, reason: 'already_sent:' + leadData.phase, lead_hash: leadData.lead_hash } };\n}\n\nconst EMAIL_MAP = {\n  a2: {\n    de: { freedom: 13, impact: 14, security: 15, growth: 16 },\n    it: { freedom: 98, impact: 99, security: 100, growth: 101 },\n    en: { freedom: 146, impact: 147, security: 148, growth: 149 },\n    hu: { _single: 162 },\n    fr: { _single: 170 },\n    ru: { _single: 178 },\n  },\n  a3: {\n    de: { vehicle: 17, community: 18, confidence: 19, opportunity: 20 },\n    it: { vehicle: 114, community: 115, confidence: 116, opportunity: 117 },\n    en: { vehicle: 130, community: 131, confidence: 132, opportunity: 133 },\n    hu: { _single: 163 },\n    fr: { _single: 171 },\n    ru: { _single: 179 },\n  },\n  a4: {\n    de: { feuer: 21, wind: 22, wasser: 23, fels: 24 },\n    it: { feuer: 21, wind: 22, wasser: 23, fels: 24 },\n    en: { feuer: 21, wind: 22, wasser: 23, fels: 24 },\n  },\n  a5: {\n    de: { _single: 25 }, it: { _single: 25 }, en: { _single: 25 },\n  },\n  b1: {\n    de: { feuer: 26, wind: 27, wasser: 28, fels: 29 },\n    it: { feuer: 102, wind: 103, wasser: 104, fels: 105 },\n    en: { feuer: 150, wind: 151, wasser: 152, fels: 153 },\n    hu: { _single: 164 },\n    fr: { _single: 172 },\n    ru: { _single: 180 },\n  },\n  b2: {\n    de: { feuer: 30, wind: 31, wasser: 32, fels: 33 },\n    it: { feuer: 118, wind: 119, wasser: 120, fels: 121 },\n    en: { feuer: 134, wind: 135, wasser: 136, fels: 137 },\n    hu: { _single: 165 },\n    fr: { _single: 173 },\n    ru: { _single: 181 },\n  },\n  c1: {\n    de: { freedom: 34, impact: 95, security: 96, growth: 97 },\n    it: { freedom: 106, impact: 107, security: 108, growth: 109 },\n    en: { freedom: 154, impact: 155, security: 156, growth: 157 },\n    hu: { _single: 166 },\n    fr: { _single: 174 },\n    ru: { _single: 182 },\n  },\n  c2: {\n    de: { feuer: 35, wind: 36, wasser: 37, fels: 38 },\n    it: { feuer: 122, wind: 123, wasser: 124, fels: 125 },\n    en: { feuer: 138, wind: 139, wasser: 140, fels: 141 },\n    hu: { _single: 167 },\n    fr: { _single: 175 },\n    ru: { _single: 183 },\n  },\n  d1: {\n    de: { freedom: 39, impact: 40, security: 41, growth: 42 },\n    it: { freedom: 110, impact: 111, security: 112, growth: 113 },\n    en: { freedom: 158, impact: 159, security: 160, growth: 161 },\n    hu: { _single: 168 },\n    fr: { _single: 176 },\n    ru: { _single: 184 },\n  },\n  d2: {\n    de: { vehicle: 43, community: 44, confidence: 45, opportunity: 46 },\n    it: { vehicle: 126, community: 127, confidence: 128, opportunity: 129 },\n    en: { vehicle: 142, community: 143, confidence: 144, opportunity: 145 },\n    hu: { _single: 169 },\n    fr: { _single: 177 },\n    ru: { _single: 185 },\n  },\n};\n\nconst PHASE_DIM = {\n  a2: 'main_goal', a3: 'barrier', a4: 'profile', a5: '_single',\n  b1: 'profile', b2: 'profile', c1: 'main_goal', c2: 'profile', d1: 'main_goal', d2: 'barrier',\n};\n\n// Normalize localized/legacy values to canonical variant keys\nconst GOAL_ALIAS = { freiheit:'freedom', liberta:'freedom', 'liberta`':'freedom', wirkung:'impact', impatto:'impact', sicherheit:'security', sicurezza:'security', wachstum:'growth', crescita:'growth', 'mehr-energie':'growth', energy:'growth', energia:'growth', freedom:'freedom', impact:'impact', security:'security', growth:'growth' };\nconst PROFILE_ALIAS = { 'il-realizzatore':'feuer', 'il-connettore':'wind', 'l-ancora':'wasser', 'l-architetto':'fels', 'tipo-a':'feuer', 'tipo-b':'wind', 'tipo-c':'wasser', 'tipo-d':'fels', fire:'feuer', wind:'wind', water:'wasser', rock:'fels' };\nconst BARRIER_ALIAS = { 'fehlende-sicherheit':'confidence', 'manca-sicurezza':'confidence', 'fehlende-moglichkeit':'opportunity', 'fehlendes-umfeld':'community', 'manca-l-ambiente':'community', 'manca-un-sistema':'vehicle', vehicle:'vehicle', community:'community', confidence:'confidence', opportunity:'opportunity' };\nconst norm = (val, map) => { const v=(val||'').toLowerCase(); return map[v] || v; };\n\nconst rawLang = (getField('ac_last_form_language') || leadData.lang || 'de').toLowerCase().replace(/_.*/, '');\n// Sprach-Gate: nur Sprachen mit echten Templates senden. DE, IT und EN sind aktiv.\n// Seit 31.08.2026 auch hu, fr und ru — dort je Phase EINE generische Vorlage\n// (Version A). Quelle der Texte: nurture/vorlagen/generisch-hu-fr-ru.js im\n// Quiz-Repo. 🔴 Wer eine Sprache wieder abschaltet, nimmt sie NUR hier heraus;\n// die Vorlagen bleiben stehen und lassen sich jederzeit wieder zuschalten.\nconst SUPPORTED_LANGS = ['de', 'it', 'en', 'hu', 'fr', 'ru'];\nif (!SUPPORTED_LANGS.includes(rawLang)) {\n  return { json: { skip: true, reason: 'unsupported_language:' + rawLang, lead_hash: leadData.lead_hash } };\n}\nconst lang = rawLang;\nconst profile  = norm(getField('ac_last_profile') || leadData.profile_code, PROFILE_ALIAS);\nconst mainGoal = norm(getField('ac_last_main_goal') || leadData.main_aspiration, GOAL_ALIAS);\nconst barrier  = norm(getField('ac_last_barrier') || leadData.initial_barrier, BARRIER_ALIAS);\n\nconst dim = PHASE_DIM[leadData.phase];\nlet variantKey;\nif (dim === 'main_goal') variantKey = mainGoal;\nelse if (dim === 'profile') variantKey = profile;\nelse if (dim === 'barrier') variantKey = barrier;\nelse variantKey = '_single';\n\n// 🔴 Rueckfall auf die generische Fassung: Sprachen ohne Variantentiefe haben je\n// Phase EINE Vorlage unter `_single`. Wer spaeter eine echte Variante nachtraegt,\n// ueberschreibt damit genau diese Kombination — ohne Umstellung, ohne Deploy.\nconst emailId = EMAIL_MAP[leadData.phase]?.[lang]?.[variantKey]\n  ?? EMAIL_MAP[leadData.phase]?.[lang]?.['_single'];\nif (!emailId) {\n  return { json: { skip: true, reason: 'no_email_id:' + leadData.phase + '/' + lang + '/' + variantKey, lead_hash: leadData.lead_hash } };\n}\n\nconst coachEmail = getField('ac_berater_email') || '';\nif (!coachEmail) {\n  return { json: { skip: true, reason: 'no_coach_data', lead_hash: leadData.lead_hash } };\n}\nconst cleanPart = (value) => String(value || '').trim().replace(/\\s+/g, ' ');\nconst coachName = [cleanPart(getField('ac_berater_vorname')), cleanPart(getField('ac_berater_name'))].filter(Boolean).join(' ').trim();\nconst coachOrg = cleanPart(getField('ac_berater_org_display')) || 'Activecenter';\nconst coachDisplayName = [coachName, coachOrg].filter(Boolean).join(' - ') || 'Activecenter';\n\nconst newSentPhases = [...sentPhases, leadData.phase].join(',');\n\nreturn { json: {\n  skip: false,\n  mauticContactId: c.id,\n  emailId,\n  phase: leadData.phase,\n  lead_hash: leadData.lead_hash,\n  email: leadData.email,\n  berater_slug: leadData.berater_slug || '',\n  language: lang,\n  variantKey,\n  newSentPhases,\n  coachEmail,\n  coachDisplayName,\n  pilot_batch: leadData.pilot_batch || '',\n  pilot_cap: leadData.pilot_cap || null,\n  pilot_interval_hours: leadData.pilot_interval_hours || null,\n}};\n",
+          "mode": "runOnceForEachItem"
+        }
+      },
+      {
+        "id": "if-skip",
+        "name": "IF - Needs Email",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1320,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "skip-check",
+                "leftValue": "={{ $json.skip }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "mautic-send-email",
+        "name": "Mautic - Send Transactional Email",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1760,
+          200
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        },
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://mautic.hl-support.biz/api/emails/' + $('Code - Select Email ID').item.json.emailId + '/contact/' + $('Code - Select Email ID').item.json.mauticContactId + '/send' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "options": {}
+        }
+      },
+      {
+        "id": "mautic-update-sent-phases",
+        "name": "Mautic - Update Sent Phases",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1980,
+          200
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        },
+        "parameters": {
+          "method": "PATCH",
+          "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $('Code - Select Email ID').item.json.mauticContactId + '/edit' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendBody": true,
+          "options": {},
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ ac_nurture_sent_phases: $('Code - Select Email ID').item.json.newSentPhases }) }}"
+        }
+      },
+      {
+        "id": "no-op-skip",
+        "name": "No-op (skipped)",
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          1540,
+          420
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "mautic-set-reply-to",
+        "name": "Mautic - Set Reply-To",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1540,
+          200
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        },
+        "parameters": {
+          "method": "PATCH",
+          "url": "={{ 'https://mautic.hl-support.biz/api/emails/' + $('Code - Select Email ID').item.json.emailId + '/edit' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendBody": true,
+          "options": {},
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ replyToAddress: $('Code - Select Email ID').item.json.coachEmail, fromAddress: 'mail@mail.hl-support.biz', fromName: $('Code - Select Email ID').item.json.coachDisplayName || 'Activecenter' }) }}"
+        }
+      },
+      {
+        "name": "Supabase - Get Test Events",
+        "id": "supabase-test-events",
+        "position": [
+          100,
+          160
+        ],
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "select lead_hash, event_name, event_at, payload\nfrom leads.lead_events\nwhere event_name in ('test_lead_marked','test_lead_unmarked','nurture_sent')\norder by event_at desc, event_uid asc",
+          "options": {}
+        },
+        "credentials": {
+          "postgres": {
+            "id": "6ARQvSx0fKTy2Mcq",
+            "name": "Plattform-DB leads_n8n (hl_support)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "logworthy",
+                "leftValue": "={{ $json.skip === true && !String($json.reason || '').startsWith('already_sent') }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "flt-logworthy",
+        "name": "Filter - Log Worthy",
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2,
+        "position": [
+          1180,
+          560
+        ],
+        "onError": "continueRegularOutput"
+      },
+      {
+        "name": "Supabase - Log Skip",
+        "id": "sb-log-skip",
+        "position": [
+          1400,
+          560
+        ],
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "select leads.record_nurture_skip(\n  ($1::jsonb->>'p_project_key'), ($1::jsonb->>'p_sequence_key'), ($1::jsonb->>'p_lead_hash'),\n  ($1::jsonb->>'p_reason_code'), ($1::jsonb->>'p_phase_key'),\n  ($1::jsonb->>'p_occurred_at')::timestamptz, ($1::jsonb->>'p_telemetry_version')::int\n) as ergebnis",
+          "options": {
+            "queryReplacement": "={{ JSON.stringify(({\n  p_project_key: 'business_leads_quiz',\n  p_sequence_key: 'video_nurture',\n  p_lead_hash: $json.lead_hash,\n  p_reason_code: ($json.reason || 'unknown'),\n  p_phase_key: ($json.phase || null),\n  p_occurred_at: new Date().toISOString(),\n  p_telemetry_version: 2\n})) }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "6ARQvSx0fKTy2Mcq",
+            "name": "Plattform-DB leads_n8n (hl_support)"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "name": "Supabase - Log Sent",
+        "id": "sb-log-sent",
+        "position": [
+          1400,
+          760
+        ],
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "select leads.record_nurture_sent(\n  ($1::jsonb->>'p_project_key'), ($1::jsonb->>'p_sequence_key'), ($1::jsonb->>'p_event_uid'),\n  ($1::jsonb->>'p_lead_hash'), ($1::jsonb->>'p_phase_key'), ($1::jsonb->>'p_email_id'),\n  ($1::jsonb->>'p_subject'), ($1::jsonb->>'p_language'), ($1::jsonb->>'p_variant'),\n  ($1::jsonb->>'p_mautic_contact_id'), ($1::jsonb->>'p_occurred_at')::timestamptz,\n  ($1::jsonb->>'p_telemetry_version')::int\n) as ergebnis",
+          "options": {
+            "queryReplacement": "={{ JSON.stringify((() => {\n  const selected = $('Code - Select Email ID').item.json;\n  const subjects = {\"13\":\"{contactfield=firstname}, dein Erfolgscode\",\"14\":\"{contactfield=firstname}, dein Erfolgscode\",\"15\":\"{contactfield=firstname}, dein Erfolgscode\",\"16\":\"{contactfield=firstname}, dein Erfolgscode\",\"26\":\"{contactfield=firstname}, jetzt wird's konkret\",\"27\":\"{contactfield=firstname}, wer dabei ist\",\"28\":\"{contactfield=firstname}, der Plan dahinter\",\"29\":\"{contactfield=firstname}, der Mechanismus\",\"34\":\"{contactfield=firstname}, jetzt wird's pers?nlich\",\"95\":\"{contactfield=firstname}, jetzt wird's pers?nlich\",\"96\":\"{contactfield=firstname}, jetzt wird's pers?nlich\",\"97\":\"{contactfield=firstname}, jetzt wird's pers?nlich\",\"39\":\"{contactfield=firstname}, du hast jetzt alles gesehen\",\"40\":\"{contactfield=firstname}, was du jetzt wei?t\",\"41\":\"{contactfield=firstname}, Sicherheit beginnt mit Klarheit\",\"42\":\"{contactfield=firstname}, du bist nicht zuf?llig hier\",\"98\":\"{contactfield=firstname}, il tuo Codice del Successo\",\"99\":\"{contactfield=firstname}, il tuo Codice del Successo\",\"100\":\"{contactfield=firstname}, il tuo Codice del Successo\",\"101\":\"{contactfield=firstname}, il tuo Codice del Successo\",\"102\":\"{contactfield=firstname}, adesso diventa concreto\",\"103\":\"{contactfield=firstname}, chi c'? dentro\",\"104\":\"{contactfield=firstname}, il piano dietro\",\"105\":\"{contactfield=firstname}, il meccanismo\",\"106\":\"{contactfield=firstname}, adesso diventa personale\",\"107\":\"{contactfield=firstname}, adesso diventa personale\",\"108\":\"{contactfield=firstname}, adesso diventa personale\",\"109\":\"{contactfield=firstname}, adesso diventa personale\",\"110\":\"{contactfield=firstname}, hai visto tutto adesso\",\"111\":\"{contactfield=firstname}, quello che sai adesso\",\"112\":\"{contactfield=firstname}, la sicurezza inizia con la chiarezza\",\"113\":\"{contactfield=firstname}, non sei qui per caso\",\"146\":\"{contactfield=firstname}, your success code\",\"147\":\"{contactfield=firstname}, your success code\",\"148\":\"{contactfield=firstname}, your success code\",\"149\":\"{contactfield=firstname}, your success code\",\"150\":\"{contactfield=firstname}, now it gets concrete\",\"151\":\"{contactfield=firstname}, who is in this with you\",\"152\":\"{contactfield=firstname}, the plan behind it\",\"153\":\"{contactfield=firstname}, the mechanism\",\"154\":\"{contactfield=firstname}, now it gets personal\",\"155\":\"{contactfield=firstname}, now it gets personal\",\"156\":\"{contactfield=firstname}, now it gets personal\",\"157\":\"{contactfield=firstname}, now it gets personal\",\"158\":\"{contactfield=firstname}, you have seen the full picture\",\"159\":\"{contactfield=firstname}, what you know now\",\"160\":\"{contactfield=firstname}, certainty starts with clarity\",\"161\":\"{contactfield=firstname}, you are not here by accident\",\"17\":\"Dein erster Schritt braucht keinen fertigen Plan\",\"18\":\"Du musst das nicht alleine einsch?tzen\",\"19\":\"Du musst noch nicht bereit sein\",\"20\":\"Schau kurz, ob das dein Weg sein kann\",\"30\":\"{contactfield=firstname}, jetzt siehst du das System\",\"31\":\"{contactfield=firstname}, du musst das nicht allein tragen\",\"32\":\"{contactfield=firstname}, der n?chste Schritt ist Struktur\",\"33\":\"{contactfield=firstname}, pr?fe jetzt den Aufbau\",\"35\":\"{contactfield=firstname}, jetzt brauchst du echte Menschen\",\"36\":\"{contactfield=firstname}, schau auf die Menschen\",\"37\":\"{contactfield=firstname}, jetzt siehst du echte Starts\",\"38\":\"{contactfield=firstname}, passt das wirklich zu dir?\",\"43\":\"Dein n?chster Schritt kann klein sein\",\"44\":\"Der n?chste Schritt ist ein kurzes Gespr?ch\",\"45\":\"Mehr Sicherheit entsteht im Gespr?ch\",\"46\":\"Wenn du offen bist, sag kurz Bescheid\",\"114\":\"Il tuo primo passo non richiede un piano perfetto\",\"115\":\"Non devi capirlo tutto da solo\",\"116\":\"Non devi sentirti gi? pronto\",\"117\":\"Guarda se questo percorso pu? fare per te\",\"118\":\"{contactfield=firstname}, ora vedi il sistema\",\"119\":\"{contactfield=firstname}, non devi portarlo avanti da solo\",\"120\":\"{contactfield=firstname}, il prossimo passo ? la struttura\",\"121\":\"{contactfield=firstname}, ora valuta la struttura\",\"122\":\"{contactfield=firstname}, ora servono persone reali\",\"123\":\"{contactfield=firstname}, guarda le persone\",\"124\":\"{contactfield=firstname}, ora vedi partenze vere\",\"125\":\"{contactfield=firstname}, questo percorso fa davvero per te?\",\"126\":\"Il tuo prossimo passo pu? essere piccolo\",\"127\":\"Il prossimo passo ? una breve conversazione\",\"128\":\"La sicurezza cresce parlando\",\"129\":\"Se sei aperto, dai un breve segnale\",\"130\":\"Your first step does not need a finished plan\",\"131\":\"You do not have to figure this out alone\",\"132\":\"You do not have to feel ready yet\",\"133\":\"Take a quick look at whether this could fit\",\"134\":\"{contactfield=firstname}, now you see the system\",\"135\":\"{contactfield=firstname}, you do not have to carry this alone\",\"136\":\"{contactfield=firstname}, the next step is structure\",\"137\":\"{contactfield=firstname}, now check the structure\",\"138\":\"{contactfield=firstname}, now you need real people\",\"139\":\"{contactfield=firstname}, look at the people\",\"140\":\"{contactfield=firstname}, now you see real starts\",\"141\":\"{contactfield=firstname}, does this really fit you?\",\"142\":\"Your next step can be small\",\"143\":\"The next step is a short conversation\",\"144\":\"More certainty comes through a conversation\",\"145\":\"If you are open, send a quick signal\"};\n  const subject = subjects[String(selected.emailId)] || '';\n  return {\n    p_project_key: 'business_leads_quiz',\n    p_sequence_key: 'video_nurture',\n    p_event_uid: 'nurture_sent_contact_' + selected.mauticContactId + '_' + selected.phase,\n    p_lead_hash: selected.lead_hash,\n    p_phase_key: selected.phase,\n    p_email_id: String(selected.emailId || ''),\n    p_subject: subject,\n    p_language: selected.language,\n    p_variant: selected.variantKey,\n    p_mautic_contact_id: String(selected.mauticContactId || ''),\n    p_occurred_at: new Date().toISOString(),\n    p_telemetry_version: 2\n  };\n})()) }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "6ARQvSx0fKTy2Mcq",
+            "name": "Plattform-DB leads_n8n (hl_support)"
+          }
+        }
+      },
+      {
+        "name": "Supabase - Get Resume Session",
+        "id": "supabase-get-resume-session",
+        "position": [
+          1260,
+          140
+        ],
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "select id, session_hash, lead_hash, form_email, funnel, updated_at\nfrom leads.tracking_sessions\nwhere lead_hash = $1\norder by updated_at desc\nlimit 1",
+          "options": {
+            "queryReplacement": "={{ $('Code - Select Email ID').item.json.lead_hash }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "6ARQvSx0fKTy2Mcq",
+            "name": "Plattform-DB leads_n8n (hl_support)"
+          }
+        },
+        "retryOnFail": true,
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "jsCode": "const selected = $('Code - Select Email ID').item.json;\nconst inputItems = $input.all();\nlet rows = [];\nfor (const item of inputItems) {\n  if (Array.isArray(item.json)) rows.push(...item.json);\n  else if (item.json && item.json.session_hash) rows.push(item.json);\n}\nconst session = rows.find(r => r && r.session_hash);\nreturn { json: {\n  ...selected,\n  skip: false,\n  sessionHash: session?.session_hash || '',\n  resumeTargetRequest: ['d1', 'd2'].includes(selected.phase) ? 'final' : 'videos',\n}};"
+        },
+        "id": "code-build-resume-request",
+        "name": "Code - Build Resume Request",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1480,
+          140
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "resume-session-ready",
+                "leftValue": "={{ $json.skip }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        },
+        "id": "if-resume-session-ready",
+        "name": "IF - Resume Session Ready",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1700,
+          140
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://business.activecenter.info/api/bridge",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ action: 'generate_resume_token', payload: { sessionHash: $('Code - Build Resume Request').item.json.sessionHash, leadHash: $('Code - Build Resume Request').item.json.lead_hash, email: $('Code - Build Resume Request').item.json.email, resumeTarget: $('Code - Build Resume Request').item.json.resumeTargetRequest || 'videos', slug: $('Code - Build Resume Request').item.json.berater_slug || '', context: 'business' } }) }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          },
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "id": "bridge-generate-resume-link",
+        "name": "Bridge - Generate Resume Link",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1920,
+          120
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "Dwum7g63YfojD3q5",
+            "name": "Bridge Service Key (business.activecenter.info)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const selected = $('Code - Build Resume Request').item.json;\nconst generated = $json || {};\nconst resumeUrl = generated.shortUrl || generated.resumeUrl || '';\nconst target = generated.resumeTarget || '';\nconst step = Number(generated.lastVideoStep || 0);\nconst expectedStepByPhase = { a2: 1, a3: 1, b1: 2, b2: 2, c1: 3, c2: 3, d1: 3, d2: 3 };\nconst expectedStep = expectedStepByPhase[selected.phase] || 1;\n\nconst skip = (reason, extra = {}) => ({ json: {\n  ...selected,\n  ...extra,\n  skip: true,\n  reason,\n  phase: selected.phase,\n  lead_hash: selected.lead_hash,\n}});\n\nif (!generated.success || !resumeUrl) {\n  return skip('resume_link_generation_failed', { bridge_error: generated.error || null });\n}\n\nif (resumeUrl.length > 190) {\n  return skip('resume_link_too_long', {\n    resumeUrlLength: resumeUrl.length,\n    generatedShortKey: generated.shortKey || null,\n    generatedShortUrl: generated.shortUrl || null,\n  });\n}\n\nif (selected.phase === 'd1' || selected.phase === 'd2') {\n  if (target !== 'final' || step !== 3) {\n    return skip('resume_target_mismatch', { generatedResumeTarget: target, generatedLastVideoStep: step, expectedResumeTarget: 'final', expectedLastVideoStep: 3 });\n  }\n} else {\n  if (target !== 'videos' || step < expectedStep) {\n    return skip('resume_target_mismatch', { generatedResumeTarget: target, generatedLastVideoStep: step, expectedResumeTarget: 'videos', expectedLastVideoStep: expectedStep });\n  }\n}\n\nreturn { json: {\n  ...selected,\n  skip: false,\n  resumeUrl,\n  generatedResumeTarget: target,\n  generatedLastVideoStep: step,\n}};"
+        },
+        "id": "code-validate-resume-link",
+        "name": "Code - Validate Resume Link",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2140,
+          120
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "resume-link-valid",
+                "leftValue": "={{ $json.skip }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        },
+        "id": "if-resume-link-valid",
+        "name": "IF - Resume Link Valid",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          2360,
+          120
+        ]
+      },
+      {
+        "parameters": {
+          "method": "PATCH",
+          "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $('Code - Validate Resume Link').item.json.mauticContactId + '/edit' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendBody": true,
+          "options": {},
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ ac_last_video_access_url: $('Code - Validate Resume Link').item.json.resumeUrl }) }}"
+        },
+        "id": "mautic-update-resume-link",
+        "name": "Mautic - Update Resume Link",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2580,
+          80
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        }
+      },
+      {
+        "id": "code-single-run-gate",
+        "name": "Code - Single Run Gate",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          220,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const eventItems = $input.all();\nreturn [{ json: { ready: true, event_count: eventItems.length } }];"
+        }
+      },
+      {
+        "id": "code-recovery-send-cap",
+        "name": "Code - Recovery Send Cap",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2360,
+          20
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const item = $json || {};\nif (item.skip) return { json: item };\n\n// 🔴 Seit 26.08.2026 gilt die Bremse fuer ALLE Phasen, nicht nur die Zweitmails.\n// Grund: Die stille Zeilengrenze der Auswahlabfrage hatte 186 Menschen drei Wochen lang\n// unsichtbar gemacht. Nach der Reparatur waeren sie alle in EINEM Lauf angeschrieben\n// worden - ein Schwall, der Zustellbarkeit und Ruf kostet. Bei 25 je Lauf und zwoelf\n// Laeufen taeglich ist ein solcher Rueckstand binnen eines Tages abgearbeitet.\nconst SECOND_PHASES = ['a3', 'b2', 'c2', 'd2'];\nconst ALLE_PHASEN = ['a2', 'b1', 'c1', 'd1', 'a3', 'b2', 'c2', 'd2'];\nif (!ALLE_PHASEN.includes(item.phase)) return { json: item };\n\nconst executionId = String($execution.id || '');\nif (!executionId) throw new Error('Missing n8n execution id for recovery cap');\n\nconst state = $getWorkflowStaticData('global');\nif (!state.nurtureRecoveryCap || state.nurtureRecoveryCap.executionId !== executionId) {\n  state.nurtureRecoveryCap = {\n    executionId,\n    counts: Object.fromEntries(ALLE_PHASEN.map(phase => [phase, 0])),\n  };\n}\n\n// 🔴 Zusaetzlich eine GLOBALE Obergrenze je Lauf. Die Zaehlung je Phase allein liess\n// theoretisch 4x25 + 4x20 = 180 Mails in einem Lauf zu - genau der Schwall, der verhindert\n// werden sollte. Gemessen am 26.08. im ersten reparierten Lauf: 63 Mails, davon a2 und b1\n// mit exakt 25 an ihrer Phasengrenze.\n// 🔴 Am 28.08.2026 fuer den Umbau auf die Plattform-DB auf 5 gedrosselt und am selben\n  // Abend wieder auf 60 geoeffnet (Entscheidung Markus). Belegt VOR dem Oeffnen: vier Laeufe\n  // (06:01, 14:03, 16:03, 18:00 MESZ), zwoelf Mails, kein Fehlereintrag, bei Postmark null\n  // Bounces und zwei Oeffnungen. 60 war auch der Wert vor der Umstellung.\n  // Es warteten zu diesem Zeitpunkt rund 195 faellige Menschen hinter der Bremse.\n  const GESAMT_GRENZE = 60;\nstate.nurtureRecoveryCap.gesamt = Number(state.nurtureRecoveryCap.gesamt || 0);\nif (state.nurtureRecoveryCap.gesamt >= GESAMT_GRENZE) {\n  return { json: { ...item, skip: true, reason: 'gesamt_cap_reached' } };\n}\n\nconst count = Number(state.nurtureRecoveryCap.counts[item.phase] || 0);\nconst GRENZE = SECOND_PHASES.includes(item.phase) ? 20 : 25;\nif (count >= GRENZE) {\n  return { json: { ...item, skip: true, reason: 'recovery_cap_reached' } };\n}\nstate.nurtureRecoveryCap.counts[item.phase] = count + 1;\nstate.nurtureRecoveryCap.gesamt += 1;\nreturn { json: item };"
+        }
+      },
+      {
+        "name": "Supabase - Log Run",
+        "id": "sb-log-nurture-run",
+        "position": [
+          920,
+          140
+        ],
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "select leads.record_nurture_run(\n  ($1::jsonb->>'p_project_key'), ($1::jsonb->>'p_sequence_key'), ($1::jsonb->>'p_execution_id'),\n  ($1::jsonb->>'p_status'), ($1::jsonb->>'p_started_at')::timestamptz,\n  ($1::jsonb->>'p_finished_at')::timestamptz, ($1::jsonb->>'p_workflow_id'),\n  ($1::jsonb->>'p_workflow_version_id'), ($1::jsonb->>'p_candidates_checked')::int,\n  ($1::jsonb->>'p_sent_count')::int, ($1::jsonb->>'p_skipped_count')::int,\n  ($1::jsonb->>'p_failed_count')::int, ($1::jsonb->>'p_error_code'), ($1::jsonb->>'p_error_node'),\n  ($1::jsonb->>'p_telemetry_version')::int\n) as ergebnis",
+          "options": {
+            "queryReplacement": "={{ JSON.stringify((() => {\n  const all = (name) => {\n    try { return $(name).all(); } catch { return []; }\n  };\n  const now = new Date().toISOString();\n  return {\n    p_project_key: 'business_leads_quiz',\n    p_sequence_key: 'video_nurture',\n    p_execution_id: String($execution.id),\n    p_status: 'success',\n    p_started_at: now,\n    p_finished_at: now,\n    p_workflow_id: String($workflow.id),\n    p_workflow_version_id: null,\n    p_candidates_checked: all('Code - Determine Phase').length,\n    p_sent_count: all('Supabase - Log Sent').length,\n    p_skipped_count: all('Supabase - Log Skip').length,\n    p_failed_count: 0,\n    p_error_code: null,\n    p_error_node: null,\n    p_telemetry_version: 1\n  };\n})()) }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "6ARQvSx0fKTy2Mcq",
+            "name": "Plattform-DB leads_n8n (hl_support)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "select json_arrayagg(t.hash) as hashes from prod_contacts_activesupport.typeform_surveys t join prod_contacts_activesupport.contacts c on c.id = t.contact_id where t.hash like 'qz\\_%' and c.deleted_at is not null",
+          "options": {}
+        },
+        "id": "mysql-geloeschte-kontakte",
+        "name": "MySQL - Geloeschte Kontakte",
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 2.5,
+        "position": [
+          400,
+          460
+        ],
+        "credentials": {
+          "mySql": {
+            "id": "73WL8zP1Qlctkz12",
+            "name": "MySQL account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Cron - Every 2h": {
+        "main": [
+          [
+            {
+              "node": "Supabase - Get Test Events",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Supabase - Get Eligible Leads": {
+        "main": [
+          [
+            {
+              "node": "Code - Determine Phase",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code - Determine Phase": {
+        "main": [
+          [
+            {
+              "node": "Split In Batches",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split In Batches": {
+        "main": [
+          [
+            {
+              "node": "Supabase - Log Run",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Mautic - Get Contact",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code - Select Email ID": {
+        "main": [
+          [
+            {
+              "node": "IF - Needs Email",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Filter - Log Worthy",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF - Needs Email": {
+        "main": [
+          [
+            {
+              "node": "Supabase - Get Resume Session",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "No-op (skipped)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mautic - Send Transactional Email": {
+        "main": [
+          [
+            {
+              "node": "Mautic - Update Sent Phases",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mautic - Update Sent Phases": {
+        "main": [
+          [
+            {
+              "node": "Supabase - Log Sent",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Split In Batches",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mautic - Set Reply-To": {
+        "main": [
+          [
+            {
+              "node": "Mautic - Send Transactional Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mautic - Get Contact": {
+        "main": [
+          [
+            {
+              "node": "Code - Select Email ID",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Supabase - Get Test Events": {
+        "main": [
+          [
+            {
+              "node": "Code - Single Run Gate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "No-op (skipped)": {
+        "main": [
+          [
+            {
+              "node": "Split In Batches",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter - Log Worthy": {
+        "main": [
+          [
+            {
+              "node": "Supabase - Log Skip",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Supabase - Get Resume Session": {
+        "main": [
+          [
+            {
+              "node": "Code - Build Resume Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code - Build Resume Request": {
+        "main": [
+          [
+            {
+              "node": "IF - Resume Session Ready",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Filter - Log Worthy",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF - Resume Session Ready": {
+        "main": [
+          [
+            {
+              "node": "Bridge - Generate Resume Link",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "No-op (skipped)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Bridge - Generate Resume Link": {
+        "main": [
+          [
+            {
+              "node": "Code - Validate Resume Link",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code - Validate Resume Link": {
+        "main": [
+          [
+            {
+              "node": "Code - Recovery Send Cap",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Filter - Log Worthy",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF - Resume Link Valid": {
+        "main": [
+          [
+            {
+              "node": "Mautic - Update Resume Link",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "No-op (skipped)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mautic - Update Resume Link": {
+        "main": [
+          [
+            {
+              "node": "Mautic - Set Reply-To",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code - Single Run Gate": {
+        "main": [
+          [
+            {
+              "node": "MySQL - Geloeschte Kontakte",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code - Recovery Send Cap": {
+        "main": [
+          [
+            {
+              "node": "IF - Resume Link Valid",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MySQL - Geloeschte Kontakte": {
+        "main": [
+          [
+            {
+              "node": "Supabase - Get Eligible Leads",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Markus Oberhofer",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-08-31T18:36:44.149Z",
+        "id": 1322,
+        "workflowId": "RqKSRTgFv8mv04H2",
+        "versionId": "6f449b4d-82c5-4b31-83e8-436ba1e9a7c0",
+        "event": "deactivated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      },
+      {
+        "createdAt": "2026-08-31T18:36:44.170Z",
+        "id": 1323,
+        "workflowId": "RqKSRTgFv8mv04H2",
+        "versionId": "6f449b4d-82c5-4b31-83e8-436ba1e9a7c0",
+        "event": "activated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    ]
+  }
+}
