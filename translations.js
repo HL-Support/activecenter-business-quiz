@@ -143,6 +143,12 @@
       optin_placeholder_firstname: 'Dein Vorname',
       optin_label_email: 'E-Mail-Adresse',
       optin_placeholder_email: 'deine@email.com',
+      optin_form_subheading_b:
+        'Auswertung und die 3 Videos bekommst du per E-Mail — auf Wunsch zusätzlich direkt aufs Handy.',
+      optin_label_phone: 'Mobilnummer (optional)',
+      optin_placeholder_phone: '+49 151 23456789',
+      optin_phone_hint:
+        'Für die WhatsApp-Zustellung deiner Auswertung und der 3 Videos. Kein Spam.',
       optin_btn_submit: 'Meine Auswertung anzeigen →',
       optin_btn_loading: 'Wird gesendet...',
       optin_btn_validating: 'E-Mail wird geprüft...',
@@ -606,6 +612,12 @@
       optin_placeholder_firstname: 'Il tuo nome',
       optin_label_email: 'Indirizzo e-mail',
       optin_placeholder_email: 'tua@email.com',
+      optin_form_subheading_b:
+        'Ricevi la valutazione e i 3 video via e-mail — se vuoi, anche direttamente sul cellulare.',
+      optin_label_phone: 'Numero di cellulare (facoltativo)',
+      optin_placeholder_phone: '+39 333 1234567',
+      optin_phone_hint:
+        'Per ricevere la valutazione e i 3 video su WhatsApp. Niente spam.',
       optin_btn_submit: 'Mostrami la mia analisi →',
       optin_btn_loading: 'Invio in corso...',
       optin_btn_validating: 'Controllo e-mail...',
@@ -1060,6 +1072,11 @@
       optin_placeholder_firstname: 'Your first name',
       optin_label_email: 'Email address',
       optin_placeholder_email: 'you@email.com',
+      optin_form_subheading_b:
+        "You'll get your results and the 3 videos by email — and straight to your phone if you like.",
+      optin_label_phone: 'Mobile number (optional)',
+      optin_placeholder_phone: '+1 555 123 4567',
+      optin_phone_hint: 'For WhatsApp delivery of your results and the 3 videos. No spam.',
       optin_btn_submit: 'Show my analysis →',
       optin_btn_loading: 'Sending...',
       optin_btn_validating: 'Checking email...',
@@ -1510,6 +1527,12 @@
       optin_placeholder_firstname: 'Ton prénom',
       optin_label_email: 'Adresse e-mail',
       optin_placeholder_email: 'ton@email.com',
+      optin_form_subheading_b:
+        'Tu reçois ton évaluation et les 3 vidéos par e-mail — et sur ton téléphone si tu veux.',
+      optin_label_phone: 'Numéro de mobile (facultatif)',
+      optin_placeholder_phone: '+33 6 12 34 56 78',
+      optin_phone_hint:
+        'Pour recevoir ton évaluation et les 3 vidéos sur WhatsApp. Pas de spam.',
       optin_btn_submit: 'Afficher mon analyse →',
       optin_btn_loading: 'Envoi en cours...',
       optin_btn_validating: 'Vérification e-mail...',
@@ -1974,6 +1997,11 @@
       optin_placeholder_firstname: 'Твое имя',
       optin_label_email: 'Email адрес',
       optin_placeholder_email: 'твой@email.com',
+      optin_form_subheading_b:
+        'Результат и 3 видео придут на e-mail — по желанию сразу на телефон.',
+      optin_label_phone: 'Номер мобильного (необязательно)',
+      optin_placeholder_phone: '+49 151 23456789',
+      optin_phone_hint: 'Для отправки результата и 3 видео в WhatsApp. Без спама.',
       optin_btn_submit: 'Показать мою аналитику →',
       optin_btn_loading: 'Отправка...',
       optin_btn_validating: 'Проверка email...',
@@ -2427,6 +2455,11 @@
       optin_placeholder_firstname: 'A keresztneved',
       optin_label_email: 'E-mail cím',
       optin_placeholder_email: 'te@email.com',
+      optin_form_subheading_b:
+        'Az értékelést és a 3 videót e-mailben kapod meg — ha szeretnéd, közvetlenül a telefonodra is.',
+      optin_label_phone: 'Mobilszám (nem kötelező)',
+      optin_placeholder_phone: '+36 30 123 4567',
+      optin_phone_hint: 'Az értékelés és a 3 videó WhatsApp-kézbesítéséhez. Nincs spam.',
       optin_btn_submit: 'Mutasd meg a kiértékelésemet →',
       optin_btn_loading: 'Küldés...',
       optin_btn_validating: 'E-mail ellenőrzése...',
