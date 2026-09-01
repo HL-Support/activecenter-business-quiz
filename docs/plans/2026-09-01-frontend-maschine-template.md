@@ -350,6 +350,24 @@ Beweis: lint rot bei absichtlichem Grenzverstoß (Negativprobe im Test).
    neue kanonische Pfade); STAND-UND-FORTSETZUNG verweist hierauf; dieses
    Dokument erhält den Ergebnis-Anhang je Etappe.
 
+### F1 — Gemeinsamer Fuß-Baustein „Weiter + WhatsApp" (nach E6, gemessen)
+
+Auftrag Markus 01.09. (Nachtrag): Auf der Ergebnisseite konkurrieren heute
+Sticky-CTA und WhatsApp-Footer um denselben Platz (Verdrängung über
+`acQuickContact`, §5.4). Statt Verdrängung soll geprüft werden: **ein**
+gemeinsamer Footer — primärer Weiter-CTA plus kompakter WhatsApp-Knopf daneben
+(Alternativen: ersetzen oder stapeln). Vorgehen:
+
+1. In der E4-Vorschau werden alle drei Varianten als Prototyp gezeigt
+   (kostet dort fast nichts, weil der Fuß-Baustein ohnehin EIN Baustein ist).
+   Markus entscheidet am Bild.
+2. 🔴 F1 ist eine **Verhaltensänderung** (CTA-Präsentation → Conversion) und
+   darum ausdrücklich NICHT Teil der pixelgleichen Etappen E1–E5. Eigener
+   kleiner PR nach E6, Wirkung über `result_cta_click`, `cta_click(whatsapp)`
+   und die Optin→Video-1-Quote im Cockpit gemessen (Vorher-Basis §5 des
+   Conversion-Plans). Eine Änderung zur Zeit — F1 startet nicht, solange ein
+   anderes Messfenster (Telefon-A/B) läuft.
+
 ### E7 — (Schritt 2, eigener Auftrag) Template „petrol"
 
 Rein additiv: neuer Ordner, Tokens aus
@@ -358,6 +376,39 @@ Rein additiv: neuer Ordner, Tokens aus
 `h-2 rounded-full`, Antwortkarten `border-2` + 4-px-Selected-Ring, feste
 Inhaltshöhe) aus §2 des Landingpage-Befunds. Zuteilung/Umschaltung ist dann
 eine Maschine-Entscheidung analog optin_phone_v1. **Nicht Teil von Schritt 1.**
+
+---
+
+## §3a Abrissliste — besser machen, nicht nur extrahieren
+
+Auftrag Markus 01.09. (Nachtrag): Der Umbau soll Altlasten AKTIV loswerden
+(„wir sind auf Hetzner, kein Vercel, keine Bridge, kein Supabase"), nicht nur
+verschieben. Das ist richtig — und es braucht dieselbe Disziplin wie die
+Extraktion, denn zwei der genannten Altlasten sind heute noch tragende Wege.
+
+**Grundsatz:** Extraktion und Abriss NIE im selben PR. Jeder Abriss ist ein
+eigener kleiner PR mit dem Beweis „niemand ruft es mehr" (Messung/Logs/Grep),
+und die Etappen E1–E4 räumen dafür vor: Sie bündeln jeden Altweg auf GENAU
+EINE Stelle hinter der Maschine-Fassade, sodass der spätere Abriss ein
+Ein-Stellen-Eingriff ist.
+
+| # | Altlast | Ist-Zustand (kontrolliert) | Tor, das den Abriss freigibt | Abriss |
+| --- | --- | --- | --- | --- |
+| A1 | Legacy-Seitentracker `ac-track.js` (Wurzel, 511 Z., `window.acTrack*`, `track_event`) inkl. Aufruf App.jsx:531 | feuert nur, wenn v2 inaktiv; v2 steht seit Monaten auf 100 % | 30-Tage-Messung „0 × `track_event` vom Funnel" (Bridge-Logs) + Entscheidung Markus | Entry-Import raus, verify-Vertrag (`tracker.includes('persistSession…')`) mitziehen |
+| A2 | Legacy-Batcher `src/ac-track.js` (183 Z., `write_analytics_batch`) als Fallback von `trackQuizAnalytics` (core.js:1209) | greift nur ohne v2; das Analytics-Projekt ist stillgelegt (Entscheidung #8, 27.08.) | wie A1 — die v2-Queue puffert Init-Fehler ohnehin selbst | Fallback-Zweig raus; `trackQuizAnalytics` wird reine Queue |
+| A3 | `update_points_result` (core.js:1546 + App.jsx:85) | nur nicht-v2 | fällt mit A1/A2 | zwei Aufrufstellen löschen |
+| A4 | Opt-in über `forward_typeform_adapter` → alte contacts-Route | 🔴 DER produktive Sendeweg bis B5 (`CONTACTS_QUIZ_MODUS=schatten`) | **B5 vollzogen + Ruhefenster** (Übersichts-Plan §0) | E2 kapselt den Submit auf eine Maschine-Stelle; der Tausch auf den schlanken Weg ist danach ein eigener, kleiner, beweisbarer PR |
+| A5 | `ac_`-`session_hash`/`tracking_hash` im Submit-Payload | vom contacts-Webhook-**Vertrag** heute verlangt (docs/contacts-quiz-webhook-vertrag.md); AGENTS: „nur Legacy-Kontext, nicht ausbauen" | Vertragsänderung im contacts-Projekt (Nachbarrepo) | nur vormerken — nicht unser Alleingang |
+| A6 | Vercel-Reste: `vercel.json` + verify-Gate `verifyBeraterInfoRewriteOrder`, `.vercel.app`-Internal-Flag (core.js:397–407, ac-track.js), `deploy:preview`/`promote:prod` | Vercel pausiert, 4 Domains hängen noch; Abbau-Tore 12/14, Datums-Tore 01./03.09. | **Vercel-Abbau vollzogen** (eigener Strang, Freigabe liegt vor) | Kleinst-PR: Datei + drei Codestellen + verify-Gate |
+| A7 | `acQuizHash`-Aufräumcode (core.js:884 f., Schlüssel §1.5) | reine Hygiene für Alt-Besucher | 90 Tage nach Cutover (≈ Ende Nov.) | Kleinst-PR |
+| A8 | `api/bridge.js`-Monolith (~4300 Z.) serverseitig | trägt noch A/B-Strang-Wege; EIGENER Plan existiert: [bridge-abloesen-direktzugriff.md](bridge-abloesen-direktzugriff.md) | A5+B5 der Stränge | gehört NICHT zum Frontend-Umbau — Verweis genügt |
+| A9 | „ungeschickte Mails" (Zugangsmail-Aufbau, 12-h-Loch, tote Strecken a4/a5/D3/E1/EV*) | läuft bereits als AP4/AP5/AP8 im [Conversion-Plan](2026-09-01-optin-zu-video-conversion.md) | dort | bewusst NICHT hier — Testdisziplin §4.3 |
+
+Ergebnisbild nach A1–A7: das Frontend spricht mit GENAU vier Endpunkten
+(`/api/lead/init`, `/api/lead-track`, `/api/validate-email`/`confirm-…`, einem
+schlanken Submit), eine Ereignisquelle, ein Tracker, null Vercel, null
+Supabase-Begriffe im Client — und jede dieser Aussagen ist dann per Grenz-Lint
+zugehalten, nicht per Erinnerung.
 
 ---
 
@@ -409,6 +460,8 @@ eine Maschine-Entscheidung analog optin_phone_v1. **Nicht Teil von Schritt 1.**
 | Punkt | Wann |
 | --- | --- |
 | Sichtprüfung „sieht ALLES exakt gleich aus?" (Vorschau-Links) | Ende E4 |
+| F1-Variante am Prototyp wählen: ersetzen / stapeln / EIN Footer (Weiter + WhatsApp) | Ende E4, Umsetzung nach E6 |
+| Abriss-Freigaben A1–A3 (Legacy-Tracker) nach der 30-Tage-Messung | nach E6 |
 | Freigabe Deploy-Fenster (nach B5, mit Blick auf B4-Tageszählung) | vor erstem Etappen-Merge |
 | Telefon-A/B-Start nach E6 | nach E6 |
 | Template 2 „petrol": Umfang (nur Farben/Formen oder auch Layout/Texte) | eigener Auftrag E7 |
