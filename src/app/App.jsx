@@ -1109,7 +1109,6 @@ function VideoStep({
           React.createElement('iframe', {
             id: T,
             src: `https://player.mediadelivery.net/embed/${u.lib}/${u.id}?autoplay=true&loop=false&muted=false&preload=true&responsive=true&cacheBust=${c}`,
-            loading: 'lazy',
             style: {
               border: '0',
               position: 'absolute',
@@ -1589,6 +1588,7 @@ function QuickWhatsAppLink() {
   return React.createElement(
     'div',
     {
+      id: 'acQuickContact',
       style: {
         position: 'fixed',
         bottom: 0,
@@ -1702,10 +1702,18 @@ function QuizFlow() {
         setResumeStartPercent(0);
         setResumeVideoStep(0);
         t('final');
-      } else {
+      } else if (resumeProfileCode && profiles[resumeProfileCode]) {
         setResumeStartPercent(0);
         setResumeVideoStep(0);
         t('result');
+      } else {
+        // Datensatz ohne (gueltigen) Profilcode: die Ergebnisseite rendert nur
+        // mit Profil - ohne Guard fiele der Resume bis zu Quizfrage 1 durch.
+        // Dann lieber direkt auf die Videos.
+        m(1);
+        setResumeVideoStep(1);
+        setResumeStartPercent(0);
+        t('videos');
       }
     }
   }, [profiles, videoSteps]);
@@ -1725,6 +1733,46 @@ function QuizFlow() {
     // Ergebnis unten geklickt -> Videoseite unterhalb des Players).
     window.scrollTo(0, 0);
   }, [e, n, c]);
+  React.useEffect(() => {
+    // Macht das Leck Optin -> Video trennbar: "Ergebnisseite nie gesehen"
+    // vs. "gesehen, aber CTA nicht geklickt" (Plan AP6, analog optin_viewed).
+    if (e !== 'result' || !g) return;
+    Dt('result_viewed', {
+      quiz_profile: g?.code || '',
+      quiz_profile_name: g?.name || '',
+      quiz_aspiration: h,
+      main_aspiration: h,
+      main_aspiration_label: getAspirationLabel(h),
+      result_viewed_at: new Date().toISOString(),
+    });
+  }, [e]);
+  const dockAnchorRef = React.useRef(null),
+    [ctaDocked, setCtaDocked] = React.useState(false);
+  React.useEffect(() => {
+    // Sticky-Dock-CTA der Ergebnisseite: schwebt als Footer, bis die natuerliche
+    // Button-Position (Anker am Seitenende) in den sichtbaren Bereich kommt -
+    // dort dockt er an, damit es nie zwei Buttons gleichzeitig gibt.
+    if (e !== 'result') return;
+    const anchor = dockAnchorRef.current;
+    if (!anchor || typeof window.IntersectionObserver !== 'function') {
+      setCtaDocked(true);
+      return;
+    }
+    setCtaDocked(false);
+    const io = new window.IntersectionObserver(([entry]) => setCtaDocked(entry.isIntersecting), {
+      rootMargin: '0px 0px -80px 0px',
+    });
+    io.observe(anchor);
+    return () => io.disconnect();
+  }, [e]);
+  React.useEffect(() => {
+    // Der globale WhatsApp-Footer (QuickWhatsAppLink) liegt ebenfalls fixed am
+    // unteren Rand und wuerde die Klicks auf den schwebenden CTA abfangen -
+    // solange der CTA schwebt, weicht der Footer; angedockt kommt er zurueck.
+    const bar = document.getElementById('acQuickContact');
+    if (!bar) return;
+    bar.style.display = e === 'result' && !ctaDocked ? 'none' : '';
+  }, [e, ctaDocked]);
   const v = (L) => {
       (d(!1),
         setTimeout(() => {
@@ -2048,7 +2096,26 @@ function QuizFlow() {
           label: a('result_snapshot_access_label'),
           value: a('result_snapshot_access_text'),
         },
-      ];
+      ],
+      resultCta = (extraStyle) =>
+        React.createElement(
+          'button',
+          {
+            onClick: () => {
+              Dt('result_cta_click', {
+                quiz_profile: g?.code || '',
+                quiz_profile_name: g?.name || '',
+                quiz_aspiration: h,
+                main_aspiration: h,
+                main_aspiration_label: getAspirationLabel(h),
+                result_cta_clicked_at: new Date().toISOString(),
+              });
+              v(() => t('videos'));
+            },
+            style: In(g.accentColor, '#0A0A0A', { width: '100%', ...extraStyle }),
+          },
+          a('result_cta_btn')
+        );
     return React.createElement(
       'div',
       { style: at },
@@ -2413,28 +2480,35 @@ function QuizFlow() {
               flexDirection: 'column',
               gap: '11px',
               alignItems: 'center',
+              paddingBottom: ctaDocked ? 0 : '84px',
             },
           },
           React.createElement(
-            'button',
-            {
-              onClick: () => {
-                Dt('result_cta_click', {
-                  quiz_profile: g?.code || '',
-                  quiz_profile_name: g?.name || '',
-                  quiz_aspiration: h,
-                  main_aspiration: h,
-                  main_aspiration_label: getAspirationLabel(h),
-                  result_cta_clicked_at: new Date().toISOString(),
-                });
-                v(() => t('videos'));
-              },
-              style: In(g.accentColor, '#0A0A0A', { width: '100%' }),
-            },
-            a('result_cta_btn')
+            'div',
+            { ref: dockAnchorRef, style: { width: '100%', minHeight: '56px' } },
+            ctaDocked ? resultCta({ padding: '15px 22px' }) : null
           )
         )
-      )
+      ),
+      !ctaDocked &&
+        React.createElement(
+          'div',
+          {
+            style: {
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 40,
+              background: 'linear-gradient(to top, rgba(7,11,20,0.95), transparent)',
+              backdropFilter: 'blur(10px)',
+              padding: '10px 16px calc(12px + env(safe-area-inset-bottom, 0px))',
+              display: 'flex',
+              justifyContent: 'center',
+            },
+          },
+          resultCta({ maxWidth: '560px', padding: '13px 22px', fontSize: '14px' })
+        )
     );
   }
   if (e === 'aspiration-confirm') {

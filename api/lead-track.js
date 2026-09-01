@@ -60,6 +60,7 @@ const ALLOWED_EVENTS = new Set([
   'aspiration_confirmed', // 1811
   'quiz_result', // 1741
   'optin_viewed', // 1724
+  'result_viewed', // neu 09/2026 (Conversion-Plan AP6): Mount der Ergebnisseite, analog optin_viewed
   'form_submit', // 1018
   'form_submitted', // 1191
   'email_correction_pending', // Vollstaendiger Lead vor der bestaetigungspflichtigen E-Mail-Korrektur

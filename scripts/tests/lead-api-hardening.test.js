@@ -150,6 +150,19 @@ test('cta_click bleibt erlaubt - normalisiert wird vor der Allowlist', async () 
   });
 });
 
+test('result_viewed ist erlaubt - Messpunkt der Ergebnisseite (Conversion-Plan AP6)', async () => {
+  await withSupabaseMock(async (calls) => {
+    const response = await track({
+      lead_hash: LEAD_HASH,
+      event_name: 'result_viewed',
+      payload: { lead_hash: LEAD_HASH },
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(insertedEvents(calls)[0].event_name, 'result_viewed');
+  });
+});
+
 test('unbekanntes Event wird mit 400 event_not_allowed abgewiesen - ohne jeden Supabase-Call', async () => {
   await withSupabaseMock(async (calls) => {
     const response = await track({
