@@ -13,6 +13,7 @@
     "e2e:queue": "pnpm run build && node --test scripts/e2e/queue-failure.e2e.js",
     "e2e:scroll": "pnpm run build && node --test scripts/e2e/scroll-reset.e2e.js",
     "e2e:result": "pnpm run build && node --test scripts/e2e/result-cta.e2e.js",
+    "vorschau": "pnpm run build && node scripts/vorschau.js",
     "verify": "node scripts/verify.js",
     "inventory:check": "node scripts/inventory/check-consumers.js",
     "smoke:resume": "node scripts/smoke-resume-link.js",

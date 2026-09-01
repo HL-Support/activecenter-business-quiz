@@ -107,6 +107,15 @@ test('Ergebnis-CTA: Sticky ab Sekunde 1, dockt am Seitenende an, beide Wege trac
     `Sticky-CTA muss im Viewport liegen (top=${sticky.top}, bottom=${sticky.bottom}, viewport=${sticky.viewportHeight})`
   );
 
+  // Im schwebenden Zustand sitzt links neben dem CTA das WhatsApp-Logo
+  // (ersetzt den ausgeblendeten globalen WhatsApp-Footer).
+  const stickyWhatsApp = await page
+    .locator('a[href*="wa.me"]')
+    .first()
+    .isVisible()
+    .catch(() => false);
+  assert.equal(stickyWhatsApp, true, 'WhatsApp-Link muss im Sticky-Zustand sichtbar sein');
+
   // ---------- Am Seitenende andocken ----------
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(600);

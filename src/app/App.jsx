@@ -2115,7 +2115,14 @@ function QuizFlow() {
             style: In(g.accentColor, '#0A0A0A', { width: '100%', ...extraStyle }),
           },
           a('result_cta_btn')
-        );
+        ),
+      waCoach = getCoachFromStorage(),
+      waUrl =
+        waCoach && waCoach.phone
+          ? `https://wa.me/${waCoach.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+              `${a('quicklink_whatsapp_prefix')}${waCoach.first_name || waCoach.full_name || 'Coach'}${a('quicklink_whatsapp_suffix')}`
+            )}`
+          : '';
     return React.createElement(
       'div',
       { style: at },
@@ -2505,8 +2512,37 @@ function QuizFlow() {
               padding: '10px 16px calc(12px + env(safe-area-inset-bottom, 0px))',
               display: 'flex',
               justifyContent: 'center',
+              alignItems: 'stretch',
+              gap: '10px',
             },
           },
+          waUrl &&
+            React.createElement(
+              'a',
+              {
+                href: waUrl,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                'aria-label': 'WhatsApp',
+                style: {
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '52px',
+                  minWidth: '52px',
+                  borderRadius: '100px',
+                  background: 'linear-gradient(135deg, #25D366, #25D366CC)',
+                  textDecoration: 'none',
+                },
+              },
+              React.createElement(
+                'svg',
+                { viewBox: '0 0 32 32', width: '26', height: '26', fill: '#fff', 'aria-hidden': true },
+                React.createElement('path', {
+                  d: 'M16 .667C7.54.667.667 7.54.667 16c0 2.706.707 5.353 2.049 7.68L.667 31.333l7.84-2.014A15.27 15.27 0 0 0 16 31.333c8.46 0 15.333-6.873 15.333-15.333S24.46.667 16 .667zm0 28.11a12.73 12.73 0 0 1-6.494-1.777l-.466-.277-4.653 1.196 1.242-4.537-.305-.482A12.71 12.71 0 0 1 3.222 16C3.222 8.953 8.953 3.222 16 3.222S28.778 8.953 28.778 16 23.047 28.778 16 28.778zm7.01-9.559c-.384-.192-2.271-1.12-2.623-1.249-.352-.128-.608-.192-.864.192-.256.384-.992 1.249-1.216 1.505-.224.256-.448.288-.832.096-.384-.192-1.621-.597-3.088-1.905-1.141-1.018-1.912-2.275-2.136-2.659-.224-.384-.024-.591.168-.783.173-.172.384-.448.576-.672.192-.224.256-.384.384-.64.128-.256.064-.48-.032-.672-.096-.192-.864-2.082-1.184-2.85-.312-.75-.629-.648-.864-.66l-.736-.013c-.256 0-.672.096-1.024.48-.352.384-1.344 1.313-1.344 3.202s1.376 3.714 1.568 3.97c.192.256 2.708 4.134 6.561 5.797.917.396 1.632.632 2.19.809.92.293 1.757.251 2.419.152.738-.11 2.271-.928 2.591-1.825.32-.896.32-1.664.224-1.825-.096-.16-.352-.256-.736-.448z',
+                })
+              )
+            ),
           resultCta({ maxWidth: '560px', padding: '13px 22px', fontSize: '14px' })
         )
     );
