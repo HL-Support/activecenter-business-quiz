@@ -1719,6 +1719,12 @@ function QuizFlow() {
       question_viewed_at: new Date().toISOString(),
     });
   }, [e, n, questions]);
+  React.useEffect(() => {
+    // Die Steps wechseln ohne Navigation; ohne Reset erbt jede Seite den
+    // Scroll-Offset der vorigen (Optin unten abgesendet -> Ergebnis mittig,
+    // Ergebnis unten geklickt -> Videoseite unterhalb des Players).
+    window.scrollTo(0, 0);
+  }, [e, n, c]);
   const v = (L) => {
       (d(!1),
         setTimeout(() => {
