@@ -177,6 +177,8 @@ Reihenfolge = Priorität. AP1–AP4 sind die erste Welle.
    - „Dein Ergebnis erklärt in 3 Minuten → Video ansehen“
    - „Video ansehen: Was dein Erfolgscode bedeutet (3 Min)“
    Finale Formulierung mit Markus abstimmen; Minutenangabe („3 Min“) beibehalten.
+   **✅ Entscheidung Markus 01.09.2026: „Dein Potenzial nutzen! → Video ansehen
+   (3 Min)“** (statt der Frage-Variante), sinngemäß in allen 6 Sprachen.
 2. Sticky-Dock-CTA: Der CTA ist ab Laden der Ergebnisseite als Sticky-Footer
    sichtbar (safe-area beachten, iOS). Erreicht der Nutzer die natürliche
    Button-Position am Seitenende, dockt der Button dort an (kein Schweben mehr,
