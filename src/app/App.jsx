@@ -23,6 +23,8 @@ import {
   inputStyle as od,
   resetLeadRun as resetRun,
   getActiveLeadRun,
+  getOptinExperimentVariant,
+  getOptinPreviewVariant,
   isLeadSystemV2Active,
   deriveQuizBarrier,
   getEmailReputationDecision,
@@ -490,8 +492,18 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
           form_first_name: C,
           form_email: z,
           form_submitted_at: new Date().toISOString(),
+          ...(messung
+            ? {
+                experiment_name: 'optin_phone_v1',
+                experiment_variant: messung,
+                phone_provided: ab === 'b' && phoneVal.trim() ? '1' : '0',
+              }
+            : {}),
         });
-        const submitResult = await Qp(C, z, t, e, r);
+        const submitResult = await Qp(C, z, t, e, r, {
+          phone: ab === 'b' ? phoneVal.trim() : '',
+          variant: messung || '',
+        });
         if (!submitResult || submitResult.success === false || submitResult.error) {
           throw new Error(submitResult?.error || 'submit_failed');
         }
@@ -531,6 +543,14 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
         k(a('optin_submit_error'));
       }
     };
+  // A/B optin_phone_v1: `ab` bestimmt die ANZEIGE, `messung` die Kennzeichnung.
+  // Die Vorschau (?optin_vorschau=a|b) erzwingt nur die Ansicht — eine erzwungene
+  // Ansicht wird nie gekennzeichnet, damit Abnahme-Proben die Messung nicht verzerren.
+  const vorschau = React.useMemo(() => getOptinPreviewVariant(), []);
+  const zugeteilt = React.useMemo(() => getOptinExperimentVariant(n || 'default'), [n]);
+  const ab = vorschau || zugeteilt;
+  const messung = vorschau ? null : zugeteilt;
+  const [phoneVal, setPhoneVal] = React.useState('');
   React.useEffect(() => {
     Dt('optin_viewed', {
       quiz_profile: e?.code || '',
@@ -539,6 +559,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
       main_aspiration: r || 'freedom',
       main_aspiration_label: getAspirationLabel(r || 'freedom'),
       optin_viewed_at: new Date().toISOString(),
+      ...(messung ? { experiment_name: 'optin_phone_v1', experiment_variant: messung } : {}),
     });
   }, [e, r]);
   return React.createElement(
@@ -695,7 +716,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
                 margin: 0,
               },
             },
-            a('optin_form_subheading')
+            a(ab === 'b' ? 'optin_form_subheading_b' : 'optin_form_subheading')
           )
         ),
         React.createElement(
@@ -839,7 +860,57 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
                   a('optin_email_lead_saved')
                 )
               )
-          )
+          ),
+          // A/B optin_phone_v1, Variante B: optionale Mobilnummer.
+          ab === 'b' &&
+            React.createElement(
+              'div',
+              null,
+              React.createElement(
+                'label',
+                {
+                  style: {
+                    color: 'rgba(245,240,232,0.64)',
+                    fontSize: '10.5px',
+                    letterSpacing: '2.5px',
+                    textTransform: 'uppercase',
+                    display: 'block',
+                    marginBottom: '7px',
+                  },
+                },
+                a('optin_label_phone')
+              ),
+              React.createElement('input', {
+                type: 'tel',
+                inputMode: 'tel',
+                autoComplete: 'tel',
+                placeholder: a('optin_placeholder_phone'),
+                value: phoneVal,
+                onChange: (C) => setPhoneVal(C.target.value),
+                style: {
+                  ...od,
+                  background: 'rgba(7,11,20,0.62)',
+                  borderColor: 'rgba(245,240,232,0.16)',
+                  borderRadius: '14px',
+                  padding: '16px 18px',
+                  fontSize: '16px',
+                },
+                onFocus: (C) => (C.target.style.borderColor = I),
+                onBlur: (C) => (C.target.style.borderColor = 'rgba(245,240,232,0.16)'),
+              }),
+              React.createElement(
+                'p',
+                {
+                  style: {
+                    color: 'rgba(245,240,232,0.55)',
+                    fontSize: '12px',
+                    marginTop: '6px',
+                    marginBottom: 0,
+                  },
+                },
+                a('optin_phone_hint')
+              )
+            )
         ),
         React.createElement(
           'button',

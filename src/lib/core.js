@@ -1440,12 +1440,71 @@ export function getAspirationLabel(aspiration) {
   return t(`asp_tag_${normalizeAspiration(aspiration)}`);
 }
 
+
+// ── A/B-Test optin_phone_v1: optionales Telefonfeld im Optin ────────────────
+// Schalter ist BEWUSST eine Codekonstante (Aktivierung = ein Commit + CI):
+// der Test braucht keinen Not-Aus ohne Deploy, und ein eigener app_config-
+// Kanal waere mehr System fuer weniger Nutzen.
+export const OPTIN_PHONE_EXPERIMENT = Object.freeze({
+  name: 'optin_phone_v1',
+  enabled: false, // true = Test laeuft (nur Anzeigen-Traffic, 50/50)
+});
+
+const EXPERIMENT_PAID_MEDIA = new Set(['paid_social', 'paid']);
+const EXPERIMENT_PAID_SOURCES = new Set(['fb', 'ig', 'facebook', 'meta', 'an', 'th']);
+
+export function isPaidLeadAttribution() {
+  try {
+    const attribution = getLeadAttribution() || {};
+    const medium = String(attribution.utm_medium || '').toLowerCase();
+    const source = String(attribution.utm_source || '').toLowerCase();
+    return EXPERIMENT_PAID_MEDIA.has(medium) || EXPERIMENT_PAID_SOURCES.has(source);
+  } catch (_error) {
+    return false;
+  }
+}
+
+// Die reine Zuteilung, getrennt exportiert: so kann der Vertragstest
+// Determinismus und ~50/50-Aufteilung messen, ohne den Schalter anzufassen.
+export function optinExperimentVariantFromHash(hash) {
+  const value = String(hash || '');
+  if (!value) return null;
+  let sum = 0;
+  for (let i = 0; i < value.length; i += 1) sum = (sum + value.charCodeAt(i)) % 9973;
+  return sum % 2 === 0 ? 'a' : 'b';
+}
+
+// 'a' | 'b' solange der Test laeuft UND die Person ueber eine Anzeige kam,
+// sonst null (unveraendertes Optin, keine Kennzeichnung in den Ereignissen).
+// Deterministisch aus dem lead_hash: dieselbe Person sieht bei Wiederkehr
+// dieselbe Variante, ohne dass irgendetwas Neues gespeichert wird.
+export function getOptinExperimentVariant(slug = getCurrentSlug()) {
+  if (!OPTIN_PHONE_EXPERIMENT.enabled || !isPaidLeadAttribution()) return null;
+  return optinExperimentVariantFromHash(getActiveLeadRun(slug)?.lead_hash);
+}
+
+// Vorschau fuer die Abnahme: ?optin_vorschau=a|b erzwingt die ANZEIGE einer
+// Variante, unabhaengig von Schalter, Traffic-Herkunft und Zuteilung.
+// Eine erzwungene Ansicht wird NIE als Experiment gekennzeichnet — Vorschau-
+// Proben tauchen in der Auswertung nicht auf und verzerren nichts.
+export function getOptinPreviewVariant() {
+  try {
+    const value = String(
+      new URLSearchParams(window.location.search || '').get('optin_vorschau') || ''
+    ).toLowerCase();
+    return value === 'a' || value === 'b' ? value : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
 async function performQuizSubmission(
   firstName,
   email,
   selectedAnswers,
   profile,
-  aspiration = 'freedom'
+  aspiration = 'freedom',
+  extras = {}
 ) {
   const coach = getCoachFromStorage() || {};
   const slug =
@@ -1590,6 +1649,12 @@ async function performQuizSubmission(
           mainAspiration,
           mainAspirationLabel,
           metaEventId,
+          // A/B optin_phone_v1: JSON.stringify laesst undefined-Felder weg,
+          // ausserhalb des Tests aendert sich die Nachricht also nicht.
+          phone: extras.phone ? String(extras.phone).trim() : undefined,
+          experiment: extras.variant
+            ? { name: 'optin_phone_v1', variant: extras.variant }
+            : undefined,
           attribution,
         },
       }),
@@ -1612,6 +1677,16 @@ async function performQuizSubmission(
             main_aspiration: mainAspiration,
             main_aspiration_label: mainAspirationLabel,
             initial_barrier: initialBarrier,
+            // A/B optin_phone_v1: phone nur mitschicken, wenn eingegeben -
+            // der Ingest patcht payload.phone nach lead_state.phone.
+            ...(extras.phone ? { phone: String(extras.phone).trim() } : {}),
+            ...(extras.variant
+              ? {
+                  experiment_name: 'optin_phone_v1',
+                  experiment_variant: extras.variant,
+                  phone_provided: extras.phone ? '1' : '0',
+                }
+              : {}),
             member_id: memberId,
             ref_id: memberId,
             berater_slug: slug,
@@ -1653,7 +1728,8 @@ export function forwardQuizSubmission(
   email,
   selectedAnswers,
   profile,
-  aspiration = 'freedom'
+  aspiration = 'freedom',
+  extras = {}
 ) {
   if (quizSubmissionInFlight) return quizSubmissionInFlight;
 
@@ -1662,7 +1738,8 @@ export function forwardQuizSubmission(
     email,
     selectedAnswers,
     profile,
-    aspiration
+    aspiration,
+    extras
   );
   quizSubmissionInFlight = submission;
   submission.finally(() => {
