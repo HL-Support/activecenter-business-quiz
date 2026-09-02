@@ -200,16 +200,44 @@ async function fahreSubmission(extras) {
   return calls.map((call) => ({ url: call.url, body: normalisiere(call.body) }));
 }
 
+// E0b-Ergaenzung: der dritte Submit-Weg — die Zwischenspeicherung bei
+// E-Mail-Korrekturvorschlag (persistPendingEmailCorrection, seit dem
+// Nurture-Merge auf main). Sie geht DIREKT an /api/lead-track, nicht durch
+// die Queue, und traegt den vollstaendigen Quiz-Zustand.
+async function fahreEmailKorrektur() {
+  const calls = [];
+  const core = loadCore({ fetchImpl: capturingFetch(calls) });
+  seedLeadState(core);
+
+  const persisted = await core.persistPendingEmailCorrection({
+    firstName: 'anna',
+    email: 'anna@gmial.com',
+    selectedAnswers: [
+      { type: 'R', label: 'Antwort R' },
+      { type: 'G', label: 'Antwort G' },
+      { type: 'B', label: 'Antwort B' },
+      { aspiration: 'freedom', label: 'Freiheit' },
+      { aspiration: 'growth', label: 'Wachstum' },
+      { barrier: 'confidence', label: 'Selbstvertrauen' },
+    ],
+    profile: { code: 'feuer', name: 'Der Macher' },
+    aspiration: 'freedom',
+  });
+  assert.equal(persisted, true, 'die Zwischenspeicherung muss durchgehen');
+  return calls.map((call) => ({ url: call.url, body: normalisiere(call.body) }));
+}
+
 async function erzeugeIst() {
   return {
     hinweis:
-      'Golden-Master der Submit-Payloads (E0a). Aktualisierung NUR bewusst: ' +
+      'Golden-Master der Submit-Payloads (E0a+E0b). Aktualisierung NUR bewusst: ' +
       'GOLDEN_AKTUALISIEREN=1, Begruendung in den PR.',
     standard_optin: await fahreSubmission({}),
     variante_b_mit_telefon: await fahreSubmission({
       variant: 'b',
       phone: '  +49 151 2345678  ',
     }),
+    email_korrektur_zwischenspeicher: await fahreEmailKorrektur(),
   };
 }
 
@@ -271,4 +299,11 @@ test('der Golden-Master haelt die tragenden Vertragsfelder wirklich fest', async
   assert.equal(varianteB.body.payload.phone, '+49 151 2345678');
   assert.equal(varianteB.body.payload.experiment_variant, 'b');
   assert.equal(varianteB.body.payload.phone_provided, '1');
+
+  const korrektur = ist.email_korrektur_zwischenspeicher.find(
+    (c) => c.url === '/api/lead-track' && c.body?.event_name === 'email_correction_pending'
+  );
+  assert.ok(korrektur, 'email_correction_pending fehlt');
+  assert.equal(korrektur.body.payload.selected_answers.length, 6);
+  assert.equal(korrektur.body.payload.profile_code, 'feuer');
 });
