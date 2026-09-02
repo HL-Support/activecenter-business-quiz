@@ -105,6 +105,41 @@ where id = <job_id>;
 
 Then call the Outbox worker or wait for n8n.
 
+### `n8n_update_failed:200:… matchedRows: 0` — first ask *whose* lead it is
+
+🔴 Do **not** reset this one blindly. The message means the MySQL Kartei has no
+`typeform_surveys` row for that `lead_hash`, and that has two opposite meanings:
+
+- **Real lead** — the silent loss this alarm exists for. The consultant never learns about
+  them. Find out why the forward failed, fix it, then reset as above.
+- **Test lead** (`?test=1`, `?qa=1`, `?internal=1`, the E2E suite) — there never was a
+  Kartei row and there never will be. A reset just dies again ~1.5 h later and re-alerts.
+
+Tell them apart before touching anything:
+
+```sql
+select o.id, o.status, s.email_normalized, s.mysql_survey_id,
+       exists (select 1 from leads.lead_events e
+                where e.lead_hash = o.lead_hash and e.event_name = 'test_lead_marked') as testlead
+  from leads.lead_sync_outbox o
+  join leads.lead_state s on s.lead_hash = o.lead_hash
+ where o.sync_type in ('mysql_initial_rank', 'mysql_rank_update')
+   and o.status in ('dead', 'failed');
+```
+
+Since 02.09.2026 this should not recur: `api/lead-track.js` skips the rank job for internal
+traffic and writes `test_lead_marked` instead, and the worker returns
+`skipped: test_lead_no_kartei_row` (→ `done`) rather than failing. Jobs queued *before* a
+lead was marked drain themselves once the worker retries.
+
+**Incident 01./02.09.2026** — 19 dead jobs, nine alert mails, no real lead affected. All of
+them E2E runs (`e2e-scroll@example.com`) whose stubbed bridge submit left them without a
+Kartei row. Second, unnoticed half: without the test mark the nurture sender
+(n8n `RqKSRTgFv8mv04H2`, which excludes only via `test_lead_marked`) would have mailed a
+reserved domain twelve hours after opt-in. Cleared by setting the 20 jobs to `done` with
+`response_data.reason = internal_traffic_no_kartei_row` — the same outcome the fixed worker
+now produces on its own.
+
 ## Reconciliation
 
 Minimum checks:
