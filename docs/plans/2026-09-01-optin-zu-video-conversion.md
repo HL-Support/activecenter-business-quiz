@@ -386,6 +386,24 @@ Praktisch heißt das: Leads mit `form_submitted_at` **ab 02.09.2026 08:00 Berlin
 haben den kompletten neuen Funnel (Seite + Mail + a1). Der 01.09.-Abend ist eine
 Mischzone (nur Mail neu) und gehört in keine der beiden Vergleichsgruppen.
 
+**Der Vergleich ist im Ads-Cockpit eingebaut** (seit 02.09.2026, ~07:50): Die
+Zeitraum-Pillen **„Vor Update“ / „Seit Update“** auf https://ads.hl-support.biz
+trennen alle Trichter- und Video-Stufen **minutengenau am 02.09.2026 07:31**
+(`STICHTAG_UPDATE` in `Meta_Ads_Engine/07_Ads_Cockpit/app/sammler.py`, per Env
+`MASSNAHMEN_STICHTAG` übersteuerbar). Zwei bewusste Unschärfen: (1) Die
+Mail-only-Mischzone vom 01.09.-Abend liegt im Cockpit in „Vor Update“ —
+nachts kommen kaum Anzeigen-Optins, für die Quoten ist das vernachlässigbar;
+wer es exakt braucht, filtert per SQL auf `form_submitted_at >= 02.09. 08:00`.
+(2) Metas Ausgaben sind tagesgenau, der 02.09. zählt dort komplett zu „Seit
+Update“. Konsistenz am 02.09. verifiziert: Vor + Seit = Gesamt (686 + 0
+Anzeigen-Optins).
+
+**E2E-Läufe und die Zahlen:** Die Scroll-/Result-Suiten laufen gefahrlos gegen
+die Produktion, legen aber weiterhin echte (markierte) Leads in `lead_state`
+an — ohne Rang-Auftrag, ohne Nurture, das ist Absicht (Commit `690559d`). Wer
+Zahlen außerhalb des Cockpits liest, rechnet `@example.com`-Adressen bzw.
+`is_internal_traffic` weiterhin heraus; das Cockpit filtert selbst.
+
 Vorher-Basis (gesamte Laufzeit, Anzeigen): Optin → Video-1-Start 75 %,
 → Video-1-fertig 57 % der Starter, Video-2-Frühabbruch 36 %.
 Nach AP1/2/4/5 wöchentlich im Ads-Cockpit (https://ads.hl-support.biz,
