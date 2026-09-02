@@ -77,8 +77,10 @@ test('video completion storage is isolated by coach and persists completed steps
 });
 
 test('video unlock source keeps the 95 percent unique-watch threshold', () => {
+  // Seit E2 lebt die Video-Engine in der Maschine — der Vertrag zieht mit
+  // (Eigenschaft identisch, Fundort neu; Plan §1.7).
   const source = require('node:fs').readFileSync(
-    path.resolve(__dirname, '../../src/app/App.jsx'),
+    path.resolve(__dirname, '../../src/maschine/video-engine.js'),
     'utf8'
   );
   assert.match(source, /percent >= 95\) unlock\('unique_watch_95'\)/);

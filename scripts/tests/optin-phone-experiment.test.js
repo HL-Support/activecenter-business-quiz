@@ -265,26 +265,36 @@ test('die Vorschau aendert die Zuteilung nicht — sie bleibt Sache von Schalter
   assert.equal(core.getOptinExperimentVariant(SLUG), null);
 });
 
-test('App.jsx kennzeichnet nur die echte Zuteilung, nie die erzwungene Ansicht', () => {
-  const source = require('node:fs').readFileSync(
-    path.resolve(__dirname, '../../src/app/App.jsx'),
+test('nur die echte Zuteilung wird gekennzeichnet, nie die erzwungene Ansicht (seit E2 in der Maschine)', () => {
+  const fs = require('node:fs');
+  const app = fs.readFileSync(path.resolve(__dirname, '../../src/app/App.jsx'), 'utf8');
+  const katalog = fs.readFileSync(
+    path.resolve(__dirname, '../../src/maschine/ereignisse.js'),
     'utf8'
   );
-  // Die Kennzeichnung haengt an `messung` (null bei Vorschau), nie an der Anzeige `ab`.
-  assert.ok(source.includes('getOptinPreviewVariant'), 'App.jsx nutzt den Vorschau-Weg');
+  // App.jsx bezieht Anzeige UND Messung aus der Maschine (optinVarianten) und
+  // kennzeichnet selbst gar nichts mehr.
+  assert.ok(app.includes('optinVarianten('), 'App.jsx bezieht die Varianten aus der Maschine');
   assert.equal(
-    (source.match(/experiment_variant: messung/g) || []).length,
-    2,
-    'beide Ereignisse kennzeichnen mit der Messgroesse'
-  );
-  assert.equal(
-    /experiment_variant: ab\b/.test(source),
+    /experiment_variant/.test(app),
     false,
-    'die Anzeige-Variante darf nie als Kennzeichnung dienen'
+    'App.jsx darf seit E2 keine Experiment-Kennzeichnung mehr bauen'
   );
   assert.ok(
-    source.includes("variant: messung || ''"),
-    'auch die Submit-Extras tragen nur die echte Zuteilung'
+    app.includes("variant: messung || ''"),
+    'die Submit-Extras tragen nur die echte Zuteilung'
+  );
+  // Im Katalog haengt die Kennzeichnung an `messung` (null bei Vorschau).
+  assert.ok(katalog.includes('getOptinPreviewVariant'), 'der Katalog kennt den Vorschau-Weg');
+  assert.equal(
+    (katalog.match(/experiment_variant: messung/g) || []).length,
+    2,
+    'beide Ereignisse (optin_viewed, form_submit) kennzeichnen mit der Messgroesse'
+  );
+  assert.equal(
+    /experiment_variant: (ab|anzeige)\b/.test(katalog),
+    false,
+    'die Anzeige-Variante darf nie als Kennzeichnung dienen'
   );
 });
 

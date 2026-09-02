@@ -6,10 +6,8 @@ import {
   t as a,
   storage as le,
   videoProgressStore as ld,
-  trackQuizAnalytics as Dt,
   forwardQuizSubmission as Qp,
   getVideoConfig as Ap,
-  getAspirationLabel,
   getQuestions as jp,
   getProfiles as Bp,
   getAnalyzingSteps as Up,
@@ -23,8 +21,6 @@ import {
   inputStyle as od,
   resetLeadRun as resetRun,
   getActiveLeadRun,
-  getOptinExperimentVariant,
-  getOptinPreviewVariant,
   isLeadSystemV2Active,
   deriveQuizBarrier,
   getEmailReputationDecision,
@@ -41,6 +37,27 @@ import {
   resumeZiel,
   neustartZustand,
 } from '../maschine/ablauf.js';
+// E2: Ereignisse und Video-Engine gehoeren der Maschine. App.jsx baut keine
+// Event-Payloads mehr selbst — es meldet nur noch ueber den Katalog.
+import { bindeVideoTracking as qp } from '../maschine/video-engine.js';
+import {
+  optinVarianten,
+  baueQuizGestartet,
+  baueFrageGesehen,
+  baueFrageBeantwortet,
+  baueAspirationBestaetigt,
+  baueQuizErgebnis,
+  baueOptinGesehen,
+  baueFormularAbgeschickt,
+  baueErgebnisGesehen,
+  baueErgebnisCta,
+  baueVideoGesehen,
+  baueVideoErholung,
+  baueVideoWeiter,
+  baueFinalGesehen,
+  baueCta,
+  melde,
+} from '../maschine/ereignisse.js';
 
 const VIDEO_FULL_COMPLETION_KEY_PREFIX = 'acVideoFullCompletion_';
 const VIDEO_COMPLETION_NOTIFY_KEY_PREFIX = 'acVideoCompletionCoachNotify_';
@@ -159,286 +176,6 @@ function sendAllVideosCompletedCoachNotification(slug, memberId, completedStep, 
     .catch(() => {});
 }
 
-function qp(iframeId, videoStep, onUnlocked, onStatus, options = {}) {
-  const iframe = document.getElementById(iframeId);
-  if (!iframe) {
-    onStatus && onStatus({ status: 'error', reason: 'iframe_missing' });
-    return () => {};
-  }
-
-  let destroyed = !1,
-    unlocked = !1,
-    hasProgress = !1,
-    playTracked = !1,
-    duration = 0,
-    lastSecond = 0,
-    maxPlayheadPercent = 0,
-    maxAllowedSecond = 0,
-    seekCount = 0,
-    programmaticSeekUntil = 0,
-    readyTimeout = null,
-    progressTimeout = null,
-    durationTimeout = null,
-    progressBuckets = {},
-    watchedSeconds = new Set(),
-    videoId = options.videoId || `quiz_video_${videoStep}`,
-    resumeStartPercent = Math.max(0, Math.min(90, Number(options.resumeStartPercent || 0))),
-    resumeApplied = resumeStartPercent <= 0;
-
-  function setStatus(status, reason) {
-    onStatus && !destroyed && onStatus({ status, reason: reason || null });
-  }
-
-  function track(eventName, extra = {}) {
-    Dt(eventName, {
-      video_step: videoStep,
-      video_id: videoId,
-      ...extra,
-    });
-  }
-
-  function trackHealth(issue, context) {
-    track('video_health', {
-      video_issue: issue,
-      video_issue_context: context || '',
-      video_issue_at: new Date().toISOString(),
-    });
-  }
-
-  function setPlayerTime(player, second, issue) {
-    try {
-      programmaticSeekUntil = Date.now() + 1200;
-      player.setCurrentTime(second);
-    } catch {
-      trackHealth(issue || 'set_time_failed', String(second));
-    }
-  }
-
-  function compactRanges() {
-    let seconds = Array.from(watchedSeconds).sort((a, b) => a - b),
-      ranges = [],
-      start = null,
-      prev = null;
-    seconds.forEach((second) => {
-      if (start === null) {
-        start = second;
-        prev = second;
-        return;
-      }
-      if (second === prev + 1) {
-        prev = second;
-        return;
-      }
-      ranges.push([start, prev + 1]);
-      start = second;
-      prev = second;
-    });
-    if (start !== null) ranges.push([start, prev + 1]);
-    return ranges;
-  }
-
-  function uniqueWatchedPercent() {
-    return duration > 0 ? Math.min(100, Math.floor((watchedSeconds.size / duration) * 100)) : 0;
-  }
-
-  function buildProgressPayload(method, bucket) {
-    const prefix = 'video' + videoStep,
-      percent = uniqueWatchedPercent(),
-      payload = {};
-    payload[prefix + '_watched_sec'] = watchedSeconds.size;
-    payload[prefix + '_max_pct'] = percent;
-    payload[prefix + '_unique_watched_pct'] = percent;
-    payload[prefix + '_max_playhead_pct'] = maxPlayheadPercent;
-    payload[prefix + '_seek_count'] = seekCount;
-    payload[prefix + '_last_update'] = new Date().toISOString();
-    payload[prefix + '_tracking_method'] = method;
-    payload.video_step = videoStep;
-    payload.video_id = videoId;
-    payload.duration_seconds = Math.floor(duration || 0);
-    payload.unique_watched_seconds = watchedSeconds.size;
-    payload.unique_watched_percent = percent;
-    payload.max_playhead_percent = maxPlayheadPercent;
-    payload.seek_count = seekCount;
-    payload.progress_percent = bucket || percent;
-    payload.watched_ranges = compactRanges();
-    return payload;
-  }
-
-  function emitProgress(method, force = !1) {
-    const percent = uniqueWatchedPercent(),
-      bucket = Math.floor(percent / 5) * 5;
-    if (bucket > 0 && (force || !progressBuckets[bucket])) {
-      progressBuckets[bucket] = !0;
-      track('video_progress', buildProgressPayload(method, bucket));
-    }
-    if (percent >= 95) unlock('unique_watch_95');
-  }
-
-  function unlock(reason) {
-    if (destroyed || unlocked) return;
-    unlocked = !0;
-    readyTimeout && clearTimeout(readyTimeout);
-    progressTimeout && clearTimeout(progressTimeout);
-    durationTimeout && clearTimeout(durationTimeout);
-    track('video_unlocked', buildProgressPayload(reason, 95));
-    setStatus('unlocked');
-    onUnlocked && onUnlocked(reason);
-  }
-
-  function markWatched(from, to) {
-    if (!(duration > 0)) return;
-    const start = Math.max(0, Math.floor(Math.min(from, to))),
-      end = Math.min(Math.ceil(Math.max(from, to)), Math.ceil(duration));
-    for (let second = start; second < end; second += 1) {
-      watchedSeconds.add(second);
-    }
-    maxAllowedSecond = Math.max(maxAllowedSecond, end + 2);
-  }
-
-  function seedResumeProgress(player) {
-    if (resumeApplied || !(duration > 0)) return;
-    resumeApplied = !0;
-    const startSecond = Math.max(
-      0,
-      Math.min(
-        Math.floor((duration * resumeStartPercent) / 100),
-        Math.max(0, Math.floor(duration - 3))
-      )
-    );
-    if (startSecond <= 0) return;
-
-    for (let second = 0; second < startSecond; second += 1) {
-      watchedSeconds.add(second);
-    }
-    maxAllowedSecond = Math.max(maxAllowedSecond, startSecond + 2);
-    lastSecond = startSecond;
-    maxPlayheadPercent = Math.max(maxPlayheadPercent, resumeStartPercent);
-    track('video_resume_seek', {
-      resume_start_percent: resumeStartPercent,
-      resume_start_second: startSecond,
-    });
-    setPlayerTime(player, startSecond, 'resume_seek_failed');
-  }
-
-  function seekBack(player, attemptedSecond) {
-    const allowed = Math.max(0, Math.min(maxAllowedSecond, duration || maxAllowedSecond));
-    seekCount += 1;
-    track('video_seeked', {
-      attempted_second: Math.floor(attemptedSecond || 0),
-      allowed_second: Math.floor(allowed),
-      seek_count: seekCount,
-    });
-    setPlayerTime(player, allowed, 'seekback_failed');
-    lastSecond = allowed;
-  }
-
-  if (typeof playerjs > 'u') {
-    trackHealth('playerjs_missing');
-    setStatus('error', 'playerjs_missing');
-    return () => {
-      destroyed = !0;
-    };
-  }
-
-  const player = new playerjs.Player(iframe);
-
-  readyTimeout = setTimeout(function () {
-    destroyed || unlocked || (trackHealth('ready_timeout'), setStatus('error', 'ready_timeout'));
-  }, 8e3);
-
-  player.on('ready', function () {
-    if (destroyed || unlocked) return;
-    clearTimeout(readyTimeout);
-    setStatus('ready');
-
-    player.on('play', function () {
-      if (!playTracked) {
-        playTracked = !0;
-        track('video_started', { video_started_at: new Date().toISOString() });
-      }
-    });
-
-    player.on('seeked', function (data) {
-      const current = data && typeof data.seconds === 'number' ? data.seconds : lastSecond;
-      if (Date.now() < programmaticSeekUntil) {
-        lastSecond = Math.min(current, maxAllowedSecond || current);
-        return;
-      }
-      if (duration > 0 && current > maxAllowedSecond + 1) seekBack(player, current);
-    });
-
-    player.on('timeupdate', function (data) {
-      if (destroyed || !data || !(data.duration > 0)) return;
-      duration = data.duration;
-      const current = Math.max(0, Number(data.seconds || 0));
-      seedResumeProgress(player);
-      hasProgress ||
-        ((hasProgress = !0),
-        progressTimeout && clearTimeout(progressTimeout),
-        setStatus('tracking'));
-      maxPlayheadPercent = Math.max(maxPlayheadPercent, Math.floor((current / duration) * 100));
-
-      const delta = current - lastSecond;
-      if (lastSecond > 0 && delta > 8 && current > maxAllowedSecond + 4) {
-        seekBack(player, current);
-        return;
-      }
-
-      if (delta > 0 && delta <= 8) {
-        markWatched(lastSecond, current);
-        emitProgress('playerjs_unique_watch');
-      }
-      lastSecond = current;
-    });
-
-    player.on('ended', function () {
-      if (destroyed) return;
-      markWatched(lastSecond, duration || lastSecond);
-      const percent = uniqueWatchedPercent(),
-        completedPayload = buildProgressPayload('playerjs_ended', 100);
-      if (percent >= 95) {
-        track('video_completed', completedPayload);
-        if (options.onCompleted) options.onCompleted(videoStep, completedPayload);
-      } else {
-        track('video_ended_low_watch', {
-          ...completedPayload,
-          video_issue: 'ended_before_unique_watch_threshold',
-          required_unique_watched_percent: 95,
-        });
-        setStatus('stalled', 'ended_before_unique_watch_threshold');
-      }
-      emitProgress('playerjs_ended', !0);
-      if (uniqueWatchedPercent() >= 95) unlock('ended');
-    });
-
-    progressTimeout = setTimeout(function () {
-      destroyed ||
-        unlocked ||
-        hasProgress ||
-        (trackHealth('progress_timeout'), setStatus('error', 'progress_timeout'));
-    }, 12e3);
-
-    durationTimeout = setTimeout(function () {
-      if (!destroyed && !unlocked && !(duration > 0)) {
-        trackHealth('duration_timeout');
-        setStatus('stalled', 'duration_timeout');
-      }
-    }, 5e3);
-
-    player.getDuration(function (value) {
-      if (destroyed || unlocked) return;
-      durationTimeout && clearTimeout(durationTimeout);
-      if (value > 0) duration = value;
-    });
-  });
-
-  return () => {
-    destroyed = !0;
-    readyTimeout && clearTimeout(readyTimeout);
-    progressTimeout && clearTimeout(progressTimeout);
-    durationTimeout && clearTimeout(durationTimeout);
-  };
-}
 function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible: l, onSubmit: o }) {
   const [i, u] = React.useState(''),
     [s, d] = React.useState(''),
@@ -498,18 +235,7 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
         }
         setEmailCorrection(null);
         d(z);
-        Dt('form_submit', {
-          form_first_name: C,
-          form_email: z,
-          form_submitted_at: new Date().toISOString(),
-          ...(messung
-            ? {
-                experiment_name: 'optin_phone_v1',
-                experiment_variant: messung,
-                phone_provided: ab === 'b' && phoneVal.trim() ? '1' : '0',
-              }
-            : {}),
-        });
+        melde(baueFormularAbgeschickt(C, z, messung, ab === 'b' && Boolean(phoneVal.trim())));
         const submitResult = await Qp(C, z, t, e, r, {
           phone: ab === 'b' ? phoneVal.trim() : '',
           variant: messung || '',
@@ -553,24 +279,12 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
         k(a('optin_submit_error'));
       }
     };
-  // A/B optin_phone_v1: `ab` bestimmt die ANZEIGE, `messung` die Kennzeichnung.
-  // Die Vorschau (?optin_vorschau=a|b) erzwingt nur die Ansicht — eine erzwungene
-  // Ansicht wird nie gekennzeichnet, damit Abnahme-Proben die Messung nicht verzerren.
-  const vorschau = React.useMemo(() => getOptinPreviewVariant(), []);
-  const zugeteilt = React.useMemo(() => getOptinExperimentVariant(n || 'default'), [n]);
-  const ab = vorschau || zugeteilt;
-  const messung = vorschau ? null : zugeteilt;
+  // A/B optin_phone_v1: `ab` (anzeige) bestimmt das Rendern, `messung` die
+  // Kennzeichnung — die Trennung inkl. Vorschau-Regel liegt in der Maschine.
+  const { anzeige: ab, messung } = React.useMemo(() => optinVarianten(n || 'default'), [n]);
   const [phoneVal, setPhoneVal] = React.useState('');
   React.useEffect(() => {
-    Dt('optin_viewed', {
-      quiz_profile: e?.code || '',
-      quiz_profile_name: e?.name || '',
-      quiz_aspiration: r || 'freedom',
-      main_aspiration: r || 'freedom',
-      main_aspiration_label: getAspirationLabel(r || 'freedom'),
-      optin_viewed_at: new Date().toISOString(),
-      ...(messung ? { experiment_name: 'optin_phone_v1', experiment_variant: messung } : {}),
-    });
+    melde(baueOptinGesehen(e, r, messung));
   }, [e, r]);
   return React.createElement(
     'div',
@@ -989,22 +703,13 @@ function VideoStep({
     H = a(`video_transition_${t}`),
     K = a(`video_extra_${t}`),
     J = function (w) {
-      const L = {
-        video_step: t,
-        video_recovery_action: w,
-        video_recovery_at: new Date().toISOString(),
-      };
-      Dt('video_recovery', L);
+      melde(baueVideoErholung(t, w));
     };
   return (
     React.useEffect(() => {
       const w = ld.isVideoCompleted(V, t);
       (h(w), w ? (k('unlocked'), f(null)) : (k('loading'), f(null)));
-      Dt('video_viewed', {
-        video_step: t,
-        video_id: u.id || `quiz_video_${t}`,
-        video_viewed_at: new Date().toISOString(),
-      });
+      melde(baueVideoGesehen(t, u.id));
       const L = qp(
         T,
         t,
@@ -1325,11 +1030,7 @@ function FinalStep({ profile: e, visible: t, onRestart: n }) {
     d = encodeURIComponent(a('final_whatsapp_prefill')),
     g = u ? `https://wa.me/${u.replace(/\D/g, '')}?text=${d}` : `https://wa.me/?text=${d}`;
   React.useEffect(() => {
-    Dt('final_viewed', {
-      quiz_profile: e?.code || '',
-      quiz_profile_name: e?.name || '',
-      final_viewed_at: new Date().toISOString(),
-    });
+    melde(baueFinalGesehen(e));
   }, [e]);
   return r
     ? React.createElement(
@@ -1459,10 +1160,7 @@ function FinalStep({ profile: e, visible: t, onRestart: n }) {
                 target: '_blank',
                 rel: 'noopener noreferrer',
                 onClick: () => {
-                  Dt('cta_click', {
-                    cta_type: 'whatsapp',
-                    cta_clicked_at: new Date().toISOString(),
-                  });
+                  melde(baueCta('whatsapp'));
                 },
                 style: {
                   ...In('#25D366', '#fff', {
@@ -1483,11 +1181,7 @@ function FinalStep({ profile: e, visible: t, onRestart: n }) {
               'button',
               {
                 onClick: () => {
-                  (Dt('cta_click', {
-                    cta_type: 'spaeter',
-                    cta_clicked_at: new Date().toISOString(),
-                  }),
-                    l(!0));
+                  (melde(baueCta('spaeter')), l(!0));
                 },
                 style: Su({
                   width: '100%',
@@ -1713,13 +1407,7 @@ function QuizFlow() {
   }, [profiles, videoSteps]);
   React.useEffect(() => {
     if (e !== 'quiz' || !questions[n]) return;
-    Dt('question_viewed', {
-      step_index: n + 1,
-      question_index: n + 1,
-      question_key: questions[n].id,
-      question_phase: questions[n].phase,
-      question_viewed_at: new Date().toISOString(),
-    });
+    melde(baueFrageGesehen(questions[n], n));
   }, [e, n, questions]);
   React.useEffect(() => {
     // Die Steps wechseln ohne Navigation; ohne Reset erbt jede Seite den
@@ -1731,14 +1419,7 @@ function QuizFlow() {
     // Macht das Leck Optin -> Video trennbar: "Ergebnisseite nie gesehen"
     // vs. "gesehen, aber CTA nicht geklickt" (Plan AP6, analog optin_viewed).
     if (e !== 'result' || !g) return;
-    Dt('result_viewed', {
-      quiz_profile: g?.code || '',
-      quiz_profile_name: g?.name || '',
-      quiz_aspiration: h,
-      main_aspiration: h,
-      main_aspiration_label: getAspirationLabel(h),
-      result_viewed_at: new Date().toISOString(),
-    });
+    melde(baueErgebnisGesehen(g, h));
   }, [e]);
   const dockAnchorRef = React.useRef(null),
     [ctaDocked, setCtaDocked] = React.useState(false);
@@ -1776,17 +1457,7 @@ function QuizFlow() {
     C = () => {
       if (!i || !s || answerLockRef.current) return;
       answerLockRef.current = true;
-      Dt('question_answered', {
-        step_index: n + 1,
-        question_index: n + 1,
-        question_key: questions[n]?.id || n + 1,
-        question_phase: questions[n]?.phase || '',
-        answer_label: i.label || '',
-        answer_type: i.type || '',
-        answer_aspiration: i.aspiration || '',
-        answer_barrier: i.barrier || '',
-        answered_at: new Date().toISOString(),
-      });
+      melde(baueFrageBeantwortet(questions[n], n, i));
       const L = [...l, i];
       const wechsel = uebergangNachAntwort(n, questions.length);
       wechsel.ziel === 'aspiration-confirm'
@@ -1815,17 +1486,7 @@ function QuizFlow() {
               (clearInterval(Xl),
               setTimeout(() => {
                 const _ = profiles[se];
-                (y(_),
-                  Dt('quiz_result', {
-                    quiz_profile: se,
-                    quiz_profile_name: _.name,
-                    quiz_aspiration: je,
-                    main_aspiration: je,
-                    main_aspiration_label: getAspirationLabel(je),
-                    quiz_barrier: deriveQuizBarrier(L),
-                    quiz_completed_at: new Date().toISOString(),
-                  }),
-                  v(() => t('optin')));
+                (y(_), melde(baueQuizErgebnis(se, _.name, je, L)), v(() => t('optin')));
               }, 500)));
         }, 620);
     },
@@ -1917,7 +1578,7 @@ function QuizFlow() {
           'button',
           {
             onClick: () => {
-              Dt('quiz_started', { quiz_started_at: new Date().toISOString() });
+              melde(baueQuizGestartet());
               v(() => t('quiz'));
             },
             style: In('#C9A84C'),
@@ -2101,14 +1762,7 @@ function QuizFlow() {
           'button',
           {
             onClick: () => {
-              Dt('result_cta_click', {
-                quiz_profile: g?.code || '',
-                quiz_profile_name: g?.name || '',
-                quiz_aspiration: h,
-                main_aspiration: h,
-                main_aspiration_label: getAspirationLabel(h),
-                result_cta_clicked_at: new Date().toISOString(),
-              });
+              melde(baueErgebnisCta(g, h));
               v(() => t('videos'));
             },
             style: In(g.accentColor, '#0A0A0A', { width: '100%', ...extraStyle }),
@@ -2607,12 +2261,7 @@ function QuizFlow() {
           {
             onClick: () =>
               v(() => {
-                Dt('aspiration_confirmed', {
-                  quiz_aspiration: h,
-                  main_aspiration: h,
-                  main_aspiration_label: getAspirationLabel(h),
-                  aspiration_confirmed_at: new Date().toISOString(),
-                });
+                melde(baueAspirationBestaetigt(h));
                 (r((se) => se + 1), u(null), t('quiz'));
               }),
             style: In('#C9A84C', '#0A0A0A', { width: '100%' }),
@@ -2661,12 +2310,7 @@ function QuizFlow() {
         sendAllVideosCompletedCoachNotification(slug, memberId, completedStep, videoSteps);
       },
       onNext: () => {
-        Dt('video_continue_click', {
-          video_step: c,
-          video_id: videoSteps[c]?.id || `quiz_video_${c}`,
-          next_step: c < Object.keys(videoSteps).length ? c + 1 : 'final',
-          video_continue_clicked_at: new Date().toISOString(),
-        });
+        melde(baueVideoWeiter(c, videoSteps[c]?.id, Object.keys(videoSteps).length));
         c < Object.keys(videoSteps).length ? v(() => m((L) => L + 1)) : v(() => t('final'));
       },
       onPrev: () => v(() => m((L) => L - 1)),
