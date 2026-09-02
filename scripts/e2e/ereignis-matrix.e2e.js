@@ -21,7 +21,13 @@
  *
  * Referenz-Screenshots je Screen landen in e2e-artifacts/ (Anschauung, nicht
  * Assertion). lead-track laeuft als markierter Testtraffic (?test=1) gegen die
- * echte API; der Optin-Submit ist gestubbt (kein Lead, keine Mail).
+ * echte API; der Optin-Submit ist gestubbt (keine Kartei-Zeile, keine Mail).
+ *
+ * 🔴 Bewusste Produktionswirkung, kein Fehler-Rest (Stand 02.09., nach #137):
+ * Jeder Lauf legt einen ECHTEN, aber markierten Lead in leads.lead_state an -
+ * test_lead_marked, ohne Rang-Auftrag, ohne Nurture. Wer Zahlen im Ads-Cockpit
+ * oder direkt in der Datenbank liest, muss internen Verkehr weiterhin selbst
+ * herausrechnen (is_internal_traffic bzw. @example.com-Adressen).
  *
  * Golden aktualisieren (nur bewusst, Begruendung in den PR):
  *   GOLDEN_AKTUALISIEREN=1 pnpm run e2e:matrix
