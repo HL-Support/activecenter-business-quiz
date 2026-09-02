@@ -31,6 +31,16 @@ import {
   persistPendingEmailCorrection,
   confirmEmailCorrection,
 } from '../lib/core.js';
+// E1: Die Entscheidungen der Schrittfolge leben in der Maschine — App.jsx
+// fuehrt sie nur noch aus (State, Storage, Ereignisse, Blende bleiben hier
+// bis zu den Folgeetappen).
+import {
+  uebergangNachAntwort,
+  profilCodeAusAntworten,
+  aspirationAusAntworten,
+  resumeZiel,
+  neustartZustand,
+} from '../maschine/ablauf.js';
 
 const VIDEO_FULL_COMPLETION_KEY_PREFIX = 'acVideoFullCompletion_';
 const VIDEO_COMPLETION_NOTIFY_KEY_PREFIX = 'acVideoCompletionCoachNotify_';
@@ -1687,34 +1697,18 @@ function QuizFlow() {
         o(restoredAnswers);
       }
 
-      if (resumeTarget === 'videos') {
-        const normalizedVideoStep =
-          videoStep > 1 && videoStep <= Object.keys(videoSteps).length ? videoStep : 1;
-        m(normalizedVideoStep);
-        setResumeVideoStep(normalizedVideoStep);
-        setResumeStartPercent(
-          Number.isFinite(storedResumeStartPercent)
-            ? Math.max(0, Math.min(90, storedResumeStartPercent))
-            : 0
-        );
-        t('videos');
-      } else if (resumeTarget === 'final') {
-        setResumeStartPercent(0);
-        setResumeVideoStep(0);
-        t('final');
-      } else if (resumeProfileCode && profiles[resumeProfileCode]) {
-        setResumeStartPercent(0);
-        setResumeVideoStep(0);
-        t('result');
-      } else {
-        // Datensatz ohne (gueltigen) Profilcode: die Ergebnisseite rendert nur
-        // mit Profil - ohne Guard fiele der Resume bis zu Quizfrage 1 durch.
-        // Dann lieber direkt auf die Videos.
-        m(1);
-        setResumeVideoStep(1);
-        setResumeStartPercent(0);
-        t('videos');
-      }
+      // Abbildung inkl. Guard (kein Profil -> Videos, nie Quiz) in der Maschine.
+      const ziel = resumeZiel({
+        resumeTarget,
+        videoStep,
+        resumeStartPercent: storedResumeStartPercent,
+        profilBekannt: Boolean(resumeProfileCode && profiles[resumeProfileCode]),
+        anzahlVideos: Object.keys(videoSteps).length,
+      });
+      m(ziel.videoStep);
+      setResumeVideoStep(ziel.resumeVideoStep);
+      setResumeStartPercent(ziel.resumeStartPercent);
+      t(ziel.schritt);
     }
   }, [profiles, videoSteps]);
   React.useEffect(() => {
@@ -1794,27 +1788,24 @@ function QuizFlow() {
         answered_at: new Date().toISOString(),
       });
       const L = [...l, i];
-      n === 3
+      const wechsel = uebergangNachAntwort(n, questions.length);
+      wechsel.ziel === 'aspiration-confirm'
         ? v(() => {
             (o(L), t('aspiration-confirm'), u(null));
             const j = i.aspiration || 'freedom';
             w(j);
           })
-        : n < questions.length - 1
+        : wechsel.ziel === 'quiz'
           ? v(() => {
-              (o(L), r((j) => j + 1), u(null));
+              (o(L), r(wechsel.naechsterIndex), u(null));
             })
           : v(() => {
               (o(L), t('analyzing'), z(L));
             });
     },
     z = (L) => {
-      const j = { R: 0, Y: 0, G: 0, B: 0 };
-      L.slice(0, 3).forEach((_) => {
-        _.type && j[_.type]++;
-      });
-      const se = Object.entries(j).sort((_, P) => P[1] - _[1])[0][0],
-        je = L[3]?.aspiration || L[4]?.aspiration || 'freedom';
+      const se = profilCodeAusAntworten(L),
+        je = aspirationAusAntworten(L);
       w(je);
       let Ft = 0,
         Xl = setInterval(() => {
@@ -1841,7 +1832,15 @@ function QuizFlow() {
     N = () => {
       v(() => {
         resetRun(coach.slug || le.getItem('acBeraterSlug') || 'default', coach.member_id || '');
-        (t('intro'), r(0), o([]), u(null), y(null), k(0), m(1), w('freedom'));
+        const start = neustartZustand();
+        (t(start.schritt),
+          r(start.frageIndex),
+          o(start.antworten),
+          u(start.gewaehlt),
+          y(start.profil),
+          k(start.analyzingSchritt),
+          m(start.videoStep),
+          w(start.aspiration));
       });
     };
   if (e === 'intro')
