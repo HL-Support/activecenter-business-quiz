@@ -421,6 +421,7 @@ module.exports = {
   normalizeLanguage,
   normalizeMetaAttributionFallback,
   nowIso,
+  parseBoolean,
   readCookie,
   safeInteger,
   safeNumber,

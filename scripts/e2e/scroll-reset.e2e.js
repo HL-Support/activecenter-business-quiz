@@ -10,9 +10,16 @@
  * Assertions + Messwerte im Log), mit dem Fix ist er die Regression-Wache.
  *
  * Optin-Submit und E-Mail-Pruefung laufen gegen den Harness-Stub
- * (faults.stubOptin): kein Lead im Backend, keine Mail. Nur lead-track-Events
- * laufen als markierter Testtraffic (?test=1) gegen die echte API — wie in der
- * uebrigen E2E-Suite.
+ * (faults.stubOptin): keine Kartei-Zeile, keine Mail. Die lead-track-Events laufen
+ * als markierter Testtraffic (?test=1) gegen die echte API — wie in der uebrigen
+ * E2E-Suite.
+ *
+ * 🔴 Hier stand bis 02.09.2026 "kein Lead im Backend". Das war falsch und hat 19 tote
+ * Outbox-Auftraege gekostet: Gestubt ist nur der Bridge-Submit, /api/lead-track laeuft
+ * echt weiter und legt sehr wohl einen Lead in leads.lead_state an. Was der Stub
+ * verhindert, ist die Kartei-Zeile — und genau deren Fehlen liess den Rang-Rueckschrieb
+ * sterben. Seit 02.09.2026 markiert api/lead-track.js internen Verkehr beim Opt-in
+ * selbst als Testlead und reiht keinen Rang-Auftrag mehr ein.
  *
  * Aufruf: pnpm run e2e:scroll  (setzt einen frischen Build in dist/ voraus)
  */

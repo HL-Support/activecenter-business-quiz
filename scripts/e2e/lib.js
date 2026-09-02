@@ -8,6 +8,15 @@
  * Requests und Race-Faelle realistisch bleiben.
  *
  * Alle Laeufe sind markierte Testleads (?test=1 -> is_internal_traffic).
+ *
+ * 🔴 Diese Markierung ist echte Produktionswirkung, kein Etikett: Ein E2E-Lauf legt in
+ * der Produktionsdatenbank einen Lead an. Bis 02.09.2026 war er dort von einem echten
+ * nicht zu unterscheiden — er zog einen Rang-Rueckschrieb nach sich, der ohne
+ * Kartei-Zeile sterben musste (19 tote Auftraege am 01.09.), und er stand vor einer
+ * Nurture-Mail an e2e-scroll@example.com. Seither wertet api/lead-track.js
+ * is_internal_traffic beim Opt-in aus: kein Rang-Auftrag, dafuer eine test_lead_marked-
+ * Zeile, die auch der Nurture-Sender liest. Wer das Flag hier entfernt, schaltet
+ * beides ab.
  */
 const path = require('path');
 const fs = require('fs');
