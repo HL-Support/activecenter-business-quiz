@@ -11,8 +11,12 @@
  * hier nicht der Vorgang gemessen, sondern das ERGEBNIS — und zwar aus zwei voneinander
  * unabhaengigen Richtungen, die uebereinstimmen muessen.
  *
- * Zaehler A  Opt-ins:      leads.lead_state mit form_submitted_at am Tag
- * Zaehler B  Uebermittlungen: leads.contacts_zustellprotokoll
+ * Zaehler A  Opt-ins:      leads.lead_state mit form_submitted_at am Tag — OHNE Testleads
+ *              (test_lead_marked, seit #137): die durchlaufen den Funnel echt, erzeugen aber
+ *              absichtlich keine Kartei-Zeile. Sie stehen als eigene Spalte daneben, damit
+ *              Testverkehr weder Fehlalarme ausloest noch echte Luecken verdecken kann.
+ * Zaehler B  Uebermittlungen: leads.contacts_zustellprotokoll — Paritaet ebenfalls nur ueber
+ *              echte Leads; gescheitert/offen alarmieren weiterhin fuer ALLE Zeilen
  *              - im Modus `schatten`: Zeilen mit status='schatten'   -> muss A entsprechen
  *              - im Modus `an`:       success+duplicate MIT contact_id -> muss A entsprechen
  * Zaehler S  Auftraege:    leads.lead_sync_outbox je Zustand; `dead` muss 0 sein
@@ -82,25 +86,47 @@ function zahl(wert) {
                (current_date - ${TAGE - 1})::date, current_date, interval '1 day'
              )::date AS tag
     ),
+    -- 🔴 Testleads (E2E-Geschirr, ?test=1) durchlaufen den Funnel ECHT, aber ohne
+    -- Kartei-Zeile und ohne Mail — seit #137 tragen sie die Marke test_lead_marked.
+    -- Sie duerfen weder mitgezaehlt werden (sonst ist jeder E2E-Tag ein Fehlalarm,
+    -- Vorfall-Nachlese 02.09.: 39 Opt-ins / 20 Schatten, Delta = 19 Testleads) noch
+    -- stillschweigend verschwinden (sonst verdeckt Testverkehr echte Luecken).
+    -- Darum: eigene Spalte, Paritaet NUR ueber echte Leads. Gescheitert/offen
+    -- alarmieren weiterhin fuer ALLE Zeilen — ein failed ist nie normal.
     optins AS (
-      SELECT (form_submitted_at AT TIME ZONE 'Europe/Vienna')::date AS tag, count(*) AS n
-        FROM leads.lead_state
-       WHERE form_submitted_at >= current_date - ${TAGE - 1}
-         AND source_app = 'business_leads_quiz'
+      SELECT (s.form_submitted_at AT TIME ZONE 'Europe/Vienna')::date AS tag,
+             count(*) FILTER (WHERE NOT EXISTS (
+               SELECT 1 FROM leads.lead_events e
+                WHERE e.lead_hash = s.lead_hash
+                  AND e.event_name = 'test_lead_marked')) AS n,
+             count(*) FILTER (WHERE EXISTS (
+               SELECT 1 FROM leads.lead_events e
+                WHERE e.lead_hash = s.lead_hash
+                  AND e.event_name = 'test_lead_marked')) AS testleads
+        FROM leads.lead_state s
+       WHERE s.form_submitted_at >= current_date - ${TAGE - 1}
+         AND s.source_app = 'business_leads_quiz'
        GROUP BY 1
     ),
     protokoll AS (
-      SELECT (created_at AT TIME ZONE 'Europe/Vienna')::date AS tag,
-             count(*) FILTER (WHERE status = 'schatten') AS schatten,
-             count(*) FILTER (WHERE status IN ('success','duplicate') AND contact_id IS NOT NULL) AS zugestellt,
-             count(*) FILTER (WHERE status = 'failed') AS gescheitert,
-             count(*) FILTER (WHERE status = 'pending') AS offen
-        FROM leads.contacts_zustellprotokoll
-       WHERE created_at >= current_date - ${TAGE - 1}
+      SELECT (c.created_at AT TIME ZONE 'Europe/Vienna')::date AS tag,
+             count(*) FILTER (WHERE c.status = 'schatten' AND NOT EXISTS (
+               SELECT 1 FROM leads.lead_events e
+                WHERE e.lead_hash = c.lead_hash
+                  AND e.event_name = 'test_lead_marked')) AS schatten,
+             count(*) FILTER (WHERE c.status IN ('success','duplicate') AND c.contact_id IS NOT NULL AND NOT EXISTS (
+               SELECT 1 FROM leads.lead_events e
+                WHERE e.lead_hash = c.lead_hash
+                  AND e.event_name = 'test_lead_marked')) AS zugestellt,
+             count(*) FILTER (WHERE c.status = 'failed') AS gescheitert,
+             count(*) FILTER (WHERE c.status = 'pending') AS offen
+        FROM leads.contacts_zustellprotokoll c
+       WHERE c.created_at >= current_date - ${TAGE - 1}
        GROUP BY 1
     )
     SELECT t.tag,
            COALESCE(o.n, 0)          AS optins,
+           COALESCE(o.testleads, 0)  AS testleads,
            COALESCE(p.schatten, 0)   AS schatten,
            COALESCE(p.zugestellt, 0) AS zugestellt,
            COALESCE(p.gescheitert, 0) AS gescheitert,
@@ -122,11 +148,12 @@ function zahl(wert) {
   for (const z of jeTag) {
     const tag = String(z.tag).slice(0, 10);
     const optins = zahl(z.optins);
+    const testleads = zahl(z.testleads);
     const schatten = zahl(z.schatten);
     const zugestellt = zahl(z.zugestellt);
     const gescheitert = zahl(z.gescheitert);
     const offen = zahl(z.offen);
-    zeilen.push({ tag, optins, schatten, zugestellt, gescheitert, offen });
+    zeilen.push({ tag, optins, testleads, schatten, zugestellt, gescheitert, offen });
 
     // 🔴 Der heutige Tag laeuft noch — eine Abweichung dort ist eine Momentaufnahme,
     // kein Befund. Gezaehlt wird ab dem ersten VOLLSTAENDIGEN Tag.
@@ -188,12 +215,14 @@ function zahl(wert) {
       (AB ? `  ·  beurteilt ab ${AB}` : '')
   );
   console.log('');
-  console.log('  Tag          Opt-ins   Schatten   Zugestellt   Gescheitert   Offen');
+  console.log(
+    '  Tag          Opt-ins   Testleads   Schatten   Zugestellt   Gescheitert   Offen'
+  );
   for (const z of zeilen) {
     console.log(
-      `  ${z.tag}   ${String(z.optins).padStart(7)}   ${String(z.schatten).padStart(8)}` +
-        `   ${String(z.zugestellt).padStart(10)}   ${String(z.gescheitert).padStart(11)}` +
-        `   ${String(z.offen).padStart(5)}`
+      `  ${z.tag}   ${String(z.optins).padStart(7)}   ${String(z.testleads).padStart(9)}` +
+        `   ${String(z.schatten).padStart(8)}   ${String(z.zugestellt).padStart(10)}` +
+        `   ${String(z.gescheitert).padStart(11)}   ${String(z.offen).padStart(5)}`
     );
   }
   console.log('');
