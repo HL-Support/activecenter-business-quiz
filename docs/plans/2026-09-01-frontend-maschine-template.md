@@ -321,8 +321,12 @@ Beweis: Ereignis-Matrix-Test (kein Event fehlt, keins doppelt) + Golden-Payload.
 
 `src/templates/klassik/theme.js` entsteht aus dem DESIGN.md-Frontmatter; die 7
 Helfer aus core.js:1751–1830 ziehen dorthin (core.js verliert seine letzte
-Optik); `accentColor`/`accentSoft` ziehen aus getProfiles in
-`theme.profilAkzent()`; Phase-2-Blau wird `theme.phasenAkzent(2)`. App.jsx
+Optik); Phase-2-Blau wird `theme.phasenAkzent(2)`. 🔴 **Korrektur (kontrolliert
+02.09., E3a):** `accentColor`/`accentSoft` ziehen NICHT aus getProfiles heraus —
+das komplette Profil-Objekt reist im Submit-Payload an die Bridge
+(`profile: profile`, performQuizSubmission) und ist damit **Datenvertrag,
+keine Optik**; der Golden-Payload-Test hält es fest. Ein Petrol-Theme darf die
+Profil-Akzente fürs RENDERN übersteuern, die Daten bleiben unverändert. App.jsx
 ersetzt Farb-/Style-Literale durch Theme-Zugriffe — mechanisch, Screen für
 Screen, OHNE Werte zu ändern. Auch: Missing-Coach-Seite (bootstrap) und der
 App-Loader (index.html) beziehen ihre Werte aus demselben Katalog (Loader als

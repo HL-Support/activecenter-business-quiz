@@ -12,13 +12,6 @@ import {
   getProfiles as Bp,
   getAnalyzingSteps as Up,
   getCoachFromStorage,
-  pageLayout as at,
-  panelStyle as ct,
-  titleStyle as dt,
-  badgeStyle as Ot,
-  primaryButtonStyle as In,
-  secondaryButtonStyle as Su,
-  inputStyle as od,
   resetLeadRun as resetRun,
   getActiveLeadRun,
   isLeadSystemV2Active,
@@ -37,6 +30,17 @@ import {
   resumeZiel,
   neustartZustand,
 } from '../maschine/ablauf.js';
+// E3a: Optik kommt aus dem Theme, nicht mehr aus core.js. Werte identisch —
+// der Style-Schnappschuss (E0b-Golden) beweist es.
+import {
+  pageLayout as at,
+  panelStyle as ct,
+  titleStyle as dt,
+  badgeStyle as Ot,
+  primaryButtonStyle as In,
+  secondaryButtonStyle as Su,
+  inputStyle as od,
+} from '../templates/klassik/theme.js';
 // E2: Ereignisse und Video-Engine gehoeren der Maschine. App.jsx baut keine
 // Event-Payloads mehr selbst — es meldet nur noch ueber den Katalog.
 import { bindeVideoTracking as qp } from '../maschine/video-engine.js';
