@@ -231,7 +231,14 @@ function baueMarkdown(sprache) {
   return zeilen.join('\n');
 }
 
-(async () => {
+// 🔴 Nur ausführen, wenn dieses Skript AUFGERUFEN wird — nicht, wenn es jemand einbindet.
+// Der Driftwächter im Test braucht `baueMarkdown`, aber kein Mautic und vor allem keine
+// Schreibvorgänge: Ein Test, der Dateien ins Repo schreibt, während die Suite parallel
+// läuft, ist eine Wettlaufquelle. Er wäre irgendwann rot, ohne dass etwas kaputt ist —
+// und ein Test, der grundlos rot wird, erzieht dazu, ihn zu ignorieren.
+if (require.main === module) hauptlauf();
+
+async function hauptlauf() {
   // Die Lesefassung braucht kein Mautic — sie entsteht allein aus der Quelldatei.
   if (process.argv.includes('--markdown')) {
     const fs = require('fs');
@@ -344,7 +351,7 @@ function baueMarkdown(sprache) {
   console.log('');
   console.log(JSON.stringify(karte));
   process.exit(0);
-})().catch((fehler) => {
-  console.error(`  🔴 Abbruch: ${fehler.message}`);
-  process.exit(1);
-});
+}
+
+// Für den Driftwächter: die Lesefassung bauen, ohne sie zu schreiben.
+module.exports = { baueMarkdown, MARKDOWN_PRAEFIX };
