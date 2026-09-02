@@ -1,0 +1,30 @@
+{
+  "intro": {
+    "hash": "fbafa873402b100bbcae4257bc0ee75b82477d6659e4271bb22c5614e0d4a9fa",
+    "elemente": 40
+  },
+  "frage-1": {
+    "hash": "a7539bb1a7293d313e1c9418e1e9774e5853cbcc0ec1f742e761baff2fe9d63d",
+    "elemente": 45
+  },
+  "aspiration-confirm": {
+    "hash": "b0fee0d03794082dd40dfe4f83c24e36079b31b426988a3103bb4290e788a667",
+    "elemente": 20
+  },
+  "frage-5-phase2": {
+    "hash": "7c424ff9b38914e5b91462b057baed0ec33f89809edd676e1e222a14364ac528",
+    "elemente": 45
+  },
+  "optin": {
+    "hash": "c1fb3e35112aa71b8023bc8ae85a5837764baa31e4c84833fc028551f22d6d4a",
+    "elemente": 45
+  },
+  "result": {
+    "hash": "f1b3563b222b9b954b4a554f8d0f573b3b602fe58b281321ee9c0c8380b58eba",
+    "elemente": 72
+  },
+  "video-1": {
+    "hash": "d2121e5092bb94826b011dbc9fdce4d8889fbfd214ed1a9fa32e4137d64284ea",
+    "elemente": 35
+  }
+}

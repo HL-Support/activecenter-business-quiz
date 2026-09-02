@@ -1,5 +1,5 @@
 {
-  "hinweis": "Golden-Master der Submit-Payloads (E0a). Aktualisierung NUR bewusst: GOLDEN_AKTUALISIEREN=1, Begruendung in den PR.",
+  "hinweis": "Golden-Master der Submit-Payloads (E0a+E0b). Aktualisierung NUR bewusst: GOLDEN_AKTUALISIEREN=1, Begruendung in den PR.",
   "standard_optin": [
     {
       "url": "/api/bridge",
@@ -397,6 +397,75 @@
           "utm_source": "fb",
           "utm_term": "",
           "visitor_id": "av_goldenbesucher12345678"
+        }
+      }
+    }
+  ],
+  "email_korrektur_zwischenspeicher": [
+    {
+      "url": "/api/lead-track",
+      "body": {
+        "event_name": "email_correction_pending",
+        "lead_hash": "qz_goldenprobe1234567890abcd",
+        "payload": {
+          "berater_slug": "markus",
+          "client_seed": "11111111-2222-3333-4444-555555555555",
+          "email": "anna@gmial.com",
+          "event_source_url": "https://business.activecenter.info/markus?utm_medium=paid_social&utm_source=fb&utm_campaign=golden",
+          "fbc": "",
+          "fbclid": "",
+          "fbp": "",
+          "first_name": "anna",
+          "form_submitted_at": "<zeitstempel>",
+          "funnel_key": "business",
+          "lang": "de",
+          "lead_hash": "qz_goldenprobe1234567890abcd",
+          "main_aspiration": "freedom",
+          "main_aspiration_label": "asp_tag_freedom",
+          "member_id": "25851739",
+          "profile": {
+            "code": "feuer",
+            "name": "Der Macher"
+          },
+          "profile_code": "feuer",
+          "profile_label": "Der Macher",
+          "ref_id": "25851739",
+          "selected_answers": [
+            {
+              "label": "Antwort R",
+              "type": "R"
+            },
+            {
+              "label": "Antwort G",
+              "type": "G"
+            },
+            {
+              "label": "Antwort B",
+              "type": "B"
+            },
+            {
+              "aspiration": "freedom",
+              "label": "Freiheit"
+            },
+            {
+              "aspiration": "growth",
+              "label": "Wachstum"
+            },
+            {
+              "barrier": "confidence",
+              "label": "Selbstvertrauen"
+            }
+          ],
+          "source_app": "business_leads_quiz",
+          "submitted_at": "<zeitstempel>",
+          "utm_ad_id": "",
+          "utm_adset_id": "",
+          "utm_campaign": "golden",
+          "utm_campaign_id": "",
+          "utm_content": "",
+          "utm_medium": "paid_social",
+          "utm_source": "fb",
+          "utm_term": ""
         }
       }
     }

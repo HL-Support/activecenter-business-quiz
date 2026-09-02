@@ -21,7 +21,8 @@
     "lint": "eslint . --ext .js,.jsx && node scripts/lint-grenze.js",
     "lint:fix": "eslint . --ext .js,.jsx --fix",
     "format": "prettier --write \"**/*.{js,jsx,json}\"",
-    "check": "pnpm run lint && pnpm run format"
+    "check": "pnpm run lint && pnpm run format",
+    "e2e:matrix": "pnpm run build && node --test scripts/e2e/ereignis-matrix.e2e.js"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.3",
