@@ -54,6 +54,15 @@ Postfachs benutzte.
 | 4 | Nurture-Strecke („der Mechanismus", „wer dabei ist", …) | Cron alle 2 h | der Lead | n8n `AC - Quiz Nurture Email Sender` → **Mautic** | **Mautic** / `broadcast` |
 | 5 | Störungsmails („Member-ID fehlt", „Points Result Update fehlgeschlagen") | Fehler | `IDENTITY_ALERT_EMAIL` | **dieses Repo**, `api/bridge.js` | Leadgen / `outbound` |
 
+**Sprachen der Nurture-Strecke (seit 31.08.2026):** `de`, `it`, `en` mit je vier Varianten
+pro Phase (37 Vorlagen) sowie **`hu`, `fr`, `ru` mit je einer generischen Fassung pro
+Phase** (8 Vorlagen, Mautic 162–185). Der Sender fällt auf `_single` zurück, wenn es für
+eine Sprache keine Variante gibt. Vorher waren nur `de`/`it`/`en` unterstützt — Leads in
+den anderen drei Sprachen bekamen **nie** eine Nurture-Mail, obwohl Quiz und
+Opt-in-Mailvorlagen längst alle sechs Sprachen sprechen. Hergang, Zahlen und der Vermerk
+für die spätere Optimierung:
+[audits/2026-08-31-nurture-standortbestimmung.md](audits/2026-08-31-nurture-standortbestimmung.md).
+
 🔴 **Mail 1 und 2 kommen NICHT aus diesem Repo** und nicht synchron beim Absenden des
 Formulars. Der Weg ist:
 

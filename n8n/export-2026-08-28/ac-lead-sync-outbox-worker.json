@@ -1,0 +1,237 @@
+{
+  "updatedAt": "2026-05-14T08:36:55.645Z",
+  "createdAt": "2026-05-14T08:16:36.657Z",
+  "id": "ALLHYLRwkvujkuFJ",
+  "name": "AC - Lead Sync Outbox Worker - Business Leads Quiz",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "schedule_trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -480,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "call_outbox_worker",
+      "name": "HTTP - Call Lead Outbox Worker",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -240,
+        0
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "https://quiz.activecenter.info/api/lead-outbox-worker",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Bridge-Key",
+              "value": "94e88b36b5f460411f5d4d805a46c6bd533aa7d06da64be6"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ batch_size: 10, worker_id: \"n8n-\" + $execution.id }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Call Lead Outbox Worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "timezone": "Europe/Berlin"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "8bf40638-0cf8-49a6-a6a5-171998238c7c",
+  "activeVersionId": "8bf40638-0cf8-49a6-a6a5-171998238c7c",
+  "versionCounter": 10,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-05-14T08:16:36.657Z",
+      "createdAt": "2026-05-14T08:16:36.657Z",
+      "role": "workflow:owner",
+      "workflowId": "ALLHYLRwkvujkuFJ",
+      "projectId": "ROWWTo0FQLcxZajT",
+      "project": {
+        "updatedAt": "2026-03-21T16:42:22.082Z",
+        "createdAt": "2025-12-09T17:32:24.857Z",
+        "id": "ROWWTo0FQLcxZajT",
+        "name": "Unnamed Project",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-14T08:31:09.436Z",
+    "createdAt": "2026-05-14T08:31:09.436Z",
+    "versionId": "8bf40638-0cf8-49a6-a6a5-171998238c7c",
+    "workflowId": "ALLHYLRwkvujkuFJ",
+    "nodes": [
+      {
+        "id": "schedule_trigger",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -480,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "call_outbox_worker",
+        "name": "HTTP - Call Lead Outbox Worker",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          -240,
+          0
+        ],
+        "onError": "continueRegularOutput",
+        "parameters": {
+          "method": "POST",
+          "url": "https://quiz.activecenter.info/api/lead-outbox-worker",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "X-Bridge-Key",
+                "value": "94e88b36b5f460411f5d4d805a46c6bd533aa7d06da64be6"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ batch_size: 10, worker_id: \"n8n-\" + $execution.id }) }}",
+          "options": {
+            "timeout": 30000
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "HTTP - Call Lead Outbox Worker",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Markus Oberhofer",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-08-28T05:22:00.070Z",
+        "id": 1222,
+        "workflowId": "ALLHYLRwkvujkuFJ",
+        "versionId": "8bf40638-0cf8-49a6-a6a5-171998238c7c",
+        "event": "deactivated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      },
+      {
+        "createdAt": "2026-05-14T08:42:31.579Z",
+        "id": 498,
+        "workflowId": "ALLHYLRwkvujkuFJ",
+        "versionId": "8bf40638-0cf8-49a6-a6a5-171998238c7c",
+        "event": "deactivated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      },
+      {
+        "createdAt": "2026-05-14T08:42:31.610Z",
+        "id": 499,
+        "workflowId": "ALLHYLRwkvujkuFJ",
+        "versionId": "8bf40638-0cf8-49a6-a6a5-171998238c7c",
+        "event": "activated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      },
+      {
+        "createdAt": "2026-08-28T05:36:50.252Z",
+        "id": 1228,
+        "workflowId": "ALLHYLRwkvujkuFJ",
+        "versionId": "8bf40638-0cf8-49a6-a6a5-171998238c7c",
+        "event": "activated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    ]
+  }
+}

@@ -168,7 +168,68 @@ test('unzulässige Bezeichner werden abgewiesen', () => {
 });
 
 test('noch nicht unterstützte Parameter scheitern, statt ignoriert zu werden', () => {
-  // Stillschweigend fallengelassenes offset würde die falsche Seite liefern.
-  assert.throws(() => uebersetze('t?offset=10', { method: 'GET' }), /offset/);
   assert.throws(() => uebersetze('t?columns=a', { method: 'POST', body: '{"a":1}' }), /columns/);
+});
+
+// --- Erweiterungen 28.08.2026 für den Business-Kalkulator (UMZUG-COOLIFY-POSTGRES.md §4) --
+
+test('not.-Negation wird übersetzt: not.is.null und not.eq', () => {
+  const a = uebersetze('t?email=not.is.null', { method: 'GET' });
+  assert.ok(a.sql.endsWith('WHERE NOT (email IS NULL)'), a.sql);
+  assert.deepEqual(a.werte, []);
+
+  const b = uebersetze('t?status=not.eq.done', { method: 'GET' });
+  assert.ok(b.sql.endsWith('WHERE NOT (status = $1)'), b.sql);
+  assert.deepEqual(b.werte, ['done']);
+});
+
+test('not. ohne inneren Operator scheitert laut', () => {
+  assert.throws(() => uebersetze('t?a=not.wahr', { method: 'GET' }), /Filter ohne Operator|Unbekannter Operator/);
+});
+
+test('or-Gruppe wird zu einer geklammerten OR-Bedingung, Kommata in in.(…) trennen nicht', () => {
+  // Exakt die Form, die coachPostgrestFilter im Kalkulator baut (contact-domain.js:142).
+  const r = uebersetze(
+    't?organisation_id=eq.2&or=(berater_slug.eq.markus,member_id.in.(25851739,25297671),ref_id.in.(25851739,25297671))',
+    { method: 'GET' }
+  );
+  assert.ok(r.sql.includes(
+    'WHERE organisation_id = $1 AND (berater_slug = $2 OR member_id IN ($3, $4) OR ref_id IN ($5, $6))'
+  ), r.sql);
+  assert.deepEqual(r.werte, ['2', 'markus', '25851739', '25297671', '25851739', '25297671']);
+});
+
+test('kaputte or-Gruppen scheitern laut', () => {
+  assert.throws(() => uebersetze('t?or=a.eq.1', { method: 'GET' }), /Unzulaessige or-Gruppe/);
+  assert.throws(() => uebersetze('t?or=()', { method: 'GET' }), /Leere or-Gruppe/);
+  assert.throws(() => uebersetze('t?or=(a.eq.1', { method: 'GET' }), /Unzulaessige or-Gruppe/);
+  assert.throws(() => uebersetze('t?or=(ohnepunkt)', { method: 'GET' }), /or-Teil ohne Operator/);
+});
+
+test('eq.true/eq.false werden echte Booleans - der Treiber macht aus Strings sonst still false', () => {
+  // Gemessen 28.08.2026 am Kalkulator: postgres.js serialisiert fuer eine
+  // boolean-Spalte JEDEN Nicht-`true`-Wert zu 'f'. Mit dem String 'true' war
+  // manual_added=eq.true faktisch manual_added=false - exakt die falschen Zeilen.
+  const a = uebersetze('t?manual_added=eq.true', { method: 'GET' });
+  assert.deepEqual(a.werte, [true]);
+  const b = uebersetze('t?aktiv=neq.false', { method: 'GET' });
+  assert.deepEqual(b.werte, [false]);
+  // Andere Werte bleiben Strings - der Treiber laesst PostgreSQL den Typ bestimmen.
+  const c = uebersetze('t?status=eq.truey', { method: 'GET' });
+  assert.deepEqual(c.werte, ['truey']);
+});
+
+test('offset wird bei GET übersetzt, bleibt begrenzt und ist ausserhalb von GET verboten', () => {
+  const r = uebersetze('t?a=eq.1&order=b.desc&limit=61&offset=60', { method: 'GET' });
+  assert.ok(r.sql.endsWith('ORDER BY b DESC LIMIT 61 OFFSET 60'), r.sql);
+
+  // Obergrenze: ein Ausreisser darf die Datenbank nicht ganze Tabellen durchzählen lassen.
+  assert.throws(() => uebersetze('t?offset=10001', { method: 'GET' }), /Unzulaessiges offset/);
+  assert.throws(() => uebersetze('t?offset=-1', { method: 'GET' }), /Unzulaessiges offset/);
+  assert.throws(() => uebersetze('t?offset=viele', { method: 'GET' }), /Unzulaessiges offset/);
+  // Stillschweigend fallengelassenes offset bei PATCH würde die falschen Zeilen treffen.
+  assert.throws(
+    () => uebersetze('t?a=eq.1&offset=10', { method: 'PATCH', body: '{"b":2}' }),
+    /offset ist nur bei GET erlaubt/
+  );
 });

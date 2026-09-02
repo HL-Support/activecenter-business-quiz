@@ -1,0 +1,295 @@
+=== EMAIL 34 ===
+NAME: AC Nurture - C1 - Testimonials
+SUBJECT: {contactfield=firstname}, jetzt wird's persönlich
+
+Hallo {contactfield=firstname},
+
+Zwei Teile gesehen. <strong>Jetzt kommen die echten Erfahrungen.</strong> ✨
+
+Du kennst jetzt den Aufbau. In Teil 3 siehst du, wie sich das bei echten Menschen anfühlt.
+
+In Teil 3 hörst du von Menschen, die aus ganz unterschiedlichen Situationen gestartet sind: Nebenjob, Studium, Familie, Schulden, Wunsch nach mehr Freiheit.
+
+<strong>Schau nicht nach Perfektion, sondern nach Wiedererkennung.</strong> Welche Erfahrung klingt nach deinem nächsten Schritt?
+
+👉 <strong>Klick jetzt auf Teil 3.</strong>
+
+CTA: Teil 3 - Echte Erfahrungen ansehen | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=34
+
+=== EMAIL 35 ===
+NAME: AC Nurture - C2 - Feuer
+SUBJECT: {contactfield=firstname}, jetzt brauchst du echte Menschen
+
+Hallo {contactfield=firstname},
+
+Du hast Teil 1 und Teil 2 gesehen. <strong>Jetzt kommt der Realitätscheck.</strong> 🔥
+
+Für "Feuer-Typen" zählt, was daraus wird. Du willst nicht nur wissen, ob eine Idee gut klingt. Du willst sehen, was Menschen damit machen.
+
+Teil 3 zeigt echte Erfahrungen. Unterschiedliche Lebenssituationen, verschiedene Starts, klare Ergebnisse. Nicht als Show. Als Vergleich.
+
+<strong>Achte nicht auf Perfektion.</strong> Achte darauf, bei welcher Erfahrung du denkst: "Das könnte mein nächster Schritt sein."
+
+👉 <strong>Klick jetzt auf Teil 3.</strong> Danach hast du mehr als ein Modell. Du hast echte Bezugspunkte.
+
+CTA: Teil 3 - Echte Erfahrungen ansehen | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=35
+
+=== EMAIL 36 ===
+NAME: AC Nurture - C2 - Wind
+SUBJECT: {contactfield=firstname}, schau auf die Menschen
+
+Hallo {contactfield=firstname},
+
+Du hast die Idee gesehen. Du hast den Aufbau gesehen. <strong>Jetzt fehlen die Menschen.</strong> 🤝
+
+Für "Wind-Typen" ist das oft der wichtigste Punkt. Passt die Energie? Wirkt das echt? Kann ich mir solche Menschen an meiner Seite vorstellen?
+
+Teil 3 gibt dir diesen Blick. Keine weitere Theorie. Menschen, Geschichten, echte Situationen.
+
+<strong>Du musst nicht alles bewerten.</strong> Eine einzige Geschichte, in der du dich wiedererkennst, kann reichen.
+
+👉 <strong>Klick jetzt auf Teil 3.</strong> Schau nicht nach Hochglanz. Schau nach Wiedererkennung.
+
+CTA: Teil 3 - Echte Erfahrungen ansehen | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=36
+
+=== EMAIL 37 ===
+NAME: AC Nurture - C2 - Wasser
+SUBJECT: {contactfield=firstname}, jetzt siehst du echte Starts
+
+Hallo {contactfield=firstname},
+
+Du hast zwei Teile gesehen. <strong>Jetzt darf es menschlich werden.</strong> 📋
+
+Für "Wasser-Typen" reicht die reine Logik selten aus. Du willst spüren, ob ein Weg verlässlich genug ist.
+
+Teil 3 zeigt dir Menschen, die nicht perfekt gestartet sind. Genau das macht es hilfreich. Du siehst nicht nur das Ergebnis. Du siehst auch den Weg dorthin.
+
+<strong>Für eine ruhige Entscheidung brauchst du ein vollständiges Bild.</strong> Teil 3 ist das fehlende Stück.
+
+👉 <strong>Klick jetzt auf Teil 3.</strong> Danach musst du nicht raten, wie sich dieser Weg in echt anfühlt.
+
+CTA: Teil 3 - Echte Erfahrungen ansehen | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=37
+
+=== EMAIL 38 ===
+NAME: AC Nurture - C2 - Fels
+SUBJECT: {contactfield=firstname}, passt das wirklich zu dir?
+
+Hallo {contactfield=firstname},
+
+Nach Teil 2 bleibt oft eine Frage offen. <strong>Passt das wirklich zu Menschen wie mir?</strong> 🔍
+
+Für "Fels-Typen" ist das keine Kleinigkeit. Ein Modell kann logisch wirken und trotzdem menschlich nicht passen.
+
+Teil 3 gibt dir die fehlende Prüfung. Du siehst Erfahrungen, nicht nur Behauptungen. Du erkennst, welche Art Mensch diesen Weg geht und welche Fragen unterwegs auftauchen.
+
+<strong>Es geht um Eignung.</strong> Passt dieser Weg zu dir, zu deiner Art und zu deinem Alltag?
+
+👉 <strong>Klick jetzt auf Teil 3.</strong> Danach kannst du deine Einschätzung sauberer treffen.
+
+CTA: Teil 3 - Echte Erfahrungen ansehen | {contactfield=ac_last_video_access_url}&acn_phase=C2&acn_email=38
+
+=== EMAIL 79 ===
+NAME: AC Nurture - C3 - Feuer
+SUBJECT: Video 3: vom Allgemeinen ins Konkrete
+
+Hallo {contactfield=firstname},
+
+Video 3 funktioniert anders als die ersten beiden.
+
+In Video 1 hast du gesehen, was das Modell ist. In Video 2 hast du gesehen, wie es funktioniert und was es bringt. Beides war auf der Sachebene.
+
+Video 3 stellt die Frage, die du dir längst stellst. Wie sieht das konkret bei mir aus. Mit meinem Hintergrund, meiner Zeit, meinen Umständen. <strong>Es ist der Übergang vom Allgemeinen ins Spezifische.</strong>
+
+Für Macher-Typen ist das oft der entscheidende Teil. Du lebst nicht in Theorien, sondern in Entscheidungen. Und Entscheidungen brauchen konkrete Information, keine schönen Konzepte.
+
+Zwölf Minuten. Danach hast du das Fundament für ein echtes Gespräch oder eine klare Absage. 👇
+
+CTA: Video 3 — jetzt konkret werden | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 80 ===
+NAME: AC Nurture - C3 - Wind
+SUBJECT: In Video 3 lernst du jemanden kennen
+
+Hallo {contactfield=firstname},
+
+in Video 3 lernst du jemanden kennen. Nicht von außen. Nicht über eine Folie. Direkt. Wie er redet, wie er erklärt, wie er Pausen macht.
+
+Nach 20 Minuten hast du das Gefühl, ihn länger zu kennen. Das ist kein Zufall. Das hat nichts mit Charisma-Tricks zu tun. Es hat damit zu tun, dass er erzählt, wo er hergekommen ist. Nicht, wo er jetzt steht.
+
+Für Netzwerker-Typen ist das oft der Teil, der den Unterschied macht. Du beurteilst kein Modell. <strong>Du beurteilst Menschen.</strong> Und du tust das gut.
+
+Video 3 gibt dir die Information, die in dieser Beurteilung noch fehlt. ✉️
+
+CTA: Video 3 anschauen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 81 ===
+NAME: AC Nurture - C3 - Wasser
+SUBJECT: Das persönlichste der drei Videos
+
+Hallo {contactfield=firstname},
+
+Video 3 ist das persönlichste der drei.
+
+Kein Modell. Keine Marge. Keine Zahlen. Stattdessen Menschen, die erzählen, wie es bei ihnen wirklich war. Nicht die Hochglanz-Version. Die echte. Mit den ersten Wochen Unsicherheit, mit der einen schwierigen Phase, mit den kleinen Momenten, an denen sich gezeigt hat, dass es das Richtige war.
+
+Für Anker-Typen ist das oft das wichtigste Video, auch wenn es am Anfang nicht so wirkt. Du entscheidest selten über Argumente. <strong>Du entscheidest darüber, ob ein Weg sich für dich richtig anfühlt.</strong> Und Gefühl kommt aus Geschichten, nicht aus Folien.
+
+Zwölf Minuten. Ohne Druck danach. 💡
+
+CTA: Das persönlichste Video anschauen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 82 ===
+NAME: AC Nurture - C3 - Fels
+SUBJECT: Video 3 beantwortet die Frage, die noch offen ist
+
+Hallo {contactfield=firstname},
+
+nach Video 2 bleibt für die meisten Architekten eine Frage offen. Wo ist der Haken.
+
+Wenn das so rechnet, wenn das so funktioniert, wenn die Begleitung so aussieht, warum macht das nicht jeder. Berechtigte Frage.
+
+Video 3 beantwortet sie. Offen, ohne ausweichende Marketing-Sprache. Es gibt Gründe, warum die Mehrheit das nicht macht. Es gibt Risiken. Es gibt Aufwand. Es gibt Phasen, in denen man Geduld braucht. Und es gibt Leute, für die das schlicht nicht passt.
+
+<strong>Video 3 sagt dir, wer diese Leute sind.</strong> Damit du selbst beurteilen kannst, ob du dazu gehörst.
+
+Das ist keine Verkaufsentscheidung. Das ist eine Eignungsprüfung. Zwölf Minuten. 🔎
+
+CTA: Video 3 — Fragen beantworten lassen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 83 ===
+NAME: AC Nurture - C4 - Freedom
+SUBJECT: Freiheit ist eine Entscheidung, kein Zustand
+
+Hallo {contactfield=firstname},
+
+Freiheit klingt nach einem Zustand, der irgendwann eintritt. Tut sie nicht. <strong>Sie ist eine Entscheidung.</strong> Immer wieder. Jeden Monat.
+
+Die Entscheidung besteht darin, was du gegen sie eintauschst. Sicherheit eines festen Gehalts. Vorgegebene Strukturen. Fertige Antworten. Im Tausch bekommst du etwas anderes.
+
+Video 3 zeigt, was dieses andere konkret ist. Nicht als Versprechen. Als Beschreibung. Damit du weißt, was du wählst, bevor du wählst. 👇
+
+CTA: Video 3 jetzt anschauen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 84 ===
+NAME: AC Nurture - C4 - Impact
+SUBJECT: Wirkung beginnt mit dem, was du schon hast
+
+Hallo {contactfield=firstname},
+
+Wirkung entsteht nicht, weil man sie sich vornimmt. Sie entsteht, weil man irgendwo anfängt. Mit dem, was man schon hat. Mit den Leuten, die man schon kennt. Mit dem Wissen, das man schon mitbringt.
+
+Das klingt klein. Aber jeder, der Wirkung erzielt hat, hat genau dort angefangen. Nicht später. Nicht größer. <strong>Nicht mit mehr Ressourcen.</strong>
+
+Video 3 zeigt, wie der erste Schritt konkret aussieht. Wen er trifft, was sich verändert, in welchem Tempo. 💡
+
+CTA: Video 3 anschauen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 85 ===
+NAME: AC Nurture - C4 - Security
+SUBJECT: Die Sicherheit, die niemand kündigen kann
+
+Hallo {contactfield=firstname},
+
+Sicherheit ist nicht das Geld auf dem Konto. <strong>Sicherheit ist das Wissen, dass du es wieder aufbauen könntest, wenn morgen alles weg wäre.</strong>
+
+Das ist die Form von Sicherheit, die niemand kündigen kann. Kein Arbeitgeber. Keine Krise. Kein Markt. Kein Quartalsbericht.
+
+Video 3 ist das letzte Puzzleteil dazu. Es zeigt, was du am Ende konkret in der Hand hast. Und wer dir hilft, falls einzelne Teile wackeln. 📌
+
+CTA: Video 3 — das letzte Puzzleteil | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 86 ===
+NAME: AC Nurture - C4 - Growth
+SUBJECT: Wachstum braucht eine Richtung
+
+Hallo {contactfield=firstname},
+
+Wachstum ohne Richtung ist nur Bewegung. Du kannst zehn Jahre lang täglich neue Dinge lernen und am Ende nichts gebaut haben.
+
+Das Bauen passiert, wenn die einzelnen Schritte alle in dieselbe Richtung zeigen. <strong>Wenn das, was du heute tust, das von gestern verstärkt.</strong>
+
+Video 3 zeigt diese Richtung. Konkret, in einer Form, die du auf dich übertragen kannst. 👇
+
+CTA: Video 3 jetzt anschauen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 87 ===
+NAME: AC Nurture - C5 - Check-in
+SUBJECT: Zwei von drei
+
+Hallo {contactfield=firstname},
+
+zwei Videos. Das dritte noch nicht.
+
+Ich kann mir vorstellen, was dazwischengekommen ist. Das Leben kommt immer dazwischen. Das ist normal. Ich schreibe diese Mail trotzdem, weil zwölf Minuten in einem ruhigen Moment manchmal besser passen als die Zeit für eine ganze Entscheidung.
+
+<strong>Falls heute Abend so ein Moment ist.</strong> ✉️
+
+CTA: 12 Minuten — Video 3 | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 88 ===
+NAME: AC Nurture - C6 - Letzte Einladung
+SUBJECT: Fast da
+
+Hallo {contactfield=firstname},
+
+zwei von drei. Das ist weiter, als die meisten kommen.
+
+Das dritte Video wartet. Der Link bleibt offen. <strong>Ich halte die Tür offen.</strong> Nicht, weil ich auf etwas warte. Weil es respektlos wäre, sie zuzumachen, wenn du fast da bist.
+
+Wann auch immer der richtige Moment ist. 📌
+
+CTA: Video 3 — wann du bereit bist | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 95 ===
+NAME: AC Nurture - C1 - Impact
+SUBJECT: {contactfield=firstname}, jetzt wird's persönlich
+
+Hallo {contactfield=firstname},
+
+Zwei Teile gesehen. <strong>Jetzt kommen die echten Erfahrungen.</strong> ✨
+
+Du kennst jetzt den Aufbau. In Teil 3 siehst du, wie sich das bei echten Menschen anfühlt.
+
+In Teil 3 hörst du von Menschen, die aus ganz unterschiedlichen Situationen gestartet sind: Nebenjob, Studium, Familie, Schulden, Wunsch nach mehr Freiheit.
+
+<strong>Schau nicht nach Perfektion, sondern nach Wiedererkennung.</strong> Welche Erfahrung klingt nach deinem nächsten Schritt?
+
+👉 <strong>Klick jetzt auf Teil 3.</strong>
+
+CTA: Teil 3 - Echte Erfahrungen ansehen | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=95
+
+=== EMAIL 96 ===
+NAME: AC Nurture - C1 - Security
+SUBJECT: {contactfield=firstname}, jetzt wird's persönlich
+
+Hallo {contactfield=firstname},
+
+Zwei Teile gesehen. <strong>Jetzt kommen die echten Erfahrungen.</strong> ✨
+
+Du kennst jetzt den Aufbau. In Teil 3 siehst du, wie sich das bei echten Menschen anfühlt.
+
+In Teil 3 hörst du von Menschen, die aus ganz unterschiedlichen Situationen gestartet sind: Nebenjob, Studium, Familie, Schulden, Wunsch nach mehr Freiheit.
+
+<strong>Schau nicht nach Perfektion, sondern nach Wiedererkennung.</strong> Welche Erfahrung klingt nach deinem nächsten Schritt?
+
+👉 <strong>Klick jetzt auf Teil 3.</strong>
+
+CTA: Teil 3 - Echte Erfahrungen ansehen | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=96
+
+=== EMAIL 97 ===
+NAME: AC Nurture - C1 - Growth
+SUBJECT: {contactfield=firstname}, jetzt wird's persönlich
+
+Hallo {contactfield=firstname},
+
+Zwei Teile gesehen. <strong>Jetzt kommen die echten Erfahrungen.</strong> ✨
+
+Du kennst jetzt den Aufbau. In Teil 3 siehst du, wie sich das bei echten Menschen anfühlt.
+
+In Teil 3 hörst du von Menschen, die aus ganz unterschiedlichen Situationen gestartet sind: Nebenjob, Studium, Familie, Schulden, Wunsch nach mehr Freiheit.
+
+<strong>Schau nicht nach Perfektion, sondern nach Wiedererkennung.</strong> Welche Erfahrung klingt nach deinem nächsten Schritt?
+
+👉 <strong>Klick jetzt auf Teil 3.</strong>
+
+CTA: Teil 3 - Echte Erfahrungen ansehen | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=97

@@ -1,0 +1,293 @@
+=== EMAIL 98 ===
+NAME: AC Nurture IT - A2 - Freedom
+SUBJECT: {contactfield=firstname}, il tuo Codice del Successo
+
+Ciao {contactfield=firstname},
+
+<strong>Il tuo Codice del Successo dice: Sei {contactfield=ac_last_profile_label}.</strong> 🔓
+
+Persone come te non vogliono lavorare ancora di più. Vogliono lavorare diversamente. Un modello che appartiene a loro. Che continua a funzionare anche quando non ci sono.
+
+Il tuo risultato è il punto di partenza. Nella Parte 1 vedi se questa opportunità può davvero essere adatta a te e alla prossima fase della tua vita.
+
+👉 <strong>Inizia dalla Parte 1.</strong> Dopo potrai capire meglio se questo percorso è coerente per te.
+
+CTA: Iniziare la Parte 1 | {contactfield=ac_last_video_access_url}&acn_phase=A2&acn_email=98
+
+=== EMAIL 99 ===
+NAME: AC Nurture IT - A2 - Impact
+SUBJECT: {contactfield=firstname}, il tuo Codice del Successo
+
+Ciao {contactfield=firstname},
+
+<strong>Il tuo Codice del Successo dice: Sei {contactfield=ac_last_profile_label}.</strong> 🎯
+
+Vuoi raggiungere le persone giuste. In un contesto che appartiene a te, che non ti impone come farlo.
+
+Il tuo risultato è il punto di partenza. Nella Parte 1 vedi se questa opportunità può davvero essere adatta a te e alla prossima fase della tua vita.
+
+👉 <strong>Inizia dalla Parte 1.</strong> Dopo potrai capire meglio se questo percorso è coerente per te.
+
+CTA: Iniziare la Parte 1 | {contactfield=ac_last_video_access_url}&acn_phase=A2&acn_email=99
+
+=== EMAIL 100 ===
+NAME: AC Nurture IT - A2 - Security
+SUBJECT: {contactfield=firstname}, il tuo Codice del Successo
+
+Ciao {contactfield=firstname},
+
+<strong>Il tuo Codice del Successo dice: Sei {contactfield=ac_last_profile_label}.</strong> 🏗️
+
+Rischiare tutto o non iniziare. La maggior parte vede solo queste due opzioni.
+
+Il tuo risultato è il punto di partenza. Nella Parte 1 vedi se questa opportunità può davvero essere adatta a te e alla prossima fase della tua vita.
+
+👉 <strong>Inizia dalla Parte 1.</strong> Dopo potrai capire meglio se questo percorso è coerente per te.
+
+CTA: Iniziare la Parte 1 | {contactfield=ac_last_video_access_url}&acn_phase=A2&acn_email=100
+
+=== EMAIL 101 ===
+NAME: AC Nurture IT - A2 - Growth
+SUBJECT: {contactfield=firstname}, il tuo Codice del Successo
+
+Ciao {contactfield=firstname},
+
+<strong>Il tuo Codice del Successo dice: Sei {contactfield=ac_last_profile_label}.</strong> 🌱
+
+Crescita è una parola che quasi tutti usano. Quasi nessuno la definisce. Più fatturato? Più responsabilità, che si sente uguale a quella di prima? O qualcosa di diverso: un ruolo che ti fa ancora crescere.
+
+Il tuo risultato è il punto di partenza. Nella Parte 1 vedi se questa opportunità può davvero essere adatta a te e alla prossima fase della tua vita.
+
+👉 <strong>Inizia dalla Parte 1.</strong> Dopo potrai capire meglio se questo percorso è coerente per te.
+
+CTA: Iniziare la Parte 1 | {contactfield=ac_last_video_access_url}&acn_phase=A2&acn_email=101
+
+=== EMAIL 102 ===
+NAME: AC Nurture IT - B1 - Feuer
+SUBJECT: {contactfield=firstname}, adesso diventa concreto
+
+Ciao {contactfield=firstname},
+
+Hai visto la Parte 1. <strong>Questo è più di quanto facciano la maggior parte delle persone.</strong> 🔥
+
+<strong>Markus ti ha mostrato di cosa si tratta.</strong> Perché questo è il momento giusto. La domanda alla fine rimane: Voglio avviare il cambiamento da solo o aspettare che arrivi?
+
+La Parte 1 è fatta. Adesso arriva il punto più importante: come diventa un interesse un sistema chiaro?
+
+La Parte 2 ti mostra la struttura concreta: come inizi, chi ti accompagna e come da un'esperienza personale può nascere una vera seconda base.
+
+👉 <strong>Clicca adesso sulla Parte 2.</strong> Dopo vedrai più chiaramente se questo percorso può entrare nella tua vita quotidiana.
+
+CTA: Parte 2 - Capire il sistema | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=102
+
+=== EMAIL 103 ===
+NAME: AC Nurture IT - B1 - Wind
+SUBJECT: {contactfield=firstname}, chi c'è dentro
+
+Ciao {contactfield=firstname},
+
+Hai visto la Parte 1. <strong>Bene che tu sia qui.</strong> 🤝
+
+<strong>Markus ha mostrato chi stiamo cercando.</strong> Persone che sentono: c'è ancora di più. Che vogliono avere successo in modo autentico, senza stravolgere se stesse.
+
+La Parte 1 è fatta. Adesso arriva il punto più importante: come diventa un interesse un sistema chiaro?
+
+La Parte 2 ti mostra la struttura concreta: come inizi, chi ti accompagna e come da un'esperienza personale può nascere una vera seconda base.
+
+👉 <strong>Clicca adesso sulla Parte 2.</strong> Dopo vedrai più chiaramente se questo percorso può entrare nella tua vita quotidiana.
+
+CTA: Parte 2 - Capire il sistema | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=103
+
+=== EMAIL 104 ===
+NAME: AC Nurture IT - B1 - Wasser
+SUBJECT: {contactfield=firstname}, il piano dietro
+
+Ciao {contactfield=firstname},
+
+Hai visto la Parte 1. <strong>Bello che ti stia prendendo il tempo.</strong> 📋
+
+<strong>Nella prima parte hai visto il quadro generale.</strong> Di cosa si tratta, perché è rilevante adesso. Ma un'immagine non è ancora un piano.
+
+La Parte 1 è fatta. Adesso arriva il punto più importante: come diventa un interesse un sistema chiaro?
+
+La Parte 2 ti mostra la struttura concreta: come inizi, chi ti accompagna e come da un'esperienza personale può nascere una vera seconda base.
+
+👉 <strong>Clicca adesso sulla Parte 2.</strong> Dopo vedrai più chiaramente se questo percorso può entrare nella tua vita quotidiana.
+
+CTA: Parte 2 - Capire il sistema | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=104
+
+=== EMAIL 105 ===
+NAME: AC Nurture IT - B1 - Fels
+SUBJECT: {contactfield=firstname}, il meccanismo
+
+Ciao {contactfield=firstname},
+
+Hai visto la Parte 1. <strong>Il modello sembra logico.</strong> 🔍
+
+<strong>Nella prima parte hai visto il Cosa.</strong> Probabilmente hai già la prossima domanda. Come funziona esattamente?
+
+La Parte 1 è fatta. Adesso arriva il punto più importante: come diventa un interesse un sistema chiaro?
+
+La Parte 2 ti mostra la struttura concreta: come inizi, chi ti accompagna e come da un'esperienza personale può nascere una vera seconda base.
+
+👉 <strong>Clicca adesso sulla Parte 2.</strong> Dopo vedrai più chiaramente se questo percorso può entrare nella tua vita quotidiana.
+
+CTA: Parte 2 - Capire il sistema | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=105
+
+=== EMAIL 106 ===
+NAME: AC Nurture IT - C1 - Freedom
+SUBJECT: {contactfield=firstname}, adesso diventa personale
+
+Ciao {contactfield=firstname},
+
+Hai visto le prime due parti. <strong>Adesso arrivano le esperienze reali.</strong> ✨
+
+Ora conosci la struttura. Nella Parte 3 vedi come si sente tutto questo nella vita di persone reali.
+
+Nella Parte 3 ascolti persone partite da situazioni molto diverse: un secondo lavoro, lo studio, la famiglia, i debiti, il desiderio di più libertà.
+
+<strong>Non cercare la perfezione, cerca il riconoscimento.</strong> Quale esperienza assomiglia al tuo prossimo passo?
+
+👉 <strong>Clicca adesso sulla Parte 3.</strong>
+
+CTA: Parte 3 - Guardare esperienze reali | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=106
+
+=== EMAIL 107 ===
+NAME: AC Nurture IT - C1 - Impact
+SUBJECT: {contactfield=firstname}, adesso diventa personale
+
+Ciao {contactfield=firstname},
+
+Hai visto le prime due parti. <strong>Adesso arrivano le esperienze reali.</strong> ✨
+
+Ora conosci la struttura. Nella Parte 3 vedi come si sente tutto questo nella vita di persone reali.
+
+Nella Parte 3 ascolti persone partite da situazioni molto diverse: un secondo lavoro, lo studio, la famiglia, i debiti, il desiderio di più libertà.
+
+<strong>Non cercare la perfezione, cerca il riconoscimento.</strong> Quale esperienza assomiglia al tuo prossimo passo?
+
+👉 <strong>Clicca adesso sulla Parte 3.</strong>
+
+CTA: Parte 3 - Guardare esperienze reali | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=107
+
+=== EMAIL 108 ===
+NAME: AC Nurture IT - C1 - Security
+SUBJECT: {contactfield=firstname}, adesso diventa personale
+
+Ciao {contactfield=firstname},
+
+Hai visto le prime due parti. <strong>Adesso arrivano le esperienze reali.</strong> ✨
+
+Ora conosci la struttura. Nella Parte 3 vedi come si sente tutto questo nella vita di persone reali.
+
+Nella Parte 3 ascolti persone partite da situazioni molto diverse: un secondo lavoro, lo studio, la famiglia, i debiti, il desiderio di più libertà.
+
+<strong>Non cercare la perfezione, cerca il riconoscimento.</strong> Quale esperienza assomiglia al tuo prossimo passo?
+
+👉 <strong>Clicca adesso sulla Parte 3.</strong>
+
+CTA: Parte 3 - Guardare esperienze reali | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=108
+
+=== EMAIL 109 ===
+NAME: AC Nurture IT - C1 - Growth
+SUBJECT: {contactfield=firstname}, adesso diventa personale
+
+Ciao {contactfield=firstname},
+
+Hai visto le prime due parti. <strong>Adesso arrivano le esperienze reali.</strong> ✨
+
+Ora conosci la struttura. Nella Parte 3 vedi come si sente tutto questo nella vita di persone reali.
+
+Nella Parte 3 ascolti persone partite da situazioni molto diverse: un secondo lavoro, lo studio, la famiglia, i debiti, il desiderio di più libertà.
+
+<strong>Non cercare la perfezione, cerca il riconoscimento.</strong> Quale esperienza assomiglia al tuo prossimo passo?
+
+👉 <strong>Clicca adesso sulla Parte 3.</strong>
+
+CTA: Parte 3 - Guardare esperienze reali | {contactfield=ac_last_video_access_url}&acn_phase=C1&acn_email=109
+
+=== EMAIL 110 ===
+NAME: AC Nurture IT - D1 - Freedom
+SUBJECT: {contactfield=firstname}, hai visto tutto adesso
+
+Hallo {contactfield=firstname},
+
+<strong>Tre video. Un'idea.</strong> 🔓 Un'immagine concreta di come potrebbe essere la tua vita quando la sveglia non decide più quando inizia la tua giornata.
+
+<strong>La libertà non inizia il giorno in cui dai le dimissioni.</strong> Inizia il giorno in cui prendi una decisione e parli con qualcuno che conosce già la strada.
+
+<strong>Esattamente questa persona è {contactfield=ac_berater_vorname}.</strong>
+
+Un colloquio in cui scopri se questo fa per te e {contactfield=ac_berater_vorname} scopre se può accompagnarti su questo percorso.
+
+Forse hai già risposto direttamente a {contactfield=ac_berater_vorname}, con un messaggio o al telefono. Allora va benissimo, ignora questa email.
+
+Se non l'hai fatto: informa {contactfield=ac_berater_vorname} con un clic a che punto sei. <strong>Ti sembra interessante? O per ora no?</strong> Entrambe le risposte vanno bene.
+
+CTA: Fai sapere a {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=110
+
+=== EMAIL 111 ===
+NAME: AC Nurture IT - D1 - Impact
+SUBJECT: {contactfield=firstname}, quello che sai adesso
+
+Hallo {contactfield=firstname},
+
+<strong>Hai visto tutte e tre le parti.</strong> 🎯 Da qualche parte dentro di te è rimasta una frase che non ti lascia più.
+
+<strong>L'impatto non nasce da quello che fai. Ma dalla persona che diventi nel farlo.</strong>
+
+Questo è il punto in cui questo modello smette di essere "un'attività". Costruisci una posizione da cui le altre persone guardano diversamente alla propria vita. Perché tu guardi diversamente alla tua.
+
+Esattamente di questo parli nel primo colloquio con {contactfield=ac_berater_vorname}. Non di piani, pacchetti, strutture. Di una domanda: <strong>Dove vuoi essere tra due anni? E a chi vuoi avere qualcosa da dire allora?</strong> 📌
+
+30 minuti. Esci con la certezza che questa è la tua strada. O con la certezza che non fa per te al momento.
+
+Forse hai già risposto direttamente a {contactfield=ac_berater_vorname}, con un messaggio o al telefono. Allora va benissimo, ignora questa email.
+
+Se non l'hai fatto: informa {contactfield=ac_berater_vorname} con un clic a che punto sei. <strong>Ti sembra interessante? O per ora no?</strong> Entrambe le risposte vanno bene.
+
+CTA: Fai sapere a {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=111
+
+=== EMAIL 112 ===
+NAME: AC Nurture IT - D1 - Security
+SUBJECT: {contactfield=firstname}, la sicurezza inizia con la chiarezza
+
+Hallo {contactfield=firstname},
+
+<strong>Ci sono due tipi di sicurezza.</strong> 🏗️
+
+Uno viene dall'esterno. Una busta paga che mostra ogni mese la stessa cifra. Pianificabile, dipendente da una decisione che non prendi tu.
+
+<strong>L'altro viene dall'interno. Questa sicurezza non te la può togliere nessuno.</strong>
+
+Nelle tre parti hai visto come funziona questo modello. Numeri. Strutture. Persone che l'hanno fatto. <strong>Hai visto abbastanza per sapere che è reale.</strong>
+
+Quello che manca adesso non è un altro video. È un colloquio in cui guardi alla tua situazione. Il tuo background, i tuoi impegni. Come sarebbe concretamente la strada per TE.
+
+Esattamente questo fa {contactfield=ac_berater_vorname} nel primo colloquio. Ascolta, chiede, ti dice onestamente se vede una strada. 🔎
+
+Forse hai già risposto direttamente a {contactfield=ac_berater_vorname}, con un messaggio o al telefono. Allora va benissimo, ignora questa email.
+
+Se non l'hai fatto: informa {contactfield=ac_berater_vorname} con un clic a che punto sei. <strong>Ti sembra interessante? O per ora no?</strong> Entrambe le risposte vanno bene.
+
+CTA: Fai sapere a {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=112
+
+=== EMAIL 113 ===
+NAME: AC Nurture IT - D1 - Growth
+SUBJECT: {contactfield=firstname}, non sei qui per caso
+
+Hallo {contactfield=firstname},
+
+<strong>Tre parti. Guardate per intero.</strong> 🌱 Lo fanno in pochi.
+
+<strong>La crescita è una decisione che prendi nel momento in cui diventa difficile.</strong> Esattamente questo momento è adesso.
+
+Sei a un punto in cui non ti chiedi più se è possibile qualcosa di più. Lo sai già. Lo senti la mattina. E la sera, quando ti chiedi se era davvero tutto.
+
+Nel colloquio con {contactfield=ac_berater_vorname} si tratta di guardare insieme al prossimo passo concreto per te. Cosa prima, cosa dopo, dove stanno i tuoi punti di forza. 💡
+
+Forse hai già risposto direttamente a {contactfield=ac_berater_vorname}, con un messaggio o al telefono. Allora va benissimo, ignora questa email.
+
+Se non l'hai fatto: informa {contactfield=ac_berater_vorname} con un clic a che punto sei. <strong>Ti sembra interessante? O per ora no?</strong> Entrambe le risposte vanno bene.
+
+CTA: Fai sapere a {contactfield=ac_berater_vorname} | {contactfield=ac_last_video_access_url}&acn_phase=D1&acn_email=113

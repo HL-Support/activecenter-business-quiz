@@ -27,6 +27,9 @@ import {
   getOptinPreviewVariant,
   isLeadSystemV2Active,
   deriveQuizBarrier,
+  getEmailReputationDecision,
+  persistPendingEmailCorrection,
+  confirmEmailCorrection,
 } from '../lib/core.js';
 
 const VIDEO_FULL_COMPLETION_KEY_PREFIX = 'acVideoFullCompletion_';
@@ -431,25 +434,60 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
     [s, d] = React.useState(''),
     [g, y] = React.useState(!1),
     [S, k] = React.useState(''),
+    [emailCorrection, setEmailCorrection] = React.useState(null),
     submitLock = React.useRef(!1),
     I = e?.accentColor || '#C9A84C',
     f = s.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/),
     c = i.trim().length > 0 && f && !S,
     m = (C) => {
       d(C);
+      setEmailCorrection(null);
       if (S) k('');
     },
-    v = async () => {
+    v = async (emailOverride = '', confirmationChoice = '') => {
       if (submitLock.current || g) return;
-      if (!i.trim() || !s.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      const emailValue = typeof emailOverride === 'string' && emailOverride ? emailOverride : s;
+      if (!i.trim() || !emailValue.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
         k(a('optin_email_error_format'));
         return;
       }
       submitLock.current = !0;
       y(!0);
       const C = i.trim(),
-        z = s.trim();
+        z = emailValue.trim();
       try {
+        const leadRun = getActiveLeadRun(n || 'default');
+        if (confirmationChoice) {
+          const confirmed = await confirmEmailCorrection({
+            consumerRef: leadRun?.lead_hash || '',
+            confirmation: confirmationChoice,
+          });
+          if (!confirmed) throw new Error('email_confirmation_pending');
+        } else {
+          const reputation = await getEmailReputationDecision(z, leadRun?.lead_hash || '');
+          if (reputation.action === 'reject_invalid') {
+            k(a('optin_email_error_invalid'));
+            submitLock.current = !1;
+            y(!1);
+            return;
+          }
+          if (reputation.action === 'request_correction' && reputation.suggested_email) {
+            const persisted = await persistPendingEmailCorrection({
+              firstName: C,
+              email: z,
+              selectedAnswers: t,
+              profile: e,
+              aspiration: r,
+            });
+            if (!persisted) throw new Error('pending_lead_persist_failed');
+            setEmailCorrection(reputation);
+            submitLock.current = !1;
+            y(!1);
+            return;
+          }
+        }
+        setEmailCorrection(null);
+        d(z);
         Dt('form_submit', {
           form_first_name: C,
           form_email: z,
@@ -770,6 +808,57 @@ function OptinStep({ profile: e, answers: t, berater: n, aspiration: r, visible:
                 },
                 '\u26A0\uFE0F ',
                 S
+              ),
+            emailCorrection &&
+              React.createElement(
+                'div',
+                {
+                  style: {
+                    marginTop: '10px',
+                    padding: '13px',
+                    borderRadius: '12px',
+                    border: `1px solid ${I}66`,
+                    background: `${I}12`,
+                  },
+                },
+                React.createElement(
+                  'p',
+                  { style: { color: '#F5F0E8', fontSize: '13px', margin: '0 0 10px' } },
+                  a('optin_email_suggestion').replace('{email}', emailCorrection.suggested_email)
+                ),
+                React.createElement(
+                  'div',
+                  { style: { display: 'flex', gap: '8px', flexWrap: 'wrap' } },
+                  React.createElement(
+                    'button',
+                    {
+                      type: 'button',
+                      onClick: () => v(emailCorrection.suggested_email, 'suggestion'),
+                      style: In(I, '#0A0A0A', { padding: '10px 13px', fontSize: '12px' }),
+                    },
+                    a('optin_email_use_suggestion')
+                  ),
+                  React.createElement(
+                    'button',
+                    {
+                      type: 'button',
+                      onClick: () => v(s, 'original'),
+                      style: Su({ padding: '10px 13px', fontSize: '12px' }),
+                    },
+                    a('optin_email_keep_original')
+                  )
+                ),
+                React.createElement(
+                  'p',
+                  {
+                    style: {
+                      color: 'rgba(245,240,232,0.52)',
+                      fontSize: '11px',
+                      margin: '9px 0 0',
+                    },
+                  },
+                  a('optin_email_lead_saved')
+                )
               )
           ),
           // A/B optin_phone_v1, Variante B: optionale Mobilnummer.
@@ -1020,7 +1109,6 @@ function VideoStep({
           React.createElement('iframe', {
             id: T,
             src: `https://player.mediadelivery.net/embed/${u.lib}/${u.id}?autoplay=true&loop=false&muted=false&preload=true&responsive=true&cacheBust=${c}`,
-            loading: 'lazy',
             style: {
               border: '0',
               position: 'absolute',
@@ -1500,6 +1588,7 @@ function QuickWhatsAppLink() {
   return React.createElement(
     'div',
     {
+      id: 'acQuickContact',
       style: {
         position: 'fixed',
         bottom: 0,
@@ -1613,10 +1702,18 @@ function QuizFlow() {
         setResumeStartPercent(0);
         setResumeVideoStep(0);
         t('final');
-      } else {
+      } else if (resumeProfileCode && profiles[resumeProfileCode]) {
         setResumeStartPercent(0);
         setResumeVideoStep(0);
         t('result');
+      } else {
+        // Datensatz ohne (gueltigen) Profilcode: die Ergebnisseite rendert nur
+        // mit Profil - ohne Guard fiele der Resume bis zu Quizfrage 1 durch.
+        // Dann lieber direkt auf die Videos.
+        m(1);
+        setResumeVideoStep(1);
+        setResumeStartPercent(0);
+        t('videos');
       }
     }
   }, [profiles, videoSteps]);
@@ -1630,6 +1727,52 @@ function QuizFlow() {
       question_viewed_at: new Date().toISOString(),
     });
   }, [e, n, questions]);
+  React.useEffect(() => {
+    // Die Steps wechseln ohne Navigation; ohne Reset erbt jede Seite den
+    // Scroll-Offset der vorigen (Optin unten abgesendet -> Ergebnis mittig,
+    // Ergebnis unten geklickt -> Videoseite unterhalb des Players).
+    window.scrollTo(0, 0);
+  }, [e, n, c]);
+  React.useEffect(() => {
+    // Macht das Leck Optin -> Video trennbar: "Ergebnisseite nie gesehen"
+    // vs. "gesehen, aber CTA nicht geklickt" (Plan AP6, analog optin_viewed).
+    if (e !== 'result' || !g) return;
+    Dt('result_viewed', {
+      quiz_profile: g?.code || '',
+      quiz_profile_name: g?.name || '',
+      quiz_aspiration: h,
+      main_aspiration: h,
+      main_aspiration_label: getAspirationLabel(h),
+      result_viewed_at: new Date().toISOString(),
+    });
+  }, [e]);
+  const dockAnchorRef = React.useRef(null),
+    [ctaDocked, setCtaDocked] = React.useState(false);
+  React.useEffect(() => {
+    // Sticky-Dock-CTA der Ergebnisseite: schwebt als Footer, bis die natuerliche
+    // Button-Position (Anker am Seitenende) in den sichtbaren Bereich kommt -
+    // dort dockt er an, damit es nie zwei Buttons gleichzeitig gibt.
+    if (e !== 'result') return;
+    const anchor = dockAnchorRef.current;
+    if (!anchor || typeof window.IntersectionObserver !== 'function') {
+      setCtaDocked(true);
+      return;
+    }
+    setCtaDocked(false);
+    const io = new window.IntersectionObserver(([entry]) => setCtaDocked(entry.isIntersecting), {
+      rootMargin: '0px 0px -80px 0px',
+    });
+    io.observe(anchor);
+    return () => io.disconnect();
+  }, [e]);
+  React.useEffect(() => {
+    // Der globale WhatsApp-Footer (QuickWhatsAppLink) liegt ebenfalls fixed am
+    // unteren Rand und wuerde die Klicks auf den schwebenden CTA abfangen -
+    // solange der CTA schwebt, weicht der Footer; angedockt kommt er zurueck.
+    const bar = document.getElementById('acQuickContact');
+    if (!bar) return;
+    bar.style.display = e === 'result' && !ctaDocked ? 'none' : '';
+  }, [e, ctaDocked]);
   const v = (L) => {
       (d(!1),
         setTimeout(() => {
@@ -1953,7 +2096,33 @@ function QuizFlow() {
           label: a('result_snapshot_access_label'),
           value: a('result_snapshot_access_text'),
         },
-      ];
+      ],
+      resultCta = (extraStyle) =>
+        React.createElement(
+          'button',
+          {
+            onClick: () => {
+              Dt('result_cta_click', {
+                quiz_profile: g?.code || '',
+                quiz_profile_name: g?.name || '',
+                quiz_aspiration: h,
+                main_aspiration: h,
+                main_aspiration_label: getAspirationLabel(h),
+                result_cta_clicked_at: new Date().toISOString(),
+              });
+              v(() => t('videos'));
+            },
+            style: In(g.accentColor, '#0A0A0A', { width: '100%', ...extraStyle }),
+          },
+          a('result_cta_btn')
+        ),
+      waCoach = getCoachFromStorage(),
+      waUrl =
+        waCoach && waCoach.phone
+          ? `https://wa.me/${waCoach.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+              `${a('quicklink_whatsapp_prefix')}${waCoach.first_name || waCoach.full_name || 'Coach'}${a('quicklink_whatsapp_suffix')}`
+            )}`
+          : '';
     return React.createElement(
       'div',
       { style: at },
@@ -2318,28 +2487,64 @@ function QuizFlow() {
               flexDirection: 'column',
               gap: '11px',
               alignItems: 'center',
+              paddingBottom: ctaDocked ? 0 : '84px',
             },
           },
           React.createElement(
-            'button',
-            {
-              onClick: () => {
-                Dt('result_cta_click', {
-                  quiz_profile: g?.code || '',
-                  quiz_profile_name: g?.name || '',
-                  quiz_aspiration: h,
-                  main_aspiration: h,
-                  main_aspiration_label: getAspirationLabel(h),
-                  result_cta_clicked_at: new Date().toISOString(),
-                });
-                v(() => t('videos'));
-              },
-              style: In(g.accentColor, '#0A0A0A', { width: '100%' }),
-            },
-            a('result_cta_btn')
+            'div',
+            { ref: dockAnchorRef, style: { width: '100%', minHeight: '56px' } },
+            ctaDocked ? resultCta({ padding: '15px 22px' }) : null
           )
         )
-      )
+      ),
+      !ctaDocked &&
+        React.createElement(
+          'div',
+          {
+            style: {
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 40,
+              background: 'linear-gradient(to top, rgba(7,11,20,0.95), transparent)',
+              backdropFilter: 'blur(10px)',
+              padding: '10px 16px calc(12px + env(safe-area-inset-bottom, 0px))',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'stretch',
+              gap: '10px',
+            },
+          },
+          waUrl &&
+            React.createElement(
+              'a',
+              {
+                href: waUrl,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                'aria-label': 'WhatsApp',
+                style: {
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '52px',
+                  minWidth: '52px',
+                  borderRadius: '100px',
+                  background: 'linear-gradient(135deg, #25D366, #25D366CC)',
+                  textDecoration: 'none',
+                },
+              },
+              React.createElement(
+                'svg',
+                { viewBox: '0 0 32 32', width: '26', height: '26', fill: '#fff', 'aria-hidden': true },
+                React.createElement('path', {
+                  d: 'M16 .667C7.54.667.667 7.54.667 16c0 2.706.707 5.353 2.049 7.68L.667 31.333l7.84-2.014A15.27 15.27 0 0 0 16 31.333c8.46 0 15.333-6.873 15.333-15.333S24.46.667 16 .667zm0 28.11a12.73 12.73 0 0 1-6.494-1.777l-.466-.277-4.653 1.196 1.242-4.537-.305-.482A12.71 12.71 0 0 1 3.222 16C3.222 8.953 8.953 3.222 16 3.222S28.778 8.953 28.778 16 23.047 28.778 16 28.778zm7.01-9.559c-.384-.192-2.271-1.12-2.623-1.249-.352-.128-.608-.192-.864.192-.256.384-.992 1.249-1.216 1.505-.224.256-.448.288-.832.096-.384-.192-1.621-.597-3.088-1.905-1.141-1.018-1.912-2.275-2.136-2.659-.224-.384-.024-.591.168-.783.173-.172.384-.448.576-.672.192-.224.256-.384.384-.64.128-.256.064-.48-.032-.672-.096-.192-.864-2.082-1.184-2.85-.312-.75-.629-.648-.864-.66l-.736-.013c-.256 0-.672.096-1.024.48-.352.384-1.344 1.313-1.344 3.202s1.376 3.714 1.568 3.97c.192.256 2.708 4.134 6.561 5.797.917.396 1.632.632 2.19.809.92.293 1.757.251 2.419.152.738-.11 2.271-.928 2.591-1.825.32-.896.32-1.664.224-1.825-.096-.16-.352-.256-.736-.448z',
+                })
+              )
+            ),
+          resultCta({ maxWidth: '560px', padding: '13px 22px', fontSize: '14px' })
+        )
     );
   }
   if (e === 'aspiration-confirm') {

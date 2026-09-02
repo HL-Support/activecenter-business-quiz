@@ -52,6 +52,12 @@ test('every documented bridge action still has a handler branch', () => {
 test('frontend bridge actions are documented', () => {
   const files = ['ac-track.js', 'src/ac-track.js', 'src/lib/core.js', 'src/app/bootstrap.js', 'src/app/App.jsx'];
   const discovered = new Set();
+  const centralDecisionActions = new Set([
+    'accept',
+    'accept_pending',
+    'request_correction',
+    'reject_invalid',
+  ]);
   const actionPattern = /action\s*:\s*['"]([a-z0-9_]+)['"]/g;
 
   for (const relativePath of files) {
@@ -60,6 +66,7 @@ test('frontend bridge actions are documented', () => {
   }
 
   for (const action of discovered) {
+    if (centralDecisionActions.has(action)) continue;
     assert.ok(contracts[action], `Undocumented frontend bridge action: ${action}`);
   }
 });

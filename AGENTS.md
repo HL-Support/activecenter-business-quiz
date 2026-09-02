@@ -8,15 +8,15 @@ der Fortsetzungsplan. Wer hier weiterarbeitet, faengt dort an.
 
 ## Shared Operating Layer
 
-- Read `D:\OneDrive\Antigravity Laptop\agent-core\governance\GOVERNANCE_RULES.json` before substantial work.
-- Use direct brain helpers from `D:\OneDrive\Antigravity Laptop\agent-core\scripts\direct-api-helpers.ps1`.
+- Read `D:\Antigravity_Projects\agent-core\governance\GOVERNANCE_RULES.json` before substantial work.
+- Use direct brain helpers from `D:\Antigravity_Projects\agent-core\scripts\direct-api-helpers.ps1`.
 - Session start:
   ```powershell
-  . "D:\OneDrive\Antigravity Laptop\agent-core\scripts\direct-api-helpers.ps1"
+  . "D:\Antigravity_Projects\agent-core\scripts\direct-api-helpers.ps1"
   Read-Memory -Query "business leads quiz aktuelle entscheidungen status"
   ```
 - Use `Query-KnowledgeBase` for AnythingLLM and `Save-Memory -Tier PROJECT` for durable project updates.
-- Before commits, pushes, branch cleanup, worktree cleanup, or deploys follow `D:\OneDrive\Antigravity Laptop\activecenter-web\.agents\skills\git-deploy-safety\SKILL.md`.
+- Before commits, pushes, branch cleanup, worktree cleanup, or deploys follow `D:\Antigravity_Projects\activecenter-web\.agents\skills\git-deploy-safety\SKILL.md`.
 - Safety project key: `business_leads_quiz`.
 - Required root checks:
   ```bash
@@ -88,14 +88,14 @@ der Fortsetzungsplan. Wer hier weiterarbeitet, faengt dort an.
 
 ## Kritische Dateien
 
-- [index.html](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/index.html)
-- [src/app.entry.js](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/src/app.entry.js)
-- [translations.js](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/translations.js)
-- [video-config.js](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/video-config.js)
-- [src/app/App.jsx](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/src/app/App.jsx)
-- [src/app/bootstrap.js](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/src/app/bootstrap.js)
-- [src/lib/core.js](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/src/lib/core.js)
-- [dist/assets/app.js](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/dist/assets/app.js)
-- [ac-track.js](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/ac-track.js)
-- [api/bridge.js](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/api/bridge.js)
-- [api/validate-email.js](D:/OneDrive/Antigravity Laptop/activecenter-web/business_leads_quiz/api/validate-email.js)
+- [index.html](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/index.html)
+- [src/app.entry.js](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/src/app.entry.js)
+- [translations.js](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/translations.js)
+- [video-config.js](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/video-config.js)
+- [src/app/App.jsx](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/src/app/App.jsx)
+- [src/app/bootstrap.js](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/src/app/bootstrap.js)
+- [src/lib/core.js](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/src/lib/core.js)
+- [dist/assets/app.js](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/dist/assets/app.js)
+- [ac-track.js](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/ac-track.js)
+- [api/bridge.js](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/api/bridge.js)
+- [api/validate-email.js](D:\Antigravity_Projects/activecenter-web/business_leads_quiz/api/validate-email.js)

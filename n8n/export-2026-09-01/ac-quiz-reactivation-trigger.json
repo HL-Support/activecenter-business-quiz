@@ -1,0 +1,622 @@
+{
+  "updatedAt": "2026-05-14T20:17:59.437Z",
+  "createdAt": "2026-05-14T19:43:05.020Z",
+  "id": "XfefeLNF1DYJPGc8",
+  "name": "AC - Quiz Reactivation Trigger",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mautic-evergreen-link-clicked",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-mautic-click",
+      "name": "Webhook - Mautic Event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "quiz-reactivation-trigger-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst body = $json.body || $json;\n\n// Handle mautic.email_on_open webhook format:\n// {\"mautic.email_on_open\": [{..., \"lead\": {\"id\": 123, ...}}, ...]}\n// Also handle legacy custom format: {contact_id: \"...\", ...}\n\nlet contactId = null;\n\n// Mautic email_on_open payload\nconst openEvents = body['mautic.email_on_open'];\nif (Array.isArray(openEvents) && openEvents.length > 0) {\n  const event = openEvents[0];\n  const lead = event.lead || event.contact || {};\n  contactId = String(lead.id || lead.mauticContactId || '').trim();\n}\n\n// Fallback: legacy custom format\nif (!contactId) {\n  contactId = String(body.contact_id || body.mautic_contact_id || '').trim();\n}\n\nif (!contactId) {\n  return [{ json: { skip: true, reason: 'no contact_id in payload' } }];\n}\n\nreturn [{ json: { contactId, skip: false } }];\n"
+      },
+      "id": "code-parse-mautic-click",
+      "name": "Code - Parse Mautic Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "if-skip",
+      "name": "IF - Skip Invalid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $json.contactId + '?includeCustomObjects=false' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "mautic-get-contact",
+      "name": "Mautic - Get Contact + Segments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// After fetching contact, check if they are in segment 16 (ac-nurture-evergreen)\nconst contactData = $json.contact || $json;\nconst fields = contactData.fields?.all || {};\n\n// Check nurture_stopped\nconst nurtureStoppedRaw = fields.ac_nurture_stopped;\nif (nurtureStoppedRaw === true || nurtureStoppedRaw === 1 || nurtureStoppedRaw === '1') {\n  return [{ json: { skip: true, reason: 'nurture_stopped' } }];\n}\n\n// Get the contact's segment memberships\n// We'll check via the lists property if available\nconst lists = contactData.lists || {};\nconst inEvergreen = Object.values(lists).some(l => l.alias === 'ac-nurture-evergreen');\n\nif (!inEvergreen) {\n  return [{ json: { skip: true, reason: 'not in evergreen segment' } }];\n}\n\nreturn [{\n  json: {\n    skip: false,\n    mauticContactId: contactData.id,\n    contactId: $('Code - Parse Mautic Event').item.json.contactId\n  }\n}];\n"
+      },
+      "id": "code-check-segment",
+      "name": "Code - Check Evergreen Segment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "if-skip-2",
+      "name": "IF - Skip if Not Evergreen",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://mautic.hl-support.biz/api/segments/ac-nurture-reactivation/contact/' + $json.mauticContactId + '/add' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "mautic-add-reactivation",
+      "name": "Mautic - Add to Reactivation Segment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://mautic.hl-support.biz/api/segments/ac-nurture-evergreen/contact/' + $('Code - Check Evergreen Segment').item.json.mauticContactId + '/remove' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "mautic-remove-evergreen",
+      "name": "Mautic - Remove from Evergreen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Rt7PRC4IRSrjNt2L",
+          "name": "Mautic Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": true }",
+        "options": {}
+      },
+      "id": "respond-ok",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Mautic Event": {
+      "main": [
+        [
+          {
+            "node": "Code - Parse Mautic Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Parse Mautic Event": {
+      "main": [
+        [
+          {
+            "node": "IF - Skip Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Skip Invalid": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Mautic - Get Contact + Segments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Get Contact + Segments": {
+      "main": [
+        [
+          {
+            "node": "Code - Check Evergreen Segment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Check Evergreen Segment": {
+      "main": [
+        [
+          {
+            "node": "IF - Skip if Not Evergreen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Skip if Not Evergreen": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Mautic - Add to Reactivation Segment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Add to Reactivation Segment": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Remove from Evergreen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Remove from Evergreen": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "ca46331d-6444-4fd7-9c5b-038be0ebe840",
+  "activeVersionId": "ca46331d-6444-4fd7-9c5b-038be0ebe840",
+  "versionCounter": 9,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-05-14T19:43:05.020Z",
+      "createdAt": "2026-05-14T19:43:05.020Z",
+      "role": "workflow:owner",
+      "workflowId": "XfefeLNF1DYJPGc8",
+      "projectId": "ROWWTo0FQLcxZajT",
+      "project": {
+        "updatedAt": "2026-03-21T16:42:22.082Z",
+        "createdAt": "2025-12-09T17:32:24.857Z",
+        "id": "ROWWTo0FQLcxZajT",
+        "name": "Unnamed Project",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-14T20:17:59.438Z",
+    "createdAt": "2026-05-14T20:17:59.438Z",
+    "versionId": "ca46331d-6444-4fd7-9c5b-038be0ebe840",
+    "workflowId": "XfefeLNF1DYJPGc8",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "mautic-evergreen-link-clicked",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "webhook-mautic-click",
+        "name": "Webhook - Mautic Event",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "quiz-reactivation-trigger-001"
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst body = $json.body || $json;\n\n// Handle mautic.email_on_open webhook format:\n// {\"mautic.email_on_open\": [{..., \"lead\": {\"id\": 123, ...}}, ...]}\n// Also handle legacy custom format: {contact_id: \"...\", ...}\n\nlet contactId = null;\n\n// Mautic email_on_open payload\nconst openEvents = body['mautic.email_on_open'];\nif (Array.isArray(openEvents) && openEvents.length > 0) {\n  const event = openEvents[0];\n  const lead = event.lead || event.contact || {};\n  contactId = String(lead.id || lead.mauticContactId || '').trim();\n}\n\n// Fallback: legacy custom format\nif (!contactId) {\n  contactId = String(body.contact_id || body.mautic_contact_id || '').trim();\n}\n\nif (!contactId) {\n  return [{ json: { skip: true, reason: 'no contact_id in payload' } }];\n}\n\nreturn [{ json: { contactId, skip: false } }];\n"
+        },
+        "id": "code-parse-mautic-click",
+        "name": "Code - Parse Mautic Event",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.skip }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ]
+          }
+        },
+        "id": "if-skip",
+        "name": "IF - Skip Invalid",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          480,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $json.contactId + '?includeCustomObjects=false' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "options": {}
+        },
+        "id": "mautic-get-contact",
+        "name": "Mautic - Get Contact + Segments",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          720,
+          0
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "\n// After fetching contact, check if they are in segment 16 (ac-nurture-evergreen)\nconst contactData = $json.contact || $json;\nconst fields = contactData.fields?.all || {};\n\n// Check nurture_stopped\nconst nurtureStoppedRaw = fields.ac_nurture_stopped;\nif (nurtureStoppedRaw === true || nurtureStoppedRaw === 1 || nurtureStoppedRaw === '1') {\n  return [{ json: { skip: true, reason: 'nurture_stopped' } }];\n}\n\n// Get the contact's segment memberships\n// We'll check via the lists property if available\nconst lists = contactData.lists || {};\nconst inEvergreen = Object.values(lists).some(l => l.alias === 'ac-nurture-evergreen');\n\nif (!inEvergreen) {\n  return [{ json: { skip: true, reason: 'not in evergreen segment' } }];\n}\n\nreturn [{\n  json: {\n    skip: false,\n    mauticContactId: contactData.id,\n    contactId: $('Code - Parse Mautic Event').item.json.contactId\n  }\n}];\n"
+        },
+        "id": "code-check-segment",
+        "name": "Code - Check Evergreen Segment",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          960,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.skip }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ]
+          }
+        },
+        "id": "if-skip-2",
+        "name": "IF - Skip if Not Evergreen",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1200,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://mautic.hl-support.biz/api/segments/ac-nurture-reactivation/contact/' + $json.mauticContactId + '/add' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "options": {}
+        },
+        "id": "mautic-add-reactivation",
+        "name": "Mautic - Add to Reactivation Segment",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1440,
+          0
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://mautic.hl-support.biz/api/segments/ac-nurture-evergreen/contact/' + $('Code - Check Evergreen Segment').item.json.mauticContactId + '/remove' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "options": {}
+        },
+        "id": "mautic-remove-evergreen",
+        "name": "Mautic - Remove from Evergreen",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1680,
+          0
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "Rt7PRC4IRSrjNt2L",
+            "name": "Mautic Basic Auth"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "{ \"ok\": true }",
+          "options": {}
+        },
+        "id": "respond-ok",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          1920,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook - Mautic Event": {
+        "main": [
+          [
+            {
+              "node": "Code - Parse Mautic Event",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code - Parse Mautic Event": {
+        "main": [
+          [
+            {
+              "node": "IF - Skip Invalid",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF - Skip Invalid": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Mautic - Get Contact + Segments",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mautic - Get Contact + Segments": {
+        "main": [
+          [
+            {
+              "node": "Code - Check Evergreen Segment",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code - Check Evergreen Segment": {
+        "main": [
+          [
+            {
+              "node": "IF - Skip if Not Evergreen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF - Skip if Not Evergreen": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Mautic - Add to Reactivation Segment",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mautic - Add to Reactivation Segment": {
+        "main": [
+          [
+            {
+              "node": "Mautic - Remove from Evergreen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mautic - Remove from Evergreen": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Markus Oberhofer",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-14T20:17:59.510Z",
+        "id": 525,
+        "workflowId": "XfefeLNF1DYJPGc8",
+        "versionId": "ca46331d-6444-4fd7-9c5b-038be0ebe840",
+        "event": "deactivated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      },
+      {
+        "createdAt": "2026-05-14T20:17:59.534Z",
+        "id": 526,
+        "workflowId": "XfefeLNF1DYJPGc8",
+        "versionId": "ca46331d-6444-4fd7-9c5b-038be0ebe840",
+        "event": "activated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    ]
+  }
+}

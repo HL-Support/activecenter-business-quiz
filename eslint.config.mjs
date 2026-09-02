@@ -26,12 +26,20 @@ export default [
       'build/',
       '.vercel/',
       'code_details/**',
-      // Aus n8n gezogene Code-Belege: Fragmente, die nur im n8n-Code-Knoten laufen —
-      // kein Projektquelltext, sondern Beweismaterial. Sie werden bewusst NICHT nach den
-      // Regeln dieses Projekts formatiert: Jede Aenderung daran entwertet den Beweis,
-      // dass der Extrakt zeichengleich mit dem laufenden Workflow ist.
+      // Aus n8n gezogene Code-Belege: Fragmente, die nur im n8n-Code-Knoten laufen
+      // (`return` auf oberster Ebene, `$input`) — kein Projektquelltext, sondern
+      // Beweismaterial. Sie werden bewusst NICHT nach den Regeln dieses Projekts
+      // formatiert: Jede Aenderung daran entwertet den Beweis, dass der Extrakt
+      // zeichengleich mit dem laufenden Workflow ist.
       // Siehe docs/audits/c1-postprocessor-extrakt/BEFUND.md.
       'docs/audits/**/*.js',
+      // Gleiches Prinzip: zeichengleiche Arbeitskopien der laufenden n8n-Code-Knoten
+      // (Post-Processor, Nurture-Sender) — `return` auf oberster Ebene, `$input`.
+      'n8n/arbeit/**',
+      // Eigenstaendige Anwendungen mit eigenem Werkzeugkasten (Next.js, JSX in .js).
+      // Sie werden nicht vom Quiz gebaut und nicht von dessen ESLint-Regeln bedient.
+      'nurture/review-app/**',
+      'nurture/mautic-setup/**',
     ],
   },
   js.configs.recommended,

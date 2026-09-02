@@ -1,0 +1,236 @@
+{
+  "name": "AC - Quiz Nightly Data Sync (MySQL → Mautic)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 2 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-nightly",
+      "name": "Cron - Nightly 02:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  c.id AS contact_id,\n  c.email AS contact_email,\n  c.first_name AS contact_first_name,\n  c.last_name AS contact_last_name,\n  u.id AS coach_user_id,\n  u.first_name AS coach_first_name,\n  u.last_name AS coach_last_name,\n  u.full_name AS coach_full_name,\n  u.email AS coach_email,\n  u.phone_number AS coach_phone,\n  u.area_code AS coach_phone_prefix,\n  u.sub_domain AS coach_slug,\n  o.org_name AS coach_organisation_name\nFROM prod_contacts_activesupport.contacts c\nLEFT JOIN prod_activesupport.users u ON u.id = c.coach_id\nLEFT JOIN prod_activesupport.organizations o ON o.id = u.organization_id\nWHERE c.deleted_at IS NULL\n  AND (\n    c.updated_at > NOW() - INTERVAL 2 DAY\n    OR u.updated_at > NOW() - INTERVAL 2 DAY\n  )\nLIMIT 500",
+        "options": {}
+      },
+      "id": "mysql-get-updated-contacts",
+      "name": "MySQL - Get Recently Updated Contacts",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "73WL8zP1Qlctkz12",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) return [];\n\nfunction cleanPart(value) {\n  return String(value || '').trim().replace(/\\s+/g, ' ');\n}\n\nfunction normalizeOrg(value) {\n  const org = cleanPart(value);\n  if (!org) return 'Activecenter';\n  return org.toUpperCase() === 'ACTIVECENTER' ? 'Activecenter' : org;\n}\n\nfunction formatPhone(prefix, number) {\n  const cleanPrefix = String(prefix || '').replace(/[^\\d+]/g, '');\n  const cleanNumber = String(number || '').replace(/[^\\d]/g, '');\n  if (!cleanPrefix && !cleanNumber) return '';\n  if (!cleanPrefix) return cleanNumber;\n  if (!cleanNumber) return cleanPrefix.startsWith('+') ? cleanPrefix : '+' + cleanPrefix;\n  const intlPrefix = cleanPrefix.startsWith('+') ? cleanPrefix : '+' + cleanPrefix;\n  const firstChunk = cleanNumber.slice(0, 3);\n  const rest = cleanNumber.slice(3);\n  return rest ? intlPrefix + ' ' + firstChunk + ' ' + rest : intlPrefix + ' ' + firstChunk;\n}\n\nreturn items.map(item => {\n  const row = item.json;\n  const phone = formatPhone(row.coach_phone_prefix, row.coach_phone);\n  const coachFirstName = cleanPart(row.coach_first_name);\n  const coachLastName = cleanPart(row.coach_last_name || row.coach_full_name);\n  const coachName = [coachFirstName, coachLastName].filter(Boolean).join(' ').trim();\n  const org = normalizeOrg(row.coach_organisation_name);\n\n  return {\n    json: {\n      contact_id: String(row.contact_id || ''),\n      contact_email: cleanPart(row.contact_email),\n      contact_first_name: cleanPart(row.contact_first_name),\n      contact_last_name: cleanPart(row.contact_last_name),\n      coach_first_name: coachFirstName,\n      coach_last_name: coachLastName,\n      coach_full_name: coachName,\n      coach_email: cleanPart(row.coach_email),\n      coach_phone: phone,\n      coach_slug: cleanPart(row.coach_slug),\n      coach_organisation_name: org,\n      coach_org_display: org,\n      coach_display_name: [coachName, org].filter(Boolean).join(' - ')\n    }\n  };\n});"
+      },
+      "id": "code-normalize-contact-data",
+      "name": "Code - Normalize Contact Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://mautic.hl-support.biz/api/contacts?search=ac_contact_id:' + $json.contact_id + '&limit=1' }}",
+        "authentication": "oAuth2",
+        "options": {}
+      },
+      "id": "mautic-find-contact",
+      "name": "Mautic - Find Contact by ac_contact_id",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "MAUTIC_OAUTH2_CRED_ID",
+          "name": "Mautic OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const mauticResponse = $json;\nconst contacts = Object.values(mauticResponse.contacts || {});\n\nif (!contacts.length) {\n  return [{ json: { skip: true, reason: 'contact not found in Mautic', contact_id: $('Code - Normalize Contact Data').item.json.contact_id } }];\n}\n\nconst mauticContact = contacts[0];\nconst mysqlData = $('Code - Normalize Contact Data').item.json;\nconst fields = mauticContact.fields?.all || {};\n\nfunction fieldValue(alias) {\n  const raw = fields[alias];\n  if (raw && typeof raw === 'object') return String(raw.value ?? '').trim();\n  return String(raw ?? '').trim();\n}\n\nfunction same(alias, value) {\n  return fieldValue(alias) === String(value || '').trim();\n}\n\nconst updatePayload = {\n  ac_berater_vorname: mysqlData.coach_first_name,\n  ac_berater_name: mysqlData.coach_last_name,\n  ac_berater_email: mysqlData.coach_email,\n  ac_berater_whatsapp: mysqlData.coach_phone,\n  ac_berater_slug: mysqlData.coach_slug,\n  ac_berater_organisation: mysqlData.coach_organisation_name,\n  ac_berater_display_name: mysqlData.coach_display_name,\n  ac_berater_org_display: mysqlData.coach_org_display\n};\n\nconst needsUpdate = Object.entries(updatePayload).some(([alias, value]) => !same(alias, value));\n\nif (!needsUpdate) {\n  return [{ json: { skip: true, reason: 'no changes', mauticContactId: mauticContact.id } }];\n}\n\nreturn [{\n  json: {\n    skip: false,\n    mauticContactId: mauticContact.id,\n    updatePayload\n  }\n}];"
+      },
+      "id": "code-diff-and-prepare-update",
+      "name": "Code - Diff and Prepare Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "if-needs-update",
+      "name": "IF - Needs Update",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $json.mauticContactId + '/edit' }}",
+        "authentication": "oAuth2",
+        "body": {
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.updatePayload }}"
+        },
+        "options": {}
+      },
+      "id": "mautic-update-contact",
+      "name": "Mautic - Update Contact Coach Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        0
+      ],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "MAUTIC_OAUTH2_CRED_ID",
+          "name": "Mautic OAuth2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron - Nightly 02:00": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Get Recently Updated Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Get Recently Updated Contacts": {
+      "main": [
+        [
+          {
+            "node": "Code - Normalize Contact Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Normalize Contact Data": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Find Contact by ac_contact_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mautic - Find Contact by ac_contact_id": {
+      "main": [
+        [
+          {
+            "node": "Code - Diff and Prepare Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Diff and Prepare Update": {
+      "main": [
+        [
+          {
+            "node": "IF - Needs Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Needs Update": {
+      "main": [
+        [
+          {
+            "node": "Mautic - Update Contact Coach Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false,
+  "tags": [
+    "sync",
+    "nightly",
+    "business-quiz"
+  ],
+  "_setupNotes": {
+    "credentialIds": {
+      "MAUTIC_OAUTH2_CRED_ID": "Replace with your Mautic OAuth2 credential ID in n8n",
+      "mysqlCredId": "Already uses existing 73WL8zP1Qlctkz12 MySQL account"
+    },
+    "logic": "Nightly at 02:00: Reads recently changed contacts and coach data from explicit production MySQL databases. Finds the matching Mautic contact by ac_contact_id and updates coach name, email, WhatsApp, slug, organisation and sender display fields only when values changed.",
+    "sourceOfTruth": "MySQL (Laravel system) is always master. Mautic is the downstream sync target.",
+    "mysqlTableAssumptions": "Uses prod_contacts_activesupport.contacts joined to prod_activesupport.users via contacts.coach_id and prod_activesupport.organizations via users.organization_id.",
+    "scalingNote": "For >500 contacts with recent changes, add pagination or increase limit"
+  }
+}

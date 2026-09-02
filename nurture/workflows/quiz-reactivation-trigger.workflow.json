@@ -1,0 +1,181 @@
+{
+  "name": "AC - Quiz Reactivation Trigger",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mautic-evergreen-link-clicked",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-mautic-click",
+      "name": "Webhook - Mautic Link Clicked",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "webhookId": "quiz-reactivation-trigger-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || $json;\n\n// Mautic sends: contact_id, email_id, campaign_id, url\nconst contactId = String(body.contact_id || body.mautic_contact_id || '').trim();\nconst emailId = String(body.email_id || '').trim();\nconst clickedUrl = String(body.url || '').trim();\n\nif (!contactId) {\n  return [{ json: { skip: true, reason: 'no contact_id in payload' } }];\n}\n\nreturn [{ json: { contactId, emailId, clickedUrl, skip: false } }];"
+      },
+      "id": "code-parse-mautic-click",
+      "name": "Code - Parse Mautic Click Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false },
+          "conditions": [{ "leftValue": "={{ $json.skip }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }]
+        }
+      },
+      "id": "if-skip",
+      "name": "IF - Skip Invalid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://mautic.hl-support.biz/api/contacts/' + $json.contactId }}",
+        "authentication": "oAuth2",
+        "options": {}
+      },
+      "id": "mautic-get-contact",
+      "name": "Mautic - Get Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 0],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "MAUTIC_OAUTH2_CRED_ID",
+          "name": "Mautic OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const contactData = $json.contact || $json;\nconst fields = contactData.fields?.all || {};\n\nconst nurtureStoppedRaw = fields.ac_nurture_stopped;\nif (nurtureStoppedRaw === true || nurtureStoppedRaw === 1 || nurtureStoppedRaw === '1') {\n  return [{ json: { skip: true, reason: 'nurture_stopped' } }];\n}\n\nreturn [{\n  json: {\n    skip: false,\n    mauticContactId: contactData.id,\n    evergreen_position: Number(fields.ac_evergreen_position || 0),\n    profile: fields.ac_last_profile || '',\n    language: fields.ac_last_form_language || 'de',\n    clickedUrl: $('Code - Parse Mautic Click Event').item.json.clickedUrl\n  }\n}];"
+      },
+      "id": "code-check-nurture-status",
+      "name": "Code - Check Nurture Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false },
+          "conditions": [{ "leftValue": "={{ $json.skip }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }]
+        }
+      },
+      "id": "if-skip-2",
+      "name": "IF - Skip Stopped Leads",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1200, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://mautic.hl-support.biz/api/segments/ac-nurture-reactivation/contact/' + $json.mauticContactId + '/add' }}",
+        "authentication": "oAuth2",
+        "options": {}
+      },
+      "id": "mautic-add-to-reactivation",
+      "name": "Mautic - Add to Reactivation Segment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1440, 0],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "MAUTIC_OAUTH2_CRED_ID",
+          "name": "Mautic OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://mautic.hl-support.biz/api/segments/ac-nurture-evergreen/contact/' + $('Code - Check Nurture Status').item.json.mauticContactId + '/remove' }}",
+        "authentication": "oAuth2",
+        "options": {}
+      },
+      "id": "mautic-remove-from-evergreen",
+      "name": "Mautic - Pause Evergreen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1680, 0],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "MAUTIC_OAUTH2_CRED_ID",
+          "name": "Mautic OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true }",
+        "options": {}
+      },
+      "id": "respond-ok",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1920, 0]
+    }
+  ],
+  "connections": {
+    "Webhook - Mautic Link Clicked": {
+      "main": [[{ "node": "Code - Parse Mautic Click Event", "type": "main", "index": 0 }]]
+    },
+    "Code - Parse Mautic Click Event": {
+      "main": [[{ "node": "IF - Skip Invalid", "type": "main", "index": 0 }]]
+    },
+    "IF - Skip Invalid": {
+      "main": [
+        [],
+        [{ "node": "Mautic - Get Contact", "type": "main", "index": 0 }]
+      ]
+    },
+    "Mautic - Get Contact": {
+      "main": [[{ "node": "Code - Check Nurture Status", "type": "main", "index": 0 }]]
+    },
+    "Code - Check Nurture Status": {
+      "main": [[{ "node": "IF - Skip Stopped Leads", "type": "main", "index": 0 }]]
+    },
+    "IF - Skip Stopped Leads": {
+      "main": [
+        [],
+        [{ "node": "Mautic - Add to Reactivation Segment", "type": "main", "index": 0 }]
+      ]
+    },
+    "Mautic - Add to Reactivation Segment": {
+      "main": [[{ "node": "Mautic - Pause Evergreen", "type": "main", "index": 0 }]]
+    },
+    "Mautic - Pause Evergreen": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false,
+  "tags": ["nurture", "reactivation", "business-quiz"],
+  "_setupNotes": {
+    "credentialIds": {
+      "MAUTIC_OAUTH2_CRED_ID": "Replace with your Mautic OAuth2 credential ID in n8n"
+    },
+    "mauticWebhookSetup": "In Mautic: Settings → Webhooks → Create webhook for 'Email link clicked' events in the ac-nurture-evergreen campaign. Point to this workflow's webhook URL.",
+    "logic": "When an Evergreen lead clicks a link in an Evergreen email: (1) removes from Evergreen segment to pause monthly sends, (2) adds to ac-nurture-reactivation segment which triggers a 3-5 day intensive sequence. After reactivation sequence ends, Mautic campaign action adds lead back to Evergreen at the next position (n8n quiz-evergreen-scheduler handles the position increment automatically).",
+    "mauticSegments": "Must have segments: ac-nurture-reactivation, ac-nurture-evergreen created before activating",
+    "reactivationReturn": "After the reactivation campaign ends (day +7), a Mautic campaign action should fire a webhook back to n8n or re-add the contact to ac-nurture-evergreen. The quiz-evergreen-scheduler will then pick them up on next daily run and advance their position."
+  }
+}

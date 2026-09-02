@@ -672,7 +672,7 @@ wenn der Beweis des vorigen **vorliegt** — Fristen verkürzen nie die Prüfung
 | Registry | `form_id 'hC2yTcU8'`, `public_id '12'`, Schalter aus | ✅ als `quiz-erfolgscode` in `config/surveys.php` |
 | `config/quiz.php` | — | ✅ Geheimnis, Kopfname, **Gebietsliste** |
 | Index | `typeform_surveys_submission_id_unique` prüfen | ✅ existiert bereits (`SurveyIntake.php:438`) |
-| Tests | nach dem Muster der `SurveyWebhookTest` | ✅ **12 neue**, Suite 162 grün |
+| Tests | nach dem Muster der `SurveyWebhookTest` | ✅ **12 neue**, Suite damals 162 grün (Stand 31.08. abends: **166**) |
 | Env | `QUIZ_WEBHOOK_SECRET` **vor** dem Deploy setzen | ✅ gesetzt, dann deployt |
 
 | Empfohlen | Übergangswache „Kreuz-Duplikat": existiert binnen 7 Tagen bereits eine Zeile mit demselben `hash`, antworte `duplicate:true` statt eine zweite anzulegen. Zweck: schliesst das Flip-Fenster-Restrisiko (§9/B5). Kaveat ehrlich benennen: `qz_`-Hashes sind zu 1270/1271 eindeutig — die Wache kann theoretisch eine echte Neuteilnahme in der 7-Tage-Frist verwerfen; deshalb Fenster klein und Protokolleintrag je Treffer |

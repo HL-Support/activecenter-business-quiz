@@ -1,0 +1,353 @@
+=== EMAIL 26 ===
+NAME: AC Nurture - B1 - Feuer
+SUBJECT: {contactfield=firstname}, jetzt wird's konkret
+
+Hallo {contactfield=firstname},
+
+Du hast Video 1 gesehen. <strong>Das ist mehr als die meisten tun.</strong> 🔥
+
+<strong>Markus hat dir gezeigt, worum es geht.</strong> Warum jetzt ein guter Zeitpunkt ist. Die Frage am Ende bleibt: Möchte ich Veränderung selbst anstoßen oder warten, bis sie kommt?
+
+Teil 1 ist erledigt. Jetzt kommt der wichtigste Punkt: Wie wird aus Interesse ein klares System?
+
+Video 2 zeigt dir den konkreten Aufbau: wie du startest, wer dich begleitet und wie aus persönlicher Erfahrung ein echtes zweites Standbein entstehen kann.
+
+👉 <strong>Klick jetzt auf Teil 2.</strong> Danach siehst du klarer, ob dieser Weg zu deinem Alltag passt.
+
+CTA: Teil 2 - Das System verstehen | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=26
+
+=== EMAIL 27 ===
+NAME: AC Nurture - B1 - Wind
+SUBJECT: {contactfield=firstname}, wer dabei ist
+
+Hallo {contactfield=firstname},
+
+Du hast Video 1 gesehen. <strong>Gut, dass du dabei bist.</strong> 🤝
+
+<strong>Markus hat gezeigt, wen wir suchen.</strong> Menschen, die spüren: Es geht noch mehr. Die authentisch erfolgreich sein wollen, ganz ohne sich zu verbiegen.
+
+Teil 1 ist erledigt. Jetzt kommt der wichtigste Punkt: Wie wird aus Interesse ein klares System?
+
+Video 2 zeigt dir den konkreten Aufbau: wie du startest, wer dich begleitet und wie aus persönlicher Erfahrung ein echtes zweites Standbein entstehen kann.
+
+👉 <strong>Klick jetzt auf Teil 2.</strong> Danach siehst du klarer, ob dieser Weg zu deinem Alltag passt.
+
+CTA: Teil 2 - Das System verstehen | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=27
+
+=== EMAIL 28 ===
+NAME: AC Nurture - B1 - Wasser
+SUBJECT: {contactfield=firstname}, der Plan dahinter
+
+Hallo {contactfield=firstname},
+
+Du hast Video 1 gesehen. <strong>Schön, dass du dir die Zeit nimmst.</strong> 📋
+
+<strong>Im ersten Teil hast du das große Bild gesehen.</strong> Worum es geht, warum es jetzt relevant ist. Aber du weißt: Ein Bild ist noch kein Plan.
+
+Teil 1 ist erledigt. Jetzt kommt der wichtigste Punkt: Wie wird aus Interesse ein klares System?
+
+Video 2 zeigt dir den konkreten Aufbau: wie du startest, wer dich begleitet und wie aus persönlicher Erfahrung ein echtes zweites Standbein entstehen kann.
+
+👉 <strong>Klick jetzt auf Teil 2.</strong> Danach siehst du klarer, ob dieser Weg zu deinem Alltag passt.
+
+CTA: Teil 2 - Das System verstehen | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=28
+
+=== EMAIL 29 ===
+NAME: AC Nurture - B1 - Fels
+SUBJECT: {contactfield=firstname}, der Mechanismus
+
+Hallo {contactfield=firstname},
+
+Du hast Video 1 gesehen. <strong>Das Modell wirkt schlüssig.</strong> 🔍
+
+<strong>Im ersten Teil hast du das Was gesehen.</strong> Wahrscheinlich hast du schon die nächste Frage. Für jemanden, der Zusammenhänge versteht, reicht das selten. Wie genau funktioniert das? Warum sollte es für mich funktionieren?
+
+Teil 1 ist erledigt. Jetzt kommt der wichtigste Punkt: Wie wird aus Interesse ein klares System?
+
+Video 2 zeigt dir den konkreten Aufbau: wie du startest, wer dich begleitet und wie aus persönlicher Erfahrung ein echtes zweites Standbein entstehen kann.
+
+👉 <strong>Klick jetzt auf Teil 2.</strong> Danach siehst du klarer, ob dieser Weg zu deinem Alltag passt.
+
+CTA: Teil 2 - Das System verstehen | {contactfield=ac_last_video_access_url}&acn_phase=B1&acn_email=29
+
+=== EMAIL 30 ===
+NAME: AC Nurture - B2 - Feuer
+SUBJECT: {contactfield=firstname}, jetzt siehst du das System
+
+Hallo {contactfield=firstname},
+
+Du hast Teil 1 gesehen. <strong>Jetzt geht es um den Aufbau.</strong> 🔥
+
+Für "Feuer-Typen" zählt der nächste Schritt. Du willst wissen, was du tun würdest, wie der Start aussieht und ob dein Einsatz etwas bewirken kann.
+
+Genau deshalb ist Teil 2 wichtig. Dort wird aus dem ersten Eindruck ein konkreter Ablauf. Du siehst, welche Schritte dazugehören und ob dieser Weg zu deinem Alltag passt.
+
+<strong>Wenn du prüfen willst, ob sich das für dich lohnt, brauchst du Teil 2.</strong>
+
+👉 <strong>Klick jetzt auf Teil 2.</strong> Danach ist das Modell nicht mehr nur interessant. Du kannst es prüfen.
+
+CTA: Teil 2 - Das System verstehen | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=30
+
+=== EMAIL 31 ===
+NAME: AC Nurture - B2 - Wind
+SUBJECT: {contactfield=firstname}, du musst das nicht allein tragen
+
+Hallo {contactfield=firstname},
+
+Du hast Teil 1 gesehen. <strong>Jetzt geht es um das Wie.</strong> 🤝
+
+Für "Wind-Typen" ist eine Frage wichtig: Mit wem gehe ich diesen Weg? Du spürst schnell, ob ein Umfeld echt ist oder nur gut klingt.
+
+Teil 2 zeigt dir den Aufbau dahinter. Du siehst, wie Menschen starten, welche Begleitung es gibt und wo Beziehung in ein klares System passt.
+
+<strong>Du musst dabei nicht lauter werden.</strong> Du musst nur verstehen, wie dein natürlicher Kontakt zu Menschen genutzt werden kann.
+
+👉 <strong>Klick jetzt auf Teil 2.</strong> Schau dir an, ob sich dieses System menschlich richtig anfühlt.
+
+CTA: Teil 2 - Das System verstehen | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=31
+
+=== EMAIL 32 ===
+NAME: AC Nurture - B2 - Wasser
+SUBJECT: {contactfield=firstname}, der nächste Schritt ist Struktur
+
+Hallo {contactfield=firstname},
+
+Du hast Teil 1 gesehen. <strong>Jetzt brauchst du Reihenfolge.</strong> 📋
+
+Für "Wasser-Typen" zählt Sicherheit im Ablauf. Du willst verstehen, was zuerst kommt, was später kommt und wer dich unterstützt.
+
+Genau das macht Teil 2. Das Modell wird Schritt für Schritt erklärt. Du siehst, wie der Start aussehen kann und was nicht alles sofort passieren muss.
+
+<strong>Ein guter Weg wirkt nicht hektisch.</strong> Er wird überschaubar, wenn du ihn klar vor dir siehst.
+
+👉 <strong>Klick jetzt auf Teil 2.</strong> Danach kannst du ruhiger einschätzen, ob dieser Weg in dein Leben passt.
+
+CTA: Teil 2 - Das System verstehen | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=32
+
+=== EMAIL 33 ===
+NAME: AC Nurture - B2 - Fels
+SUBJECT: {contactfield=firstname}, prüfe jetzt den Aufbau
+
+Hallo {contactfield=firstname},
+
+Du hast Teil 1 gesehen. <strong>Jetzt kommt die Struktur.</strong> 🔍
+
+Für "Fels-Typen" reicht ein starkes Gefühl selten aus. Du willst wissen, warum etwas funktioniert und welche Logik dahintersteht.
+
+Teil 2 ist genau dafür da. Dort wird aus der Idee ein System, das du prüfen kannst. Du siehst die Schritte und die Unterstützung. Du erkennst auch, woran du den Weg selbst bewerten kannst.
+
+<strong>Du musst nichts glauben.</strong> Schau dir den Aufbau an. Danach kannst du sauberer entscheiden.
+
+👉 <strong>Klick jetzt auf Teil 2.</strong> Teil 2 zeigt dir den Aufbau hinter dem ersten Eindruck.
+
+CTA: Teil 2 - Das System verstehen | {contactfield=ac_last_video_access_url}&acn_phase=B2&acn_email=33
+
+=== EMAIL 69 ===
+NAME: AC Nurture - B3 - Feuer
+SUBJECT: {contactfield=firstname}, was Thomas nach Video 2 getan hat
+
+Hallo {contactfield=firstname},
+
+Thomas hat mir letzte Woche eine Nachricht geschickt, die ich dir kurz weitergeben will. Weil sie typisch ist für Macher, die V2 zu Ende geschaut haben.
+
+Kurze Vorgeschichte: 38 Jahre alt, ehemaliger Vertriebsleiter in einem mittelständischen Industrieunternehmen. Achtzig-Stunden-Wochen, gutes Gehalt, Hamsterrad aus Quartalszahlen. Klassisches Macher-Dilemma: das Einkommen war gut, der Hebel war null.
+
+Was er nach V2 gemacht hat: Er hat das Modell auf zwei Seiten heruntergebrochen, mit konkreten Zahlen versehen und sich gefragt, wo der erste echte Engpass liegen würde. Innerhalb von drei Tagen hatte er einen 90-Tage-Plan auf dem Tisch.
+
+Sein Satz war: <strong>"Ich habe in Video 2 verstanden, dass ich die letzten zehn Jahre Energie in die falsche Stelle gesteckt habe. Nicht zu wenig Energie — nur an der falschen Stelle."</strong>
+
+Das ist der Punkt, an dem Macher umschalten. Nicht wenn sie überzeugt werden. Wenn sie selbst rechnen.
+
+Du hast in V1 gesehen, dass es ein Modell gibt. V2 zeigt dir den Hebel. Danach entscheidest du nüchtern, wie immer.
+
+CTA: Video 2 jetzt durchrechnen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 70 ===
+NAME: AC Nurture - B3 - Wind
+SUBJECT: {contactfield=firstname}, Sabrinas Wendepunkt war nicht das, was du denkst
+
+Hallo {contactfield=firstname},
+
+Sabrina ist Lehrerin, 34, zwei Kinder, in einer kleinen Stadt in Niedersachsen. Sie hat mir erlaubt, ihre Geschichte zu erzählen, weil sie sieht, wie viele Netzwerker-Typen genau an dem Punkt stehen, an dem sie vor zwei Jahren war.
+
+Ihr Wendepunkt war nicht der Moment, als sie verstanden hat, wie viel Geld möglich ist. Geld war für sie nie der Treiber. Ihr Wendepunkt war, als sie in V2 die Menschen gesehen hat, die in diesem Geschäft erfolgreich sind, und gemerkt hat: das sind Menschen, denen sie auch privat begegnen würde wollen.
+
+Sie hat mir geschrieben: <strong>"Ich habe immer gedacht, ich muss zwischen ehrlichen Beziehungen und Erfolg wählen. Video 2 hat mir gezeigt, dass das eine falsche Trennung ist."</strong>
+
+Heute baut sie ein Team auf, das fast vollständig aus Frauen besteht, die ähnlich ticken wie sie. Lehrerinnen, Therapeutinnen, Mütter in Teilzeit. Sie nennen sich untereinander nicht "Downline". Sie nennen sich "Mädels".
+
+Das ist nicht jedermanns Sprache. Aber es ist ehrlich. Und es funktioniert.
+
+Wenn du dich in dieser Geschichte wiedererkennst, schau dir V2 an. Du wirst die Menschen sehen, die schon dort sind, wo du gerne wärst.
+
+CTA: Video 2 jetzt anschauen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 71 ===
+NAME: AC Nurture - B3 - Wasser
+SUBJECT: {contactfield=firstname}, wie Martin zwei Jahre lang gewartet hat — und was dann passierte
+
+Hallo {contactfield=firstname},
+
+Martin ist Techniker, 41, verheiratet, ein Sohn. Er hat sich V1 angeschaut, dann V2, und dann nichts. Zwei Jahre lang.
+
+Das erzähle ich dir nicht, um dich zu drängen. Ich erzähle es dir, weil Martin der typische Anker-Typ ist, und weil sein Weg zeigt, dass es keinen Druck gibt.
+
+Er hat in diesen zwei Jahren regelmäßig nachgefragt, wenn ihm etwas unklar war. Er hat Gespräche mit Menschen aus dem Team geführt. Zugehört, beobachtet, mitgedacht. Das Modell nicht "ausprobiert", sondern verstanden.
+
+Als er dann gestartet ist, war sein erster Satz: "Ich weiß genau, was ich tue. Und genau das wollte ich, bevor ich anfange."
+
+Heute, drei Jahre später, läuft sein Bereich ruhig und stabil. Keine Achterbahn, keine Wochenendaktionen, keine Sprints. Kontinuierlich. So wie Anker-Typen am besten arbeiten.
+
+<strong>Sein Satz an mich: "Die zwei Jahre Warten waren nicht verloren. Sie waren der Grund, warum ich heute keine Zweifel mehr habe."</strong>
+
+Du darfst dir Zeit nehmen. Aber lass V2 nicht ungesehen, denn ohne V2 fehlen dir die Informationen, um überhaupt eine ruhige Entscheidung zu treffen.
+
+CTA: Video 2 in Ruhe anschauen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 72 ===
+NAME: AC Nurture - B3 - Fels
+SUBJECT: {contactfield=firstname}, was Dr. Andrea nach Video 2 auf Papier gebracht hat
+
+Hallo {contactfield=firstname},
+
+Dr. Andrea ist 44, promovierte Naturwissenschaftlerin, arbeitet seit fast zwanzig Jahren in einer Forschungseinrichtung. Strukturdenkerin durch und durch. Skeptisch gegenüber allem, was nach "Erfolgsmodell" klingt.
+
+Sie hat V2 dreimal angesehen. Beim ersten Mal kritisch. Beim zweiten Mal analytisch. Beim dritten Mal mit einem Bleistift in der Hand. Dann hat sie das Gesehene auf einer einzigen Seite zusammengefasst, ein Schema mit drei Ebenen und sieben Verbindungen.
+
+Sie hat mir das Schema später gezeigt und gesagt: "Was mich überzeugt hat, war nicht, dass es funktioniert. Sondern, dass die Logik in sich geschlossen ist. <strong>Es gibt keinen Bruch, keine versteckte Annahme, kein Element, das nicht erklärbar wäre.</strong>"
+
+Genau das ist der Punkt, an dem Architekten umdenken. Über strukturelle Kohärenz. Nicht über Emotion, nicht über Druck.
+
+Andrea hat nach V2 nicht sofort gestartet. Sie hat drei Monate lang die Struktur geprüft, mit Menschen aus dem Geschäft, mit Außenstehenden, mit ihrem eigenen Modell-Wissen. Erst dann hat sie sich bewegt.
+
+Wenn dir Tiefe wichtig ist, gib V2 deine ungeteilte Aufmerksamkeit. Es ist das Stück, das die Architektur zeigt.
+
+CTA: Video 2 mit Stift und Papier ansehen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 73 ===
+NAME: AC Nurture - B4 - Vehicle
+SUBJECT: {contactfield=firstname}, "Ich weiß nicht, wie das praktisch funktionieren soll"
+
+Hallo {contactfield=firstname},
+
+das ist einer der häufigsten Sätze, den ich nach V1 höre. Und er ist berechtigt.
+
+Du hast die Idee verstanden. Du siehst, dass das Modell für andere funktioniert. Aber wenn du dich selbst hineindenkst, fehlt ein Stück: das konkrete "Wie". Welche Schritte sind das eigentlich? Was tust du am Montagmorgen? Wie wird aus einer Idee ein tatsächlicher Ablauf?
+
+Diese Lücke ist nicht dein Problem. Sie ist der Grund, warum V2 existiert.
+
+V1 war absichtlich auf der Ebene des "Warum" und "Was". V2 wechselt auf die Ebene des "Wie". <strong>Du siehst dort, welche Aktivitäten welchen Effekt erzeugen, welche Schritte in welcher Reihenfolge stehen, welche Tools und Rhythmen dahinterstecken.</strong>
+
+Das ist der Moment, an dem aus einem abstrakten Geschäftsmodell ein konkreter Werktag wird. Erst ab da kannst du überhaupt entscheiden, ob das zu dir passt. Vorher hattest du nicht alle Informationen.
+
+Viele Menschen quälen sich mit der Frage "Ist das was für mich?" bevor sie V2 gesehen haben. Das ist, als würdest du ein Auto bewerten, ohne den Motor gesehen zu haben.
+
+Mach es dir leichter. Schau dir den Motor an.
+
+CTA: Den Mechanismus in Video 2 ansehen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 74 ===
+NAME: AC Nurture - B4 - Community
+SUBJECT: {contactfield=firstname}, niemand baut so etwas allein auf
+
+Hallo {contactfield=firstname},
+
+einer der Gedanken, die nach V1 oft im Raum stehen, klingt etwa so: "Das ist schön, aber ich kenne niemanden in diesem Bereich. Ich will mich nicht alleine durch ein neues Feld kämpfen."
+
+Absolut nachvollziehbar. Und gleichzeitig das größte Missverständnis über dieses Geschäftsmodell.
+
+Du fängst hier nicht allein an. Die Struktur ist so aufgebaut, dass dich von Tag eins an Menschen begleiten, die genau diesen Weg schon gegangen sind. Feste Ansprechpartner, regelmäßige Gespräche, eine Gemeinschaft im Hintergrund, die tatsächlich funktioniert.
+
+V2 zeigt dir diese Gemeinschaft. Du siehst, wie Fragen gestellt und beantwortet werden, wie sich Menschen gegenseitig weiterbringen, wie aus Einzelpersonen ein Team wird. <strong>Es gibt darin einen Moment, der vielen das Gefühl der Einsamkeit nimmt: die Stelle, an der klar wird, dass das hier kein Wettbewerb gegeneinander ist.</strong>
+
+Das ist keine Marketing-Sprache. Das ist die strukturelle Logik dieses Modells. Wer allein arbeitet, kommt nicht weit. Also ist es im Eigeninteresse aller, dass du nicht allein bist.
+
+Du musst dich nirgendwo allein durchbeißen. Aber du musst V2 sehen, um es zu glauben.
+
+CTA: Die Gemeinschaft in Video 2 sehen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 75 ===
+NAME: AC Nurture - B4 - Confidence
+SUBJECT: {contactfield=firstname}, "Ich glaube nicht, dass ich der Typ dafür bin"
+
+Hallo {contactfield=firstname},
+
+ich kenne diesen Satz. Und ich kenne ihn von Menschen, die heute zu den ruhigsten und stärksten Personen in unserem Geschäft gehören.
+
+Hier ist die Wahrheit über Selbstzweifel an dieser Stelle: Sie sind kein Signal, dass du nicht der Typ bist. Sie sind ein Signal, dass du ernst nimmst, was du tust.
+
+Menschen, die nie zweifeln, scheitern in diesem Geschäft am häufigsten. Sie laufen blind los, schauen nicht genau hin. <strong>Wer zweifelt, hinterfragt. Und genau das ist die Voraussetzung dafür, langfristig zu bestehen.</strong>
+
+Zweifel an sich selbst lassen sich nicht durch gute Worte auflösen. Nur durch Beweis. Genau das liefert Video 2.
+
+Du siehst dort Menschen, die vor ein, zwei, drei Jahren genau dort standen, wo du jetzt stehst. Mit den gleichen Zweifeln. Es gibt darin einen Moment, an dem du dich selbst erkennen wirst. In diesem Moment kippt etwas. Nicht weil dir jemand etwas einredet, sondern weil du Beweis siehst. 👁
+
+"{contactfield=ac_last_profile_label}"-Typen wie du sind in diesem Geschäft nicht die Ausnahme. Sie sind oft die nachhaltig erfolgreichsten, weil sie nicht laut sind, sondern echt.
+
+Du musst dir nichts beweisen, was du noch nicht bist. Nur das Video sehen.
+
+CTA: Den Beweis in Video 2 sehen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 76 ===
+NAME: AC Nurture - B4 - Opportunity
+SUBJECT: {contactfield=firstname}, was hier eigentlich auf dem Tisch liegt
+
+Hallo {contactfield=firstname},
+
+manchmal sieht man eine Gelegenheit nicht, weil sie zu nah ist. Man läuft daran vorbei, weil sie nicht aussieht wie das, was man als "Gelegenheit" gelernt hat.
+
+V1 hat dir eine Tür gezeigt. Türen werden oft unterschätzt, wenn man nicht sieht, wohin sie führen. Lass mich kurz benennen, was hinter dieser Tür tatsächlich liegt:
+
+Ein Geschäftsmodell, das nicht an deine Lebenszeit gekoppelt ist. Du kannst es neben dem Beruf starten, in Teilzeit ausbauen, und es kann irgendwann mehr werden als das, was du heute machst. Oder eben nicht. Du entscheidest das Tempo.
+
+<strong>Ein Markt, der in den nächsten zehn Jahren strukturell wächst.</strong> Gesundheit, Wohlbefinden, Eigenverantwortung. Das sind keine Modethemen, das sind demografische Megatrends.
+
+Eine Struktur, in der du keine eigene Marke aufbauen, kein Produkt entwickeln und kein Team rekrutieren musst, bevor du anfangen kannst. Alles ist da.
+
+Das ist nicht "die einmalige Chance deines Lebens". Solche Sätze sind Unsinn. Aber es ist eine reale, prüfbare, durchdachte Gelegenheit, die viele übersehen, weil sie sie nicht im richtigen Licht sehen.
+
+Video 2 zeigt dir dieses Licht. Mehr nicht.
+
+CTA: Die Perspektive in Video 2 sehen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 77 ===
+NAME: AC Nurture - B5 - Check-in
+SUBJECT: {contactfield=firstname}, kurze Frage
+
+Hallo {contactfield=firstname},
+
+ich wollte mich kurz melden. Ohne Agenda, ohne langes Drumherum.
+
+Du hast Video 1 gesehen. Video 2 ist seitdem offen, aber du bist noch nicht dort angekommen. Das ist kein Problem. Leben passiert, und nicht jede Woche ist die richtige Woche für so etwas.
+
+Ich habe nur eine Frage:
+
+<strong>Gibt es irgendetwas, das ich dir beantworten oder erleichtern kann?</strong> Eine Frage, die offen ist. Ein Detail, das dich grübeln lässt. Etwas, das im Weg steht.
+
+Antworte einfach auf diese Email. Ich lese mit.
+
+CTA: Video 2 ist weiterhin offen | {contactfield=ac_last_video_access_url}
+
+=== EMAIL 78 ===
+NAME: AC Nurture - B6 - Letzte Einladung
+SUBJECT: {contactfield=firstname}, ich schreibe dir ab jetzt anders
+
+Hallo {contactfield=firstname},
+
+heute ist die letzte Email aus dieser Serie. Ich will ehrlich mit dir sein.
+
+In den letzten Wochen habe ich dir regelmäßig geschrieben, weil du Video 1 gesehen hast und ich gemerkt habe: hier ist jemand, den das Thema wirklich beschäftigt. Du hättest das Video schon nach den ersten Minuten schließen können. Hast du nicht.
+
+Ich weiß, dass V2 immer noch offen ist und du dort noch nicht angekommen bist. Vielleicht war die Zeit nicht reif. Vielleicht hattest du andere Prioritäten. Alles davon ist okay.
+
+Ab jetzt schreibe ich dir anders, seltener, ruhiger, ohne den roten Faden dieser Serie. Das gehört zum Respekt vor deiner Zeit.
+
+Zwei Dinge bleiben:
+
+<strong>Video 2 bleibt offen.</strong> Es verschwindet nicht. Du kannst es heute Abend ansehen, in drei Wochen oder in einem halben Jahr.
+
+Du hast in V1 etwas gesehen, das in dir nachgehallt hat. Was immer du damit tust, ist deine Entscheidung. Aber lass V2 nicht ungesehen, nur weil der richtige Moment "irgendwann" sein könnte. Manchmal ist der richtige Moment jetzt, weil du gerade diese Email liest.
+
+Alles Gute auf deinem Weg.
+
+CTA: Video 2 ansehen | {contactfield=ac_last_video_access_url}

@@ -12,7 +12,7 @@ Umsetzungspläne. Wer hier anfängt, liest in dieser Reihenfolge:
 
 ---
 
-## 0. Stand am 31.08.2026, 16:00 MESZ — alles am laufenden System gemessen
+## 0. Stand am 31.08.2026, 19:30 MESZ — alles am laufenden System gemessen
 
 ### Was live ist
 
@@ -27,10 +27,14 @@ Umsetzungspläne. Wer hier anfängt, liest in dieser Reihenfolge:
 | **M1** Mailvorlagen im Repo | ✅ PR #128 | Rumpf zeichengleich mit dem laufenden Workflow, Driftwächter + goldene Muster |
 | **M2a** ungarische Zuordnungen | ✅ PR #129 | Ziel „Unbekannt" → **„Szabadság"**, Barriere `""` → **`confidence`** |
 | **B2** eigener Contacts-Eingang | ✅ `f7882db` | `/webhook/quiz`: ohne Signatur **406**, falsche **401**; andere Routen unverändert. 🔴 **Nachtrag 31.08. abends:** unvollständig — `meta` wird nicht nach `hidden` gespiegelt (§0a) |
-| **B3** Absender im Quiz, inaktiv | 🟡 **gebaut, nicht ausgeliefert** | Suite **315 grün** (vorher 296), Lint und `verify` grün; ohne `CONTACTS_QUIZ_MODUS` gilt der Standard `aus` |
+| **B3** Absender im Quiz | ✅ PR #130 (`bb64238`) | ausgeliefert und wirkungslos; Datenseite angewandt und mit `ROLLBACK` bewiesen |
+| **B4** Schattenlauf der Übergabe | 🟡 **läuft seit 17:50** | `CONTACTS_QUIZ_MODUS=schatten`; erste echte Schattenzeile steht, 0 Aufträge |
+| **K3** `meta` → `hidden` in contacts | ✅ `721f525` + `10e9251` | Kartei-Zeile trägt `profile_label "Der Macher"` statt „Unbekannt" |
+| Dritte Mail abschaltbar | ✅ `10e9251` | `kartei_benachrichtigung`, fürs Quiz `false` |
 
-**Quiz-Produktion:** `3d6bf87`, `/health/ready` grün, `quelle: plattform`.
-**Tests:** Quiz **296 grün** · contacts **162 grün / 843 Zusicherungen**.
+**Quiz-Produktion:** `bb64238` (PR #130), `/health/ready` grün, `quelle: plattform`.
+**contacts-Produktion:** `10e9251`.
+**Tests:** Quiz **319 grün** · contacts **166 grün / 864 Zusicherungen**.
 
 ### Schalterstand in Produktion (Quiz)
 
@@ -39,9 +43,9 @@ COACH_LOOKUP_SOURCE   = beide      → die BRIDGE entscheidet
 COACH_LOOKUP_SCHATTEN = mysql      → MySQL wird nur gemessen
 LEGACY_MYSQL_*        = gesetzt
 BRIDGE_URL            = gesetzt    → der alte Weg ist unverändert da
-CONTACTS_QUIZ_MODUS   = NICHT gesetzt → Standard `aus`, exakt heutiges Verhalten
-CONTACTS_QUIZ_URL     = NICHT gesetzt
-CONTACTS_QUIZ_WEBHOOK_SECRET = NICHT gesetzt (Wert liegt in agent-secrets)
+CONTACTS_QUIZ_MODUS   = schatten    → bauen und protokollieren, NIE senden
+CONTACTS_QUIZ_URL     = gesetzt     ┐ beide schon gesetzt, damit B5
+CONTACTS_QUIZ_WEBHOOK_SECRET = gesetzt  ┘ EINE einzige Aenderung ist
 ```
 
 Der Modus ist ausschliessend — `aus` | `schatten` | `an`, ein `if`, kein „und". Steht er
@@ -53,7 +57,7 @@ einen Ersatzweg. Der Schattenlauf braucht kein Geheimnis — er sendet nie.
 
 | Stelle | Befund | Vergleiche | Berater |
 | --- | --- | --- | --- |
-| `funnel` | **`<deckungsgleich>`** | **35** | 9 |
+| `funnel` | **`<deckungsgleich>`** | **49** | 9 |
 
 **0 Abweichungen, 0 `mysql_fehler`.** Für `mail` gibt es noch **keine** Vergleiche — die
 entstehen nur bei einer Hot-Lead-Mail (rund zwei am Tag).
@@ -83,9 +87,46 @@ läuft über die Outbox. Der Verzug von 2–5 Minuten besteht unverändert.
 
 ## 0a. 🔴 Wie es weitergeht — der nächste Schritt zuerst
 
-> ## ✅ B3 ist gebaut (31.08.2026, abends) — und hat einen Blocker für B5 zutage gefördert
+> ## 🟡 B4 LÄUFT seit dem 31.08.2026, 17:50 MESZ — der Schattenlauf ist scharf
 >
-> **Gebaut, getestet, nicht ausgeliefert:** Vertrag festgeschrieben
+> `CONTACTS_QUIZ_MODUS=schatten`, dazu Adresse und Geheimnis. **B5 ist damit eine einzige
+> Env-Änderung.** Der neue Weg sendet nichts.
+>
+> **Erste echte Schattenzeile steht:** Lead `qz_f5cb45dd…`, Berater `trix24`,
+> „Der Architekt"/„Wirkung", Barriere `confidence`, 8 Antwortpaare. Aufträge: **0**.
+>
+> 🔴 **Täglich zu tun** (sonst misst B4 ein leeres Fenster):
+>
+> ```bash
+> ssh root@167.233.251.217 'cd /opt/waechter-nurture && docker run --rm --env-file .env \
+>   -v /opt/waechter-nurture:/w:ro node:24-alpine \
+>   node /w/contacts-quiz-nachzaehlen.js --modus schatten --ab 2026-09-01'
+> ```
+>
+> **Tor zu B5:** ≥ 3 Werktage mit `Schatten = Opt-ins` und 0 Abweichungen · 0 tote Aufträge
+> beider Typfamilien · keine offenen `failed` · am Umschalttag kein anderer Eingriff in
+> Versandwege. Die B2-Beweise 2–5 liegen vor (Plan B).
+>
+> **Und ein Fund vom selben Abend:** Je Lead gingen **drei** Mails an den Berater, nicht
+> zwei. Die dritte („Neuer Kontakteintrag") hing an keinem Schalter; sie ist jetzt über
+> `kartei_benachrichtigung` abschaltbar und fürs Quiz aus (contacts `10e9251`). Bis B5
+> kommt sie weiter, weil der Opt-in noch die alte Route nimmt. Vollständiges Mailbild:
+> [MAILWEGE.md §0](../MAILWEGE.md).
+>
+> ## ✅ B3 ist AUSGELIEFERT (31.08.2026, abends) — und wirkungslos, wie geplant
+>
+> **Quiz `bb64238` (PR #130), contacts `721f525`.** Gemessen: `CONTACTS_QUIZ_*` nicht
+> gesetzt ⇒ Modus `aus` · Zustellprotokoll **0 Zeilen** · Aufträge **0** · Funnel
+> unverändert · Schattenvergleich A4 bei **49** Vergleichen weiter deckungsgleich ·
+> **0 tote** Rang-Aufträge · contacts antwortet auf allen sechs Routen wie vor dem
+> Deploy · `sql/contacts-quiz-uebergabe.sql` angewandt und mit `ROLLBACK` bewiesen ·
+> Wächter-Serverkopie mit **W6** nachgezogen.
+>
+> *(Der damals nächste Schritt B4 ist seit 17:50 erledigt — siehe den Block darüber.)*
+>
+> <details><summary>Wie es gebaut wurde und was dabei auffiel</summary>
+>
+> **Gebaut und getestet:** Vertrag festgeschrieben
 > ([contacts-quiz-webhook-vertrag.md](../contacts-quiz-webhook-vertrag.md)), Absender
 > `server/legacy/kontakte.js`, Vertragspayload in `api/bridge.js`, Datenseite
 > `sql/contacts-quiz-uebergabe.sql`, Auftragsart im Worker, Modus-Schalter mit Standard
@@ -110,6 +151,8 @@ läuft über die Outbox. Der Verzug von 2–5 Minuten besteht unverändert.
 > **Die drei offenen Punkte des Plans sind entschieden:** §12.1 Kandidaten-SELECT
 > beantwortet und am laufenden n8n belegt · §12.4 Schema **`leads`** · §12.5
 > `max_attempts` **8** (Deckung 4 h 22 min statt 82 min).
+>
+> </details>
 
 ### B3 — der Absender, hinter der vorhandenen Outbox (die Vorgabe, an der gebaut wurde)
 
@@ -147,9 +190,10 @@ Wiederholung liefert `duplicate: true`; über beide Wege nachgezählt stimmt die
 | # | Schritt | Wartet auf | Bemerkung |
 | --- | --- | --- | --- |
 | **A5** | Quelle je Stelle auf `mysql` | das Tor unten | reine Env-Änderung, **kein Deploy** |
-| **B3'** | SQL anwenden, deployen, Gegenprobe „nichts ändert sich" | — | der Rest von B3; ohne Deploy ist der Code nirgends |
-| **B4** | Schattenlauf (`CONTACTS_QUIZ_MODUS=schatten`) | B3' | misst nur; Rückweg: Env löschen, kein Deploy |
-| **B5** | Absender scharf (`an`) | 🔴 **K3 in contacts behoben** + B4 ruhig | Notausstieg: Env löschen |
+| ~~**B3'**~~ | ~~SQL anwenden, deployen, Gegenprobe~~ | — | ✅ **erledigt 31.08.** |
+| ~~**B4**~~ | ~~Schattenlauf scharf schalten~~ | — | ✅ **läuft seit 31.08., 17:50** |
+| **B4'** | täglich nachzählen, ≥ 3 Werktage | — | `contacts-quiz-nachzaehlen.js --modus schatten` |
+| **B5** | Absender scharf (`an`) | B4' ruhig | ✅ K3 behoben und bewiesen. Notausstieg: Env löschen |
 | **B5** | `forward_webhook`, `BRIDGE_*` und toten Code ausbauen | B4 ruhig | erst dann |
 | **M2** | Vorlagen an die Outbox anschliessen | B4 | M1 liegt fertig |
 | **M3–M8** | Mails senden, Nebenaufgaben verteilen, Poller abschalten | M2 | 🔴 der teuerste Pfad |

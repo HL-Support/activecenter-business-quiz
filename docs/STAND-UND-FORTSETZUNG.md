@@ -1,89 +1,198 @@
 # Stand und Fortsetzung — Einstiegsdokument
 
-> ## 🔴 Nachtrag 31.08.2026, 19:30 MESZ — es sind acht Mails, nicht fünf
+> ## 🟡 Stand 31.08.2026, 19:30 MESZ — B4 läuft, alles Übrige ist ausgeliefert und still
 >
-> Beim Beweislauf für Strang B kamen **drei weitere** Mails zum Vorschein, die bisher
-> nirgends dokumentiert waren. Sie stammen nicht aus n8n und nicht aus diesem Repo:
+> **Der Umbau „weg von der Bridge" ist gebaut. Entscheiden tut er noch nichts:** Die
+> Bridge bestimmt weiterhin die Berateridentität (A4 misst nur), und der Opt-in geht
+> weiterhin über `forward_webhook` an die alte Route (B4 misst nur).
 >
-> | Mail | An | Wer sendet | Steuerung |
+> ### Was läuft
+>
+> | | Stand | Beleg |
+> | --- | --- | --- |
+> | Quiz-Produktion | **`bb64238`** (PR #130) | `/health/live` dreimal über eine Minute bestätigt, `/health/ready` grün, `quelle: plattform` |
+> | contacts-Produktion | **`10e9251`** | alle sechs Webhook-Routen antworten wie vor dem Deploy |
+> | Arbeitszweig | `nurture-auf-plattform-db` @ `2317132` | Quiz **319 Tests** grün, contacts **166** grün; Lint und `verify` grün |
+> | A4 Schattenlauf Berater | 🟡 läuft | **49** Vergleiche, 9 Berater, `<deckungsgleich>`, 0 `mysql_fehler` |
+> | B4 Schattenlauf Übergabe | 🟡 **läuft** | **01.09.: 2 Opt-ins, 2 Schattenzeilen — deckungsgleich.** 0 gescheitert, 0 offen |
+> | Aufträge `contacts_quiz_submission` | **0** | im Schatten wird nie gesendet |
+> | Rang-Aufträge `mysql_*` | **0 tote** | Referenzwert für B5 |
+>
+> ### Schalterstand in Produktion (Quiz-App `yhoacszoiofuq6dg4mykyr7b`)
+>
+> ```
+> COACH_LOOKUP_SOURCE          = beide       → die BRIDGE entscheidet, MySQL wird gemessen
+> COACH_LOOKUP_SCHATTEN        = mysql
+> CONTACTS_QUIZ_MODUS          = schatten    → bauen und protokollieren, NIE senden
+> CONTACTS_QUIZ_URL            = gesetzt     ┐ beide schon gesetzt, damit B5
+> CONTACTS_QUIZ_WEBHOOK_SECRET = gesetzt     ┘ EINE einzige Änderung ist
+> LEADS_DB_MODUS               = direkt
+> BRIDGE_URL                   = gesetzt     → der alte Weg ist unverändert da
+> ```
+>
+> ### 🔴 Was in den nächsten Tagen zu tun ist — sonst misst B4 ein leeres Fenster
+>
+> **Täglich einmal** (dauert eine Minute):
+>
+> ```bash
+> ssh root@167.233.251.217 'cd /opt/waechter-nurture && docker run --rm --env-file .env \
+>   -v /opt/waechter-nurture:/w:ro node:24-alpine \
+>   node /w/contacts-quiz-nachzaehlen.js --modus schatten --ab 2026-09-01'
+> ```
+>
+> Erwartet je vollem Tag: **Schatten = Opt-ins**, `gescheitert` und `offen` je 0, keine
+> toten Aufträge. Exitcode 1 heisst Befund.
+>
+> `--modus` ist **Pflicht**: ohne ihn ist ein Tag mit null Übermittlungen unauffällig — und
+> damit sähe ein Totalausfall des Sendewegs genauso aus wie ein ruhiger Tag. Das ist der
+> Fehler, an dem der Nurture-Versand drei Wochen stillstand. `--ab 2026-09-01`, weil der
+> 31.08. nur ein halber Tag im Schatten war.
+>
+> **Tor zu B5** (alle vier, jedes einzeln abgehakt):
+> ≥ 3 Werktage Schatten mit 0 Abweichungen · 0 tote Aufträge beider Typfamilien ·
+> keine offenen `failed` · am Umschalttag kein anderer Eingriff in Versandwege.
+>
+> **B5 selbst ist dann eine einzige Env-Änderung:** `CONTACTS_QUIZ_MODUS=an`, App-Neustart,
+> kein Deploy. Notausstieg: Variable löschen. Danach die Sofortprobe aus Plan B §9/B5.
+>
+> ### Die fünf Mails — welche kommt woher (31.08. an drei Proben ausgezählt)
+>
+> | Mail | An | Woher | Steuerung |
 > | --- | --- | --- | --- |
-> | „Neuer Kontakteintrag" | Berater | ActiveCenter (`NotificationService`) | 🔴 hing an **gar nichts**; seit 31.08. an `kartei_benachrichtigung` |
-> | „Neuer Kontakt aus: Business" | Berater | contacts, `NewContactCreated` | `noemail` (alt) / `coach_email` (neu) |
-> | „Deine Anfrage zu unserer Geschäftsmöglichkeit" | Lead | contacts, `sendEmailToContact` | `noemail` (alt) / `contact_email` (neu) |
+> | „Neuer Erfolgs-Code von: …" | Berater | n8n, Postmark *Leadgen* | n8n — **soll so** |
+> | „Dein Erfolgs-Code und dein Zugang" | Interessent | n8n, Postmark *Leadgen* | n8n — **soll so** |
+> | „Neuer Kontakteintrag" | Berater | ActiveCenter (`NotificationService`) | seit 31.08. `kartei_benachrichtigung=false` |
+> | „Neuer Kontakt aus: Business" | Berater | contacts selbst | `noemail` (alt) / `coach_email=false` (neu) |
+> | „Deine Anfrage zu unserer Geschäftsmöglichkeit" | Interessent | contacts selbst | `noemail` (alt) / `contact_email=false` (neu) |
 >
-> Das Quiz schickt `noemail: 1` mit, das blockt im alten Controller die unteren beiden.
-> Die **erste** blockt es nicht — ihr Aufruf steht bei `TypeformWebhookController.php:368`
-> ausserhalb jeder Prüfung, sie kommt also bis heute bei jedem Quiz-Lead an. Mit B5 hört
-> sie auf; über `/webhook/quiz` verschickt contacts **null** Mails (alle drei
-> Registry-Schalter `false`, im ausgelieferten Container nachgemessen, contacts `10e9251`).
+> 🔴 **Über `/webhook/quiz` verschickt contacts NULL Mails** — alle drei Registry-Schalter
+> stehen auf `false`, im ausgelieferten Container nachgemessen. Die zwei Mails eines Leads
+> kommen ausschliesslich aus n8n.
 >
-> ⚠️ **Korrektur:** In Plan B §5 stand, die Probe löse „Mail 1+2 an `info@global-sce.com`"
-> aus. Gemessen: Nur **eine** geht an den Berater, die andere an den **Interessenten**.
+> ⚠️ **Bis B5 bekommt der Berater weiterhin „Neuer Kontakteintrag"**, weil der Opt-in noch
+> über den alten Weg läuft und der Aufruf dort ausserhalb jeder `noemail`-Prüfung steht
+> (`TypeformWebhookController.php:368`). Mit B5 hört sie auf. Sie zusätzlich im alten
+> Controller abzuschalten wäre ein zweiter Eingriff auf demselben Versandweg, während der
+> Schattenlauf misst — Plan B §9b verbietet das.
 >
-> ⚠️ **Grenze der Zustellmessung:** Postmark beweist die Annahme durch den Mailhost, nicht
-> die Ablage im Postfach. Wer den EMPFANG beweisen will, nimmt ein echtes Postfach, keine
-> Plus-Adresse.
+> ### Werkzeuge, die es seit dem 31.08. gibt
 >
-> 🔴 Der vollständige, laufend gepflegte Stand liegt auf dem Arbeitszweig
-> `nurture-auf-plattform-db` — dort sind auch das Mailbild (`docs/MAILWEGE.md` §0) und der
-> Fortsetzungsplan nachgezogen.
->
-> ## 🟡 Nachtrag 31.08.2026, 18:00 MESZ — B4 läuft, der Schattenlauf ist scharf
->
-> `CONTACTS_QUIZ_MODUS=schatten` gesetzt, dazu Adresse und Geheimnis — B5 ist damit **eine
-> einzige** Env-Änderung. Der neue Weg **sendet nichts**.
->
-> **Am laufenden System bewiesen:** schreibende Probe `200 / case: neu / contact_id 3684234`,
-> Wiederholung ⇒ **`duplicate: true`** mit denselben Kennungen · 🔴 **K3 belegt** — die
-> Kartei-Zeile trägt `profile_label "Der Macher"`, `main_aspiration_label "Freiheit"`,
-> `barrier_slug`, `session_hash`, `berater_slug`, **nicht „Unbekannt"** · Post Processor
-> nimmt sie auf, Mail 1 + Mail 2 beide `ErrorCode 0` · Rang-Aktualisierer `matchedRows: 1` ·
-> Schattenzweig schreibt (isoliert gemessen), **0 Aufträge** · alle Probespuren entfernt.
->
-> **Zwei Werkzeuge:** `scripts/contacts-quiz-probe.js` (Trockenlauf ist Standard) und
-> `scripts/contacts-quiz-nachzaehlen.js` (§10-Zählung, liegt auf dem Wächter-Host).
->
-> 🔴 **Täglich, solange B4 läuft** — sonst misst der Schattenlauf ein leeres Fenster:
-> `contacts-quiz-nachzaehlen.js --modus schatten --ab 2026-09-01`. Ohne `--modus` sieht ein
-> **Totalausfall** genauso aus wie ein ruhiger Tag.
->
-> ⚠️ Probespuren: `lead_processing_jobs` bleibt **stehen**. Der Kandidaten-SELECT filtert
-> über `lpj.id IS NULL`, nicht über `deleted_at` — wer die Auftragszeile entfernt, macht die
-> weich gelöschte Kartei-Zeile wieder zum Kandidaten und die Mails gehen erneut raus.
->
-> ## 🟡 Nachtrag 31.08.2026 — B3 ist ausgeliefert, aber inaktiv
->
-> Der Absender an `contacts /webhook/quiz` liegt im Repo und läuft mit. **Er tut
-> nichts:** ohne `CONTACTS_QUIZ_MODUS` gilt der Standard `aus`, das Opt-in geht
-> unverändert über `forward_webhook` an die Bridge.
->
-> | Was | Wo |
+> | Werkzeug | Wozu |
 > | --- | --- |
-> | Der Vertrag (gilt, nicht §3 des Plans) | [contacts-quiz-webhook-vertrag.md](contacts-quiz-webhook-vertrag.md) |
-> | Absender | `server/legacy/kontakte.js` |
-> | Vertragspayload | `api/bridge.js`, `buildContactsQuizPayload` |
-> | Datenseite (angewandt und bewiesen) | `sql/contacts-quiz-uebergabe.sql`, Schema `leads` |
-> | Auftragsart `contacts_quiz_submission` | `api/lead-outbox-worker.js` |
-> | Wächterprüfung **W6** | `scripts/waechter-nurture.js` — 🔴 Serverkopie nachziehen |
+> | `scripts/contacts-quiz-probe.js` | Probe-Übermittlung mit dem **echten** Payload-Bau. Trockenlauf ist Standard. `--ueber-adapter` misst den Schattenzweig durch den echten Opt-in-Eingang |
+> | `scripts/contacts-quiz-nachzaehlen.js` | die §10-Zählung; liegt auch auf dem Wächter-Host |
+> | Wächter **W6** | tote Übergaben = ALARM, hängende und Protokollzeilen ohne Kennung = WARNUNG |
 >
-> 🔴 **Drei Abweichungen der Gegenstelle, beim Nachlesen gefunden:** Sie liest
-> `meta.survey` (nicht `meta.quiz`), erwartet den Kopf `X-Quiz-Signature`, und sie
-> spiegelte `meta` **nicht** nach `form_response.hidden`. Das Dritte hätte beim
-> Umschalten „Unbekannt" statt Profil und Ziel in Mail 1 und Mail 2 gestellt — ohne
-> jede Meldung. Behoben im contacts-Repo (`721f525`, ausgeliefert), Hergang in
-> [uebergaben/2026-08-31-contacts-hidden-abbildung.md](uebergaben/2026-08-31-contacts-hidden-abbildung.md).
+> ### Was am 31.08. bewiesen wurde (alles am laufenden System)
 >
-> **Nächster Schritt: B4** — `CONTACTS_QUIZ_MODUS=schatten`, mehrere Tage messen.
-> Reihenfolge und Tore: [plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md) §0a.
+> <details><summary>Die Beweiskette im Einzelnen</summary>
+>
+> | Beweis | Ergebnis |
+> | --- | --- |
+> | Schreibende Probe über `/webhook/quiz` | `200`, `case: neu`, `contact_id 3684234`, `survey_id 43215`, `coach_member_id 25851739` |
+> | Wiederholung mit demselben Rumpf | **`duplicate: true`** mit denselben Kennungen — Idempotenz greift |
+> | 🔴 **K3** | `hidden` der Kartei-Zeile trägt `profile_label "Der Macher"`, `main_aspiration_label "Freiheit"`, `barrier_slug`, `session_hash`, `berater_slug` — **nicht „Unbekannt"** |
+> | Post Processor (Plan B §5) | nimmt die Zeile im nächsten Lauf auf, Modell trägt das richtige Profil |
+> | Mails | beide `ErrorCode 0`; eine an den Berater, **eine an den Interessenten** |
+> | Rang-Aktualisierer (§6) | `matchedRows: 1`, `points_result` in der Kartei gesetzt |
+> | Schattenzweig (§9a) | schreibt `status='schatten'` mit vollem Payload, 0 Aufträge |
+> | Datenseite | `sql/contacts-quiz-uebergabe.sql` angewandt, Funktionsbeweis mit `ROLLBACK`, danach 0/0/0 |
+> | Probespuren | Kartei weich gelöscht, Mautic entfernt, Plattform-DB bereinigt |
+>
+> ⚠️ Die `lead_processing_jobs` der Proben **bleiben absichtlich stehen**: Der
+> Kandidaten-SELECT filtert über `lpj.id IS NULL`, **nicht** über `deleted_at`. Wer sie
+> entfernt, macht die weich gelöschte Kartei-Zeile wieder zum Kandidaten — und die Mails
+> gehen erneut raus. Gilt für jede künftige Probe.
+>
+> </details>
+>
+> ### Drei Fehler dieses Tages, festgehalten statt weggelassen
+>
+> <details><summary>Weil jeder davon wiederkommen kann</summary>
+>
+> 1. **SQL als zusammengesetzte Zeichenkette.** Der erste Funktionsbeweis ging als
+>    JS-Template an `psql`; dabei gingen die Backslashes der `\echo`-Zeilen verloren,
+>    `BEGIN` lief ins Leere und einzelne Anweisungen wurden **autocommittet** — obwohl am
+>    Ende ein `ROLLBACK` stand. Zurück blieben genau zwei Zeilen, beide aus demselben Lauf,
+>    beide gezielt entfernt (`lead_state` 6385 → 6384).
+>    **Lehre: SQL geht nur noch als Datei über base64.** Das ist Falle 10 in neuer
+>    Verkleidung.
+> 2. **Eine Probe, die anders aussieht als der Ernstfall.** Die Probe über `--ueber-adapter`
+>    schickte `variables` nicht mit, also auch kein `noemail: 1` — und löste über den alten
+>    Weg zwei Mails aus, die der echte Funnel nie verschickt. Kein Systemfehler, ein
+>    Werkzeugfehler. Ein Test hält die Probe-Variablen jetzt gegen die des Browsers.
+> 3. **Ein Test, der nichts prüfte.** Die Abschaltung von „Neuer Kontakteintrag" sollte über
+>    `Http::assertNothingSent()` belegt werden — aber die Benachrichtigung geht über
+>    `dispatch(closure)`, und mit `Queue::fake()` wird die Closure nie ausgeführt. Der Test
+>    wäre **immer** grün gewesen. Aufgefallen ist es nur, weil der Gegentest durchfiel.
+>    Jetzt prüfen beide Richtungen die Einreihung.
+>
+> Dazu ein Befund über den Beobachtungsweg: Die Interessenten-Mail der dritten Probe ist im
+> Postfach nicht sichtbar geworden, obwohl Postmark sie als zugestellt führt (250 OK vom
+> Mailhost, kein Bounce, keine Sperre). Was hinter der Annahme im Postfach passiert, ist von
+> aussen **nicht** messbar. Für den Funnel folgenlos — echte Interessenten haben dieselbe
+> Mail am selben Tag bekommen. **Wer den Empfang beweisen will, nimmt ein echtes Postfach,
+> keine Plus-Adresse.**
+>
+> </details>
+>
+> Vollständiger Fortsetzungsplan, Tore und offene Entscheidungen:
+> **[plans/umsetzung-uebersicht.md](plans/umsetzung-uebersicht.md)** §0 und §0a ·
+> Vertrag: **[contacts-quiz-webhook-vertrag.md](contacts-quiz-webhook-vertrag.md)** ·
+> Mailbild: **[MAILWEGE.md](MAILWEGE.md)**
+>
+> ### Nurture: nachgemessen am 31.08. abends
+>
+> Der Versand ist **gesund** — alle 2 h, alle Läufe grün, 914 von 1118 Menschen haben
+> mindestens eine Mail. Der Augustvorfall ist in der Kurve sichtbar (20.–25.08. Stillstand)
+> und am 26.08. mit 137 Mails abgearbeitet; die 125 am 29.08. sind die Aktivierung der
+> zweiten Erinnerungen, kein zweiter Vorfall.
+>
+> Die Dauerwarnung des Wächters („9 fällige ohne Mail") ist vollständig aufgeklärt:
+> 4× keine Vorlage in ihrer Sprache · 4× im Mautic angehalten · 1× kein Mautic-Kontakt.
+> **Kein technischer Ausfall.**
+>
+> ✅ **Am 01.09. nachgemessen — es hat getragen.** Der erste Lauf nach der Änderung
+> erreichte alle vier: Judit Mária und Csilla (hu), Andrii (ru), El Mehdi (fr) — über
+> Postmark als zugestellt bestätigt, **zwei davon geöffnet**. Eine fünfte ging an den
+> ungarischen Lead, der auf `c1` weitergerückt ist. Keine neuen Abbruchgründe, Deutsch
+> unverändert, W2 von **9 auf 5** Warnfällen gefallen.
+>
+> ✅ **Die Sprachlücke ist geschlossen.** Die Strecke kannte nur `de`, `it`, `en`; sieben
+> Menschen in `hu`/`fr`/`ru` fielen strukturell durch. Jetzt gibt es für diese drei je eine
+> generische Vorlage pro Phase — **24 neue Mautic-Vorlagen (162–185)**, `SUPPORTED_LANGS`
+> erweitert, Rückfall auf `_single`. Damit werden **vier** der neun Warnfälle erreichbar;
+> die übrigen fünf bleiben zu Recht draußen (vier im Mautic angehalten, einer ohne
+> Mautic-Kontakt) und gehören in die Wächter-Baseline.
+>
+> 🔴 **Offen: muttersprachliche Gegenlese.** Die Übersetzungen sind nicht gegengelesen —
+> bei Verkaufstext fängt kein Test den Fehler. Die betroffenen Berater sind selbst
+> Muttersprachler (`wellnesskurs` für hu, `fit` für ru). Rückweg: Sprache aus
+> `SUPPORTED_LANGS` nehmen, die Vorlagen bleiben stehen.
+>
+> ⚠️ **Vermerk für später:** Das ist bewusst die vereinfachte Fassung („Version A", eine
+> Vorlage je Phase statt vier Varianten). Bekommt eine Sprache Volumen, gehört sie auf die
+> Tiefe von Deutsch — der Rückfall erlaubt das **schrittweise**, ohne Umstellung.
+>
+> Vollständig: [audits/2026-08-31-nurture-standortbestimmung.md](audits/2026-08-31-nurture-standortbestimmung.md)
+>
+> ### Was weiterhin bei Markus liegt
+>
+> 1. **Telefonlücke** (Übersicht §2a): entschieden „wiederholen" — noch **nicht gebaut**.
+>    Betrifft erst Strang M.
+> 2. **Mautic-Geheimnis rotieren** (M8): stand im Klartext im Repo und damit in der
+>    Git-Historie; Schwärzen entfernt es dort nicht.
+> 3. **Rotation des geteilten Contacts-Geheimnisses** — Sache des contacts-Projekts.
 
-**Letzte Aktualisierung: 28.08.2026, nachts — nach dem vollständigen Audit.**
+
+**Letzte inhaltliche Überarbeitung: 28.08.2026, nachts — nach dem vollständigen Audit.**
 Alle Zahlen in diesem Dokument sind am 27.08. abends **neu gemessen**, nicht übernommen. Dieses Dokument ist der Einstieg für jede
 neue Sitzung: Es beschreibt, wo das System steht, was zuletzt passiert ist, welche
 Entscheidungen gelten, welche Fallen bekannt sind — und wie es konkret weitergeht.
 Zeiten sind MESZ, sofern nicht anders angegeben.
 
 > Regeln zuerst: `AGENTS.md` (dieses Repo) und die globale Governance in
-> `D:\OneDrive\Antigravity Laptop\agent-core\governance\GOVERNANCE_RULES.json`.
+> `D:\Antigravity_Projects\agent-core\governance\GOVERNANCE_RULES.json`.
 > 🔴 R0 gilt immer: keine Eile, alles prüfen, nie gegen echte Daten testen.
 
 > ## 🔴 Zuerst lesen: der Cutover ist erfolgt
@@ -127,12 +236,22 @@ Zeiten sind MESZ, sofern nicht anders angegeben.
 > über `supabaseJson`/`patchByEquals`/`insertIgnoringDuplicates`, mit zwei Tests als
 > Wächter dagegen.
 >
-> **Weiter offen:** Nurture-Sender auf `leads_n8n` umbauen (bleibt bis dahin aus,
-> Wächter W2 schlägt erwartungsgemäß an) · `AC - Error Alert` schreibt weiterhin
+> **✅ Korrektur vom 28.08. nachmittags:** Der **Nurture-Sender läuft bereits auf der
+> Plattform-DB**. Am n8n-Workflow `AC - Quiz Nurture Email Sender` (`RqKSRTgFv8mv04H2`)
+> nachgemessen: Zugangsdaten «Plattform-DB leads_n8n (hl_support)», SQL auf
+> `leads.lead_events` und `leads.record_nurture_sent`, letzter Lauf 28.08. 14:00 (179 s).
+> Die Knoten **heißen** noch „Supabase - …" — das ist nur der Name, nicht das Ziel.
+> Frühere Fassungen dieses Dokuments und die Commit-Nachricht von `4d72f7c`
+> („noch NICHT aktiviert") sind damit überholt.
+>
+> **Weiter offen:** `AC - Error Alert` schreibt weiterhin
 > nach Supabase · Test-DB `business_leads_testimport` löschen · `pgss-monatsreset`
 > reparieren · der **finale CTA nach den Videos** ist nicht automatisiert geprüft
 > (siehe [BROWSERWEG-KETTENTEST](BROWSERWEG-KETTENTEST.md)) · Vercel-Projekt ist
-> **pausiert, aber nicht abgebaut** (vier Domains hängen noch daran).
+> **pausiert, aber nicht abgebaut** (vier Domains hängen noch daran) · 🔴 **neu:** der
+> **Benachrichtigungsweg hängt noch an der Legacy-MySQL** — siehe
+> [MAILWEGE.md](MAILWEGE.md) und den Plan
+> [benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md).
 
 ---
 
@@ -642,10 +761,11 @@ Dokumentation übernommen. Reihenfolge: nach Dringlichkeit.
 
 | # | Punkt | Warum |
 | --- | --- | --- |
-| 7 | **Nurture-Sender umbauen** — 6 Nodes von HTTP auf Postgres (`leads_n8n`) | Netzweg steht seit 27.08.; der Umbau wird *einfacher*, weil die Blätterungslogik entfällt |
-| 8 | **`AC - Error Alert` umstellen** (RPC `record_nurture_failure`) | 🔴 der **Alarmkanal** — zeigt sonst auf die alte Instanz |
-| 9 | `Supabase Keep-Alive` und `AC - Quiz Video Inactivity Checker` (inaktiv) | dieselbe Credential, dieselbe alte Instanz |
-| 10 | **Wächter W2 wird anschlagen**, solange der Versand steht | gewollt; dem Bereitschaftshabenden muss es bekannt sein |
+| 7 | ~~**Nurture-Sender umbauen**~~ → ✅ **erledigt und live** (nachgemessen 28.08. 15:00) | Zugangsdaten «Plattform-DB leads_n8n (hl_support)», SQL auf `leads.*`, letzter Lauf 14:00. Die Knotennamen tragen noch „Supabase - …" — nur Namen, nicht das Ziel |
+| 8 | ~~**`AC - Error Alert` umstellen**~~ → ✅ **erledigt und live** (nachgemessen 28.08.) | Workflow `vSpXIyOUK9WIlvxi`, Knoten „Supabase - Log Nurture Failure" trägt die Zugangsdaten «Plattform-DB leads_n8n (hl_support)» und ist **nicht** abgeschaltet. Auch hier: nur der Knotenname ist alt |
+| 9 | `Supabase Keep-Alive` (`CODeVYeZ_63C-DoT4Z8SN`) und `AC - Quiz Video Inactivity Checker` (`ie2WEc1RmFhN5LQf`) | **beide inaktiv**, tragen aber weiterhin «Supabase Stats_Logs (service role)». Nachgemessen 28.08.: es sind die **einzigen** von 86 Workflows mit Supabase-Spur. Workflows und danach die Zugangsdaten löschen |
+| 10 | ~~**Wächter W2 wird anschlagen**, solange der Versand steht~~ → der Versand läuft; W2 meldet am 28.08. weiterhin **9 fällige Erstempfänger** — das ist ein **eigener** Befund (Sendegrenze 5 je Lauf), nicht der stehende Versand | gehört getrennt nachgegangen |
+| 10b | 🔴 **Benachrichtigungsweg (Opt-in-Mail) hängt noch an der Legacy-MySQL** | `AC - Lead Post Processor` pollt alle 5 Min `prod_contacts_activesupport.typeform_surveys`. Widerspricht Entscheidung 3 („Outbox ist der **einzige** Übergabepunkt"). Karte: [MAILWEGE.md](MAILWEGE.md) · Plan: [plans/benachrichtigungsweg-auf-plattform.md](plans/benachrichtigungsweg-auf-plattform.md). **Stand 31.08.:** die *Berateridentität* ist der erste gelöste Teilstrang — B1 ausgeliefert (`6688a05`), B2 im Schattenlauf, B3/B4 offen. Der Postprozessor-Poll selbst ist davon **unberührt** |
 
 ### Danach
 
@@ -658,6 +778,75 @@ Dokumentation übernommen. Reihenfolge: nach Dringlichkeit.
 | 15 | `supabase-lead-system-v2.sql` bereinigen (`lead_access_permissions` streichen) | Entscheidung 4 |
 | 16 | **PgBouncer**, sobald das dritte Projekt kommt · **cx32** vor der Kontakte-Migration | RAM ist der Engpass, nicht die Platte |
 | 17 | Alten Eingang „Landing Page Business" abbauen · Empfehlung an FitApp: Schema `marathon` → `fitapp` | Entscheidung 12 |
+
+---
+
+## 8c. Restweg zu 100 % eigener Infrastruktur (erhoben 28.08.2026)
+
+Ziel: **alles auf Hetzner, Vercel und Supabase raus** — Funnel *und* Nurture.
+Jede Zeile ist gemessen, nicht aus der Doku übernommen.
+
+### Was bereits auf eigener Infrastruktur läuft
+
+| Baustein | Wo | |
+| --- | --- | --- |
+| Funnel-App | Coolify, `167.233.251.217` | ✅ |
+| Lead-Daten | Postgres 18 `hl_support`, `91.99.76.104` | ✅ |
+| Legacy-Kontaktkartei | MySQL, **dieselbe** Maschine | ✅ |
+| n8n | `46.224.76.193` | ✅ |
+| **Mautic** | `46.224.76.193` — kein Fremddienst | ✅ |
+| Nurture-Versand | n8n → Plattform-DB `leads.*` | ✅ live |
+| Error-Alert | n8n → Plattform-DB | ✅ live |
+| Postmark | SaaS, Server **`Leadgen`** | bleibt — Mailversand baut man nicht selbst |
+
+### A — Supabase raus
+
+| # | Punkt | Stand 28.08. |
+| --- | --- | --- |
+| A1 | ~~**Laufzeitcode entkoppeln**~~ | ✅ **erledigt 29.08.** Alle fünf Dateien laufen modusbewusst; danach `SUPABASE_*` aus Coolify entfernt. Nachgemessen am 30.08.: **0** solcher Variablen im Produktionscontainer, `/health/ready` meldet `quelle: plattform` |
+| A2 | ~~Zwei tote Workflows + Zugangsdaten löschen~~ | ✅ **erledigt**: `Supabase Keep-Alive` und `AC - Quiz Video Inactivity Checker` gelöscht, danach **beide** service-role-Zugangsdaten. Nachgemessen: **0 von 84** Workflows haben noch eine Supabase-Spur. Rückweg: `n8n/export-2026-08-28/` |
+| A3 | ~~**Fremdleser auf Postgres umhängen**~~ | ✅ **erledigt 29.08.** Für dieses Projekt gibt es keinen Supabase-Leser mehr: Container ohne `SUPABASE_*`, n8n mit **0 von 86** Workflows mit Supabase-Spur (30.08. nachgemessen). Der große Rest der damals gezählten 14.046 Zugriffe (`cron_runs`, Webhook-Verbund) gehörte **anderen Systemen** und läuft dort weiter |
+| A3a | 🔴 **Falle: die Edge-Log-Abfrage lügt still** | Eine Abfrage mit `cross join unnest(t.metadata) … unnest(m.request)` und `order by … limit N` lieferte **0 Zeilen** für ein Fenster, in dem `select count(*) from edge_logs` **14.046** meldete. Wer nur die erste Form nutzt, schliesst „niemand greift mehr zu" — und liegt falsch. **Immer zuerst gegenzählen** und die Abfrage an einem Fenster prüfen, in dem garantiert Verkehr war |
+| A4 | ~~**Business-Kalkulator** auf Coolify **und** Postgres~~ | ✅ **KOMPLETT erledigt 29.08.** (Freigabe Markus). Läuft als Coolify-App `kalkulator` unter **`kalkulator.hl-support.biz`** im direkten Modus (eigene Rolle `leads_kalk`, Limit 4). Schritt 6: SSO-Linkziel im Online-Support per `SSO_ERFOLGS_URL` umgestellt (Laufzeit-Beweis via artisan im neuen Container), Schlüsselpaar-Beweis, SSO-Flow-Probe inkl. Replay-Schutz und DB-Zeile, SSO-Delta dreimal gemessen = **0** (nichts nachzuziehen; Endstand Supabase 854 / Plattform 855), Vercel-Projekt `zzz-stillgelegt-…`, alte Domain gelöscht → 404. Abnahme zweimal über Zeit. 🔴 Nebenbefund behoben: CRM-Speichern war auf Vercel seit der Schreibbarriere kaputt (42501) — auf der Plattform wieder funktionsfähig. Beweise: **Business_Kalkulator/UMZUG-COOLIFY-POSTGRES.md §5b** |
+| A4a | ✅ **Datenlücke geschlossen: `sso_token_consumptions`** | 🔴 Die Tabelle **fehlte auf der Plattform**, obwohl der Kalkulator hineinschreibt (`api/sso.js:42`). Sie ist der **Replay-Schutz der SSO-Token** — ohne sie wäre ein Token nach dem Umzug mehrfach einlösbar. Angelegt in `leads` (Eigentümerin `leads_owner`, Rechte deckungsgleich mit `lead_contact_crm`), **854 Zeilen übernommen**, Zeitstempel identisch. `lead_contact_crm` war bereits vollständig: 41 Zeilen beidseitig gleich |
+| A4b | 🔴 **Die Schreibbarriere hat diese Tabelle NICHT erfasst** | Gemessen am 28.08. um 20:08 MESZ: die neueste Zeile in **Supabase** war **von diesem Moment** — der Kalkulator schrieb also nach dem Cutover weiter dorthin, erfolgreich. „Supabase ist eingefroren" gilt für `lead_state` und `lead_events`, **nicht** für alles. Beim Umschalten des Kalkulators müssen die seither entstandenen Zeilen nachgezogen werden |
+| A4c | **Anwendung umstellen** — Vercel/Supabase → Coolify/Postgres | 🔴 **Vercel kann die Plattform-DB gar nicht erreichen** (pg_hba lässt nur 10.0.1.5 zu). Umzug auf Coolify ist **Voraussetzung**, nicht Alternative. Vollständiger Plan mit Beweisen je Schritt: **Business_Kalkulator/UMZUG-COOLIFY-POSTGRES.md** |
+| A4d | ~~Lücken im Übersetzer~~ | ✅ **erledigt 28./29.08.** — es waren **vier**, nicht zwei: `not.`-Negation, `offset` (Obergrenze 10000), **`or=(…)`** (von `coachPostgrestFilter` genutzt, war vom `not.`-Fehler verdeckt) und 🔴 **Boolean-Filter**: postgres.js serialisiert für boolean-Spalten jeden Nicht-`true`-Wert zu `'f'` — `manual_added=eq.true` als String-Parameter wurde **still invertiert** (falsche Zeilen, am Kalkulator gemessen). Fix: `eq.true/false` → echte Booleans. Alles im Quiz-Repo mit Tests (`postgrest-nach-sql.kalkulator.test.js` beweist die zeichengleichen Kalkulator-Abfragen), Kopie im Kalkulator mit Drift-Wächter-Test. Das Quiz selbst nutzt keine Boolean-Filter (ausgezählt) — Produktion war nicht betroffen |
+| A4e | ~~Vercel-Projekt des Quiz~~ | ✅ **stillgelegt 29.08.**: Projekt hiess weiter `business_leads_quiz` und **baute bei jedem Push auf `main` weiter** (gemessen: Prod-Deploy 28.08. durch die Umzugs-Commits — Zombie ohne Domains). Umbenannt in `zzz-stillgelegt-business-leads-quiz`, **Git-Verknüpfung per API gekappt** (`DELETE /v9/projects/<id>/link`). Ebenfalls 29.08.: `ac-email-review` → `zzz-stillgelegt-ac-email-review` (seit B2 durch `nurture-review` auf Coolify ersetzt, letztes Deploy 29.05.) |
+| A5 | ~~**Test-DB `business_leads_testimport` löschen**~~ | ✅ **erledigt 30.08.** Inhalt vor dem Löschen protokolliert: 18 Tabellen, größte `lead_events` 108.445 Zeilen, **1.236 Adressen / 1.095 eindeutige**. Nur die **Struktur** gesichert (`/root/testdb-abschied-20260830/struktur.sql`, sha256 im Manifest) — die Adressen sollten ja gerade weg. Danach `dropdb`; auf dem Server liegen jetzt nur noch `hl_support` und `postgres`. Die drei Skripte `phase5-datenprobe.js`, `phase5-testimport-vergleich.js` und `stufe-b-beweis.js` sprechen die DB an, werden aber **nirgends automatisiert aufgerufen** (geprüft: keine CI-, npm- oder Shell-Verwendung) |
+
+🔴 **Das Supabase-Projekt selbst kann nicht weg**, solange **Marathon** dort liegt
+(Entscheidung 10: tabu). Erreichbar ist „das Quiz benutzt Supabase nicht mehr" —
+nicht „Supabase ist gelöscht".
+
+### B — Vercel raus
+
+| # | Punkt | Stand |
+| --- | --- | --- |
+| B1 | Pausiertes Vercel-Projekt endgültig löschen | offen — aber ungefährlich: `zzz-stillgelegt-business-leads-quiz` ist **pausiert, ohne Git-Verknüpfung und ohne Domains** (30.08. nachgemessen). Nur noch Kosmetik |
+| B2 | ~~Review-App `ac-email-review` auf Coolify~~ | ✅ **erledigt 28.08.** — läuft unter **`https://nurture-review.hl-support.biz`** (Coolify-App `nurture-review`, UUID `e20rigehi49gkdzmrzcwptds`, nixpacks, Basisverzeichnis `/nurture/review-app`, Zweig `nurture-auf-plattform-db`). DNS über Cloudflare, **DNS-only**. Abnahme zweimal über Zeit: ohne Zugangsdaten 401 (auch auf `/api/email/48`), falsches Passwort 401, falscher Benutzer 401, richtige Zugangsdaten 200 und API liefert Mautic-Inhalt. Zugang in `agent-secrets.json` → `leadgen_review`. **Damit ist das Nurture-System frei von Vercel** |
+| B2a | ✅ **erledigt 28.08.** Offener Schreibzugriff der Review-App geschlossen | Vercels eigener Schutz war auf diesem Tarif nicht verfügbar (`428` bei `ssoProtection` **und** `passwordProtection`; die Einstellung stand auf `all_except_custom_domains` — deshalb war ausgerechnet die Produktions-URL offen). Deshalb die aktive Auslieferung gelöscht. Zweimal über Zeit gemessen: `GET /api/email/48` von **200 auf 404**, Startseite 404, die 14 übrigen Auslieferungen 302 (Vercel-SSO). Code-seitig schützt jetzt `nurture/review-app/middleware.js` fail-closed, mit 7 Tests |
+| B2b | 🔴 **`MAUTIC_PASS` rotieren — offen, bewusst zurückgestellt** | Das Mautic-`admin`-Passwort lag hinter der offenen App **und** steht im Klartext in der Git-Historie (drei Python-Dateien, am 28.08. gepusht; aus dem Arbeitsbaum entfernt, aus der Historie nicht). **Entscheidung Markus am 28.08.: nicht rotieren.** Damit ist dasselbe Passwort auch in der neuen Coolify-Auslieferung im Einsatz. Der Zugang von aussen ist zu — wer die Repo-Historie liest, hat es trotzdem. Bleibt offen |
+| B3 | ~~Vier Domains vom Vercel-Projekt lösen~~ | ✅ **erledigt 29.08.** — das Projekt trägt keine Domain mehr |
+
+### C — Der letzte Legacy-MySQL-Knoten
+
+| # | Punkt | Stand |
+| --- | --- | --- |
+| C1 | **Benachrichtigungsweg auf die Plattform** — `AC - Lead Post Processor` pollt alle 5 Min `prod_contacts_activesupport.typeform_surveys` und verschickt von dort Opt-in- und Zugangsmail | **Schritt 1 von 7 erledigt 30.08.**: Es sind nicht dreimal 87.000 Zeichen, sondern **eine** Bibliothek (1.708 Zeilen, 53 Funktionen) und drei Treiber (3 / 4 / 47 Zeilen). 🔴 Zwei Fassungen im Umlauf — zwei Knoten laufen auf der älteren. Befund: [audits/c1-postprocessor-extrakt/BEFUND.md](audits/c1-postprocessor-extrakt/BEFUND.md). Schritte 2–7 offen; Schritt 4 verlangt einen 48-Stunden-Schattenlauf |
+
+### D — Zusammenzug und Kleinkram
+
+| # | Punkt | Stand |
+| --- | --- | --- |
+| D1 | ~~Nurture-System ins Repo~~ | ✅ **erledigt 28.08.**: `nurture/` (39 Dateien), alte Ablage → `zzz-Leads_quiz_Nurture-abgeloest-2026-08-28`. Vollständigkeit per SHA-256 über alle 42 Dateien geprüft |
+| D2 | ~~n8n-Definitionen versionieren~~ | ✅ **erledigt**: `n8n/export-2026-08-28/`, zehn Workflows |
+| D3 | ~~Postmark-Server umbenennen~~ | ✅ **erledigt**: `Typenanalyse` → `Leadgen`, Token unverändert |
+| D4 | ~~Postmark-Tags~~ | ✅ **erledigt**: sechs Tags, vier im Repo, zwei in n8n |
+| D5 | 47 Fremdmails (6 % des `Leadgen`-Servers) auf `Admin` umziehen | offen |
+| D6 | `activecenter.info`: DKIM einrichten **oder** Signatur `support@activecenter.info` entfernen | offen — sendet heute nichts von dort, geladene Waffe |
+| D7 | Drei OneDrive-Konfliktkopien in `nurture/review-app/_konflikte-onedrive/` auflösen | offen — **vor** dem Neudeploy der Review-App, siehe `nurture/README.md` |
+| D8 | ~~`pgss-monatsreset`~~ · Outbox-Worker-Secret aus dem Query-String · `supabase-lead-system-v2.sql` bereinigen | ✅ **Cron-Job erledigt 30.08.**: Der Job zeigte auf die Datenbank **`fitapp`**, die es auf diesem Server nicht mehr gibt — der nächste fällige Lauf am 01.09. wäre daran gescheitert. Neu als **`pgss-wochenreset`** in `hl_support`, sonntags 03:15. Warum wöchentlich: gemessen **4.782 von 5.000 Einträgen nach 11 Tagen (95,6 %)** — monatlich stünde die Tabelle zwei Drittel des Monats voll und verdrängte. Rückweg: `cron.alter_job(<id>, schedule := '15 3 1 * *')`. Die übrigen zwei Punkte bleiben offen |
 
 ### Dokumentation — im Audit gefunden und bereits korrigiert
 

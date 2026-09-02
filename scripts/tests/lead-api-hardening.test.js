@@ -104,6 +104,39 @@ test('erlaubtes Event wird unveraendert verarbeitet', async () => {
   });
 });
 
+test('pending E-Mail-Korrektur speichert den Kontakt ohne Versand-Sync', async () => {
+  await withSupabaseMock(async (calls) => {
+    const response = await track({
+      lead_hash: LEAD_HASH,
+      event_name: 'email_correction_pending',
+      payload: {
+        lead_hash: LEAD_HASH,
+        first_name: 'Christine',
+        email: 'christineschuster14@gmail.com.com',
+        selected_answers: [{ question_ref: 'q1', answer_ref: 'a1' }],
+        profile_code: 'wind',
+        lang: 'de',
+      },
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(insertedEvents(calls)[0].event_name, 'email_correction_pending');
+    const statePatch = calls.find(
+      (call) => call.path.includes('lead_state?') && call.method === 'PATCH'
+    );
+    assert.ok(statePatch, 'Lead State muss vor der Rueckfrage gespeichert werden');
+    assert.equal(
+      JSON.parse(statePatch.body).lifecycle_stage,
+      'contact_known_pending_email_correction'
+    );
+    assert.equal(
+      calls.some((call) => call.path.includes('rpc/enqueue_lead_sync')),
+      false,
+      'Pending-Korrektur darf noch keinen Versand-Sync ausloesen'
+    );
+  });
+});
+
 test('cta_click bleibt erlaubt - normalisiert wird vor der Allowlist', async () => {
   await withSupabaseMock(async (calls) => {
     const response = await track({
@@ -114,6 +147,19 @@ test('cta_click bleibt erlaubt - normalisiert wird vor der Allowlist', async () 
 
     assert.equal(response.statusCode, 200);
     assert.equal(insertedEvents(calls)[0].event_name, 'cta_clicked');
+  });
+});
+
+test('result_viewed ist erlaubt - Messpunkt der Ergebnisseite (Conversion-Plan AP6)', async () => {
+  await withSupabaseMock(async (calls) => {
+    const response = await track({
+      lead_hash: LEAD_HASH,
+      event_name: 'result_viewed',
+      payload: { lead_hash: LEAD_HASH },
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(insertedEvents(calls)[0].event_name, 'result_viewed');
   });
 });
 

@@ -1,6 +1,6 @@
 # Nurture-Versand — Betriebsregeln
 
-Stand 28.08.2026 (§4b und W4/W5 vom 27.08.) · Kanonische Fassung. Das Verzeichnis `Leads_quiz_Nurture` ist **kein
+Stand 31.08.2026 (§3a Strecke und Sprachen, W6 vom 31.08.; §4b und W4/W5 vom 27.08.) · Kanonische Fassung. Das Verzeichnis `Leads_quiz_Nurture` ist **kein
 Git-Repository**; die dortige `README.md` verweist hierher, damit diese Regeln versioniert
 sind und einen Versehensfall überleben.
 
@@ -92,6 +92,129 @@ Versand komplett; der Fehler muss im Alarm-Workflow ankommen.
 Berater, nicht Kontakte, und es gibt keine Spalte, die festhält, wer gehandelt hat. Wer
 wissen will, ob sich jemand selbst ausgetragen hat, muss Mautic als zweite Quelle
 danebenlegen (`lead_donotcontact`).
+
+---
+
+## 3a. Die Strecke selbst — Phasen, Varianten, Sprachen
+
+*Ausgezählt am 31.08.2026 am laufenden Workflow und an `leads.lead_events`. Vollständige
+Standortbestimmung: [audits/2026-08-31-nurture-standortbestimmung.md](audits/2026-08-31-nurture-standortbestimmung.md).*
+
+**Neun aktive Phasen** (seit 01.09.2026, `a1` aus dem Conversion-Plan AP5). Die
+Bestandsphasen fächern nach **einer** Dimension in vier Varianten auf; `a1` ist
+bewusst variantenlos — EINE generische Fassung je Sprache, in allen sechs:
+
+| Phase | Auslöser | Auffächerung nach |
+| --- | --- | --- |
+| `a1` | 2–24 h nach Opt-in, kein `video_started`, nur 08–21 Uhr Berlin | keine (generisch, Mautic 186–191) |
+| `a2` | 12 h nach Opt-in, kein Video | Hauptziel (`freedom`, `impact`, `security`, `growth`) |
+| `a3` | 48 h nach `a2`, tagsüber | Barriere (`vehicle`, `community`, `confidence`, `opportunity`) |
+| `b1` | 24 h nach Video 1 | Profil (`feuer`, `wind`, `wasser`, `fels`) |
+| `b2` | 48 h nach `b1`, tagsüber | Profil |
+| `c1` | 24 h nach Video 2 | Hauptziel |
+| `c2` | 48 h nach `c1`, tagsüber | Profil |
+| `d1` | 12 h nach Video 3, kein CTA | Hauptziel |
+| `d2` | 48 h nach `d1`, tagsüber | Barriere |
+
+🔴 **`a4` und `a5` stehen NICHT in `ACTIVE_PHASES`** — sie werden in **keiner** Sprache
+verschickt, auch nicht in Deutsch. Die Vorlagen liegen in Mautic, aber der Sender kennt
+sie nicht. Wer die Strecke verlängern will, aktiviert sie zuerst dort.
+
+**Sprachen und Vorlagen** (`EMAIL_MAP` im Knoten `Code - Select Email ID`):
+
+| Sprachen | Tiefe | Vorlagen je Sprache |
+| --- | --- | --- |
+| `de`, `it`, `en` | vier Varianten je Phase, `a1` generisch | 38 (inkl. der inaktiven `a4`/`a5`) |
+| `hu`, `fr`, `ru` | **eine generische Fassung je Phase** | 9 (Mautic 162–185 + `a1` 189–191) |
+
+`a1`-Texte: `nurture/vorlagen/a1-kein-videostart.js` (Lesefassungen
+`nurture/vorlagen/nurture-a1-<lang>.md`). Timing und Zielgruppe der Phase liegen
+im Sender (`Code - Determine Phase`): 2–24 h nach `form_submitted_at`, kein
+`video_started`, kein CTA, Fenster 08–21 Uhr Berlin, einmalig; `a2` (12 h)
+bleibt dahinter unverändert bestehen. Die 24-h-Obergrenze verhindert beim
+Scharfschalten einen Schwall an Altleads.
+
+Der Sender fällt auf die generische Fassung zurück:
+
+```js
+const emailId = EMAIL_MAP[phase]?.[lang]?.[variantKey]
+  ?? EMAIL_MAP[phase]?.[lang]?.['_single'];
+```
+
+### Warum die drei Sprachen nur generisch sind
+
+Bis zum 31.08.2026 kannte die Strecke ausschliesslich `de`/`it`/`en`. Sieben Menschen in
+`hu`/`fr`/`ru` bekamen deshalb **nie** eine Nurture-Mail — obwohl das Quiz alle 267
+Textschlüssel und die Opt-in-Mailvorlagen längst alle sechs Sprachen sprechen. Für sieben
+Empfänger vier Varianten je Phase auszuspielen, deren Wirkung sich bei der Menge ohnehin
+nicht messen lässt, wäre Aufwand ohne Erkenntnis gewesen — und jede künftige Textänderung
+ginge durch 96 statt 24 Vorlagen (Entscheidung Markus).
+
+⚠️ **Vermerk:** Bekommt eine dieser Sprachen Volumen, gehört sie auf die Tiefe von Deutsch.
+Der Rückfall macht das **schrittweise** möglich: Wer eine einzelne Variante nachträgt,
+überschreibt damit genau diese Kombination — ohne Umstellung, ohne Deploy.
+
+### Die Abbruchgründe — was der Sender protokolliert
+
+Jeder übersprungene Empfänger wird als `nurture_skipped` mit Grund festgehalten. **Diese
+Tabelle ist die erste Anlaufstelle, wenn jemand keine Mail bekommt:**
+
+| Grund | Heisst | Zu tun |
+| --- | --- | --- |
+| `dnc_unsubscribed` | abgemeldet oder hart gebounct | nichts — richtig so |
+| `nurture_stopped` | Mautic-Feld `ac_nurture_stopped` gesetzt | nichts, ausser das Feld war ein Versehen |
+| `unsupported_language:<x>` | keine Vorlage in dieser Sprache | Sprache ergänzen (unten) |
+| `contact_not_found` | kein Mautic-Kontakt zur Adresse | Kontakt anlegen lassen |
+| `no_email_id:<phase>/<lang>/<variante>` | 🔴 die Kombination fehlt in `EMAIL_MAP` | **sofort nachsehen** — das kostet still die ganze Strecke |
+| `already_sent:<phase>` | Phase steht schon in `ac_nurture_sent_phases` | nichts |
+| `no_coach_data` | `ac_berater_email` leer | Beraterdaten am Kontakt prüfen |
+| `resume_target_mismatch` | Wiederaufnahme-Link passt nicht | Einzelfall |
+
+Ablesen:
+
+```sql
+SELECT split_part(payload->>'reason', ':', 1) AS grundart,
+       count(*) AS eintraege, count(DISTINCT lead_hash) AS menschen, max(event_at)
+  FROM leads.lead_events WHERE event_name = 'nurture_skipped'
+ GROUP BY 1 ORDER BY 3 DESC;
+```
+
+🔴 **`no_email_id` verdient besondere Aufmerksamkeit.** Er traf im Sommer 30 Menschen,
+zuletzt am 26.08.2026 — der Schlüssel lautete `a2/de/` mit **leerer** Variante. Wer ihn
+wiedersieht, hat ein Loch in der Zuordnung, und die Betroffenen bekommen bis zur Behebung
+gar nichts.
+
+### Eine Sprache ergänzen oder abschalten
+
+**Abschalten** — eine Zeile, sofort wirksam, kein Datenverlust:
+Sprache aus `SUPPORTED_LANGS` im Knoten `Code - Select Email ID` entfernen. Die Vorlagen
+bleiben stehen und lassen sich jederzeit wieder zuschalten.
+
+**Ergänzen:**
+
+1. Texte in `nurture/vorlagen/generisch-hu-fr-ru.js` eintragen (Phasen **und** Rahmen).
+2. `node scripts/nurture-vorlagen-anlegen.js` — Trockenlauf, zeigt was entstünde.
+   `--zeige a2/hu` druckt das fertige HTML einer einzelnen Mail.
+3. `node scripts/nurture-vorlagen-anlegen.js --markdown` — Lesefassung für die Gegenlese.
+4. **Muttersprachlich gegenlesen lassen**, bevor irgendetwas gesendet wird.
+5. `--anlegen` erzeugt die Vorlagen in Mautic und druckt den Block für `EMAIL_MAP`.
+6. Workflow **über die n8n-API** ändern (`PUT`), nie per SQL — n8n hält die Definitionen im
+   RAM-Cache, ein direktes `UPDATE` wird vom laufenden Prozess ignoriert. Vorher sichern
+   nach `n8n/backups/`.
+
+🔴 **Das HTML-Gerüst wird zur Laufzeit aus einer bestehenden Vorlage geholt, nicht im Repo
+gehalten.** Eine Kopie wäre eine zweite Wahrheit: Ändert jemand das Layout in Mautic,
+entstünden ab dann Mails, die anders aussehen als alle anderen — und es fiele niemandem auf.
+
+⚠️ **Der Rahmen gehört mit übersetzt** — Beraterkasten, Abmeldelink, Impressum. Beim ersten
+Entwurf am 31.08. stand der Text ungarisch und der Rahmen deutsch. Eine halb übersetzte
+Mail ist schlechter als eine ganz fremdsprachige: Sie sieht aus wie ein Fehler, weil sie
+einer ist. Das Skript bricht deshalb ab, wenn es einen Rahmenbaustein nicht findet.
+
+Bewacht durch `scripts/tests/nurture-vorlagen-generisch.test.js`: kein zerbrochener
+Mautic-Platzhalter, gleiche Platzhalter wie in der deutschen Referenz, Rahmen nirgends
+deutsch geblieben — und die Lesefassung deckungsgleich mit der Quelle, damit niemand einen
+Text freigibt, der so gar nicht verschickt wird.
 
 ---
 

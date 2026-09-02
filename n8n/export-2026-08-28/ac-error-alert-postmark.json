@@ -1,0 +1,317 @@
+{
+  "updatedAt": "2026-08-28T12:38:24.296Z",
+  "createdAt": "2026-06-03T08:30:35.263Z",
+  "id": "vSpXIyOUK9WIlvxi",
+  "name": "AC - Error Alert (Postmark)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "err-trigger",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.postmarkapp.com/email",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "postmarkApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ From: 'Activecenter Alert <mail@mail.hl-support.biz>', To: 'markus@global-sce.com', Subject: ('?? n8n Fehler: ' + (($json.workflow && $json.workflow.name) || 'Workflow')), HtmlBody: ('<h2 style=\"color:#b00\">n8n Workflow-Fehler</h2>'   + '<p><b>Workflow:</b> ' + (($json.workflow && $json.workflow.name) || '?') + ' (' + (($json.workflow && $json.workflow.id) || '') + ')</p>'   + '<p><b>Fehler-Node:</b> ' + (($json.execution && $json.execution.lastNodeExecuted) || '-') + '</p>'   + '<p><b>Meldung:</b> ' + (($json.execution && $json.execution.error && $json.execution.error.message) || '-') + '</p>'   + '<p><b>Execution:</b> ' + (($json.execution && $json.execution.id) || '-') + '</p>'   + '<p><a href=\"' + (($json.execution && $json.execution.url) || '#') + '\">In n8n oeffnen</a></p>'), TextBody: ('n8n Fehler in ' + (($json.workflow && $json.workflow.name) || '?') + ' / Node ' + (($json.execution && $json.execution.lastNodeExecuted) || '-') + ': ' + (($json.execution && $json.execution.error && $json.execution.error.message) || '-')), MessageStream: 'outbound'}) }}",
+        "options": {}
+      },
+      "id": "pm-send",
+      "name": "Postmark - Send Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        300
+      ],
+      "credentials": {
+        "postmarkApi": {
+          "id": "KJgdnWx7t6eirqzo",
+          "name": "Postmark Typenanalyse"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "business-nurture-workflow-only",
+              "leftValue": "={{ $json.workflow.id }}",
+              "rightValue": "RqKSRTgFv8mv04H2",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "filter-business-nurture-workflow",
+      "name": "Filter - Business Nurture Workflow",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        520,
+        500
+      ]
+    },
+    {
+      "name": "Supabase - Log Nurture Failure",
+      "id": "sb-log-nurture-failure",
+      "position": [
+        780,
+        500
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select leads.record_nurture_failure(\n  ($1::jsonb->>'p_project_key'), ($1::jsonb->>'p_sequence_key'), ($1::jsonb->>'p_workflow_id'),\n  ($1::jsonb->>'p_workflow_version_id'), ($1::jsonb->>'p_execution_id'), ($1::jsonb->>'p_error_code'),\n  ($1::jsonb->>'p_error_node'), ($1::jsonb->>'p_error_message'),\n  ($1::jsonb->>'p_occurred_at')::timestamptz\n) as ergebnis",
+        "options": {
+          "queryReplacement": "={{ JSON.stringify((() => {\n  const failure = $json || {};\n  const execution = failure.execution || {};\n  const error = execution.error || {};\n  return {\n    p_project_key: 'business_leads_quiz',\n    p_sequence_key: 'video_nurture',\n    p_workflow_id: String(failure.workflow?.id || 'RqKSRTgFv8mv04H2'),\n    p_workflow_version_id: failure.workflow?.activeVersionId || null,\n    p_execution_id: String(execution.id || 'unknown'),\n    p_error_code: String(error.name || error.cause?.name || 'workflow_failed').slice(0, 120),\n    p_error_node: String(execution.lastNodeExecuted || 'unknown').slice(0, 160),\n    p_error_message: String(error.message || 'Workflow failed').slice(0, 500),\n    p_occurred_at: new Date().toISOString()\n  };\n})()) }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "6ARQvSx0fKTy2Mcq",
+          "name": "Plattform-DB leads_n8n (hl_support)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Postmark - Send Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter - Business Nurture Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter - Business Nurture Workflow": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Log Nurture Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "0f7524fb-5865-470d-943c-32afc9aa940a",
+  "activeVersionId": "0f7524fb-5865-470d-943c-32afc9aa940a",
+  "versionCounter": 4,
+  "triggerCount": 0,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-06-03T08:30:35.263Z",
+      "createdAt": "2026-06-03T08:30:35.263Z",
+      "role": "workflow:owner",
+      "workflowId": "vSpXIyOUK9WIlvxi",
+      "projectId": "ROWWTo0FQLcxZajT",
+      "project": {
+        "updatedAt": "2026-03-21T16:42:22.082Z",
+        "createdAt": "2025-12-09T17:32:24.857Z",
+        "id": "ROWWTo0FQLcxZajT",
+        "name": "Unnamed Project",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-08-28T12:38:24.297Z",
+    "createdAt": "2026-08-28T12:38:24.297Z",
+    "versionId": "0f7524fb-5865-470d-943c-32afc9aa940a",
+    "workflowId": "vSpXIyOUK9WIlvxi",
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "err-trigger",
+        "name": "Error Trigger",
+        "type": "n8n-nodes-base.errorTrigger",
+        "typeVersion": 1,
+        "position": [
+          260,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.postmarkapp.com/email",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "postmarkApi",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ From: 'Activecenter Alert <mail@mail.hl-support.biz>', To: 'markus@global-sce.com', Subject: ('?? n8n Fehler: ' + (($json.workflow && $json.workflow.name) || 'Workflow')), HtmlBody: ('<h2 style=\"color:#b00\">n8n Workflow-Fehler</h2>'   + '<p><b>Workflow:</b> ' + (($json.workflow && $json.workflow.name) || '?') + ' (' + (($json.workflow && $json.workflow.id) || '') + ')</p>'   + '<p><b>Fehler-Node:</b> ' + (($json.execution && $json.execution.lastNodeExecuted) || '-') + '</p>'   + '<p><b>Meldung:</b> ' + (($json.execution && $json.execution.error && $json.execution.error.message) || '-') + '</p>'   + '<p><b>Execution:</b> ' + (($json.execution && $json.execution.id) || '-') + '</p>'   + '<p><a href=\"' + (($json.execution && $json.execution.url) || '#') + '\">In n8n oeffnen</a></p>'), TextBody: ('n8n Fehler in ' + (($json.workflow && $json.workflow.name) || '?') + ' / Node ' + (($json.execution && $json.execution.lastNodeExecuted) || '-') + ': ' + (($json.execution && $json.execution.error && $json.execution.error.message) || '-')), MessageStream: 'outbound'}) }}",
+          "options": {}
+        },
+        "id": "pm-send",
+        "name": "Postmark - Send Alert",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          520,
+          300
+        ],
+        "credentials": {
+          "postmarkApi": {
+            "id": "KJgdnWx7t6eirqzo",
+            "name": "Postmark Typenanalyse"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "business-nurture-workflow-only",
+                "leftValue": "={{ $json.workflow.id }}",
+                "rightValue": "RqKSRTgFv8mv04H2",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "filter-business-nurture-workflow",
+        "name": "Filter - Business Nurture Workflow",
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2,
+        "position": [
+          520,
+          500
+        ]
+      },
+      {
+        "name": "Supabase - Log Nurture Failure",
+        "id": "sb-log-nurture-failure",
+        "position": [
+          780,
+          500
+        ],
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "select leads.record_nurture_failure(\n  ($1::jsonb->>'p_project_key'), ($1::jsonb->>'p_sequence_key'), ($1::jsonb->>'p_workflow_id'),\n  ($1::jsonb->>'p_workflow_version_id'), ($1::jsonb->>'p_execution_id'), ($1::jsonb->>'p_error_code'),\n  ($1::jsonb->>'p_error_node'), ($1::jsonb->>'p_error_message'),\n  ($1::jsonb->>'p_occurred_at')::timestamptz\n) as ergebnis",
+          "options": {
+            "queryReplacement": "={{ JSON.stringify((() => {\n  const failure = $json || {};\n  const execution = failure.execution || {};\n  const error = execution.error || {};\n  return {\n    p_project_key: 'business_leads_quiz',\n    p_sequence_key: 'video_nurture',\n    p_workflow_id: String(failure.workflow?.id || 'RqKSRTgFv8mv04H2'),\n    p_workflow_version_id: failure.workflow?.activeVersionId || null,\n    p_execution_id: String(execution.id || 'unknown'),\n    p_error_code: String(error.name || error.cause?.name || 'workflow_failed').slice(0, 120),\n    p_error_node: String(execution.lastNodeExecuted || 'unknown').slice(0, 160),\n    p_error_message: String(error.message || 'Workflow failed').slice(0, 500),\n    p_occurred_at: new Date().toISOString()\n  };\n})()) }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "6ARQvSx0fKTy2Mcq",
+            "name": "Plattform-DB leads_n8n (hl_support)"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Error Trigger": {
+        "main": [
+          [
+            {
+              "node": "Postmark - Send Alert",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Filter - Business Nurture Workflow",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter - Business Nurture Workflow": {
+        "main": [
+          [
+            {
+              "node": "Supabase - Log Nurture Failure",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Markus Oberhofer",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-08-28T12:38:24.323Z",
+        "id": 1242,
+        "workflowId": "vSpXIyOUK9WIlvxi",
+        "versionId": "0f7524fb-5865-470d-943c-32afc9aa940a",
+        "event": "deactivated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      },
+      {
+        "createdAt": "2026-08-28T12:38:24.334Z",
+        "id": 1243,
+        "workflowId": "vSpXIyOUK9WIlvxi",
+        "versionId": "0f7524fb-5865-470d-943c-32afc9aa940a",
+        "event": "activated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    ]
+  }
+}

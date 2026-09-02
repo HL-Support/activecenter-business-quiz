@@ -1,0 +1,146 @@
+{
+  "updatedAt": "2026-07-27T09:44:00.873Z",
+  "createdAt": "2026-02-19T16:45:45.988Z",
+  "id": "CODeVYeZ_63C-DoT4Z8SN",
+  "name": "Supabase Keep-Alive",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 5,
+              "triggerAtMinute": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -240,
+        -32
+      ],
+      "id": "ab93d0fb-6a0a-47d9-bfd5-350d65aa3501",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://xlpiisbozpgmemxhtivj.supabase.co/rest/v1/",
+        "sendHeaders": false,
+        "options": {},
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -32,
+        -32
+      ],
+      "id": "fdb9b3f3-bcdb-4363-862c-15db0e8c078b",
+      "name": "Image Factory",
+      "credentials": {
+        "supabaseApi": {
+          "id": "TbpjpCuPQdM6II2X",
+          "name": "Supabase Stats_Logs (service role)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://xlpiisbozpgmemxhtivj.supabase.co/rest/v1/",
+        "sendHeaders": false,
+        "options": {},
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        160,
+        -32
+      ],
+      "id": "66af55fc-4d9d-4a03-804b-ee73a312d325",
+      "name": "Reconnect",
+      "credentials": {
+        "supabaseApi": {
+          "id": "TbpjpCuPQdM6II2X",
+          "name": "Supabase Stats_Logs (service role)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Image Factory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Factory": {
+      "main": [
+        [
+          {
+            "node": "Reconnect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        239
+      ],
+      "recurrenceRuleSignatures": [
+        "days:5"
+      ]
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "fff5653b-5314-4c0d-94d0-c7fd94e746a1",
+  "activeVersionId": null,
+  "versionCounter": 94,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-02-19T16:45:45.988Z",
+      "createdAt": "2026-02-19T16:45:45.988Z",
+      "role": "workflow:owner",
+      "workflowId": "CODeVYeZ_63C-DoT4Z8SN",
+      "projectId": "ROWWTo0FQLcxZajT",
+      "project": {
+        "updatedAt": "2026-03-21T16:42:22.082Z",
+        "createdAt": "2025-12-09T17:32:24.857Z",
+        "id": "ROWWTo0FQLcxZajT",
+        "name": "Unnamed Project",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

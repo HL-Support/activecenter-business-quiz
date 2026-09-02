@@ -1283,26 +1283,147 @@ export const videoProgressStore = {
   },
 };
 
-export async function validateEmailAddress(email) {
+export async function getEmailReputationDecision(email, consumerRef = '') {
+  const fallback = {
+    valid: true,
+    action: 'accept_pending',
+    reason: 'accepted_pending',
+    status: 'unknown',
+    sub_status: '',
+    policy_version: 'v1',
+  };
   try {
     const response = await fetchWithTimeout(
       '/api/validate-email',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, consumer_ref: consumerRef }),
       },
       5000
     );
 
     if (!response.ok) {
-      return true;
+      return fallback;
     }
 
     const data = await response.json();
-    return data.valid === true;
+    const allowedActions = ['accept', 'accept_pending', 'request_correction', 'reject_invalid'];
+    if (!allowedActions.includes(data.action)) {
+      if (data.valid === false) {
+        return {
+          valid: false,
+          action: 'reject_invalid',
+          reason: String(data.reason || 'invalid_email'),
+          status: String(data.status || 'invalid'),
+          sub_status: '',
+          policy_version: 'legacy',
+        };
+      }
+      if (data.valid === true) {
+        return {
+          valid: true,
+          action: 'accept',
+          reason: String(data.reason || 'accepted'),
+          status: String(data.status || 'valid'),
+          sub_status: '',
+          policy_version: 'legacy',
+        };
+      }
+      return fallback;
+    }
+    return {
+      valid: data.valid === true,
+      action: data.action,
+      reason: String(data.reason || ''),
+      status: String(data.status || ''),
+      sub_status: '',
+      policy_version: data.policy_version === 'v1' ? 'v1' : '',
+      ...(typeof data.suggested_email === 'string'
+        ? { suggested_email: data.suggested_email }
+        : {}),
+      ...(typeof data.decision_id === 'string' ? { decision_id: data.decision_id } : {}),
+    };
   } catch {
-    return true;
+    return fallback;
+  }
+}
+
+export async function validateEmailAddress(email, consumerRef = '') {
+  const decision = await getEmailReputationDecision(email, consumerRef);
+  return decision.valid === true;
+}
+
+export async function persistPendingEmailCorrection({
+  firstName,
+  email,
+  selectedAnswers,
+  profile,
+  aspiration = 'freedom',
+}) {
+  const coach = getCoachFromStorage() || {};
+  const slug =
+    firstValidCoachSlug(coach.slug, storage.getItem('acBeraterSlug'), getCurrentSlug()) ||
+    'default';
+  const memberId = String(storage.getItem('acMemberId') || coach.member_id || '');
+  const leadRun = getActiveLeadRun(slug, memberId);
+  const submittedAt = isoNow();
+  const attribution = getLeadAttribution();
+  const mainAspiration = normalizeAspiration(aspiration);
+  const response = await fetchWithTimeout(
+    '/api/lead-track',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lead_hash: leadRun.lead_hash,
+        event_name: 'email_correction_pending',
+        payload: {
+          lead_hash: leadRun.lead_hash,
+          client_seed: leadRun.client_seed,
+          first_name: String(firstName || '').trim(),
+          email: String(email || '').trim(),
+          selected_answers: Array.isArray(selectedAnswers) ? selectedAnswers : [],
+          profile: profile || null,
+          profile_code: profile?.code || profile?.animal || '',
+          profile_label: profile?.name || profile?.animal || '',
+          main_aspiration: mainAspiration,
+          main_aspiration_label: getAspirationLabel(mainAspiration),
+          submitted_at: submittedAt,
+          form_submitted_at: submittedAt,
+          member_id: memberId,
+          ref_id: memberId,
+          berater_slug: slug,
+          source_app: 'business_leads_quiz',
+          funnel_key: 'business',
+          lang: getPreferredLang(),
+          ...attribution,
+        },
+      }),
+    },
+    5000
+  );
+  const data = await response.json().catch(() => ({}));
+  return response.ok && data.success === true;
+}
+
+export async function confirmEmailCorrection({ consumerRef, confirmation }) {
+  if (!consumerRef || !['suggestion', 'original'].includes(confirmation)) return false;
+  try {
+    const response = await fetchWithTimeout(
+      '/api/confirm-email-correction',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ consumer_ref: consumerRef, confirmation }),
+      },
+      5000
+    );
+    if (!response.ok) return false;
+    const data = await response.json().catch(() => ({}));
+    return data.success === true && data.confirmation === confirmation;
+  } catch {
+    return false;
   }
 }
 

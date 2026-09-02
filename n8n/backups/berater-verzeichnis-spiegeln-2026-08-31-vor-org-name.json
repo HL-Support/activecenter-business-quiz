@@ -1,0 +1,310 @@
+{
+  "updatedAt": "2026-08-30T17:12:50.088Z",
+  "createdAt": "2026-08-30T17:11:59.398Z",
+  "id": "IFOqAOYbUp8Zwnlk",
+  "name": "AC - Berater-Verzeichnis spiegeln",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "name": "Cron - Alle 15 Minuten",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -380,
+        300
+      ],
+      "id": "cron-alle-15-minuten"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select u.sub_domain               as slug,\n       u.id                       as quelle_user_id,\n       u.email                    as email,\n       u.first_name               as first_name,\n       u.last_name                as last_name,\n       u.full_name                as full_name,\n       u.country                  as country,\n       u.preferred_newsletter_language as preferred_language,\n       o.name                     as organisation_name,\n       u.herbalife_id             as herbalife_id\n  from prod_activesupport.users u\n  left join prod_activesupport.organizations o on o.id = u.organization_id\n where u.deleted_at is null\n   and u.sub_domain is not null and u.sub_domain <> ''",
+        "options": {}
+      },
+      "name": "MySQL - Berater lesen",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -140,
+        300
+      ],
+      "id": "mysql-berater-lesen",
+      "credentials": {
+        "mySql": {
+          "id": "73WL8zP1Qlctkz12",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sammelt die Zeilen und bricht laut ab, wenn nichts kam.\n// Eine leere Antwort sieht genauso aus wie ein fehlgeschlagener Abruf - und weiter unten\n// wuerde sie das ganze Verzeichnis leeren. Also lieber scheitern als still loeschen.\nconst zeilen = $input.all().flatMap(i => (Array.isArray(i.json) ? i.json : [i.json]))\n  .filter(z => z && z.slug);\nif (zeilen.length < 50) {\n  throw new Error('Berater-Spiegel: nur ' + zeilen.length + ' Zeilen aus MySQL - Abruf vermutlich fehlgeschlagen (erwartet werden ueber 200)');\n}\nconst gesehen = new Map();\nfor (const z of zeilen) gesehen.set(String(z.slug), z);\nif (gesehen.size !== zeilen.length) {\n  throw new Error('Berater-Spiegel: doppelte slugs in der Quelle (' + zeilen.length + ' Zeilen, ' + gesehen.size + ' eindeutige)');\n}\nreturn [{ json: { anzahl: gesehen.size, saetze: [...gesehen.values()] } }];"
+      },
+      "name": "Code - Zeilen pruefen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        300
+      ],
+      "id": "code-zeilen-pruefen"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "with quelle as (\n  select * from jsonb_to_recordset(($1::jsonb)) as x(\n    slug text, quelle_user_id bigint, email text, first_name text, last_name text,\n    full_name text, country text, preferred_language text, organisation_name text, herbalife_id text)\n), eingefuegt as (\n  insert into leads.berater (slug, quelle_user_id, email, first_name, last_name, full_name,\n                             country, preferred_language, organisation_name, herbalife_id, gespiegelt_am)\n  select slug, quelle_user_id, email, first_name, last_name, full_name,\n         country, preferred_language, organisation_name, herbalife_id, now()\n    from quelle\n  on conflict (slug) do update set\n    quelle_user_id = excluded.quelle_user_id, email = excluded.email,\n    first_name = excluded.first_name, last_name = excluded.last_name,\n    full_name = excluded.full_name, country = excluded.country,\n    preferred_language = excluded.preferred_language,\n    organisation_name = excluded.organisation_name, herbalife_id = excluded.herbalife_id,\n    gespiegelt_am = now()\n  returning slug\n), entfernt as (\n  delete from leads.berater b\n   where not exists (select 1 from quelle q where q.slug = b.slug)\n  returning b.slug\n)\nselect (select count(*) from eingefuegt) as geschrieben,\n       (select count(*) from entfernt)   as entfernt,\n       (select count(*) from leads.berater) as im_verzeichnis",
+        "options": {
+          "queryReplacement": "={{ JSON.stringify($json.saetze) }}"
+        }
+      },
+      "name": "Postgres - Verzeichnis schreiben",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        340,
+        300
+      ],
+      "id": "postgres-verzeichnis-schreiben",
+      "credentials": {
+        "postgres": {
+          "id": "6ARQvSx0fKTy2Mcq",
+          "name": "Plattform-DB leads_n8n (hl_support)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "MySQL - Berater lesen": {
+      "main": [
+        [
+          {
+            "node": "Code - Zeilen pruefen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Zeilen pruefen": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Verzeichnis schreiben",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron - Alle 15 Minuten": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Berater lesen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "errorWorkflow": "vSpXIyOUK9WIlvxi"
+  },
+  "staticData": {
+    "node:Cron - Alle 15 Minuten": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "9aa90b0b-a1d8-439b-9431-ca86aaddebac",
+  "activeVersionId": "9aa90b0b-a1d8-439b-9431-ca86aaddebac",
+  "versionCounter": 2,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-08-30T17:11:59.398Z",
+      "createdAt": "2026-08-30T17:11:59.398Z",
+      "role": "workflow:owner",
+      "workflowId": "IFOqAOYbUp8Zwnlk",
+      "projectId": "ROWWTo0FQLcxZajT",
+      "project": {
+        "updatedAt": "2026-03-21T16:42:22.082Z",
+        "createdAt": "2025-12-09T17:32:24.857Z",
+        "id": "ROWWTo0FQLcxZajT",
+        "name": "Unnamed Project",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-08-30T17:12:50.089Z",
+    "createdAt": "2026-08-30T17:12:50.089Z",
+    "versionId": "9aa90b0b-a1d8-439b-9431-ca86aaddebac",
+    "workflowId": "IFOqAOYbUp8Zwnlk",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 15
+              }
+            ]
+          }
+        },
+        "name": "Cron - Alle 15 Minuten",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -380,
+          300
+        ],
+        "id": "cron-alle-15-minuten"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "select u.sub_domain               as slug,\n       u.id                       as quelle_user_id,\n       u.email                    as email,\n       u.first_name               as first_name,\n       u.last_name                as last_name,\n       u.full_name                as full_name,\n       u.country                  as country,\n       u.preferred_newsletter_language as preferred_language,\n       o.name                     as organisation_name,\n       u.herbalife_id             as herbalife_id\n  from prod_activesupport.users u\n  left join prod_activesupport.organizations o on o.id = u.organization_id\n where u.deleted_at is null\n   and u.sub_domain is not null and u.sub_domain <> ''",
+          "options": {}
+        },
+        "name": "MySQL - Berater lesen",
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 2.4,
+        "position": [
+          -140,
+          300
+        ],
+        "id": "mysql-berater-lesen",
+        "credentials": {
+          "mySql": {
+            "id": "73WL8zP1Qlctkz12",
+            "name": "MySQL account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Sammelt die Zeilen und bricht laut ab, wenn nichts kam.\n// Eine leere Antwort sieht genauso aus wie ein fehlgeschlagener Abruf - und weiter unten\n// wuerde sie das ganze Verzeichnis leeren. Also lieber scheitern als still loeschen.\nconst zeilen = $input.all().flatMap(i => (Array.isArray(i.json) ? i.json : [i.json]))\n  .filter(z => z && z.slug);\nif (zeilen.length < 50) {\n  throw new Error('Berater-Spiegel: nur ' + zeilen.length + ' Zeilen aus MySQL - Abruf vermutlich fehlgeschlagen (erwartet werden ueber 200)');\n}\nconst gesehen = new Map();\nfor (const z of zeilen) gesehen.set(String(z.slug), z);\nif (gesehen.size !== zeilen.length) {\n  throw new Error('Berater-Spiegel: doppelte slugs in der Quelle (' + zeilen.length + ' Zeilen, ' + gesehen.size + ' eindeutige)');\n}\nreturn [{ json: { anzahl: gesehen.size, saetze: [...gesehen.values()] } }];"
+        },
+        "name": "Code - Zeilen pruefen",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          100,
+          300
+        ],
+        "id": "code-zeilen-pruefen"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "with quelle as (\n  select * from jsonb_to_recordset(($1::jsonb)) as x(\n    slug text, quelle_user_id bigint, email text, first_name text, last_name text,\n    full_name text, country text, preferred_language text, organisation_name text, herbalife_id text)\n), eingefuegt as (\n  insert into leads.berater (slug, quelle_user_id, email, first_name, last_name, full_name,\n                             country, preferred_language, organisation_name, herbalife_id, gespiegelt_am)\n  select slug, quelle_user_id, email, first_name, last_name, full_name,\n         country, preferred_language, organisation_name, herbalife_id, now()\n    from quelle\n  on conflict (slug) do update set\n    quelle_user_id = excluded.quelle_user_id, email = excluded.email,\n    first_name = excluded.first_name, last_name = excluded.last_name,\n    full_name = excluded.full_name, country = excluded.country,\n    preferred_language = excluded.preferred_language,\n    organisation_name = excluded.organisation_name, herbalife_id = excluded.herbalife_id,\n    gespiegelt_am = now()\n  returning slug\n), entfernt as (\n  delete from leads.berater b\n   where not exists (select 1 from quelle q where q.slug = b.slug)\n  returning b.slug\n)\nselect (select count(*) from eingefuegt) as geschrieben,\n       (select count(*) from entfernt)   as entfernt,\n       (select count(*) from leads.berater) as im_verzeichnis",
+          "options": {
+            "queryReplacement": "={{ JSON.stringify($json.saetze) }}"
+          }
+        },
+        "name": "Postgres - Verzeichnis schreiben",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          340,
+          300
+        ],
+        "id": "postgres-verzeichnis-schreiben",
+        "credentials": {
+          "postgres": {
+            "id": "6ARQvSx0fKTy2Mcq",
+            "name": "Plattform-DB leads_n8n (hl_support)"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "MySQL - Berater lesen": {
+        "main": [
+          [
+            {
+              "node": "Code - Zeilen pruefen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code - Zeilen pruefen": {
+        "main": [
+          [
+            {
+              "node": "Postgres - Verzeichnis schreiben",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cron - Alle 15 Minuten": {
+        "main": [
+          [
+            {
+              "node": "MySQL - Berater lesen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Markus Oberhofer",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-08-30T17:12:50.119Z",
+        "id": 1314,
+        "workflowId": "IFOqAOYbUp8Zwnlk",
+        "versionId": "9aa90b0b-a1d8-439b-9431-ca86aaddebac",
+        "event": "deactivated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      },
+      {
+        "createdAt": "2026-08-30T17:12:50.139Z",
+        "id": 1315,
+        "workflowId": "IFOqAOYbUp8Zwnlk",
+        "versionId": "9aa90b0b-a1d8-439b-9431-ca86aaddebac",
+        "event": "activated",
+        "userId": "294380e8-f215-4502-bd6f-7fa7a3b7434d"
+      }
+    ]
+  }
+}

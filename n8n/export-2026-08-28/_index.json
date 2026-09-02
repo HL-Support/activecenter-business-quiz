@@ -1,0 +1,76 @@
+{
+  "exportiert_am": "2026-08-28",
+  "quelle": "https://n8n.hl-support.biz",
+  "workflows": [
+    {
+      "id": "9RZdrLxfA8IRhd55",
+      "name": "AC - Lead Post Processor - Business Leads Quiz",
+      "aktiv": true,
+      "knoten": 36,
+      "versionId": "8208d68b-f536-4d31-b6d5-bb63a5925faa"
+    },
+    {
+      "id": "ALLHYLRwkvujkuFJ",
+      "name": "AC - Lead Sync Outbox Worker - Business Leads Quiz",
+      "aktiv": true,
+      "knoten": 2,
+      "versionId": "8bf40638-0cf8-49a6-a6a5-171998238c7c"
+    },
+    {
+      "id": "RqKSRTgFv8mv04H2",
+      "name": "AC - Quiz Nurture Email Sender",
+      "aktiv": true,
+      "knoten": 26,
+      "versionId": "e9815065-af5b-4bc3-bc94-af0afa5dc24a"
+    },
+    {
+      "id": "m52uJBbSQUFUA2Dm",
+      "name": "AC - Lead System Health Monitor - Business Leads Quiz",
+      "aktiv": true,
+      "knoten": 2,
+      "versionId": "e9a82e3d-8a81-4606-abda-af671941320d"
+    },
+    {
+      "id": "XfefeLNF1DYJPGc8",
+      "name": "AC - Quiz Reactivation Trigger",
+      "aktiv": true,
+      "knoten": 9,
+      "versionId": "ca46331d-6444-4fd7-9c5b-038be0ebe840"
+    },
+    {
+      "id": "pUaGat8invCLmFx1",
+      "name": "AC - Quiz Evergreen Scheduler",
+      "aktiv": true,
+      "knoten": 5,
+      "versionId": "3f4aeca8-e3ce-4b12-811d-7994b1d418f7"
+    },
+    {
+      "id": "BLQLWW8oN8M4BSe1",
+      "name": "AC - Quiz Nightly Data Sync (MySQL → Mautic)",
+      "aktiv": true,
+      "knoten": 7,
+      "versionId": "2c2bcb36-e402-48ff-9fbc-8f02ae3dd8bf"
+    },
+    {
+      "id": "vSpXIyOUK9WIlvxi",
+      "name": "AC - Error Alert (Postmark)",
+      "aktiv": true,
+      "knoten": 4,
+      "versionId": "0f7524fb-5865-470d-943c-32afc9aa940a"
+    },
+    {
+      "id": "CODeVYeZ_63C-DoT4Z8SN",
+      "name": "Supabase Keep-Alive",
+      "aktiv": false,
+      "knoten": 3,
+      "versionId": "fff5653b-5314-4c0d-94d0-c7fd94e746a1"
+    },
+    {
+      "id": "ie2WEc1RmFhN5LQf",
+      "name": "AC - Quiz Video Inactivity Checker",
+      "aktiv": false,
+      "knoten": 7,
+      "versionId": "2345acda-3807-42c9-96be-39a696722aac"
+    }
+  ]
+}
