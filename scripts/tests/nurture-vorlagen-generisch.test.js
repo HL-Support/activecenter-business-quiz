@@ -104,25 +104,23 @@ test('🔴 die Lesefassung ist aktuell — sonst gibt jemand einen Text frei, de
   // Die Berater lesen `nurture-email-templates-<lang>.md` gegen, verschickt wird aber, was
   // in `generisch-hu-fr-ru.js` steht. Driften die beiden auseinander, ist die Freigabe
   // wertlos — und niemand merkt es, weil beide für sich plausibel aussehen.
-  const { execFileSync } = require('node:child_process');
+  // 🔴 Der Vergleich läuft im Speicher. Die frühere Fassung startete das Skript und liess
+  // es die drei Dateien NEU SCHREIBEN — ein Test, der während der parallel laufenden Suite
+  // ins Repo schreibt, ist eine Wettlaufquelle und macht nebenbei den Arbeitsbaum
+  // schmutzig. Ein Test, der irgendwann grundlos rot wird, erzieht dazu, ihn zu ignorieren.
+  const { baueMarkdown } = require('../nurture-vorlagen-anlegen.js');
   const wurzel = path.join(__dirname, '../..');
-  const vorher = {};
+
   for (const sprache of NEUE_SPRACHEN) {
     const p = path.join(wurzel, 'nurture/vorlagen', `nurture-email-templates-${sprache}.md`);
     assert.ok(fs.existsSync(p), `Lesefassung für ${sprache} fehlt — mit --markdown erzeugen`);
-    vorher[sprache] = fs.readFileSync(p, 'utf8');
-  }
-
-  execFileSync(process.execPath, ['scripts/nurture-vorlagen-anlegen.js', '--markdown'], {
-    cwd: wurzel,
-    stdio: 'pipe',
-  });
-
-  for (const sprache of NEUE_SPRACHEN) {
-    const p = path.join(wurzel, 'nurture/vorlagen', `nurture-email-templates-${sprache}.md`);
+    // Zeilenenden normalisieren: Git checkt hier mit CRLF aus, das Skript schreibt LF.
+    // Ohne das meldete der Wächter eine Drift, wo nur die Zeilenenden verschieden sind.
+    const inDatei = fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
+    const erzeugt = baueMarkdown(sprache).replace(/\r\n/g, '\n');
     assert.equal(
-      fs.readFileSync(p, 'utf8'),
-      vorher[sprache],
+      inDatei,
+      erzeugt,
       `Die Lesefassung für ${sprache} ist veraltet. Neu erzeugen: `
         + 'node scripts/nurture-vorlagen-anlegen.js --markdown'
     );
