@@ -1,0 +1,230 @@
+{
+ "zweck": "AP9-Rueckweg: Zustand VOR dem Nachtragen",
+ "ausgefuehrt": "2026-09-02",
+ "sicherung": [
+  {
+   "lead_hash": "qz_91b4bfc37e4341198e1aa1728899a145",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_f2396682bbff4a76bcb51c8dee276ee7",
+   "ref_id": "25704408",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_supabase",
+   "first_seen": "2026-04-28"
+  },
+  {
+   "lead_hash": "qz_2650de4011eb480c9195d2f38d1760cf",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-28"
+  },
+  {
+   "lead_hash": "qz_608f628b2a6f40638fe06e5704e8cd61",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-28"
+  },
+  {
+   "lead_hash": "qz_5357ff12ab5c43e7a2cb986d916fcc85",
+   "ref_id": "25632867",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_supabase",
+   "first_seen": "2026-04-27"
+  },
+  {
+   "lead_hash": "qz_e3ce2da74f9642f69e043af597727793",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-28"
+  },
+  {
+   "lead_hash": "qz_20cf71bdad6048689ca8b98a8908728a",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-28"
+  },
+  {
+   "lead_hash": "qz_196c3adc3196465384878644136bf50e",
+   "ref_id": "25555023",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-24"
+  },
+  {
+   "lead_hash": "qz_1b07a0a6529149cba6be4eb2f0415d03",
+   "ref_id": "25XY128823",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-24"
+  },
+  {
+   "lead_hash": "qz_mo9x75jxh1uq4wjf",
+   "ref_id": "25632867",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_bridge_live_moa4yiam",
+   "ref_id": "25632867",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-22"
+  },
+  {
+   "lead_hash": "qz_b4d61b4067b8460291695def92eb3bc5",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_883d3a4e907d4a00bea4cdab2f622724",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_cfc186fbda6d42c091bd78e7c8d3e5a2",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_1297bcb3d607436cb990c273d9e15be9",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_wrapper_moa3un86",
+   "ref_id": "25632867",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-22"
+  },
+  {
+   "lead_hash": "qz_test_moa3u7n4",
+   "ref_id": "25632867",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-22"
+  },
+  {
+   "lead_hash": "qz_moa2t7jf4s01lvl7",
+   "ref_id": "25632867",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-22"
+  },
+  {
+   "lead_hash": "qz_mo9xe8prj0smtid4",
+   "ref_id": "25632867",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-22"
+  },
+  {
+   "lead_hash": "qz_mo9x3l7w7o9m7scf",
+   "ref_id": "25632867",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-22"
+  },
+  {
+   "lead_hash": "qz_6d73180bb4a64ee9a13282bc8dc02ae5",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_234dc75a776645ff8549666a93631196",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_a98e92affa0f4a488866039846291766",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_c2ca0ae196a3470f96ce7e1298490e7a",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_74f6199e6738439894f61b2a023a6a2d",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_38e4e63919ae4a6c93c62b21afb44e77",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_dc1d605f266f4eb0be0ad51aa389b5e2",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_3e92df7bc93f411f92c5df39d7c9d73a",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-23"
+  },
+  {
+   "lead_hash": "qz_mo9tfse664xt87uj",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-22"
+  },
+  {
+   "lead_hash": "qz_mo2n44krbpggvrfi",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-17"
+  },
+  {
+   "lead_hash": "qz_mo2n2rcl9g9l506y",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-17"
+  },
+  {
+   "lead_hash": "qz_mo2n1ex7q6e2pcjc",
+   "ref_id": "25851739",
+   "berater_slug_alt": null,
+   "migration_source": "mysql_only",
+   "first_seen": "2026-04-17"
+  }
+ ]
+}

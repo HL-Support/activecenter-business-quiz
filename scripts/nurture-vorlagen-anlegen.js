@@ -42,6 +42,10 @@ const SPRACHEN = String(argument('sprachen', 'hu,fr,ru'))
 // Lesefassungs-Dateiname: das a1-Modul darf die Lesefassung der Bestandsstrecke
 // (`nurture-email-templates-<lang>.md`) nicht ueberschreiben.
 const MARKDOWN_PRAEFIX = argument('markdown-praefix', 'nurture-email-templates-');
+// `--ids '{"a1":{"de":186,...}}'`: bestehende Vorlagen AKTUALISIEREN (PATCH auf
+// Betreff + HTML) statt neue anzulegen — die Kennungen stehen in EMAIL_MAP des
+// Senders und muessen stabil bleiben.
+const IDS = JSON.parse(argument('ids', 'null'));
 
 function argument(name, standard) {
   const i = process.argv.indexOf(`--${name}`);
@@ -286,6 +290,29 @@ function baueMarkdown(sprache) {
         continue;
       }
       const name = `AC Nurture - ${phase.toUpperCase()} - ${sprache.toUpperCase()} - generisch`;
+
+      if (IDS) {
+        const bestehendeId = IDS[phase] && IDS[phase][sprache];
+        if (!bestehendeId) {
+          console.error(`  🔴 Keine Kennung fuer ${phase}/${sprache} in --ids — übersprungen.`);
+          continue;
+        }
+        if (!ANLEGEN) {
+          console.log(`  [Trockenlauf] AKTUALISIEREN ${bestehendeId} ${name}`);
+          console.log(`      Betreff: ${inhalt.betreff}`);
+          continue;
+        }
+        const html = baueHtml(teile, inhalt, phase, bestehendeId, sprache);
+        await mautic(`/api/emails/${bestehendeId}/edit`, {
+          method: 'PATCH',
+          body: JSON.stringify({ subject: inhalt.betreff, customHtml: html }),
+        });
+        karte[phase] = karte[phase] || {};
+        karte[phase][sprache] = bestehendeId;
+        angelegt += 1;
+        console.log(`  ✓ ${String(bestehendeId).padStart(4)}  aktualisiert  ${name}`);
+        continue;
+      }
 
       if (!ANLEGEN) {
         console.log(`  [Trockenlauf] ${name}`);

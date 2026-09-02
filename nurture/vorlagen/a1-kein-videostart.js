@@ -27,6 +27,7 @@ const generisch = require('./generisch-hu-fr-ru.js');
 const T = {
   vorname: '{contactfield=firstname}',
   profil: '{contactfield=ac_last_profile_label}',
+  ziel: '{contactfield=ac_last_main_goal_label}',
   berater: '{contactfield=ac_berater_vorname}',
   org: '{contactfield=ac_berater_org_display}',
 };
@@ -58,6 +59,9 @@ const RAHMEN = {
   },
 };
 
+// 🔴 Textregel (Markus, 02.09.2026): Mailtexte laufen durch den
+// anti-ai-slop-humanizer (agent-core/skills) — keine Gedankenstriche als
+// Satzkleber, kurze aktive Sätze. Formulierung von Markus, 02.09.2026.
 const TEXTE = {
   a1: {
     emoji: '🎬',
@@ -65,8 +69,9 @@ const TEXTE = {
       betreff: `${T.vorname}, dein Video 1 wartet (3 Min)`,
       gruss: 'Hi',
       absaetze: [
-        'Dein Video 1 wartet — und es dauert nur 3 Minuten.',
-        `Darin bekommt dein Erfolgs-Code seine Bedeutung: was es heißt, dass du ${T.profil} bist — und welcher nächste Schritt zu deinem Typ passt.`,
+        'Dein Video 1 wartet und es dauert nur 3 Minuten.',
+        `Dein Erfolgs-Code zeigt dir deine Stärken und deine Zielsetzung: ${T.profil} mit dem Wunsch nach ${T.ziel}. Damit passt du sehr gut in unser Team.`,
+        'Schau dir das kurze Einführungsvideo an. Vielleicht ist es genau das, was du suchst.',
       ],
       knopf: 'Video 1 ansehen (3 Min)',
       team: `Dein ${T.org} Team`,
@@ -75,8 +80,9 @@ const TEXTE = {
       betreff: `${T.vorname}, il tuo video 1 ti aspetta (3 min)`,
       gruss: 'Ciao',
       absaetze: [
-        'Il tuo video 1 ti aspetta — e dura solo 3 minuti.',
-        `Al suo interno il tuo codice del successo prende significato: cosa vuol dire essere ${T.profil} — e qual è il prossimo passo adatto al tuo tipo.`,
+        'Il tuo video 1 ti aspetta e dura solo 3 minuti.',
+        `Il tuo codice del successo mostra i tuoi punti di forza e il tuo obiettivo: ${T.profil}, con il desiderio di ${T.ziel}. Un profilo che sta benissimo nel nostro team.`,
+        'Guarda il breve video introduttivo. Forse è proprio quello che cerchi.',
       ],
       knopf: 'Guarda il video 1 (3 min)',
       team: `Il tuo team ${T.org}`,
@@ -85,8 +91,9 @@ const TEXTE = {
       betreff: `${T.vorname}, your video 1 is waiting (3 min)`,
       gruss: 'Hi',
       absaetze: [
-        'Your video 1 is waiting — and it only takes 3 minutes.',
-        `It puts your success code into context: what it means that you are ${T.profil} — and which next step fits your type.`,
+        'Your video 1 is waiting and it only takes 3 minutes.',
+        `Your success code shows your strengths and your goal: ${T.profil}, driven by ${T.ziel}. That profile fits our team very well.`,
+        'Watch the short intro video. Maybe it is exactly what you are looking for.',
       ],
       knopf: 'Watch video 1 (3 min)',
       team: `Your ${T.org} team`,
@@ -95,8 +102,9 @@ const TEXTE = {
       betreff: `${T.vorname}, ta vidéo 1 t'attend (3 min)`,
       gruss: 'Salut',
       absaetze: [
-        "Ta vidéo 1 t'attend — et elle ne dure que 3 minutes.",
-        `Elle donne tout son sens à ton code du succès : ce que cela signifie d'être ${T.profil} — et quelle prochaine étape correspond à ton profil.`,
+        "Ta vidéo 1 t'attend et elle ne dure que 3 minutes.",
+        `Ton code du succès montre tes forces et ton objectif : ${T.profil}, avec « ${T.ziel} » comme moteur. Un profil qui a toute sa place dans notre équipe.`,
+        "Regarde la courte vidéo d'introduction. C'est peut-être exactement ce que tu cherches.",
       ],
       knopf: 'Regarder la vidéo 1 (3 min)',
       team: `Ton équipe ${T.org}`,
@@ -105,8 +113,9 @@ const TEXTE = {
       betreff: `${T.vorname}, твоё видео 1 ждёт тебя (3 мин)`,
       gruss: 'Привет',
       absaetze: [
-        'Твоё видео 1 ждёт тебя — и длится всего 3 минуты.',
-        `В нём твой код успеха обретает смысл: что значит, что ты — ${T.profil}, и какой следующий шаг подходит твоему типу.`,
+        'Твоё видео 1 ждёт тебя, и оно длится всего 3 минуты.',
+        `Твой код успеха показывает твои сильные стороны и главную цель: ${T.profil}, цель «${T.ziel}». Такой профиль отлично подходит нашей команде.`,
+        'Посмотри короткое вводное видео. Возможно, это именно то, что ты ищешь.',
       ],
       knopf: 'Смотреть видео 1 (3 мин)',
       team: `Твоя команда ${T.org}`,
@@ -115,8 +124,9 @@ const TEXTE = {
       betreff: `${T.vorname}, vár az 1. videód (3 perc)`,
       gruss: 'Szia',
       absaetze: [
-        'Vár az 1. videód — és csak 3 percig tart.',
-        `Ebben kap értelmet a sikerkódod: mit jelent, hogy ${T.profil} vagy — és melyik következő lépés illik a típusodhoz.`,
+        'Vár az 1. videód, és csak 3 percig tart.',
+        `A sikerkódod megmutatja az erősségeidet és a célodat: ${T.profil}, cél: ${T.ziel}. Ez a profil remekül illik a csapatunkba.`,
+        'Nézd meg a rövid bevezető videót. Lehet, hogy pont ezt keresed.',
       ],
       knopf: '1. videó megnézése (3 perc)',
       team: `A ${T.org} csapatod`,

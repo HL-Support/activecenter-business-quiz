@@ -31,9 +31,11 @@ gleich und kommen aus derselben Vorlage.
 
 Szia {contactfield=firstname},
 
-Vár az 1. videód — és csak 3 percig tart.
+Vár az 1. videód, és csak 3 percig tart.
 
-Ebben kap értelmet a sikerkódod: mit jelent, hogy {contactfield=ac_last_profile_label} vagy — és melyik következő lépés illik a típusodhoz.
+A sikerkódod megmutatja az erősségeidet és a célodat: {contactfield=ac_last_profile_label}, cél: {contactfield=ac_last_main_goal_label}. Ez a profil remekül illik a csapatunkba.
+
+Nézd meg a rövid bevezető videót. Lehet, hogy pont ezt keresed.
 
 **Knopf:** 1. videó megnézése (3 perc)
 

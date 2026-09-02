@@ -31,9 +31,11 @@ gleich und kommen aus derselben Vorlage.
 
 Salut {contactfield=firstname},
 
-Ta vidéo 1 t'attend — et elle ne dure que 3 minutes.
+Ta vidéo 1 t'attend et elle ne dure que 3 minutes.
 
-Elle donne tout son sens à ton code du succès : ce que cela signifie d'être {contactfield=ac_last_profile_label} — et quelle prochaine étape correspond à ton profil.
+Ton code du succès montre tes forces et ton objectif : {contactfield=ac_last_profile_label}, avec « {contactfield=ac_last_main_goal_label} » comme moteur. Un profil qui a toute sa place dans notre équipe.
+
+Regarde la courte vidéo d'introduction. C'est peut-être exactement ce que tu cherches.
 
 **Knopf:** Regarder la vidéo 1 (3 min)
 

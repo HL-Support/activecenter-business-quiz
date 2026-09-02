@@ -31,9 +31,11 @@ gleich und kommen aus derselben Vorlage.
 
 Hi {contactfield=firstname},
 
-Dein Video 1 wartet — und es dauert nur 3 Minuten.
+Dein Video 1 wartet und es dauert nur 3 Minuten.
 
-Darin bekommt dein Erfolgs-Code seine Bedeutung: was es heißt, dass du {contactfield=ac_last_profile_label} bist — und welcher nächste Schritt zu deinem Typ passt.
+Dein Erfolgs-Code zeigt dir deine Stärken und deine Zielsetzung: {contactfield=ac_last_profile_label} mit dem Wunsch nach {contactfield=ac_last_main_goal_label}. Damit passt du sehr gut in unser Team.
+
+Schau dir das kurze Einführungsvideo an. Vielleicht ist es genau das, was du suchst.
 
 **Knopf:** Video 1 ansehen (3 Min)
 

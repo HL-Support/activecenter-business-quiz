@@ -31,9 +31,11 @@ gleich und kommen aus derselben Vorlage.
 
 Hi {contactfield=firstname},
 
-Your video 1 is waiting — and it only takes 3 minutes.
+Your video 1 is waiting and it only takes 3 minutes.
 
-It puts your success code into context: what it means that you are {contactfield=ac_last_profile_label} — and which next step fits your type.
+Your success code shows your strengths and your goal: {contactfield=ac_last_profile_label}, driven by {contactfield=ac_last_main_goal_label}. That profile fits our team very well.
+
+Watch the short intro video. Maybe it is exactly what you are looking for.
 
 **Knopf:** Watch video 1 (3 min)
 

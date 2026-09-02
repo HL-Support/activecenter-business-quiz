@@ -326,9 +326,65 @@ Messung über das Cockpit-Videomodal (dort liegen die Quoten je Video).
 Vorlagen-Doku (Tag 2) mit Code (12 h) versöhnen, neue AP5-Phase einsortieren.
 Vorher Bestandsaufnahme gegen das LIVE-n8n (Export ist vom 28.08., §7).
 
+### AP9 — Datenreparatur: `berater_slug` bei 32 migrierten Alt-Leads nachtragen
+**✅ ERLEDIGT am 02.09.2026.** Ausgeführt über die App-Rolle (`leads_pg`, DML) in
+einer Transaktion mit Soll-Ist-Prüfung; genau 32 Zeilen geändert, Gegenprobe
+0 verbleibende Null-Slugs. Rückweg: `2026-09-02-ap9-backup-berater-slug.json`
+(neben diesem Plan) hält den Vorher-Zustand aller 32 `lead_hash`.
+Zuordnung 25632867 → `lisa` wurde vorab per Datenlage geklärt (Luca führt die
+eigene Nummer 25XY119725; der Alt-Lead vom 27.04. unter `luca` blieb unberührt).
+
+Ursprünglicher Auftrag: Freigegeben von Markus am 02.09.2026. Hintergrund: Beim Cutover Ende August
+wurden 141 Alt-Optins (April/Mai, `migration_source is not null`) importiert;
+32 davon haben `berater_slug = null`, obwohl die Zuordnung über die `ref_id`
+(Member-Nummer des Beraters) lückenlos vorhanden ist. Member-Nummern mit
+Buchstaben (z. B. `25XY128823`) sind **gültig**, kein Datenfehler.
+
+Zuordnung (am 02.09.2026 aus `leads.lead_state` hergeleitet — andere Leads
+derselben `ref_id` tragen den Slug):
+
+| `ref_id` | Leads | `berater_slug` | Beleg |
+|---|---|---|---|
+| 25851739 | 21 | `markus` | 4.907 weitere Leads dieser ref_id tragen `markus` |
+| 25632867 | 8 | `lisa` | 34 Leads dieser ref_id tragen `lisa`; Luca hat eine eigene Nummer (25XY119725); die 8 stammen vom 22.–27.04., unmittelbar vor Lisas erstem Slug-Lead |
+| 25555023 | 1 | `wellnesskurs` | 61 weitere Leads |
+| 25704408 | 1 | `elias` | 72 weitere Leads |
+| 25XY128823 | 1 | `kirchler` | 13 weitere Leads |
+
+Umsetzung:
+1. **Nur** Zeilen mit `berater_slug is null and migration_source is not null
+   and form_submitted_at is not null` und exakt diesen `ref_id`-Werten
+   anfassen; erwartete Trefferzahl je Zeile wie oben (Summe 32) — vorher per
+   SELECT verifizieren, bei Abweichung abbrechen.
+2. Rückweg sichern: vor dem UPDATE die 32 `lead_hash` + alter Zustand als
+   Beleg exportieren (Datei neben diesem Plan ablegen).
+3. Schreibweg: über die Plattform-Seite mit Schreibrechten (z. B. bestehende
+   Migrations-/Repair-Skripte in `scripts/`), **nicht** über die Rolle
+   `leads_cockpit` (bewusst nur lesend).
+4. Nachher: SELECT-Gegenprobe (0 verbleibende Null-Slugs unter den fünf
+   ref_ids) und Notiz im Änderungsverlauf.
+
 ---
 
 ## 5. Messplan (Erfolg nachweisen)
+
+### 5a. Live-Zeitpunkte — die Schnittkanten für Vorher/Nachher
+
+Alle Zahlen in §1 sind der Vorher-Stand (Stichtag 01.09.2026). Für spätere
+Vergleiche gilt: **„Nachher“ beginnt je Maßnahme zu ihrem Live-Zeitpunkt**, und
+zwar bei Mails ab `form_submitted_at`, beim Frontend ab Seitenbesuch.
+
+| Live seit (Berlin) | Maßnahme | Wirkt auf |
+| --- | --- | --- |
+| 01.09.2026 ≈ 21:05 | **AP4:** Zugangsmail neu (Video-Button oben, neuer Betreff), Versandtakt 5 → 1 Min, Token-Fallback, Gate nur noch `invalid` (Post-Processor versionId `6cc5bb81`; erste Mail neuen Stils: Execution 588387, 21:08) | Optin → Video-1-Start über den **Mail-Weg** |
+| 01.09.2026 ≈ 21:40 | **AP5:** Phase `a1` im Sender scharf (versionId `cc063a21`); erste versendbare a1 frühestens 02.09. 08:00 (Fenster 08–21) | Zweittouch bei „kein Videostart“ |
+| 02.09.2026 07:31 | **AP1/AP2/AP6 (Frontend):** Scroll-Reset, Sticky-Dock-CTA mit WhatsApp-Logo, CTA-Text „Dein Potenzial nutzen!…“, `result_viewed`, Resume-Guard, Player ohne lazy (Merge `f4820bb`, CI-Deploy 07:31, `/health/live` bestätigt) | Optin → Video-1-Start auf der **Seite**; ab hier existiert `result_viewed` |
+| 02.09.2026 ≈ 07:50 | **Textstand v2 der Mails:** a1-Text nach Markus-Formulierung (Mautic 186–191 aktualisiert), Zugangsmail-Betreff/Preheader/Intro ohne Gedankenstriche (Post-Processor versionId `04a4bb28`) | Mail-Öffnungs-/Klickraten; Vergleiche je Betreffvariante über Postmark |
+| — (Baseline) | Ergebnis-CTA-Text: bis 02.09. 07:31 lief „Teil 1 starten →“; die Zwischvariante „Was steckt hinter deinem Code?“ war **nie** live | — |
+
+Praktisch heißt das: Leads mit `form_submitted_at` **ab 02.09.2026 08:00 Berlin**
+haben den kompletten neuen Funnel (Seite + Mail + a1). Der 01.09.-Abend ist eine
+Mischzone (nur Mail neu) und gehört in keine der beiden Vergleichsgruppen.
 
 Vorher-Basis (gesamte Laufzeit, Anzeigen): Optin → Video-1-Start 75 %,
 → Video-1-fertig 57 % der Starter, Video-2-Frühabbruch 36 %.
