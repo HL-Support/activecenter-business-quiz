@@ -55,7 +55,7 @@
 
   const de = buildTranslations({
     static: {
-      intro_badge: 'Erfolgscode Analyse · 4 Minuten',
+      intro_badge: 'Erfolgscode Analyse · 2 Minuten',
       intro_h1_line1: 'Welcher Erfolgstyp',
       intro_h1_line2: 'steckt wirklich in dir?',
       intro_body:
@@ -528,7 +528,7 @@
 
   const it = buildTranslations({
     static: {
-      intro_badge: 'Analisi del codice del successo · 4 minuti',
+      intro_badge: 'Analisi del codice del successo · 2 minuti',
       intro_h1_line1: 'Che tipo di successo',
       intro_h1_line2: 'si nasconde davvero in te?',
       intro_body:
@@ -992,7 +992,7 @@
 
   const en = buildTranslations({
     static: {
-      intro_badge: 'Success Code Analysis · 4 minutes',
+      intro_badge: 'Success Code Analysis · 2 minutes',
       intro_h1_line1: 'What type of success',
       intro_h1_line2: 'is really inside you?',
       intro_body:
@@ -1451,7 +1451,7 @@
 
   const fr = buildTranslations({
     static: {
-      intro_badge: 'Analyse du Code de Succès · 4 minutes',
+      intro_badge: 'Analyse du Code de Succès · 2 minutes',
       intro_h1_line1: 'Quel type de succès',
       intro_h1_line2: 'se cache vraiment en toi?',
       intro_body:
@@ -1925,7 +1925,7 @@
 
   const ru = buildTranslations({
     static: {
-      intro_badge: 'Анализ кода успеха · 4 минуты',
+      intro_badge: 'Анализ кода успеха · 2 минуты',
       intro_h1_line1: 'Какой тип успеха',
       intro_h1_line2: 'действительно скрыт в тебе?',
       intro_body:
@@ -2387,7 +2387,7 @@
 
   const hu = buildTranslations({
     static: {
-      intro_badge: 'Sikerkód elemzés · 4 perc',
+      intro_badge: 'Sikerkód elemzés · 2 perc',
       intro_h1_line1: 'Milyen sikertípus',
       intro_h1_line2: 'van benned valójában?',
       intro_body:
