@@ -10,6 +10,7 @@ const {
   normalizeLanguage,
   normalizeMetaAttributionFallback,
   nowIso,
+  parseBoolean,
   readCookie,
   safeInteger,
   safeNumber,
@@ -489,11 +490,48 @@ async function handleSideEffects(leadHash, eventName, eventAt, payload, req) {
       last_event_at: eventAt,
     });
     if (eventName === 'form_submitted') {
-      await enqueueSync(leadHash, 'mysql_initial_rank', {
-        rank: 0,
-        lang,
-        reason: 'form_submitted',
-      });
+      // 🔴 Interner Verkehr (?test=1, ?qa=1, ?internal=1 -> isInternalTraffic in
+      // src/lib/core.js) durchlaeuft den Funnel echt, aber OHNE Weiterleitung in die
+      // Kontaktkartei: Das E2E-Geschirr stubt den Bridge-Submit ab, und ein manueller
+      // Testlauf bricht spaetestens an der E-Mail-Pruefung ab. Es entsteht also nie eine
+      // typeform_surveys-Zeile zu diesem lead_hash.
+      //
+      // Daraus folgen zwei Dinge, die genau hier zu ziehen sind, weil dies die einzige
+      // Stelle ist, an der die Markierung ueberhaupt ankommt:
+      //
+      // 1. KEIN mysql_initial_rank. Der Auftrag traegt den Rang per
+      //    "update ... where hash = <lead_hash>" ein; ohne Kartei-Zeile antwortet n8n mit
+      //    200 und matchedRows 0, der Worker wertet das als Fehler, fuenf Versuche ueber
+      //    ~1,5 h, dann `dead`. Am 01.09.2026 haben 19 solcher Laeufe den Health-Monitor
+      //    neun Mal alarmieren lassen, ohne dass ein einziger echter Lead betroffen war.
+      // 2. Eine Testmarke. Ohne sie ist der Lead fuer den Nurture-Sender
+      //    (n8n RqKSRTgFv8mv04H2) von einem echten nicht zu unterscheiden - der schliesst
+      //    ausschliesslich ueber `test_lead_marked` aus und haette am 02.09.2026 eine
+      //    Erinnerung an e2e-scroll@example.com geschickt, eine reservierte Domain, also
+      //    ein sicherer Hard Bounce auf dem Postmark-Konto.
+      //
+      // Bewusst NICHT abgeschaltet wird die Kartei-Pruefung fuer echte Leads: Dort ist
+      // eine fehlende Zeile der stille Verlust, den der Alarm melden soll.
+      if (parseBoolean(payload.is_internal_traffic)) {
+        await insertLeadEvent({
+          leadHash,
+          eventName: 'test_lead_marked',
+          eventAt,
+          payload: {
+            lead_hash: leadHash,
+            event_id: `testmarke_${leadHash}`,
+            email: safeString(payload.email || payload.form_email, 180) || null,
+            reason: 'is_internal_traffic',
+            marked_by: 'lead-track/form_submitted',
+          },
+        });
+      } else {
+        await enqueueSync(leadHash, 'mysql_initial_rank', {
+          rank: 0,
+          lang,
+          reason: 'form_submitted',
+        });
+      }
     }
     return;
   }

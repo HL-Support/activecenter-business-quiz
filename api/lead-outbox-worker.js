@@ -681,6 +681,24 @@ async function callN8nUpdateResult(job) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.success === false || Number(data.matchedRows || 0) < 1) {
+    // 🔴 Kein Treffer in der Kartei heisst zweierlei, und die beiden duerfen sich nicht
+    // vermischen: Bei einem ECHTEN Lead ist es der stille Verlust, den dieser Alarm
+    // melden soll - da wird geworfen, wiederholt und notfalls gestorben. Bei einem
+    // Testlead ist es der erwartete Ausgang, denn zu ihm wurde nie eine Kartei-Zeile
+    // angelegt; fuenf Wiederholungen aendern daran nichts, der Auftrag stirbt nur als
+    // `dead` und faerbt den Health-Monitor rot (Vorfall 01.09.2026, 19 Auftraege).
+    //
+    // Die Abfrage steht bewusst HIER und nicht vor dem Aufruf: Im Normalfall kostet sie
+    // nichts, weil sie nur nach einem Fehlschlag ueberhaupt ausgefuehrt wird.
+    if (response.ok && Number(data.matchedRows || 0) === 0 && (await istTestlead(leadHash))) {
+      return {
+        success: true,
+        updated: false,
+        skipped: true,
+        reason: 'test_lead_no_kartei_row',
+        lead_hash: leadHash,
+      };
+    }
     throw new Error(
       `n8n_update_failed:${response.status}:${safeString(
         data.error || data.message || JSON.stringify(data),
@@ -690,6 +708,26 @@ async function callN8nUpdateResult(job) {
   }
 
   return data;
+}
+
+/**
+ * Traegt der Lead die Testmarke? Gesetzt wird sie von api/lead-track.js beim Opt-in aus
+ * internem Verkehr und von scripts/smoke-resume-link.js; derselbe Marker schliesst den
+ * Lead auch beim Nurture-Sender aus - eine Wahrheit, nicht zwei.
+ *
+ * Ein Lesefehler darf den urspruenglichen Fehler NICHT verdecken: Im Zweifel gilt der
+ * Lead als echt, dann bleibt es beim lauten Fehlschlag.
+ */
+async function istTestlead(leadHash) {
+  try {
+    const rows = await supabaseJson(
+      `lead_events?lead_hash=eq.${encodeURIComponent(leadHash)}` +
+        '&event_name=eq.test_lead_marked&select=event_uid&limit=1'
+    );
+    return Array.isArray(rows) && rows.length > 0;
+  } catch {
+    return false;
+  }
 }
 
 async function lookupCoachUeberBridge(normalizedSlug) {
@@ -1178,4 +1216,9 @@ module.exports = async function handler(req, res) {
       message: error.message,
     });
   }
+};
+
+module.exports._test = {
+  callN8nUpdateResult,
+  istTestlead,
 };
